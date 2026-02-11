@@ -1,0 +1,36 @@
+description = "プロジェクトのステアリングドキュメントを作成・更新"
+prompt = """
+# ステアリングドキュメント作成
+
+プロジェクトのステアリングドキュメントを作成・更新してください。
+
+## 実行手順
+1. 既存のステアリングドキュメントを確認
+2. `.kiro/steering/product.md` を作成/更新
+3. `.kiro/steering/tech.md` を作成/更新
+4. `.kiro/steering/structure.md` を作成/更新
+5. 整合性を検証
+
+## 出力ファイル
+- .kiro/steering/product.md（プロダクト戦略）
+- .kiro/steering/tech.md（技術戦略）
+- .kiro/steering/structure.md（プロジェクト構造）
+
+## ドキュメント内容
+### product.md
+- プロダクトビジョン
+- ターゲットユーザー
+- 主要機能
+- 成功指標
+
+### tech.md
+- 技術スタック
+- アーキテクチャ方針
+- 開発規約
+- 品質基準
+
+### structure.md
+- ディレクトリ構造
+- 命名規約
+- ファイル配置ルール
+"""

@@ -1,0 +1,28 @@
+description = "仕様書の技術設計を作成"
+prompt = """
+# 技術設計タスク
+
+{{args}} の技術設計を作成してください。
+
+## 実行手順
+1. `.kiro/specs/{feature}/requirements.md` を読み込む
+2. アーキテクチャを設計
+3. コンポーネントを定義
+4. インターフェースを設計
+5. データモデルを定義
+6. `.kiro/specs/{feature}/design.md` を更新
+7. 要件とのトレーサビリティを確保
+
+## 出力ファイル
+- .kiro/specs/{feature}/design.md（更新）
+
+## 設計原則
+- SOLID原則に従う
+- GAS互換性を確保
+- Env Interface Patternを適用
+- テスタビリティを考慮
+
+## 次のステップ
+- `/kiro:validate-design {feature}` で設計検証
+- `/kiro:spec-tasks {feature}` でタスク生成
+"""

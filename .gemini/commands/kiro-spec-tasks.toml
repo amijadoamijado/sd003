@@ -1,0 +1,30 @@
+description = "仕様書の実装タスクを生成"
+prompt = """
+# 実装タスク生成
+
+{{args}} の実装タスクを生成してください。
+
+## 実行手順
+1. `.kiro/specs/{feature}/design.md` を読み込む
+2. 実装単位を分割
+3. タスク（TASK-XXX）を定義
+4. 並列実行可能性を分析
+5. 依存関係を明確化
+6. `.kiro/specs/{feature}/tasks.md` を更新
+
+## タスク構造
+各タスクに以下を含める:
+- ID（TASK-XXX形式）
+- 要件参照
+- 説明
+- 対象ファイル
+- 受け入れ基準
+- 依存関係
+- 見積もり（S/M/L）
+
+## 出力ファイル
+- .kiro/specs/{feature}/tasks.md（更新）
+
+## 次のステップ
+`/kiro:spec-impl {feature}` で実装開始
+"""

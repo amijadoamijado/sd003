@@ -1,0 +1,37 @@
+description = "仕様書の進捗状況を確認"
+prompt = """
+# 仕様書ステータス確認
+
+{{args}} の仕様書進捗状況を表示してください。
+
+## 確認対象ファイル
+- .kiro/specs/{feature}/spec.json
+- .kiro/specs/{feature}/requirements.md
+- .kiro/specs/{feature}/design.md
+- .kiro/specs/{feature}/tasks.md
+
+## 実行手順
+1. 仕様書ファイルを読み込み
+2. 進捗状況を集計
+3. ステータスレポート生成
+4. 次のアクションを提案
+
+## 出力レポート形式
+```markdown
+# Spec Status: {feature}
+
+## Overview
+| Phase | Status |
+|-------|--------|
+| Requirements | ✅/🔄/⏳ |
+| Design | ✅/🔄/⏳ |
+| Tasks | ✅/🔄/⏳ |
+| Implementation | ✅/🔄/⏳ |
+
+## Requirements Summary
+## Task Progress
+## Quality Gates
+## Blockers
+## Next Actions
+```
+"""

@@ -1,0 +1,96 @@
+# /ralph-wiggum:run - Night Mode Execution
+
+夜間自律実行キューを実行する。
+
+## Usage
+
+```
+/ralph-wiggum:run [options]
+```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--queue <file>` | 実行するキューファイル（デフォルト: nightly-queue.md） |
+| `--max-iterations <n>` | 最大反復数（デフォルト: 60） |
+| `--resume` | graceful-exitから再開 |
+| `--dry-run` | 実行せずにキュー内容を確認 |
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RALPH_MAX_ITERATIONS` | 60 | 最大反復数 |
+| `RALPH_COMPLETION_PROMISE` | `RALPH_NIGHTLY_COMPLETE` | 全体完了マーカー |
+| `RALPH_BLOCKED_PROMISE` | `RALPH_NIGHTLY_BLOCKED` | ブロック時マーカー |
+
+## Execution Flow
+
+```
+1. ロック取得 (.kiro/ralph/.lock)
+     ↓
+2. キューファイル読み込み
+     ↓
+3. タスクループ（優先度順）
+   ├── タスク開始
+   ├── 品質ゲート実行
+   ├── エラー時 → リカバリー戦略
+   ├── 完了マーカー出力
+   ├── チェックポイント保存
+   └── 次のタスクへ
+     ↓
+4. 完了/ブロック判定
+     ↓
+5. 朝のレビュー用レポート生成
+     ↓
+6. ロック解放
+```
+
+## Recovery Patterns
+
+| Pattern | Description |
+|---------|-------------|
+| 1 | Build Error - 型エラー自動修正 |
+| 2 | Test Failure - 実装/テスト修正 |
+| 3 | Lint Error - --fix + 手動修正 |
+| 4 | Infinite Loop - 適応的検知 + スキップ |
+| 5 | External Dependency - サーキットブレーカー |
+| 6 | Unexpected - graceful-exit |
+| 7 | Recovery Exhaustion - スキップ + エスカレーション |
+
+## Output
+
+### 成功時
+```
+<promise>RALPH_NIGHTLY_COMPLETE</promise>
+```
+
+### ブロック時
+```
+<promise>RALPH_NIGHTLY_BLOCKED</promise>
+```
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `.kiro/ralph/nightly-queue.md` | 実行キュー |
+| `.kiro/ralph/recovery/checkpoints/` | チェックポイント |
+| `.kiro/ralph/logs/{date}-*.md` | 実行ログ |
+| `.kiro/ai-coordination/workflow/review/ralph/` | 朝のレビューレポート |
+
+## Related Commands
+
+- `/ralph-wiggum:status` - 実行状況確認
+- `/ralph-wiggum:plan` - 週次計画作成
+
+## Specification
+
+- `.kiro/specs/ralph-wiggum/requirements.md`
+- `.kiro/specs/ralph-wiggum/design.md`
+
+---
+
+**Phase**: Nighttime (Autonomous)
+**Completion Promise**: `RALPH_NIGHTLY_COMPLETE` / `RALPH_NIGHTLY_BLOCKED`

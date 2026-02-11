@@ -1,0 +1,5 @@
+# Error tracking files (runtime generated)
+.error-patterns.log
+
+# Auto code review results (runtime generated)
+# Note: .codex-review-result.md is in project root, listed in root .gitignore

@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "project": "SD002",
+  "last_updated": "2025-11-15",
+  "id_sequences": {
+    "REQ": 1,
+    "DES": 1,
+    "CODE": 1,
+    "TEST": 1,
+    "TASK": 1
+  },
+  "id_mappings": {},
+  "reserved_ids": []
+}

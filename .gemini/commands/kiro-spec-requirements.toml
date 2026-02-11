@@ -1,0 +1,26 @@
+description = "仕様書の要件定義を作成"
+prompt = """
+# 要件定義タスク
+
+{{args}} の要件定義を作成してください。
+
+## 実行手順
+1. `.kiro/specs/{feature}/requirements.md` を読み込む
+2. ユーザーの要求を分析
+3. 機能要件（FR-XXX）を洗い出し
+4. 非機能要件（NFR-XXX）を定義
+5. 受け入れ基準を明確化
+6. 要件IDを付与
+
+## 出力ファイル
+- .kiro/specs/{feature}/requirements.md（更新）
+
+## 品質基準
+- 全要件にユニークIDを付与
+- 受け入れ基準が測定可能
+- 依存関係を明記
+
+## 次のステップ
+- `/kiro:validate-gap {feature}` でギャップ分析
+- `/kiro:spec-design {feature}` で技術設計開始
+"""

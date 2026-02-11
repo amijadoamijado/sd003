@@ -1,0 +1,39 @@
+description = "仕様書に基づいて実装を行う"
+prompt = """
+# 実装タスク
+
+{{args}} の実装を開始してください。
+
+## 実行手順
+1. `.kiro/specs/{feature}/tasks.md` を読み込む
+2. 対象タスクを確認
+3. TDD方式で実装:
+   - テストを先に作成
+   - 実装を行う
+   - リファクタリング
+4. リント・型チェック実行
+5. テスト実行
+6. Task Completion Report を生成
+
+## 制約事項
+- Node.js API禁止（fs, path, process）
+- Env Interface Pattern必須
+- 6分実行制限考慮
+- TypeScript strict mode
+- ESLint エラー0件
+- テストカバレッジ80%以上
+
+## 出力レポート形式
+```markdown
+## Implementation Complete
+### Summary
+### Changes
+| File | Action | Lines |
+### Test Results
+### Verification Commands
+npm test && npm run lint
+```
+
+## 次のステップ
+`/kiro:validate-impl {feature}` で実装検証
+"""

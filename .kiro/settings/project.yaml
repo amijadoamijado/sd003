@@ -1,0 +1,49 @@
+project:
+  name: "SD002"
+  version: "1.0.0"
+  description: "Spec-Driven Development Framework for GAS"
+  repository: "https://github.com/your-org/sd002"
+
+framework:
+  sd001_version: "3.0.0"
+  ga001_version: "1.2.0"
+  integration_mode: "deep"
+
+quality:
+  coverage_threshold: 80
+  strict_mode: true
+  eslint_max_warnings: 0
+  typescript_strict: true
+
+gas:
+  environment: "local"
+  api_compatibility: "100%"
+  execution_time_limit: 360
+  memory_limit: "100MB"
+
+env_interface:
+  pattern: "enabled"
+  local_env_class: "LocalEnv"
+  gas_env_class: "GasEnv"
+  interface_name: "IEnv"
+
+testing:
+  unit_test_framework: "jest"
+  integration_test_framework: "jest"
+  e2e_test_framework: "playwright"
+  coverage_tool: "nyc"
+
+deployment:
+  staging_enabled: true
+  canary_enabled: false
+  rollback_strategy: "immediate"
+  monitoring_enabled: true
+
+paths:
+  specs: ".kiro/specs/"
+  settings: ".kiro/settings/"
+  traceability: ".kiro/traceability/"
+  source: "src/"
+  tests: "tests/"
+  build: "dist/"
+  examples: "examples/"

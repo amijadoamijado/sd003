@@ -1,0 +1,54 @@
+tag_manager:
+  version: "1.0.0"
+  project: "SD002"
+
+tags:
+  categories:
+    - framework
+    - gas
+    - spec-driven
+    - quality-assurance
+    - testing
+    - integration
+    - deployment
+    - performance
+    - security
+    - documentation
+
+  status_tags:
+    - planned
+    - in-progress
+    - completed
+    - blocked
+    - deprecated
+
+  priority_tags:
+    - p0-critical
+    - p1-high
+    - p2-medium
+    - p3-low
+
+  phase_tags:
+    - phase-0-planning
+    - phase-1-implementation
+    - phase-2-integration
+    - phase-3-optimization
+    - phase-4-production
+
+auto_tagging:
+  enabled: true
+  rules:
+    - pattern: "*.test.ts"
+      tags: ["testing", "quality-assurance"]
+    - pattern: "*.mock.ts"
+      tags: ["testing", "gas"]
+    - pattern: "src/env/*"
+      tags: ["framework", "gas"]
+    - pattern: "src/spec-driven/*"
+      tags: ["spec-driven", "framework"]
+    - pattern: ".kiro/specs/*"
+      tags: ["spec-driven", "documentation"]
+
+tag_validation:
+  required_tags_per_spec: ["status", "priority", "phase"]
+  max_tags_per_item: 10

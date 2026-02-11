@@ -1,0 +1,218 @@
+# SD003 Framework - AI Development Command Center
+
+## Project Memory
+
+**Session Start**: Run `/sessionread` (reads all 4 files automatically)
+
+| Order | File | Purpose |
+|-------|------|---------|
+| 1 | `D:\claudecode\CLAUDE.md` | Global settings (UTF-8 constraints) |
+| 2 | `./CLAUDE.md` | Project settings (SD003 rules) |
+| 3 | `.kiro/sessions/session-current.md` | Current session (short-term) |
+| 4 | `.kiro/sessions/TIMELINE.md` | Project history (long-term) |
+
+**Crash Recovery**: `claude --continue` + `/sessionread`
+
+---
+
+## Overview
+SD003: Spec-Driven Development framework integrating SD001 and GA001.
+
+**Tech Stack**: TypeScript (strict) + Google Apps Script + Env Interface Pattern
+
+---
+
+## AI Coordination Workflow (MANDATORY)
+
+**Detailed rules: `.claude/rules/workflow/ai-coordination.md`**
+
+### Claude Code's Role
+| Role | Description |
+|------|-------------|
+| Planning | Work order creation, task breakdown |
+| Coordination | Dispatch requests to other AIs |
+| Status | Track project progress |
+
+### Trigger Keywords (AUTO-EXECUTE)
+
+| Keyword | Action |
+|---------|--------|
+| "...to Antigravity", "test request" | Create TEST_REQUEST |
+| "...to Gemini", "implement" | Create IMPLEMENT_REQUEST |
+| "...to Codex", "review" | Create review request |
+| "work order", "create order" | Create WORK_ORDER |
+
+### Japanese Triggers
+
+| Keyword | Action |
+|---------|--------|
+| "Antigravityに依頼", "テストを依頼" | Create TEST_REQUEST |
+| "Geminiに依頼", "実装を依頼" | Create IMPLEMENT_REQUEST |
+| "指示書を作成", "作業指示" | Create request document |
+
+### File Location Rules
+
+**ALL documents in `.kiro/ai-coordination/`**
+
+| Type | Location |
+|------|----------|
+| Requests | `workflow/spec/{projectID}/` |
+| Reports | `workflow/review/{projectID}/` |
+| Templates | `workflow/templates/` |
+
+**PROHIBITED**: Creating in `.antigravity/` or project root
+
+---
+
+## Basic Commands
+
+### Build & Test
+```bash
+npm run build && npm test && npm run lint
+```
+
+### Spec-Driven Development
+```
+/kiro:spec-init {feature}
+/kiro:spec-requirements {feature}
+/kiro:spec-design {feature}
+/kiro:spec-tasks {feature}
+/kiro:spec-impl {feature}
+```
+
+### AI Coordination
+```
+/workflow:init {slug}
+/workflow:order {projectID}
+/workflow:request {projectID} {num}    # → impl → review 自動連鎖
+/workflow:impl {projectID} {num}       # → review 自動連鎖
+/workflow:review {projectID} {num}     # Codexレビュー依頼・実行
+/workflow:test {projectID} {num}
+/workflow:status {projectID}
+```
+
+### Ralph Loop (Daytime)
+```
+/sd003:loop-test    # Test completion loop
+/sd003:loop-lint    # ESLint completion loop
+/sd003:loop-type    # TypeScript type-check loop
+```
+
+### Ralph Wiggum (Nighttime)
+```
+/ralph-wiggum:run     # Execute nightly queue
+/ralph-wiggum:status  # Check execution status
+/ralph-wiggum:plan    # Create weekly plan
+```
+
+---
+
+## Critical Rules
+
+**Required Settings** (`.claude/settings.local.json`):
+```json
+{
+  "env": {
+    "ENABLE_TOOL_SEARCH": "true"
+  }
+}
+```
+
+**Required**:
+- `ENABLE_TOOL_SEARCH=true` (MCP最適化、トークン85%削減)
+- GAS API via Env Interface only
+- Test coverage 80%+
+- ESLint errors = 0
+- TypeScript strict mode
+
+**Prohibited**:
+- Node.js APIs (`fs`, `path`, `process`)
+- Unauthorized spec changes
+- Creating requests outside `.kiro/ai-coordination/`
+- **カバレッジのためだけの無意味なテスト作成**
+  - 実際の動作を確認せずに「こう動くはず」と仮定したテストは禁止
+  - 80%未達でも意味のあるテストを優先
+  - テストは機能検証が目的、数値達成が目的ではない
+- **フロントエンドをユーザーに見せずに次に進む**
+  - UI実装後は必ずユーザーに画面を見せて確認を取る
+  - ユーザー確認なしでバックエンド統合やデプロイに進むことは禁止
+  - 「動くはず」ではなく「実際に見せて確認」が必須
+
+---
+
+## Rule Reference
+
+| Category | Location |
+|---------|--------|
+| **AI Coordination** | `rules/workflow/ai-coordination.md` |
+| **Architecture** | `rules/architecture/adapter-core-pattern.md` |
+| **Ralph Loop/Wiggum** | `rules/ralph-loop.md` |
+| Quality Standards | `rules/global/quality-standards.md` |
+| GAS Development | `rules/gas/` |
+| Testing | `rules/testing/` |
+
+---
+
+## Debugging Tools (3-Tier System)
+
+```
+Bug occurs
+    |
+    v
+/bug-quick (5-15 min)     <-- First pass: Flow comparison
+    |
+    +-- Resolved --> Done
+    |
+    +-- Complex --> /bug-trace (30-60 min)  <-- Deep 3-Agent investigation
+                        |
+                        +-- Unresolved --> /dialogue-resolution  <-- AI reasoning check
+```
+
+| Tool | Time | Use When |
+|------|------|----------|
+| `/bug-quick` | 5-15 min | Compare your flow understanding vs code behavior |
+| `/bug-trace` | 30-60 min | Complex bugs, multiple files, need root cause |
+| `/dialogue-resolution` | Variable | AI keeps misunderstanding, circular reasoning |
+
+**Escalation Triggers**:
+- bug-quick -> bug-trace: Multiple differences, unclear root cause
+- bug-trace -> dialogue-resolution: Same error 2x, AI reasoning seems off
+
+---
+
+## Ralph Wiggum (Night Mode)
+
+夜間自律実行システム。詳細: `.kiro/ralph/README.md`
+
+| 項目 | 日中 | 夜間 |
+|------|------|------|
+| コマンド | `/sd003:loop-*` | `/ralph-wiggum:*` |
+| 環境変数 | `SD003_*` | `RALPH_*` |
+| リカバリー | dialogue-resolution | 7パターン自動 |
+
+仕様書: `.kiro/specs/ralph-wiggum/`
+
+---
+
+## Deployment to Other Projects
+
+**🚨 絶対条件**: `/kiro:deploy` コマンドを使用すること
+
+```bash
+/kiro:deploy /path/to/your-project
+```
+
+**手動デプロイは非推奨**。詳細: `README.md` の Deployment セクション
+
+### 必須ファイル数（検証用）
+
+| カテゴリ | ファイル数 |
+|---------|-----------|
+| Commands直下 | 27 |
+| Commands/kiro | 15 |
+| Rules | 16 |
+| Skills | 7 |
+| 合計 | 65 |
+
+---
+SD003 v2.11.0 | Updated: 2026-02-11

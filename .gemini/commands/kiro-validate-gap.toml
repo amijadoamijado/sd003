@@ -1,0 +1,28 @@
+description = "要件と既存実装のギャップを分析"
+prompt = """
+# ギャップ分析タスク
+
+{{args}} の要件と既存実装のギャップを分析してください。
+
+## 実行手順
+1. `.kiro/specs/{feature}/requirements.md` を読み込み
+2. 既存コードベース（src/）をスキャン
+3. 既存テスト（tests/）をスキャン
+4. カバー率を算出
+5. ギャップを特定
+6. Gap Analysis Report を生成
+
+## 分析対象
+- .kiro/specs/{feature}/requirements.md
+- src/**/*.ts
+- tests/**/*.ts
+
+## 出力
+Gap Analysis Report with coverage and recommendations
+
+## レポート内容
+- 要件カバレッジ率
+- 未実装要件リスト
+- 部分実装要件リスト
+- 推奨アクション
+"""

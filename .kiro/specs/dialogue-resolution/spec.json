@@ -1,0 +1,17 @@
+{
+  "name": "dialogue-resolution",
+  "version": "1.0.0",
+  "description": "Dialogue-based resolution for AI debugging stalls - step-by-step gap detection",
+  "status": "implemented",
+  "created": "2026-01-02",
+  "updated": "2026-01-03",
+  "implementation": {
+    "command": ".claude/commands/dialogue-resolution.md",
+    "rules": ".claude/rules/troubleshooting/dialogue-resolution.md",
+    "type": "claude-command"
+  },
+  "dependencies": [
+    "AskUserQuestion tool",
+    "Read/Glob/Grep tools"
+  ]
+}

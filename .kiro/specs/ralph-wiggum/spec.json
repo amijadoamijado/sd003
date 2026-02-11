@@ -1,0 +1,28 @@
+{
+  "name": "ralph-wiggum",
+  "version": "1.1.0",
+  "description": "Night Mode Autonomous Execution System - 24-hour development cycle with daytime AI coordination and nighttime autonomous implementation",
+  "status": "designing",
+  "review": "3-agent parallel review completed (Architecture/Risk/Integration)",
+  "created": "2026-01-04",
+  "updated": "2026-01-04",
+  "implementation": {
+    "commands": [
+      ".claude/commands/ralph-wiggum-run.md",
+      ".claude/commands/ralph-wiggum-status.md",
+      ".claude/commands/ralph-wiggum-plan.md"
+    ],
+    "runtime_dir": ".kiro/ralph/",
+    "type": "claude-command"
+  },
+  "dependencies": [
+    "Existing sd002-loop-* commands (daytime)",
+    "Task tool (for parallel execution)",
+    "TodoWrite tool (for progress tracking)",
+    "AskUserQuestion tool (for blocked state)"
+  ],
+  "integration": {
+    "daytime_system": ".claude/rules/ralph-loop.md",
+    "ai_coordination": ".kiro/ai-coordination/"
+  }
+}

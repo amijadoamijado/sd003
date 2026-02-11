@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "project": "SD002",
+  "last_updated": "2025-11-15",
+  "traceability": {
+    "requirements_to_design": {},
+    "design_to_code": {},
+    "code_to_test": {}
+  },
+  "coverage": {
+    "requirements_coverage": 0,
+    "design_coverage": 0,
+    "code_coverage": 0,
+    "test_coverage": 0
+  }
+}

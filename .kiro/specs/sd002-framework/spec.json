@@ -1,0 +1,38 @@
+{
+  "id": "SPEC-SD002-001",
+  "name": "SD002 Framework Specification",
+  "version": "1.0.0",
+  "status": "in-progress",
+  "phase": "phase-1-implementation",
+  "requirements": "requirements.md",
+  "design": "design.md",
+  "tasks": "tasks.md",
+  "created": "2025-11-15",
+  "updated": "2025-11-15",
+  "description": "Spec-Driven Development Framework integrated with GAS Local Testing Environment",
+  "tags": [
+    "framework",
+    "gas",
+    "spec-driven",
+    "local-testing",
+    "quality-assurance"
+  ],
+  "dependencies": {
+    "sd001": "3.0.0",
+    "ga001": "1.2.0"
+  },
+  "quality_gates": {
+    "syntax": "enabled",
+    "type": "enabled",
+    "lint": "enabled",
+    "security": "enabled",
+    "test": "enabled",
+    "performance": "enabled",
+    "documentation": "enabled",
+    "integration": "enabled"
+  },
+  "test_coverage": {
+    "target": 80,
+    "current": 0
+  }
+}

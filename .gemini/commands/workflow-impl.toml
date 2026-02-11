@@ -1,0 +1,141 @@
+description = "AI協調ワークフロー - 実装指示に基づいて実装を実行"
+prompt = """
+# 実装実行: /workflow:impl
+
+{{args}} の実装を開始します。
+
+## 引数解析
+- 形式: `{案件ID} {タスク番号}`
+- 例: `20251230-001-auth 001`
+
+## 実行手順
+
+### 1. 実装指示の読み込み
+```
+.kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
+```
+全内容を精読し、以下を把握:
+- 変更可能ファイル
+- 禁止領域
+- 機能仕様
+- テストケース
+- コミット方針
+
+### 2. 発注書の確認
+```
+.kiro/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md
+```
+該当タスクの詳細、業務ルール、テスト要件を確認。
+
+### 3. 作業ブランチ作成
+```bash
+git checkout -b feature/{案件ID}/{タスク番号}-{slug}
+```
+
+### 4. TDD実装
+以下の順序で実装:
+
+#### 4.1 テスト作成
+実装指示のテストケースに基づいてテストを作成:
+- 正常系テスト
+- 異常系テスト
+- エッジケーステスト
+
+#### 4.2 実装
+テストがパスするようにコードを実装:
+- 実装指示の機能仕様に従う
+- 業務ルールを正確に実装
+- Env Interface Pattern を遵守
+
+#### 4.3 リファクタリング
+テストがパスした後、コード品質を向上:
+- 重複の排除
+- 命名の改善
+- 構造の整理
+
+### 5. 品質確認
+```bash
+# テスト実行
+npm test -- --testPathPattern="{対象テストファイル}"
+
+# リント
+npm run lint
+
+# 型チェック
+npx tsc --noEmit
+
+# ビルド
+npm run build
+```
+
+全てパスするまで修正を繰り返す。
+
+### 6. コミット
+```bash
+git add .
+git commit -m "{type}({scope}): {summary}
+
+{body}
+
+Refs: {案件ID}#{タスク番号}"
+```
+
+コミットメッセージは実装指示のコミット方針に従う。
+
+## 制約事項（必須遵守）
+
+### 技術的制約
+- Node.js API禁止（`fs`, `path`, `process`）
+- GAS API直接参照禁止（Env Interface経由のみ）
+- TypeScript strictモード必須
+- ESLintエラー0件必須
+
+### 品質基準
+- カバレッジ80%以上
+- JSDocコメント必須（公開API）
+- エラーハンドリング完備
+
+### 禁止事項
+- 実装指示の「禁止領域」のファイル変更
+- 仕様書（.kiro/specs/）の変更
+- CLAUDE.md の変更
+
+## 実装完了報告
+
+実装完了時、以下の形式で報告:
+
+```markdown
+## 実装完了報告
+
+### 基本情報
+- **案件ID**: {案件ID}
+- **タスク番号**: {タスク番号}
+- **コミット**: {commit hash}
+- **ブランチ**: feature/{案件ID}/{タスク番号}-{slug}
+
+### 変更ファイル
+| ファイル | アクション | 行数 |
+|---------|----------|------|
+| {path}  | Created  | {N}  |
+| {path}  | Modified | {N}  |
+
+### テスト結果
+- ユニットテスト: X件パス / X件
+- カバレッジ: XX%
+
+### 検証コマンド結果
+```bash
+npm test       # PASS
+npm run lint   # PASS
+npm run build  # PASS
+```
+
+### 次のアクション
+- Codexレビュー依頼
+- 手順: `.kiro/ai-coordination/workflow/CODEX_GUIDE.md` 参照
+```
+
+## 次のステップ
+1. Codexに実装レビューを依頼（手動）
+2. レビューApprove後、Claude Codeが工程更新
+"""

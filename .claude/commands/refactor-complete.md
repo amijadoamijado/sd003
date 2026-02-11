@@ -1,0 +1,275 @@
+---
+description: Complete refactoring session and record final state
+allowed-tools: Bash, Read, Write, Skill, TodoWrite
+---
+
+# /refactor:complete
+
+リファクタリングセッションを完了し、最終品質ゲートを実行し、完了を記録する。
+
+## Usage
+
+```
+/refactor:complete [--partial] [--skip-verify]
+```
+
+**Arguments:**
+- `--partial`: 部分的な成功で完了（一部バッチ未完了）
+- `--skip-verify`: 最終品質検証をスキップ
+
+## Prerequisites
+
+- アクティブなリファクタリングセッションが存在すること
+- 少なくとも1つのバッチが完了していること（`--partial`使用時を除く）
+
+## Execution Steps
+
+### Step 1: Session Status Check
+
+Read manifest and verify state:
+
+```javascript
+const manifest = JSON.parse(
+  read('.kiro/refactor/plans/{session-id}/batch-manifest.json')
+);
+
+const completedBatches = manifest.batches.filter(b => b.status === 'completed');
+const pendingBatches = manifest.batches.filter(b => b.status === 'pending');
+const rolledBackBatches = manifest.batches.filter(b => b.status === 'rolled_back');
+```
+
+### Step 2: Final Quality Verification
+
+Unless `--skip-verify`:
+
+```bash
+# Full test suite
+npm test
+
+# ESLint
+npm run lint
+
+# TypeScript strict
+npm run typecheck
+
+# Build
+npm run build
+```
+
+All must pass. If any fails:
+- Propose `/refactor:rollback` or manual fix
+- Do not complete until resolved
+
+### Step 3: Generate Completion Report
+
+```markdown
+# Refactoring Completion Report
+
+## Session Summary
+- **Session ID**: refactor-20260101-160000
+- **Scope**: rename getUserById to fetchUser
+- **Started**: 2026-01-01 16:00:00
+- **Completed**: 2026-01-01 16:45:00
+- **Duration**: 45 minutes
+
+## Batch Summary
+| Batch | Status | Files | Changes |
+|-------|--------|-------|---------|
+| batch-001 | COMPLETED | 2 | 3 |
+| batch-002 | COMPLETED | 2 | 5 |
+| batch-003 | COMPLETED | 2 | 4 |
+
+**Total**: 6 files, 12 changes
+
+## Quality Gates
+| Gate | Status |
+|------|--------|
+| ESLint | PASS |
+| TypeScript | PASS |
+| Tests | PASS (50/50) |
+| Build | PASS |
+
+## Files Modified
+- src/interfaces/IUser.ts
+- src/types/user.ts
+- src/services/user-service.ts
+- src/services/auth-service.ts
+- src/handlers/user-handler.ts
+- src/handlers/api-handler.ts
+
+## Checkpoints Used
+| Checkpoint | Purpose | Status |
+|------------|---------|--------|
+| checkpoint-000-init | Initial state | archived |
+| checkpoint-001 | After batch-001 | archived |
+| checkpoint-002 | After batch-002 | archived |
+| checkpoint-003 | After batch-003 | archived |
+
+## Rollback History
+(None - all batches succeeded)
+
+## Lessons Learned
+- Pattern: Rename propagated cleanly through layers
+- Risk: No breaking changes detected
+- Recommendation: Similar refactoring safe in future
+```
+
+Save to: `.kiro/refactor/plans/{session-id}/completion-report.md`
+
+### Step 4: Cleanup
+
+#### Archive Checkpoints
+
+```bash
+# Move checkpoints to archive
+mv .kiro/refactor/checkpoints/{session-id} .kiro/refactor/archive/{session-id}
+```
+
+#### Clear Stashes (Optional)
+
+```bash
+# List refactor-related stashes
+git stash list | grep "refactor-checkpoint"
+
+# Offer to clear (user choice)
+```
+
+### Step 5: Update Session
+
+Run `/sessionwrite` with completion status:
+
+```markdown
+## Session Info
+- Type: Refactoring (COMPLETED)
+- Session ID: refactor-20260101-160000
+
+## Completion Status
+- All batches: COMPLETED
+- Quality gates: ALL PASS
+- Report: .kiro/refactor/plans/{session-id}/completion-report.md
+```
+
+### Step 6: Update Todo List
+
+```
+1. [completed] Execute Batch 1: Core interfaces (2 files)
+2. [completed] Execute Batch 2: Service layer (2 files)
+3. [completed] Execute Batch 3: Handler layer (2 files)
+4. [completed] Run final quality gates
+5. [completed] Complete refactoring session
+```
+
+### Step 7: Final Output
+
+```
+REFACTOR_SESSION_COMPLETE
+
+Refactoring completed successfully!
+
+Summary:
+- Batches: 3/3 completed
+- Files: 6 modified
+- Changes: 12 applied
+- Duration: 45 minutes
+- Quality: ALL PASS
+
+Report saved: .kiro/refactor/plans/{session-id}/completion-report.md
+
+Session archived. Ready for new refactoring.
+```
+
+## Partial Completion
+
+With `--partial` flag:
+
+```
+User: /refactor:complete --partial
+
+Claude:
+Completing with partial success.
+
+Completed batches: 2/3
+- batch-001: COMPLETED
+- batch-002: COMPLETED
+- batch-003: PENDING (not started)
+
+Quality gates for completed work:
+- ESLint: PASS
+- TypeScript: PASS
+- Tests: PASS
+
+Generating partial completion report...
+
+REFACTOR_SESSION_PARTIAL_COMPLETE
+```
+
+The partial report includes:
+- Which batches completed
+- Why remaining batches were skipped
+- Recommendations for future completion
+
+## Output Markers
+
+| Marker | Meaning |
+|--------|---------|
+| `REFACTOR_SESSION_COMPLETE` | Full success |
+| `REFACTOR_SESSION_PARTIAL_COMPLETE` | Partial success |
+| `REFACTOR_COMPLETION_FAILED` | Quality gates failed |
+
+## Error Handling
+
+| Error | Action |
+|-------|--------|
+| Quality gate fails | Propose rollback or fix |
+| No completed batches | Cannot complete, suggest /refactor:batch |
+| Archive fails | Warn, complete anyway |
+
+## Post-Completion
+
+After successful completion:
+
+1. **Git commit** (optional):
+   ```bash
+   git add -A
+   git commit -m "refactor: {scope}"
+   ```
+
+2. **PR creation** (optional):
+   ```bash
+   gh pr create --title "Refactor: {scope}"
+   ```
+
+3. **Cleanup stashes**:
+   ```bash
+   git stash clear  # Only if confirmed
+   ```
+
+## Example
+
+```
+User: /refactor:complete
+
+Claude:
+Completing refactoring session: refactor-20260101-160000
+
+Checking batch status...
+- batch-001: COMPLETED
+- batch-002: COMPLETED
+- batch-003: COMPLETED
+
+Running final quality gates...
+- ESLint: PASS
+- TypeScript: PASS
+- Tests: PASS (50/50)
+- Build: PASS
+
+Generating completion report...
+Archiving checkpoints...
+Updating session...
+
+REFACTOR_SESSION_COMPLETE
+
+Refactoring completed successfully!
+Summary: 3 batches, 6 files, 12 changes
+Report: .kiro/refactor/plans/refactor-20260101-160000/completion-report.md
+```

@@ -1,0 +1,31 @@
+description = "技術設計の品質を検証"
+prompt = """
+# 設計検証タスク
+
+{{args}} の技術設計を検証してください。
+
+## 実行手順
+1. 要件と設計を読み込み
+2. 要件カバレッジを検証
+3. 設計品質をチェック
+4. GAS互換性を確認
+5. テスタビリティを評価
+6. Design Validation Report を生成
+
+## 検証項目
+- Requirement Coverage（要件カバレッジ）
+- Single Responsibility Principle
+- Dependency Direction
+- Interface Segregation
+- GAS API Compatibility
+- Env Interface Pattern適用
+- Mockability
+- Dependency Injection
+
+## 入力ファイル
+- .kiro/specs/{feature}/requirements.md
+- .kiro/specs/{feature}/design.md
+
+## 出力
+Design Validation Report with quality assessment
+"""

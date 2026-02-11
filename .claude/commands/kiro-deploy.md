@@ -1,0 +1,362 @@
+---
+description: SD002フレームワークを新規プロジェクトに展開
+allowed-tools: Read, Write, Bash, Glob
+---
+
+# SD002フレームワーク展開 v2.11.0
+
+## 使用方法
+
+```
+/kiro:deploy <target-project-path>
+```
+
+## 入力
+
+$ARGUMENTS
+
+---
+
+## 🚨 重要: 選択的コピー禁止
+
+**絶対にファイルを選別してコピーしない。以下のリスト通りに全ファイルをコピーする。**
+
+---
+
+## 実行手順（AIが自動実行）
+
+### Phase 1: 検証
+
+1. 対象プロジェクトパスの存在確認
+2. 既存ファイルの有無確認
+3. **ソースパス確認**: `D:\claudecode\sd002`
+
+### Phase 2: ディレクトリ作成
+
+```bash
+# 全ディレクトリを作成
+mkdir -p <target>/.claude/commands/kiro
+mkdir -p <target>/.claude/rules/global
+mkdir -p <target>/.claude/rules/troubleshooting
+mkdir -p <target>/.claude/rules/session
+mkdir -p <target>/.claude/rules/workflow
+mkdir -p <target>/.claude/rules/refactoring
+mkdir -p <target>/.claude/rules/cleanup
+mkdir -p <target>/.claude/rules/specs
+mkdir -p <target>/.claude/rules/testing
+mkdir -p <target>/.claude/rules/architecture
+mkdir -p <target>/.claude/skills/dialogue-resolution
+mkdir -p <target>/.claude/skills/dialogue-trigger
+mkdir -p <target>/.claude/skills/context-autonomy
+mkdir -p <target>/.claude/skills/session-autosave
+mkdir -p <target>/.claude/skills/rollback-guard
+mkdir -p <target>/.claude/skills/kiro-deploy
+mkdir -p <target>/.kiro/specs
+mkdir -p <target>/.kiro/steering
+mkdir -p <target>/.kiro/sessions
+mkdir -p <target>/.kiro/settings/templates
+mkdir -p <target>/.kiro/settings/rules
+mkdir -p <target>/.kiro/ai-coordination/workflow/templates
+mkdir -p <target>/.kiro/ai-coordination/workflow/spec
+mkdir -p <target>/.kiro/ai-coordination/workflow/review
+mkdir -p <target>/.kiro/ai-coordination/handoff
+mkdir -p <target>/.kiro/ids
+mkdir -p <target>/docs/troubleshooting/bug-reports
+mkdir -p <target>/materials/csv
+mkdir -p <target>/materials/excel
+mkdir -p <target>/materials/pdf
+mkdir -p <target>/materials/images
+mkdir -p <target>/materials/text
+```
+
+### Phase 3: ファイルコピー（🚨 省略禁止）
+
+**ソース**: `D:\claudecode\sd002`
+
+---
+
+#### 3-1. Commands直下（27ファイル）
+
+| # | ファイル | 必須 |
+|---|---------|------|
+| 1 | sessionread.md | 🚨 |
+| 2 | sessionwrite.md | 🚨 |
+| 3 | sessionhistory.md | 🚨 |
+| 4 | bug-quick.md | 🚨 |
+| 5 | bug-trace.md | 🚨 |
+| 6 | dialogue-resolution.md | 🚨 |
+| 7 | workflow-init.md | ✓ |
+| 8 | workflow-order.md | ✓ |
+| 9 | workflow-request.md | ✓ |
+| 10 | workflow-status.md | ✓ |
+| 11 | sd002-loop-test.md | ✓ |
+| 12 | sd002-loop-lint.md | ✓ |
+| 13 | sd002-loop-type.md | ✓ |
+| 14 | ralph-wiggum-run.md | ✓ |
+| 15 | ralph-wiggum-status.md | ✓ |
+| 16 | ralph-wiggum-plan.md | ✓ |
+| 17 | refactor-init.md | ✓ |
+| 18 | refactor-plan.md | ✓ |
+| 19 | refactor-batch.md | ✓ |
+| 20 | refactor-rollback.md | ✓ |
+| 21 | refactor-complete.md | ✓ |
+| 22 | cleanup.md | ✓ |
+| 23 | cleanup-restore.md | ✓ |
+| 24 | cleanup-history.md | ✓ |
+| 25 | spec-archive.md | ✓ |
+| 26 | spec-history.md | ✓ |
+| 27 | kiro-deploy.md | ✓ |
+
+---
+
+#### 3-2. Commands/kiro/（15ファイル）
+
+| # | ファイル |
+|---|---------|
+| 1 | spec-init.md |
+| 2 | spec-requirements.md |
+| 3 | spec-design.md |
+| 4 | spec-tasks.md |
+| 5 | spec-impl.md |
+| 6 | spec-status.md |
+| 7 | spec-quick.md |
+| 8 | validate-design.md |
+| 9 | validate-gap.md |
+| 10 | validate-impl.md |
+| 11 | ai-request.md |
+| 12 | ai-report.md |
+| 13 | steering.md |
+| 14 | steering-custom.md |
+| 15 | deploy.md |
+
+---
+
+#### 3-3. Rules（10ディレクトリ）
+
+| ディレクトリ | ファイル |
+|-------------|----------|
+| (root) | ralph-loop.md, README.md |
+| global/ | quality-standards.md |
+| troubleshooting/ | dialogue-resolution.md, bug-quick.md |
+| session/ | session-management.md |
+| workflow/ | ai-coordination.md |
+| refactoring/ | refactoring-system.md |
+| cleanup/ | file-organization.md |
+| specs/ | spec-driven.md, spec-versioning.md |
+| testing/ | testing-standards.md, production-data-tdd.md |
+| architecture/ | adapter-core-pattern.md |
+
+---
+
+#### 3-4. Skills（6フォルダ）
+
+| スキル | ファイル |
+|--------|---------|
+| dialogue-resolution/ | SKILL.md |
+| dialogue-trigger/ | SKILL.md |
+| context-autonomy/ | SKILL.md |
+| session-autosave/ | SKILL.md |
+| rollback-guard/ | SKILL.md |
+| kiro-deploy/ | SKILL.md, README.md |
+
+---
+
+#### 3-5. Sessions（3ファイル）
+
+| ファイル | 処理 |
+|---------|------|
+| session-template.md | コピー |
+| session-current.md | **新規作成**（下記テンプレート使用） |
+| TIMELINE.md | **新規作成**（下記テンプレート使用） |
+
+**session-current.md テンプレート**:
+```markdown
+# Session Record
+
+## Session Info
+- **Date**: [YYYY-MM-DD HH:MM:SS]
+- **Project**: {PROJECT_NAME}
+- **Branch**: main
+- **Latest Commit**: (初期化時点)
+
+## Progress Summary
+
+### Completed
+- SD002フレームワーク展開完了
+
+### In Progress
+- (なし)
+
+### Unresolved Issues
+- (なし)
+
+### Created/Modified Files
+- SD002フレームワークファイル群
+
+### Next Session Tasks
+- P0 (Urgent): なし
+- P1 (Important): /sessionread で動作確認
+- P2 (Normal): なし
+
+### Notes
+SD002 v2.11.0 で初期化。
+```
+
+**TIMELINE.md テンプレート**:
+```markdown
+# {PROJECT_NAME} - Project Timeline
+
+## Overview
+- **Project**: {PROJECT_NAME}
+- **Created**: {TIMESTAMP}
+- **Framework**: SD002 v2.11.0
+
+---
+
+## Timeline
+
+### {DATE} - Project Initialized
+- SD002フレームワーク展開
+- 初期セッション作成
+```
+
+---
+
+#### 3-6. Docs（4ファイル）
+
+| ファイル |
+|---------|
+| troubleshooting/RESOLUTION_LOG.md |
+| troubleshooting/BUG_TRACE_LOG.md |
+| troubleshooting/bug-quick-patterns.md |
+| troubleshooting/bug-reports/BUG_INDEX.md |
+
+---
+
+#### 3-7. AI-Coordination Templates（6ファイル）
+
+| ファイル |
+|---------|
+| workflow/templates/WORK_ORDER.md |
+| workflow/templates/IMPLEMENT_REQUEST.md |
+| workflow/templates/REVIEW_REPORT.md |
+| workflow/templates/PROJECT_STATUS.md |
+| workflow/templates/TEST_REQUEST.md |
+| workflow/templates/TEST_REPORT.md |
+| workflow/README.md |
+| workflow/CODEX_GUIDE.md |
+
+---
+
+### Phase 4: 検証（🚨 全項目確認必須）
+
+```bash
+# === 必須ファイル確認 ===
+
+# Commands直下（6個の必須ファイル）
+[ -f ".claude/commands/sessionread.md" ] && echo "✅ sessionread.md" || echo "❌ sessionread.md"
+[ -f ".claude/commands/sessionwrite.md" ] && echo "✅ sessionwrite.md" || echo "❌ sessionwrite.md"
+[ -f ".claude/commands/sessionhistory.md" ] && echo "✅ sessionhistory.md" || echo "❌ sessionhistory.md"
+[ -f ".claude/commands/bug-quick.md" ] && echo "✅ bug-quick.md" || echo "❌ bug-quick.md"
+[ -f ".claude/commands/bug-trace.md" ] && echo "✅ bug-trace.md" || echo "❌ bug-trace.md"
+[ -f ".claude/commands/dialogue-resolution.md" ] && echo "✅ dialogue-resolution.md" || echo "❌ dialogue-resolution.md"
+
+# Commands/kiro（3個サンプル確認）
+[ -f ".claude/commands/kiro/spec-init.md" ] && echo "✅ kiro/spec-init.md" || echo "❌ kiro/spec-init.md"
+[ -f ".claude/commands/kiro/deploy.md" ] && echo "✅ kiro/deploy.md" || echo "❌ kiro/deploy.md"
+[ -f ".claude/commands/kiro/steering.md" ] && echo "✅ kiro/steering.md" || echo "❌ kiro/steering.md"
+
+# Sessions（必須）
+[ -f ".kiro/sessions/session-current.md" ] && echo "✅ session-current.md" || echo "❌ session-current.md"
+[ -f ".kiro/sessions/TIMELINE.md" ] && echo "✅ TIMELINE.md" || echo "❌ TIMELINE.md"
+
+# ファイル数カウント
+echo "--- File Counts ---"
+echo "Commands直下: $(ls -1 .claude/commands/*.md 2>/dev/null | wc -l) files"
+echo "Commands/kiro: $(ls -1 .claude/commands/kiro/*.md 2>/dev/null | wc -l) files"
+echo "Rules: $(find .claude/rules -name '*.md' 2>/dev/null | wc -l) files"
+echo "Skills: $(find .claude/skills -name '*.md' 2>/dev/null | wc -l) files"
+```
+
+**期待値**:
+| カテゴリ | 期待ファイル数 |
+|---------|---------------|
+| Commands直下 | 27 |
+| Commands/kiro | 15 |
+| Rules | 14 |
+| Skills | 7 |
+
+**❌が1つでもある場合は展開失敗 → 再実行**
+
+---
+
+### Phase 5: レポート出力
+
+```
+=== SD002展開完了 ===
+
+対象: {PROJECT_PATH}
+バージョン: v2.11.0
+日時: {TIMESTAMP}
+
+【コピーしたファイル数】
+- Commands直下: 27個
+- Commands/kiro: 15個
+- Rules: 14個
+- Skills: 7個
+- Docs: 4個
+- Sessions: 3個（1コピー + 2新規作成）
+- AI-Coordination: 8個
+
+合計: 78ファイル
+
+【検証結果】
+✅ 全必須ファイル存在確認
+✅ ファイル数一致確認
+
+【次のステップ】
+1. 対象プロジェクトで /sessionread を実行
+2. 動作確認
+```
+
+---
+
+## 注意事項
+
+### 🚨 絶対禁止事項
+
+1. **選択的コピー禁止** - 「これは不要そう」という判断をしない
+2. **ディレクトリ省略禁止** - kiro/サブフォルダを忘れない
+3. **検証省略禁止** - Phase 4を必ず実行
+
+### 既存ファイルの扱い
+
+- 既存ファイルは上書きしない（バックアップ推奨）
+- 上書きが必要な場合はユーザーに確認
+
+### session-current.md と TIMELINE.md
+
+- **新規作成する**（sd002からコピーしない）
+- プロジェクト固有の初期内容を記載
+
+---
+
+## トラブルシューティング
+
+### コマンドが認識されない
+
+1. `/sessionread` 実行
+2. `.claude/commands/` 配下のファイル確認
+3. 漏れがあれば手動コピー
+
+### 検証で❌が出た
+
+1. ソースパス `D:\claudecode\sd002` を確認
+2. 該当ファイルを手動コピー
+3. 再検証
+
+---
+
+## 詳細ドキュメント
+
+`.claude/skills/kiro-deploy/README.md`

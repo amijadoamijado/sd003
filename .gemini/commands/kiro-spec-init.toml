@@ -1,0 +1,24 @@
+description = "新規仕様書を初期化"
+prompt = """
+# 仕様書初期化タスク
+
+{{args}} の仕様書を初期化してください。
+
+## 実行手順
+1. 仕様書名を決定（kebab-case形式）
+2. `.kiro/specs/{feature}/` ディレクトリを作成
+3. 以下のファイルを作成:
+   - `spec.json` - メタデータ
+   - `requirements.md` - 要件定義テンプレート
+   - `design.md` - 技術設計テンプレート
+   - `tasks.md` - 実装タスクテンプレート
+
+## 出力ファイル
+- .kiro/specs/{feature}/spec.json
+- .kiro/specs/{feature}/requirements.md
+- .kiro/specs/{feature}/design.md
+- .kiro/specs/{feature}/tasks.md
+
+## 次のステップ
+初期化完了後、`/kiro:spec-requirements {feature}` で要件定義を開始してください。
+"""
