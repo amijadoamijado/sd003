@@ -1,4 +1,17 @@
-# SD002 Framework - Gemini CLI / Antigravity Configuration
+# SD003 Framework - Gemini CLI / Antigravity Configuration
+
+## Custom Commands & Skills (New)
+
+SD003 now supports Gemini CLI custom slash commands and skills.
+
+### Slash Commands
+Custom commands are synced from `.claude/commands/*.md` to `.gemini/commands/*.toml`.
+Usage: `/kiro:spec-init <description>`, `/workflow:impl <id> <task>`, etc.
+
+### Skills
+Project-local skills are available in `.gemini/skills/`.
+You can activate them using the `activate_skill` tool (if supported by your environment) or they will be automatically included in the system instructions.
+Available skills: `kiro-deploy`, `session-autosave`, `rollback-guard`, etc.
 
 ## CRITICAL: AI Coordination Workflow
 
@@ -153,4 +166,4 @@ Claude Code: 結果を読んで判断 → 承認 or 修正指示
 ```
 
 ---
-SD002 Framework v2.9.0
+SD003 Framework v1.0.0

@@ -97,6 +97,16 @@ npm test && npm run lint
 /prompts:kiro-validate-impl {feature}
 ```
 
+### Claude互換コマンド同期
+- Source: `.claude/commands/**/*.md`
+- Target: `.codex/prompts/`
+- Sync command: `npm run sync:codex-prompts`
+- コマンド一覧表示: `/prompts`
+
+例:
+- Claude `/bug-quick` -> Codex `/prompts:bug-quick`
+- Claude `/kiro:spec-init` -> Codex `/prompts:kiro-spec-init` または `/prompts:kiro/spec-init`
+
 ---
 
 ## Reference

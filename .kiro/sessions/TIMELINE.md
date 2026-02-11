@@ -10,6 +10,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 02-11 | Codex /prompts同期自動化 + Claude互換コマンド展開 | fc62074 | [Details](session-20260211-171835.md) |
 | 02-09 | デプロイv3.0.0 + oc001展開（ALL PASSED） | 29f6eb7 | [Details](session-20260209-003239.md) |
 | 02-08 | cc-sdd本家 vs SD002 比較分析（反映不要判断） | 4fef707 | [Details](session-20260208-105722.md) |
 | 02-08 | AC001 SD002 v2.11.0 展開（SD001→SD002移行） | 4057ab1 | [Details](session-20260208-104906.md) |
@@ -48,6 +49,7 @@
 
 ## Statistics
 
-- Total Sessions: 19
+- Total Sessions: 20
 - First Session: 2025-12-31
-- Latest Session: 2026-02-09
+- Latest Session: 2026-02-11
+

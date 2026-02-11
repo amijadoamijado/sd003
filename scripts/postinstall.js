@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { execFileSync } from 'child_process';
 
 console.log('SD002 Framework - Postinstall');
 console.log('==============================\n');
@@ -32,6 +33,14 @@ kiroStructure.forEach(dir => {
     console.log(`  - Exists: ${dir}`);
   }
 });
+
+console.log('\nSyncing Codex prompts from Claude commands...');
+try {
+  const syncScriptPath = path.join(process.cwd(), 'scripts', 'sync-codex-prompts.js');
+  execFileSync(process.execPath, [syncScriptPath], { stdio: 'inherit' });
+} catch (error) {
+  console.warn('  ⚠ Failed to sync Codex prompts. You can run: npm run sync:codex-prompts');
+}
 
 console.log('\n✅ SD002 Framework installation complete!');
 console.log('\nNext steps:');

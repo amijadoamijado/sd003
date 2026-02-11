@@ -1,141 +1,121 @@
-description = "AI協調ワークフロー - 実装指示に基づいて実装を実行"
+description = "AI協調ワークフロー - Gemini CLI実装実行（指示書→実行→復元を一括）"
 prompt = """
 # 実装実行: /workflow:impl
 
-{{args}} の実装を開始します。
+## 概要
+IMPLEMENT_REQUESTに基づきGemini CLIを実行し、結果を検証してコミットする。
+**指示書作成だけで止まることを防ぐための仕組み。**
 
-## 引数解析
-- 形式: `{案件ID} {タスク番号}`
-- 例: `20251230-001-auth 001`
-
-## 実行手順
-
-### 1. 実装指示の読み込み
+## 使用方法
 ```
-.kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
+/workflow:impl {案件ID} {タスク番号}
 ```
-全内容を精読し、以下を把握:
-- 変更可能ファイル
-- 禁止領域
-- 機能仕様
-- テストケース
-- コミット方針
 
-### 2. 発注書の確認
-```
-.kiro/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md
-```
-該当タスクの詳細、業務ルール、テスト要件を確認。
+## 引数
+- `案件ID`: 対象案件のID（例: `20260207-002-coverage-fix`）
+- `タスク番号`: 実装指示番号（3桁: 001, 002, ...）
 
-### 3. 作業ブランチ作成
+## 前提条件
+- IMPLEMENT_REQUEST_{タスク番号}.md が存在すること
+
+## 実行手順（全自動・省略禁止）
+
+### Step 1: 指示書の存在確認
 ```bash
-git checkout -b feature/{案件ID}/{タスク番号}-{slug}
+cat .kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
+```
+存在しない場合はエラー終了。
+
+### Step 2: 現在のgit状態を記録
+```bash
+git stash list
+git log --oneline -1
+```
+未コミットの変更がある場合は警告を表示。
+
+### Step 3: Gemini CLI実行
+**必ずバックグラウンドで実行し、完了を待つ。**
+
+```bash
+cat .kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md | gemini --yolo -p "上記の実装指示書に従って、全タスクを実装してください。完了後は検証手順に従ってビルド・テスト・ESLintを実行してください。"
 ```
 
-### 4. TDD実装
-以下の順序で実装:
+⚠️ **コマンド順序注意**: `--yolo -p "..."` の順（`-p --yolo`だと`--yolo`がプロンプト値になる）
 
-#### 4.1 テスト作成
-実装指示のテストケースに基づいてテストを作成:
-- 正常系テスト
-- 異常系テスト
-- エッジケーステスト
+### Step 4: .kiro/ 復元
+Geminiは`.kiro/`ディレクトリを削除する傾向があるため、必ず復元する。
 
-#### 4.2 実装
-テストがパスするようにコードを実装:
-- 実装指示の機能仕様に従う
-- 業務ルールを正確に実装
-- Env Interface Pattern を遵守
-
-#### 4.3 リファクタリング
-テストがパスした後、コード品質を向上:
-- 重複の排除
-- 命名の改善
-- 構造の整理
-
-### 5. 品質確認
 ```bash
-# テスト実行
-npm test -- --testPathPattern="{対象テストファイル}"
+git checkout -- .kiro/
+```
 
-# リント
-npm run lint
-
-# 型チェック
+### Step 5: 結果検証
+```bash
 npx tsc --noEmit
-
-# ビルド
-npm run build
+npx jest --no-coverage
 ```
 
-全てパスするまで修正を繰り返す。
-
-### 6. コミット
+### Step 6: 変更差分の確認
 ```bash
-git add .
-git commit -m "{type}({scope}): {summary}
-
-{body}
-
-Refs: {案件ID}#{タスク番号}"
+git status --short
+git diff --stat
 ```
 
-コミットメッセージは実装指示のコミット方針に従う。
+Geminiが変更したファイルを確認し、対象ファイルのみをステージング。
 
-## 制約事項（必須遵守）
+### Step 7: コミット
+```bash
+git add {変更ファイル}
+git commit -m "{適切なコミットメッセージ}
 
-### 技術的制約
-- Node.js API禁止（`fs`, `path`, `process`）
-- GAS API直接参照禁止（Env Interface経由のみ）
-- TypeScript strictモード必須
-- ESLintエラー0件必須
+案件: {案件ID}
 
-### 品質基準
-- カバレッジ80%以上
-- JSDocコメント必須（公開API）
-- エラーハンドリング完備
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
+```
 
-### 禁止事項
-- 実装指示の「禁止領域」のファイル変更
-- 仕様書（.kiro/specs/）の変更
-- CLAUDE.md の変更
+### Step 8: handoff-log.json 更新
+実行結果を記録:
+```json
+{
+  "timestamp": "{現在日時ISO形式}",
+  "type": "implement_complete",
+  "project_id": "{案件ID}",
+  "from": "Gemini CLI",
+  "to": "Claude Code",
+  "file": "workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md",
+  "note": "{実行結果サマリー}"
+}
+```
 
-## 実装完了報告
+### Step 9: Codexレビュー自動実行（省略禁止）
+**実装・コミット完了後、必ず `/workflow:review {案件ID} {タスク番号}` を実行する。**
+Gemini実装が終わっただけで止まることは禁止。レビュー依頼まで含めて1つのワークフロー。
 
-実装完了時、以下の形式で報告:
+### Step 10: 完了報告
+```
+## Gemini実装 → Codexレビュー完了
 
-```markdown
-## 実装完了報告
-
-### 基本情報
 - **案件ID**: {案件ID}
 - **タスク番号**: {タスク番号}
-- **コミット**: {commit hash}
-- **ブランチ**: feature/{案件ID}/{タスク番号}-{slug}
-
-### 変更ファイル
-| ファイル | アクション | 行数 |
-|---------|----------|------|
-| {path}  | Created  | {N}  |
-| {path}  | Modified | {N}  |
-
-### テスト結果
-- ユニットテスト: X件パス / X件
-- カバレッジ: XX%
-
-### 検証コマンド結果
-```bash
-npm test       # PASS
-npm run lint   # PASS
-npm run build  # PASS
+- **テスト結果**: {パス数}/{全体数}
+- **コミット**: {ハッシュ}
+- **.kiro/復元**: 完了
+- **レビュー判定**: {Approve/Request Changes}
 ```
 
-### 次のアクション
-- Codexレビュー依頼
-- 手順: `.kiro/ai-coordination/workflow/CODEX_GUIDE.md` 参照
-```
+## エラー時の対応
 
-## 次のステップ
-1. Codexに実装レビューを依頼（手動）
-2. レビューApprove後、Claude Codeが工程更新
+| エラー | 対応 |
+|--------|------|
+| Gemini CLI実行失敗 | コマンド引数順序を確認。`--yolo -p "..."` の順 |
+| テスト失敗 | Geminiの変更を`git diff`で確認し、手動修正またはリトライ |
+| .kiro/ 削除 | `git checkout -- .kiro/` で復元 |
+| ビルドエラー | `npx tsc --noEmit` のエラーを確認し修正 |
+
+## ユーザー入力
+$ARGUMENTS
+
+---
+
+**実行開始**: 上記手順に従ってGemini CLIを実行してください。Step 1からStep 9まで全て実行すること。途中で止まることは禁止。
 """

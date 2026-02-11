@@ -1,0 +1,72 @@
+description = "Archive spec files to history folder"
+prompt = """
+# Spec Archive
+
+Archive specification files to history folder with timestamp.
+
+## Usage
+
+```
+/spec:archive {feature} [file]
+```
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| feature | Yes | Feature name (folder under .kiro/specs/) |
+| file | No | Specific file (requirements, design, tasks). If omitted, archives all. |
+
+## Examples
+
+```bash
+/spec:archive bug-trace              # Archive all files
+/spec:archive bug-trace requirements # Archive requirements.md only
+/spec:archive ralph-wiggum design    # Archive design.md only
+```
+
+## Execution Steps
+
+1. Validate feature folder exists at `.kiro/specs/{feature}/`
+2. Generate timestamp: `YYYYMMDD-HHMMSS`
+3. Create `history/` folder if not exists
+4. For each target file:
+   - Read current content from `.kiro/specs/{feature}/{file}.md`
+   - Save to `.kiro/specs/{feature}/history/{file}-YYYYMMDD-HHMMSS.md`
+5. Update `spec.json` history section
+6. Display completion message
+
+## File Naming
+
+```
+{type}-YYYYMMDD-HHMMSS.md
+```
+
+Examples:
+- `requirements-20251226-143000.md`
+- `design-20251226-143000.md`
+- `tasks-20251226-143000.md`
+
+## spec.json Update
+
+Add entry to history array:
+
+```json
+{
+  "history": [
+    {
+      "version": "[current version]",
+      "date": "YYYY-MM-DD",
+      "file": "{type}-YYYYMMDD-HHMMSS.md",
+      "note": "[user provided note or auto-generated]"
+    }
+  ]
+}
+```
+
+## User Input
+
+Feature: $ARGUMENTS
+
+---
+
+**Execute**: Read target files, save to history/ with timestamp, update spec.json.
+"""

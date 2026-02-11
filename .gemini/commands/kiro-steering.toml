@@ -1,36 +1,59 @@
-description = "プロジェクトのステアリングドキュメントを作成・更新"
+description = "Manage .kiro/steering/ as persistent project knowledge"
 prompt = """
-# ステアリングドキュメント作成
+# Kiro Steering Management
 
-プロジェクトのステアリングドキュメントを作成・更新してください。
+## Mode Detection
 
-## 実行手順
-1. 既存のステアリングドキュメントを確認
-2. `.kiro/steering/product.md` を作成/更新
-3. `.kiro/steering/tech.md` を作成/更新
-4. `.kiro/steering/structure.md` を作成/更新
-5. 整合性を検証
+**Perform detection before invoking SubAgent**:
 
-## 出力ファイル
-- .kiro/steering/product.md（プロダクト戦略）
-- .kiro/steering/tech.md（技術戦略）
-- .kiro/steering/structure.md（プロジェクト構造）
+Check `.kiro/steering/` status:
+- **Bootstrap Mode**: Empty OR missing core files (product.md, tech.md, structure.md)
+- **Sync Mode**: All core files exist
 
-## ドキュメント内容
-### product.md
-- プロダクトビジョン
-- ターゲットユーザー
-- 主要機能
-- 成功指標
+Use Glob to check for existing steering files.
 
-### tech.md
-- 技術スタック
-- アーキテクチャ方針
-- 開発規約
-- 品質基準
+## Invoke SubAgent
 
-### structure.md
-- ディレクトリ構造
-- 命名規約
-- ファイル配置ルール
+Delegate steering management to steering-agent:
+
+Use the Task tool to invoke the SubAgent with file path patterns:
+
+```
+Task(
+  subagent_type="general-purpose",
+  description="Manage steering files",
+  prompt="""
+Mode: {bootstrap or sync based on detection}
+
+File patterns to read:
+- .kiro/steering/*.md (if sync mode)
+- .kiro/settings/templates/steering/*.md
+- .kiro/settings/rules/steering-principles.md
+
+JIT Strategy: Fetch codebase files when needed, not upfront
+"""
+)
+```
+
+## Display Result
+
+Show SubAgent summary to user:
+
+### Bootstrap:
+- Generated steering files: product.md, tech.md, structure.md
+- Review and approve as Source of Truth
+
+### Sync:
+- Updated steering files
+- Code drift warnings
+- Recommendations for custom steering
+
+## Notes
+
+- All `.kiro/steering/*.md` loaded as project memory
+- Templates and principles are external for customization
+- Focus on patterns, not catalogs
+- "Golden Rule": New code following patterns shouldn't require steering updates
+---
+@req: REQ-SUBAGENTS-002
 """

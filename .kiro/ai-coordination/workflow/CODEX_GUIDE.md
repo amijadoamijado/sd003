@@ -3,7 +3,13 @@
 ## 概要
 
 CodexはSD002プロジェクトにおいてレビュー・チェックを担当します。
-現時点でスラッシュコマンドに対応していないため、手動運用となります。
+カスタムスラッシュコマンドは `/prompts:*` 形式で利用します。
+
+### コマンド運用
+
+- 一覧表示: `/prompts`
+- 例: `/prompts:workflow-review {projectID} {num}`
+- 例: `/prompts:kiro-spec-init "description"`
 
 ## 対応するレビュー種別
 

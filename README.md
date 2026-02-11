@@ -51,11 +51,27 @@ See: [Ralph Wiggum Deployment Guide](docs/ralph-wiggum-deployment.md)
 | IDE/CLI | Config Files | Commands |
 |---------|-------------|----------|
 | Claude Code | CLAUDE.md, .claude/rules/ | .claude/commands/ |
-| Codex CLI | AGENTS.md, .codex/prompts/ | - |
+| Codex CLI | AGENTS.md, .codex/prompts/ | `/prompts:*`（`.claude/commands`から自動同期） |
 | Gemini CLI | GEMINI.md, .gemini/commands/ | TOML |
 | Cursor | .cursor/rules/ | - |
 | Windsurf | AGENTS.md, .windsurf/workflows/ | - |
 | Antigravity | GEMINI.md, .agent/rules/ | - |
+
+### Codex Slash Commands
+
+Codex CLI はカスタムコマンドを `/prompts:*` 形式で実行します。
+
+```bash
+# Claudeのコマンド定義をCodex用に同期
+npm run sync:codex-prompts
+
+# 利用可能コマンド一覧
+/prompts
+```
+
+主な互換マッピング:
+- Claude `/bug-quick` -> Codex `/prompts:bug-quick`
+- Claude `/kiro:spec-init` -> Codex `/prompts:kiro-spec-init` または `/prompts:kiro/spec-init`
 
 ---
 

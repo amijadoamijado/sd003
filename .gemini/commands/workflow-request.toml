@@ -1,0 +1,99 @@
+description = "AI協調ワークフロー - 実装指示（IMPLEMENT_REQUEST）作成"
+prompt = """
+# 実装指示作成: /workflow:request
+
+## 概要
+特定タスクの実装指示（IMPLEMENT_REQUEST.md）を作成します。
+
+## 使用方法
+```
+/workflow:request {案件ID} {タスク番号}
+```
+
+## 引数
+- `案件ID`: 対象案件のID
+- `タスク番号`: WORK_ORDER.md で定義したタスク番号（3桁: 001, 002, ...）
+
+## 前提条件
+- WORK_ORDER.md が存在すること
+- 発注書レビューが Approve されていること
+- 依存タスクが完了していること（該当する場合）
+
+## 実行手順
+
+### 1. 発注書の読み込み
+```
+.kiro/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md
+```
+から該当タスクの詳細を抽出。
+
+### 2. レビュー結果の確認
+```
+.kiro/ai-coordination/workflow/review/{案件ID}/REVIEW_WORK_ORDER.md
+```
+が存在し、判定が Approve であることを確認。
+
+### 3. 依存タスクの状態確認
+WORK_ORDER.md のタスク一覧から依存タスクを特定し、
+PROJECT_STATUS.md で完了状態を確認。
+
+### 4. 実装指示の詳細生成
+テンプレートを使用して実装指示を作成:
+- テンプレート: `.kiro/ai-coordination/workflow/templates/IMPLEMENT_REQUEST.md`
+
+以下を具体化:
+- **ブランチ名**: `feature/{案件ID}/{タスク番号}-{slug}`
+- **変更可能ファイル**: 発注書から特定
+- **禁止領域**: フレームワークファイル、仕様書等
+- **テストケース**: 発注書のテスト要件から展開
+- **コミット方針**: 標準形式を適用
+
+### 5. IMPLEMENT_REQUEST_{タスク番号}.md 作成
+保存先: `.kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md`
+
+### 6. PROJECT_STATUS.md 更新
+- フェーズ3（実装指示作成）完了、フェーズ4（実装）へ
+- 該当タスクを「進行中」に更新
+- タイムラインに記録追加
+
+### 7. handoff-log.json 更新
+```json
+{
+  "handoff_history": [
+    {
+      "id": "HO-{連番}",
+      "project_id": "{案件ID}",
+      "from": "Claude Code",
+      "to": "Gemini CLI",
+      "type": "implement_request",
+      "artifact": ".kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md",
+      "timestamp": "{現在日時ISO形式}",
+      "status": "pending",
+      "result": null
+    }
+  ]
+}
+```
+
+### 8. Gemini CLI 自動実行（省略禁止）
+**指示書作成後、必ず `/workflow:impl {案件ID} {タスク番号}` を実行する。**
+指示書を作っただけで止まることは禁止。実装実行まで含めて1つのワークフロー。
+
+### 9. 完了報告
+```
+## 実装指示作成 → Gemini実行完了
+
+- **案件ID**: {案件ID}
+- **タスク番号**: {タスク番号}
+- **実装指示**: .kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
+- **Gemini実行結果**: {パス/失敗}
+- **コミット**: {ハッシュ}
+```
+
+## ユーザー入力
+$ARGUMENTS
+
+---
+
+**実行開始**: 上記手順に従って実装指示を作成してください。発注書の該当タスクを詳細に展開し、Gemini CLIが迷わず実装できる具体的な指示を作成すること。
+"""
