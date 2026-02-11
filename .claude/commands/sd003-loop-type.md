@@ -1,4 +1,4 @@
-# /sd002:loop-type - TypeScript Type-Check Loop
+# /sd003:loop-type - TypeScript Type-Check Loop
 
 Run TypeScript type-checking in a loop until all type errors are resolved.
 
@@ -9,7 +9,7 @@ This command activates the Ralph Loop mechanism to automatically retry TypeScrip
 ## Usage
 
 ```
-/sd002:loop-type [max-iterations]
+/sd003:loop-type [max-iterations]
 ```
 
 ## Parameters
@@ -30,17 +30,17 @@ This command activates the Ralph Loop mechanism to automatically retry TypeScrip
 
 The loop completes when the output contains: `TYPE_CHECK_PASS`
 
-Set `SD002_COMPLETION_PROMISE=TYPE_CHECK_PASS` before running this command.
+Set `SD003_COMPLETION_PROMISE=TYPE_CHECK_PASS` before running this command.
 
 ## Example Usage
 
 ```bash
 # Set completion promise for type-check
-export SD002_COMPLETION_PROMISE=TYPE_CHECK_PASS
-export SD002_MAX_ITERATIONS=15
+export SD003_COMPLETION_PROMISE=TYPE_CHECK_PASS
+export SD003_MAX_ITERATIONS=15
 
 # Run type-check loop
-/sd002:loop-type
+/sd003:loop-type
 ```
 
 ## Expected Output Format
@@ -54,10 +54,10 @@ Your type-check script should output `TYPE_CHECK_PASS` when there are no errors:
 
 ## Related Commands
 
-- `/sd002:loop-test` - Test completion loop (primary)
-- `/sd002:loop-lint` - ESLint completion loop
+- `/sd003:loop-test` - Test completion loop (primary)
+- `/sd003:loop-lint` - ESLint completion loop
 
-## SD002 Philosophy
+## SD003 Philosophy
 
 Supplementary command for the midpoint phase. Use when:
 - TypeScript strict mode violations need resolution
@@ -66,5 +66,5 @@ Supplementary command for the midpoint phase. Use when:
 ---
 
 **Phase**: Midpoint (Phase 2-3)
-**Stop Hook**: `.claude/hooks/sd002-stop-hook.sh`
+**Stop Hook**: `.claude/hooks/sd003-stop-hook.sh`
 **Completion Promise**: `TYPE_CHECK_PASS`

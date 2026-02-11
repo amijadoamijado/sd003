@@ -1,15 +1,15 @@
-# /sd002:loop-test - Test Completion Loop
+# /sd003:loop-test - Test Completion Loop
 
 Run tests in a loop until all tests pass.
 
 ## Purpose
 
-This command activates the Ralph Loop mechanism to automatically retry test execution until all tests pass. It's designed for the **midpoint phase (Phase 2-3)** of SD002 development where we want fast development but complete (not incomplete) results.
+This command activates the Ralph Loop mechanism to automatically retry test execution until all tests pass. It's designed for the **midpoint phase (Phase 2-3)** of SD003 development where we want fast development but complete (not incomplete) results.
 
 ## Usage
 
 ```
-/sd002:loop-test [max-iterations]
+/sd003:loop-test [max-iterations]
 ```
 
 ## Parameters
@@ -30,7 +30,7 @@ This command activates the Ralph Loop mechanism to automatically retry test exec
 
 The loop completes when the output contains: `ALL_TESTS_PASS`
 
-Make sure your test output includes this string when all tests pass, or modify the SD002_COMPLETION_PROMISE environment variable.
+Make sure your test output includes this string when all tests pass, or modify the SD003_COMPLETION_PROMISE environment variable.
 
 ## Example Output
 
@@ -63,10 +63,10 @@ Completion promise 'ALL_TESTS_PASS' detected. Task complete.
 
 ## Related Commands
 
-- `/sd002:loop-lint` - ESLint completion loop
-- `/sd002:loop-type` - TypeScript type-check loop
+- `/sd003:loop-lint` - ESLint completion loop
+- `/sd003:loop-type` - TypeScript type-check loop
 
-## SD002 Philosophy
+## SD003 Philosophy
 
 This command implements the "90% fast development, 10% perfectionism" principle:
 - Fast iteration with automatic retries
@@ -76,4 +76,4 @@ This command implements the "90% fast development, 10% perfectionism" principle:
 ---
 
 **Phase**: Midpoint (Phase 2-3)
-**Stop Hook**: `.claude/hooks/sd002-stop-hook.sh`
+**Stop Hook**: `.claude/hooks/sd003-stop-hook.sh`
