@@ -1,16 +1,16 @@
 ---
 name: kiro-deploy
 description: |
-  SD002フレームワークを新規プロジェクトに展開。
-  Use when: ユーザーが「SD002導入」「フレームワーク展開」「deploy」と言及した場合。
+  SD003フレームワークを新規プロジェクトに展開。
+  Use when: ユーザーが「SD003導入」「フレームワーク展開」「deploy」と言及した場合。
 allowed-tools: Read, Write, Bash, Glob
 ---
 
-# SD002フレームワーク展開スキル v3.0.0
+# SD003フレームワーク展開スキル v3.0.0
 
 ## 概要
 
-SD002フレームワーク（v2.11.0）を新規プロジェクトに展開する。
+SD003フレームワーク（v2.11.0）を新規プロジェクトに展開する。
 **ディレクトリ単位の動的コピー**により、ファイル追加時にスクリプト修正は不要。
 
 ## 使用方法
@@ -59,6 +59,13 @@ bash .claude/skills/kiro-deploy/deploy.sh <target-project-path>
 | 10 | `.kiro/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
 | 11 | `docs/troubleshooting/` | ツリーコピー |
 | 12 | `docs/quality-gates.md` | 単体コピー |
+| 13 | `.handoff/` | ツリーコピー |
+| 14 | `scripts/sync-codex-prompts.js` | 単体コピー |
+| 15 | `scripts/sync-gemini-features.js` | 単体コピー |
+| 16 | `AGENTS.md` | 単体コピー |
+| 17 | `.kiro/ralph/` | ツリーコピー |
+| 18 | `.kiro/steering/` | ツリーコピー |
+| 19 | `.kiro/refactor/config.json` | 単体コピー |
 
 ## 生成ファイル
 

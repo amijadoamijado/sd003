@@ -1,4 +1,4 @@
-# SD002 Framework Deployment Script v3.0.0 (PowerShell)
+# SD003 Framework Deployment Script v3.0.0 (PowerShell)
 # Usage: powershell -ExecutionPolicy Bypass -File deploy.ps1 <target-project-path>
 
 param(
@@ -9,13 +9,13 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$SD002_VERSION = "3.0.0"
+$SD003_VERSION = "3.0.0"
 $FRAMEWORK_VERSION = "2.11.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
 
-Write-Host "=== SD002 Framework Deployment v${SD002_VERSION} ===" -ForegroundColor Cyan
+Write-Host "=== SD003 Framework Deployment v${SD003_VERSION} ===" -ForegroundColor Cyan
 Write-Host "Framework: v${FRAMEWORK_VERSION}"
 Write-Host "Source: $SOURCE_DIR"
 Write-Host "Target: $TargetProject"
@@ -33,7 +33,7 @@ Write-Host "[Phase 1/7] Target validated" -ForegroundColor Green
 # ============================================================
 # Phase 2: Backup
 # ============================================================
-$BackupDir = Join-Path $TargetProject ".sd002-backup-$TIMESTAMP"
+$BackupDir = Join-Path $TargetProject ".sd003-backup-$TIMESTAMP"
 New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
 
 $backupTargets = @("CLAUDE.md", "gemini.md")
@@ -74,6 +74,9 @@ $directories = @(
     ".kiro/ai-coordination/workflow/log",
     ".kiro/ai-coordination/handoff",
     ".antigravity",
+    ".handoff",
+    ".kiro/ralph",
+    ".kiro/refactor",
     "docs/troubleshooting/bug-reports",
     "materials/csv",
     "materials/excel",
@@ -233,6 +236,57 @@ if (Test-Path $qgSrc) {
     $copyStats["Docs/QualityGates"] = 0
 }
 
+# 4-13: .handoff/ (tree)
+Copy-DirTree -RelPath ".handoff" -Label "Handoff"
+
+# 4-14: scripts/sync-codex-prompts.js (single file)
+$syncCodexSrc = Join-Path $SOURCE_DIR "scripts\sync-codex-prompts.js"
+if (Test-Path $syncCodexSrc) {
+    $scriptsDst = Join-Path $TargetProject "scripts"
+    if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
+    Copy-Item $syncCodexSrc (Join-Path $scriptsDst "sync-codex-prompts.js") -Force
+    $copyStats["Sync Codex"] = 1
+} else {
+    $copyStats["Sync Codex"] = 0
+}
+
+# 4-15: scripts/sync-gemini-features.js (single file)
+$syncGeminiSrc = Join-Path $SOURCE_DIR "scripts\sync-gemini-features.js"
+if (Test-Path $syncGeminiSrc) {
+    $scriptsDst = Join-Path $TargetProject "scripts"
+    if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
+    Copy-Item $syncGeminiSrc (Join-Path $scriptsDst "sync-gemini-features.js") -Force
+    $copyStats["Sync Gemini"] = 1
+} else {
+    $copyStats["Sync Gemini"] = 0
+}
+
+# 4-16: AGENTS.md (single file)
+$agentsSrc = Join-Path $SOURCE_DIR "AGENTS.md"
+if (Test-Path $agentsSrc) {
+    Copy-Item $agentsSrc (Join-Path $TargetProject "AGENTS.md") -Force
+    $copyStats["AGENTS.md"] = 1
+} else {
+    $copyStats["AGENTS.md"] = 0
+}
+
+# 4-17: .kiro/ralph/ (tree)
+Copy-DirTree -RelPath ".kiro\ralph" -Label "Ralph"
+
+# 4-18: .kiro/steering/ (tree)
+Copy-DirTree -RelPath ".kiro\steering" -Label "Steering"
+
+# 4-19: .kiro/refactor/config.json (single file)
+$refactorCfgSrc = Join-Path $SOURCE_DIR ".kiro\refactor\config.json"
+if (Test-Path $refactorCfgSrc) {
+    $refactorDst = Join-Path $TargetProject ".kiro\refactor"
+    if (-not (Test-Path $refactorDst)) { New-Item -ItemType Directory -Path $refactorDst -Force | Out-Null }
+    Copy-Item $refactorCfgSrc (Join-Path $refactorDst "config.json") -Force
+    $copyStats["Refactor Config"] = 1
+} else {
+    $copyStats["Refactor Config"] = 0
+}
+
 Write-Host "[Phase 4/7] Dynamic copy completed" -ForegroundColor Green
 foreach ($key in $copyStats.Keys | Sort-Object) {
     Write-Host "  $key : $($copyStats[$key]) files"
@@ -280,7 +334,7 @@ $sessionCurrentContent = @"
 ## Progress Summary
 
 ### Completed
-- SD002 Framework v${FRAMEWORK_VERSION} deployed
+- SD003 Framework v${FRAMEWORK_VERSION} deployed
 
 ### In Progress
 - (none)
@@ -289,7 +343,7 @@ $sessionCurrentContent = @"
 - P1 (Important): Run /sessionread to verify
 
 ### Notes
-Initialized with SD002 v${FRAMEWORK_VERSION}.
+Initialized with SD003 v${FRAMEWORK_VERSION}.
 "@
 Set-Content -Path (Join-Path $TargetProject ".kiro\sessions\session-current.md") -Value $sessionCurrentContent -Encoding UTF8
 
@@ -300,14 +354,14 @@ $timelineContent = @"
 ## Overview
 - **Project**: $ProjectName
 - **Created**: $DATE
-- **Framework**: SD002 v${FRAMEWORK_VERSION}
+- **Framework**: SD003 v${FRAMEWORK_VERSION}
 
 ---
 
 ## Timeline
 
 ### $DATE - Project Initialized
-- SD002 Framework v${FRAMEWORK_VERSION} deployed
+- SD003 Framework v${FRAMEWORK_VERSION} deployed
 "@
 Set-Content -Path (Join-Path $TargetProject ".kiro\sessions\TIMELINE.md") -Value $timelineContent -Encoding UTF8
 
@@ -323,7 +377,7 @@ $settingsContent = @"
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"`$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd002-stop-hook.ps1\"",
+            "command": "powershell -ExecutionPolicy Bypass -File \"`$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"",
             "timeout": 10
           }
         ]
@@ -407,6 +461,9 @@ $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" 
 $verifyResults += Verify-Category -Label "Gemini Commands" -SourceRelPath ".gemini\commands" -Filter "*.toml"
 $verifyResults += Verify-Category -Label "Antigravity" -SourceRelPath ".antigravity" -Recurse
 $verifyResults += Verify-Category -Label "Kiro Settings" -SourceRelPath ".kiro\settings" -Recurse
+$verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
+$verifyResults += Verify-Category -Label "Ralph" -SourceRelPath ".kiro\ralph" -Recurse
+$verifyResults += Verify-Category -Label "Steering" -SourceRelPath ".kiro\steering" -Recurse
 
 # Display results
 foreach ($r in $verifyResults) {
@@ -444,7 +501,7 @@ Write-Host "[Phase 6/7] Verification completed" -ForegroundColor Green
 # Phase 7: Report
 # ============================================================
 Write-Host ""
-Write-Host "=== SD002 Framework Deployment Report ===" -ForegroundColor Cyan
+Write-Host "=== SD003 Framework Deployment Report ===" -ForegroundColor Cyan
 Write-Host ""
 
 $totalCopied = ($copyStats.Values | Measure-Object -Sum).Sum
@@ -466,4 +523,4 @@ Write-Host "  2. Review CLAUDE.md"
 Write-Host "  3. Run /sessionread to verify"
 Write-Host "  4. Start with /kiro:spec-init {feature}"
 Write-Host ""
-Write-Host "SD002 v${FRAMEWORK_VERSION} (deploy v${SD002_VERSION}) deployed successfully!" -ForegroundColor Green
+Write-Host "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!" -ForegroundColor Green

@@ -1,18 +1,18 @@
 #!/bin/bash
-# SD002 Framework Deployment Script v3.0.0 (Bash)
+# SD003 Framework Deployment Script v3.0.0 (Bash)
 # Usage: ./deploy.sh <target-project-path>
 
 set -e
 
 # Configuration
-SD002_VERSION="3.0.0"
+SD003_VERSION="3.0.0"
 FRAMEWORK_VERSION="2.11.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
-echo "=== SD002 Framework Deployment v${SD002_VERSION} ==="
+echo "=== SD003 Framework Deployment v${SD003_VERSION} ==="
 echo "Framework: v${FRAMEWORK_VERSION}"
 echo "Source: $SOURCE_DIR"
 echo "Target: $TARGET_PROJECT"
@@ -30,7 +30,7 @@ echo "[Phase 1/7] Target validated"
 # ============================================================
 # Phase 2: Backup
 # ============================================================
-BACKUP_DIR="$TARGET_PROJECT/.sd002-backup-$TIMESTAMP"
+BACKUP_DIR="$TARGET_PROJECT/.sd003-backup-$TIMESTAMP"
 mkdir -p "$BACKUP_DIR"
 
 for f in CLAUDE.md gemini.md; do
@@ -63,6 +63,9 @@ DIRS=(
     ".kiro/ai-coordination/workflow/log"
     ".kiro/ai-coordination/handoff"
     ".antigravity"
+    ".handoff"
+    ".kiro/ralph"
+    ".kiro/refactor"
     "docs/troubleshooting/bug-reports"
     "materials/csv"
     "materials/excel"
@@ -197,6 +200,50 @@ else
     COPY_STATS["Docs/QualityGates"]=0
 fi
 
+# 4-13: .handoff/ (tree)
+copy_dir_tree ".handoff" "Handoff" "*"
+
+# 4-14: scripts/sync-codex-prompts.js (single file)
+if [ -f "$SOURCE_DIR/scripts/sync-codex-prompts.js" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    cp "$SOURCE_DIR/scripts/sync-codex-prompts.js" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Sync Codex"]=1
+else
+    COPY_STATS["Sync Codex"]=0
+fi
+
+# 4-15: scripts/sync-gemini-features.js (single file)
+if [ -f "$SOURCE_DIR/scripts/sync-gemini-features.js" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    cp "$SOURCE_DIR/scripts/sync-gemini-features.js" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Sync Gemini"]=1
+else
+    COPY_STATS["Sync Gemini"]=0
+fi
+
+# 4-16: AGENTS.md (single file)
+if [ -f "$SOURCE_DIR/AGENTS.md" ]; then
+    cp "$SOURCE_DIR/AGENTS.md" "$TARGET_PROJECT/"
+    COPY_STATS["AGENTS.md"]=1
+else
+    COPY_STATS["AGENTS.md"]=0
+fi
+
+# 4-17: .kiro/ralph/ (tree)
+copy_dir_tree ".kiro/ralph" "Ralph" "*"
+
+# 4-18: .kiro/steering/ (tree)
+copy_dir_tree ".kiro/steering" "Steering" "*"
+
+# 4-19: .kiro/refactor/config.json (single file)
+if [ -f "$SOURCE_DIR/.kiro/refactor/config.json" ]; then
+    mkdir -p "$TARGET_PROJECT/.kiro/refactor"
+    cp "$SOURCE_DIR/.kiro/refactor/config.json" "$TARGET_PROJECT/.kiro/refactor/"
+    COPY_STATS["Refactor Config"]=1
+else
+    COPY_STATS["Refactor Config"]=0
+fi
+
 echo "[Phase 4/7] Dynamic copy completed"
 for key in "${!COPY_STATS[@]}"; do
     echo "  $key: ${COPY_STATS[$key]} files"
@@ -242,7 +289,7 @@ cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
 ## Progress Summary
 
 ### Completed
-- SD002 Framework v${FRAMEWORK_VERSION} deployed
+- SD003 Framework v${FRAMEWORK_VERSION} deployed
 
 ### In Progress
 - (none)
@@ -251,7 +298,7 @@ cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
 - P1 (Important): Run /sessionread to verify
 
 ### Notes
-Initialized with SD002 v${FRAMEWORK_VERSION}.
+Initialized with SD003 v${FRAMEWORK_VERSION}.
 EOF
 
 # 5-4: TIMELINE.md (new)
@@ -261,24 +308,24 @@ cat > "$TARGET_PROJECT/.kiro/sessions/TIMELINE.md" << EOF
 ## Overview
 - **Project**: $PROJECT_NAME
 - **Created**: $DATE
-- **Framework**: SD002 v${FRAMEWORK_VERSION}
+- **Framework**: SD003 v${FRAMEWORK_VERSION}
 
 ---
 
 ## Timeline
 
 ### $DATE - Project Initialized
-- SD002 Framework v${FRAMEWORK_VERSION} deployed
+- SD003 Framework v${FRAMEWORK_VERSION} deployed
 EOF
 
 # 5-5: .claude/settings.json (OS-aware)
 OS_TYPE="$(uname -s 2>/dev/null || echo 'Unknown')"
 if [[ "$OS_TYPE" == *"MINGW"* ]] || [[ "$OS_TYPE" == *"MSYS"* ]] || [[ "$OS_TYPE" == *"CYGWIN"* ]]; then
     # Windows (Git Bash/MSYS)
-    HOOK_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd002-stop-hook.ps1\"'
+    HOOK_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"'
 else
     # Linux/Mac
-    HOOK_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd002-stop-hook.sh\"'
+    HOOK_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd003-stop-hook.sh\"'
 fi
 
 cat > "$TARGET_PROJECT/.claude/settings.json" << EOF
@@ -366,6 +413,9 @@ verify_category "Hooks" ".claude/hooks" ".claude/hooks" "*" "true"
 verify_category "Gemini Commands" ".gemini/commands" ".gemini/commands" "*.toml" "false"
 verify_category "Antigravity" ".antigravity" ".antigravity" "*" "true"
 verify_category "Kiro Settings" ".kiro/settings" ".kiro/settings" "*" "true"
+verify_category "Handoff" ".handoff" ".handoff" "*" "true"
+verify_category "Ralph" ".kiro/ralph" ".kiro/ralph" "*" "true"
+verify_category "Steering" ".kiro/steering" ".kiro/steering" "*" "true"
 
 # Verify generated files
 echo ""
@@ -395,7 +445,7 @@ echo "[Phase 6/7] Verification completed"
 # Phase 7: Report
 # ============================================================
 echo ""
-echo "=== SD002 Framework Deployment Report ==="
+echo "=== SD003 Framework Deployment Report ==="
 echo ""
 
 total_copied=0
@@ -421,4 +471,4 @@ echo "  2. Review CLAUDE.md"
 echo "  3. Run /sessionread to verify"
 echo "  4. Start with /kiro:spec-init {feature}"
 echo ""
-echo "SD002 v${FRAMEWORK_VERSION} (deploy v${SD002_VERSION}) deployed successfully!"
+echo "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!"

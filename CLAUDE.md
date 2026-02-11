@@ -234,11 +234,11 @@ Bug occurs
 
 | カテゴリ | ファイル数 |
 |---------|-----------|
-| Commands直下 | 27 |
+| Commands直下 | 29 |
 | Commands/kiro | 15 |
 | Rules | 16 |
 | Skills | 7 |
-| 合計 | 65 |
+| 合計 | 67 |
 
 ---
 SD003 v2.11.0 | Updated: 2026-02-11

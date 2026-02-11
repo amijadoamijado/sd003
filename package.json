@@ -112,9 +112,16 @@
     "src/",
     "scripts/",
     "templates/",
-    ".claude/commands/",
+    ".claude/",
+    ".gemini/",
+    ".handoff/",
+    ".kiro/settings/",
+    ".kiro/sessions/session-template.md",
+    ".kiro/ai-coordination/workflow/",
+    ".kiro/ralph/",
+    ".kiro/steering/",
+    ".antigravity/",
     "docs/",
-    "01_requirements/",
-    "02_technical_design/"
+    "AGENTS.md"
   ]
 }

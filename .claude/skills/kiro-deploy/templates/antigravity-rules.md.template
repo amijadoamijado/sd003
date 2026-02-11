@@ -57,8 +57,8 @@ npm run lint     # Lint
 ## Reference Documents
 | Topic | Location |
 |-------|----------|
-| Setup Guide | `docs/sd002-setup-guide.md` |
+| Setup Guide | `docs/sd003-setup-guide.md` |
 | Session Management | `docs/session-management.md` |
 
 ---
-SD002 v2.11.0 | Updated: {{DATE}}
+SD003 v2.11.0 | Updated: {{DATE}}

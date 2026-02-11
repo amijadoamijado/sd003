@@ -1,4 +1,4 @@
-# SD002フレームワーク展開スキル v2.3.0
+# SD003フレームワーク展開スキル v2.3.0
 
 ## 使用方法
 
@@ -22,7 +22,7 @@ echo "対象プロジェクト確認: $TARGET_PROJECT"
 ### Step 2: 既存設定バックアップ
 
 ```bash
-BACKUP_DIR="$TARGET_PROJECT/.sd002-backup-$(date +%Y%m%d_%H%M%S)"
+BACKUP_DIR="$TARGET_PROJECT/.sd003-backup-$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 
 # 既存ファイルをバックアップ
@@ -65,11 +65,11 @@ mkdir -p "$TARGET_PROJECT/docs/troubleshooting"
 
 ### Step 4: コンポーネントコピー
 
-SD002フレームワークから以下をコピー:
+SD003フレームワークから以下をコピー:
 
 #### 4-1. Claude Commands（セッション管理 - 必須）
 ```bash
-SOURCE="path/to/sd002"
+SOURCE="path/to/sd003"
 
 # ⚠️ セッション管理（省略禁止）
 cp "$SOURCE/.claude/commands/sessionread.md" "$TARGET_PROJECT/.claude/commands/"
@@ -160,7 +160,7 @@ cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
 ## Progress Summary
 
 ### Completed
-1. SD002 Framework installed
+1. SD003 Framework installed
 
 ### In Progress
 - None
@@ -174,7 +174,7 @@ cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
 - Configure project-specific settings
 
 ### Notes
-Initial session setup from SD002 framework.
+Initial session setup from SD003 framework.
 EOF
 
 cat > "$TARGET_PROJECT/.kiro/sessions/TIMELINE.md" << EOF
@@ -190,7 +190,7 @@ cat > "$TARGET_PROJECT/.kiro/sessions/TIMELINE.md" << EOF
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
-| $(date +%m-%d) | SD002 Framework Setup | - | [Details](session-current.md) |
+| $(date +%m-%d) | SD003 Framework Setup | - | [Details](session-current.md) |
 
 ---
 
@@ -220,7 +220,7 @@ cp "$SOURCE/docs/quality-gates.md" "$TARGET_PROJECT/docs/" 2>/dev/null || true
 3フェーズ開発戦略を反映したCLAUDE.mdを生成:
 
 ```markdown
-# {PROJECT_NAME} - SD002フレームワーク
+# {PROJECT_NAME} - SD003フレームワーク
 
 ## 開発フェーズ戦略
 
@@ -268,7 +268,7 @@ cp "$SOURCE/docs/quality-gates.md" "$TARGET_PROJECT/docs/" 2>/dev/null || true
 必要時のみ参照: `docs/` 配下
 
 ---
-SD002 v2.3.0 | 導入日: {DATE}
+SD003 v2.3.0 | 導入日: {DATE}
 ```
 
 ### Step 6: gemini.md生成
@@ -296,7 +296,7 @@ SD002 v2.3.0 | 導入日: {DATE}
 - `/kiro:steering-custom` - カスタムステアリング
 
 ---
-SD002 v2.3.0
+SD003 v2.3.0
 ```
 
 ### Step 7: データストア初期化
@@ -389,7 +389,7 @@ REQUIRED_FILES=(
 ## 展開レポート
 
 ```
-=== SD002フレームワーク展開完了 (v2.10.0) ===
+=== SD003フレームワーク展開完了 (v2.10.0) ===
 
 【展開されたコンポーネント】
 

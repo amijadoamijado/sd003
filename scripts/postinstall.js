@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * SD002 Framework - Postinstall Script
+ * SD003 Framework - Postinstall Script
  *
  * インストール後の初期化処理
  */
@@ -10,7 +10,7 @@ import fs from 'fs';
 import path from 'path';
 import { execFileSync } from 'child_process';
 
-console.log('SD002 Framework - Postinstall');
+console.log('SD003 Framework - Postinstall');
 console.log('==============================\n');
 
 // .kiro ディレクトリ構造の作成
@@ -42,7 +42,7 @@ try {
   console.warn('  ⚠ Failed to sync Codex prompts. You can run: npm run sync:codex-prompts');
 }
 
-console.log('\n✅ SD002 Framework installation complete!');
+console.log('\n✅ SD003 Framework installation complete!');
 console.log('\nNext steps:');
 console.log('  1. npm run build    - Build TypeScript');
 console.log('  2. npm test         - Run tests');
