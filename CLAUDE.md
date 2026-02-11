@@ -15,6 +15,32 @@
 
 ---
 
+## Common Rules
+
+**ALL AI MODELS MUST FOLLOW**: `.handoff/RULES.md`
+
+このファイルは、全AIモデル（Claude Code、Codex、Gemini CLI、Antigravity）に共通の開発作法を定義します。
+
+| 内容 | 場所 |
+|------|------|
+| 共通ルール | `.handoff/RULES.md` |
+| タスク指示テンプレート | `.handoff/ORDER.template.md` |
+| 完了報告テンプレート | `.handoff/DONE.template.md` |
+
+## Handoff Pack（引き継ぎパック）
+
+作業終了時は、必ず **DONE.md** を出力してください。
+
+```bash
+# 作業完了時
+cp .handoff/DONE.template.md .handoff/DONE.md
+# 内容を埋めて保存
+```
+
+モデルを切り替える場合は、前のDONE.mdを次のモデルに渡してください。
+
+---
+
 ## Overview
 SD003: Spec-Driven Development framework integrating SD001 and GA001.
 
