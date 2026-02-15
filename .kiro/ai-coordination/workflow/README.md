@@ -8,9 +8,9 @@ Claude Code（計画・工程管理）、Codex（レビュー）、Gemini CLI（
 | AI | 役割 | コマンド |
 |----|------|---------|
 | Claude Code | 計画・工程管理 | `/workflow:init`, `/workflow:order`, `/workflow:request`, `/workflow:test`, `/workflow:status` |
-| Codex | レビュー・チェック | 手動運用（CODEX_GUIDE.md参照） |
-| Gemini CLI | 実装 | `/workflow:impl` |
-| Antigravity | E2Eテスト・探索的調査 | テスト依頼で実行 |
+| Codex | レビュー・チェック | `/workflow:review`（自動連鎖） |
+| Gemini CLI | 実装 | `/workflow:impl`（自動連鎖） |
+| Antigravity | E2Eテスト・探索的調査 | `/workflow:test`（自動連鎖） |
 
 ## ディレクトリ構造
 
@@ -18,6 +18,7 @@ Claude Code（計画・工程管理）、Codex（レビュー）、Gemini CLI（
 .kiro/ai-coordination/workflow/
 ├── README.md                 # このファイル
 ├── CODEX_GUIDE.md           # Codexレビュー運用ガイド
+├── ANTIGRAVITY_GUIDE.md     # Antigravityテスト運用ガイド
 ├── templates/               # テンプレート
 │   ├── WORK_ORDER.md        # 発注書テンプレート
 │   ├── IMPLEMENT_REQUEST.md # 実装指示テンプレート
@@ -124,9 +125,19 @@ CODEX_GUIDE.md の「実装レビュー」セクション参照
 /workflow:status 20251230-001-auth-feature
 ```
 
+## 自動連鎖ルール
+
+コマンド間の自動連鎖は仕組みとして強制される。
+
+| トリガー | 自動実行 | 説明 |
+|---------|---------|------|
+| `/workflow:request` 完了 | → `/workflow:impl` | 実装指示後、Gemini実行は必須 |
+| `/workflow:impl` 完了 | → `/workflow:review` | 実装後、Codexレビューは必須 |
+| `/workflow:review` Approve | → `/workflow:test` | Approve時、Antigravityテスト依頼は必須 |
+
 ## 品質基準との統合
 
-このワークフローは SD002 の 8段階品質ゲートと統合されています：
+このワークフローは SD003 の 8段階品質ゲートと統合されています：
 
 | Phase | 関連品質ゲート |
 |-------|--------------|
@@ -145,7 +156,8 @@ IMPLEMENT_REQUESTを自動で実装させるスクリプト群。
 | Script | 役割 | 実行方法 |
 |--------|------|---------|
 | `scripts/agent-implement.sh` | Gemini CLIへの実装依頼（単体） | パイプ実行 |
-| `scripts/agent-pipeline.sh` | 3-Agent統合パイプライン | 順次パイプ |
+| `scripts/agent-test.sh` | Antigravity E2Eテスト（単体） | パイプ実行 |
+| `scripts/agent-pipeline.sh` | 4-Agent統合パイプライン | 順次パイプ |
 
 ### Pipeline フロー
 
@@ -166,6 +178,17 @@ Phase 5a: 自動レビュー (Codex - パイプ)
     ▼
 Phase 5b: 判断 (Claude Code)
     │ レビュー結果を読んで Approve / Request Changes
+    ▼ Approve
+Phase 6a: E2Eテスト依頼 (Claude Code)
+    │ /workflow:test {案件ID} {タスク番号}
+    │   → TEST_REQUEST自動作成
+    ▼
+Phase 6b: E2Eテスト実行 (Antigravity)
+    │ scripts/agent-test.sh {案件ID} {タスク番号}
+    │   → TEST_REPORT作成
+    ▼
+Phase 6c: テスト結果判断 (Claude Code)
+    │ Pass → 次タスクへ / Fail → 修正対応
     ▼
     次タスクへ or 修正対応
 ```
@@ -176,8 +199,11 @@ Phase 5b: 判断 (Claude Code)
 # 単体: Gemini実装のみ
 ./scripts/agent-implement.sh 20260101-001-auth 001
 
-# 統合: 実装 + レビュー
+# 統合: 実装 + レビュー + テスト（4-Agent）
 ./scripts/agent-pipeline.sh 20260101-001-auth 001
+
+# テストスキップ
+./scripts/agent-pipeline.sh 20260101-001-auth 001 --skip-test
 
 # プレビュー（実行なし）
 ./scripts/agent-pipeline.sh 20260101-001-auth 001 --dry-run
@@ -189,6 +215,8 @@ Phase 5b: 判断 (Claude Code)
 |---------|--------|
 | Gemini実装出力 | `workflow/log/{案件ID}/gemini-output-{NNN}.md` |
 | Codexレビュー結果 | `workflow/review/{案件ID}/REVIEW_IMPL_{NNN}.md` |
+| テスト依頼 | `workflow/spec/{案件ID}/TEST_REQUEST_{NNN}.md` |
+| テスト報告 | `workflow/review/{案件ID}/TEST_REPORT_{NNN}.md` |
 | パイプラインログ | `workflow/log/{案件ID}/pipeline-{NNN}.log` |
 
 ---
@@ -199,6 +227,7 @@ Phase 5b: 判断 (Claude Code)
 - `.kiro/sessions/` - セッション管理
 - `.kiro/specs/` - 仕様書駆動開発
 - `GEMINI.md` - Gemini CLI設定・パイプ実行ガイド
+- `ANTIGRAVITY_GUIDE.md` - Antigravityテスト運用ガイド
 
 ---
-最終更新: 2026-02-07
+最終更新: 2026-02-15

@@ -95,6 +95,7 @@ SD003: Spec-Driven Development framework integrating SD001 and GA001.
 ### Build & Test
 ```bash
 npm run build && npm test && npm run lint
+npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 ```
 
 ### Spec-Driven Development
@@ -110,10 +111,10 @@ npm run build && npm test && npm run lint
 ```
 /workflow:init {slug}
 /workflow:order {projectID}
-/workflow:request {projectID} {num}    # → impl → review 自動連鎖
-/workflow:impl {projectID} {num}       # → review 自動連鎖
-/workflow:review {projectID} {num}     # Codexレビュー依頼・実行
-/workflow:test {projectID} {num}
+/workflow:request {projectID} {num}    # → impl → review → test 自動連鎖
+/workflow:impl {projectID} {num}       # → review → test 自動連鎖
+/workflow:review {projectID} {num}     # → test 自動連鎖（Approve時）
+/workflow:test {projectID} {num}       # Antigravity E2Eテスト依頼
 /workflow:status {projectID}
 ```
 
@@ -234,11 +235,11 @@ Bug occurs
 
 | カテゴリ | ファイル数 |
 |---------|-----------|
-| Commands直下 | 29 |
+| Commands直下 | 30 |
 | Commands/kiro | 15 |
 | Rules | 16 |
 | Skills | 7 |
-| 合計 | 67 |
+| 合計 | 68 |
 
 ---
-SD003 v2.11.0 | Updated: 2026-02-11
+SD003 v2.12.0 | Updated: 2026-02-15

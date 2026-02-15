@@ -31,9 +31,38 @@ describe('対象', () => {
 - 異常系: エラーケース
 - エッジ: 境界値、null/undefined
 
-## GASテスト
+## GASテスト - 3層テスト戦略
+
+| Tier | ツール | ディレクトリ | 速度 | 忠実度 | GCP認証 |
+|------|--------|------------|------|--------|---------|
+| Tier-1 | GA001モック + LocalEnv | `tests/unit/`, `tests/integration/` | < 1s | 低 | 不要 |
+| Tier-2 | @mcpher/gas-fakes | `tests/gas-fakes/` | < 30s | 中-高 | 一部必要 |
+| Tier-3 | Antigravity E2E | 本番環境 | 分単位 | 最高 | 必要 |
+
+### Tier-1: GA001モック（ユニット）
 - LocalEnv使用で疑似GAS環境
 - 本番データ相当のテストデータ
+- Core ビジネスロジックの高速検証
+
+### Tier-2: gas-fakes（統合）
+- `@mcpher/gas-fakes` による高忠実度GAS APIエミュレーション
+- PropertiesService/CacheService はローカルファイルで動作（GCP不要）
+- SpreadsheetApp/DriveApp は GCP認証が必要
+- 実行: `npm run test:gas-fakes`
+- gas-fakesセットアップ: `gas-fakes init && gas-fakes auth`
+
+### Tier-3: Antigravity E2E（本番）
+- 本番/ステージング環境でのUI確認
+- `/workflow:test` で TEST_REQUEST を作成
+- Antigravity がブラウザベースで実行
+
+### Tier選択基準
+| テスト対象 | 推奨Tier |
+|-----------|---------|
+| Core ビジネスロジック | Tier-1 |
+| GAS API統合（Properties, Cache） | Tier-2 |
+| GAS API統合（Sheets, Drive） | Tier-2（GCP認証時）/ Tier-3 |
+| UI・フロー確認 | Tier-3 |
 
 ## ⛔ 禁止事項（最重要）
 

@@ -1,7 +1,7 @@
-# SD002 Framework - Antigravity Rules
+# SD003 Framework - Antigravity Rules
 
 ## Overview
-SD002: Spec-Driven Development framework integrating SD001 and GA001 for AI-driven GAS development.
+SD003: Spec-Driven Development framework integrating SD001 and GA001 for AI-driven GAS development.
 
 **Tech Stack**: TypeScript (strict) + Google Apps Script + Env Interface Pattern
 
@@ -24,6 +24,15 @@ SD002: Spec-Driven Development framework integrating SD001 and GA001 for AI-driv
 
 ## AI Coordination Workflow (MANDATORY)
 
+### 4-Agent Pipeline
+Antigravityは4-Agentパイプラインの第4段階として、自動連鎖で呼び出される:
+```
+request → impl(Gemini) → review(Codex) → test(Antigravity)
+```
+レビュー Approve 時に `/workflow:test` が自動実行され、TEST_REQUEST が作成される。
+
+**運用ガイド**: `.kiro/ai-coordination/workflow/ANTIGRAVITY_GUIDE.md`
+
 ### Antigravity's Role
 | Role | Description |
 |------|-------------|
@@ -31,6 +40,13 @@ SD002: Spec-Driven Development framework integrating SD001 and GA001 for AI-driv
 | Exploratory Test | Behavior verification outside specs, UX validation |
 | Screenshot Capture | Evidence collection for test reports |
 | Production Verification | Post-deploy operation check |
+
+### 3-Tier Testing Integration
+| Tier | Tool | Scope |
+|------|------|-------|
+| Tier-1 | GA001 Mock + LocalEnv | Unit tests (fast, limited fidelity) |
+| Tier-2 | @mcpher/gas-fakes | Integration tests (medium speed, high fidelity) |
+| Tier-3 | Antigravity E2E | Production tests (slow, highest fidelity) |
 
 ### Trigger Words (AUTO-EXECUTE)
 
@@ -138,4 +154,4 @@ Keywords "production", "deploy", or "release" activate:
 | AI Coordination | `.claude/rules/workflow/ai-coordination.md` |
 
 ---
-SD002 v2.5.3 | Updated: 2026-01-02
+SD003 v2.12.0 | Updated: 2026-02-15

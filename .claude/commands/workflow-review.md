@@ -120,8 +120,24 @@ Codexの出力を以下に保存:
 - **レビュー結果**: .kiro/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md
 
 ## 次のアクション
-{Approveの場合: テストフェーズへ}
+{Approveの場合: テストフェーズへ（Step 9で自動連鎖）}
 {Request Changesの場合: 修正内容のサマリーと対応方針}
+```
+
+### Step 9: 自動連鎖 - Antigravity E2Eテスト（Approve時のみ）
+
+**Approve の場合のみ実行。Request Changes の場合はスキップ。**
+
+レビュー結果が Approve の場合、`/workflow:test {案件ID} {タスク番号}` を自動実行する。
+これにより TEST_REQUEST が自動作成され、Antigravity への E2E テスト依頼が発行される。
+
+```
+/workflow:test {案件ID} {タスク番号}
+```
+
+この自動連鎖により、パイプラインは以下の完全な流れとなる:
+```
+request → impl → review → test（Approve時）
 ```
 
 ## エラー時の対応
@@ -140,4 +156,4 @@ $ARGUMENTS
 
 ---
 
-**実行開始**: 上記手順に従ってCodexレビューを実行してください。Step 1からStep 8まで全て実行すること。途中で止まることは禁止。
+**実行開始**: 上記手順に従ってCodexレビューを実行してください。Step 1からStep 9まで全て実行すること。途中で止まることは禁止。

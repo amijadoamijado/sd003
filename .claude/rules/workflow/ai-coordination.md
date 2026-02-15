@@ -6,7 +6,7 @@
 | Claude Code | 計画・工程管理 | `/workflow:init`, `/workflow:order`, `/workflow:request`, `/workflow:status` |
 | Codex | レビュー・チェック | `/workflow:review`（自動連鎖） |
 | Gemini CLI | 実装 | `/workflow:impl`（自動連鎖） |
-| Antigravity | E2Eテスト・探索的調査・本番確認 | `/workflow:test` |
+| Antigravity | E2Eテスト・探索的調査・本番確認 | `/workflow:test`（自動連鎖） |
 
 **廃止**: Cursor, Windsurf
 
@@ -82,6 +82,7 @@ Phase 8: 工程完了 (Claude Code)
 |---------|---------|------|
 | `/workflow:request` 完了 | → `/workflow:impl` | 指示書作成後、Gemini CLI実行は必須 |
 | `/workflow:impl` 完了 | → `/workflow:review` | Gemini実装後、Codexレビュー依頼は必須 |
+| `/workflow:review` Approve | → `/workflow:test` | レビュー承認後、TEST_REQUEST自動作成＋Antigravityディスパッチ |
 
 ### 連鎖フロー図
 ```
@@ -90,13 +91,16 @@ Phase 8: 工程完了 (Claude Code)
   └── Step 8: /workflow:impl {ID} {N} を自動実行
         ├── Step 1-8: Gemini CLI実行 → 検証 → コミット → handoff記録
         └── Step 9: /workflow:review {ID} {N} を自動実行
-              ├── Step 1-5: レビュー依頼作成 → Codex実行 → 結果保存
-              └── Step 6-8: handoff記録 → 完了報告
+              ├── Step 1-8: レビュー依頼作成 → Codex実行 → 結果保存 → 完了報告
+              └── Step 9 (Approve時): /workflow:test {ID} {N} を自動実行
+                    ├── Step 1-3: TEST_REQUEST作成 → handoff記録
+                    └── Step 4-6: Antigravityディスパッチ → 結果確認 → 完了報告
 ```
 
 **違反パターン（禁止）**:
 - 指示書を作っただけで止まる
 - Gemini実装が終わっただけで止まる
+- レビューApprove後にテスト依頼を出さずに止まる
 - 「次のステップ」を案内して終わる（案内ではなく実行せよ）
 
 ---

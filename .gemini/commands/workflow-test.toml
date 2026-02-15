@@ -1,0 +1,64 @@
+description = "AI協調ワークフロー - Antigravity E2Eテスト依頼作成"
+prompt = """
+# テスト依頼: /workflow:test
+
+## 概要
+Codexレビュー Approve 後、Antigravity に E2Eテストを依頼する。
+**review Approve 後に自動で呼ばれる。手動実行も可能。**
+
+## 使用方法
+```
+/workflow:test {案件ID} {タスク番号}
+```
+
+## 引数
+- `案件ID`: 対象案件のID
+- `タスク番号`: テスト対象の実装指示番号（3桁: 001, 002, ...）
+
+## 前提条件
+- IMPLEMENT_REQUEST_{タスク番号}.md が存在すること
+- Codexレビューが Approve であること（推奨、強制ではない）
+
+## 実行手順（全自動・省略禁止）
+
+### Step 1: 実装指示・レビュー結果の読み込み
+```bash
+cat .kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
+cat .kiro/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md
+```
+
+### Step 2: TEST_REQUEST_{タスク番号}.md 作成
+テンプレート `.kiro/ai-coordination/workflow/templates/TEST_REQUEST.md` をベースに作成。
+保存先: `.kiro/ai-coordination/workflow/spec/{案件ID}/TEST_REQUEST_{タスク番号}.md`
+
+### Step 3: handoff-log.json 更新
+```json
+{
+  \"timestamp\": \"{現在日時ISO形式}\",
+  \"type\": \"test_request\",
+  \"project_id\": \"{案件ID}\",
+  \"from\": \"Claude Code\",
+  \"to\": \"Antigravity\",
+  \"file\": \"workflow/spec/{案件ID}/TEST_REQUEST_{タスク番号}.md\",
+  \"note\": \"{テスト内容の要約}\"
+}
+```
+
+### Step 4: Antigravityディスパッチ試行
+- Antigravity利用可能: `scripts/agent-test.sh` 実行
+- Antigravity不在: Pending記録、ユーザー通知
+
+### Step 5: TEST_REPORT 待機確認
+```
+.kiro/ai-coordination/workflow/review/{案件ID}/TEST_REPORT_{タスク番号}.md
+```
+
+### Step 6: 完了報告
+
+## ユーザー入力
+$ARGUMENTS
+
+---
+
+**実行開始**: 上記手順に従ってテスト依頼を実行してください。Step 1からStep 6まで全て実行すること。
+"""

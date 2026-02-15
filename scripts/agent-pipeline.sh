@@ -1,19 +1,21 @@
 #!/bin/bash
-# agent-pipeline.sh - 3-Agent パイプライン統合スクリプト
+# agent-pipeline.sh - 4-Agent パイプライン統合スクリプト
 #
-# Claude Code（指揮・判断）→ Gemini CLI（実装）→ Codex（レビュー）
-# の3段階パイプラインを非インタラクティブに実行する。
+# Claude Code（指揮・判断）→ Gemini CLI（実装）→ Codex（レビュー）→ Antigravity（E2Eテスト）
+# の4段階パイプラインを非インタラクティブに実行する。
 #
 # Usage:
-#   ./scripts/agent-pipeline.sh <案件ID> <タスク番号> [--skip-review] [--auto-apply]
+#   ./scripts/agent-pipeline.sh <案件ID> <タスク番号> [--skip-review] [--skip-test] [--auto-apply]
 #
 # Examples:
 #   ./scripts/agent-pipeline.sh 20260101-001-auth 001
 #   ./scripts/agent-pipeline.sh 20260101-001-auth 001 --skip-review
+#   ./scripts/agent-pipeline.sh 20260101-001-auth 001 --skip-test
 #   ./scripts/agent-pipeline.sh 20260101-001-auth 001 --auto-apply
 #
 # Options:
-#   --skip-review   Codexレビューをスキップ
+#   --skip-review   Codexレビューをスキップ（Antigravityもスキップ）
+#   --skip-test     Antigravity E2Eテストをスキップ
 #   --auto-apply    Gemini出力のgit add + commit を実行（要注意）
 #   --dry-run       全ステップをプレビューのみ
 #   --help          ヘルプ表示
@@ -36,6 +38,7 @@ PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 PROJECT_ID=""
 TASK_NUM=""
 SKIP_REVIEW=false
+SKIP_TEST=false
 AUTO_APPLY=false
 DRY_RUN=false
 
@@ -43,6 +46,10 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --skip-review)
             SKIP_REVIEW=true
+            shift
+            ;;
+        --skip-test)
+            SKIP_TEST=true
             shift
             ;;
         --auto-apply)
@@ -54,19 +61,21 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            echo "agent-pipeline.sh - 3-Agent パイプライン"
+            echo "agent-pipeline.sh - 4-Agent パイプライン"
             echo ""
             echo "Usage:"
             echo "  $0 <案件ID> <タスク番号> [options]"
             echo ""
             echo "Pipeline:"
-            echo "  Step 1: Gemini CLI  - 実装（パイプ実行）"
-            echo "  Step 2: git commit  - 自動コミット（--auto-apply時）"
-            echo "  Step 3: Codex      - レビュー（パイプ実行）"
-            echo "  Step 4: 結果出力   - Claude Codeが判断"
+            echo "  Step 1: Gemini CLI    - 実装（パイプ実行）"
+            echo "  Step 2: git commit    - 自動コミット（--auto-apply時）"
+            echo "  Step 3: Codex        - レビュー（パイプ実行）"
+            echo "  Step 4: Antigravity  - E2Eテスト（ハンドオフ実行）"
+            echo "  Step 5: 結果出力     - Claude Codeが判断"
             echo ""
             echo "Options:"
-            echo "  --skip-review   Codexレビューをスキップ"
+            echo "  --skip-review   Codexレビューをスキップ（Antigravityもスキップ）"
+            echo "  --skip-test     Antigravity E2Eテストをスキップ"
             echo "  --auto-apply    Gemini出力のgit add + commit を実行"
             echo "  --dry-run       プレビューのみ"
             echo "  --help          このヘルプを表示"
@@ -97,20 +106,22 @@ LOG_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/log/${PROJECT_ID}"
 REQUEST_FILE="${SPEC_DIR}/IMPLEMENT_REQUEST_${TASK_NUM}.md"
 GEMINI_OUTPUT="${LOG_DIR}/gemini-output-${TASK_NUM}.md"
 REVIEW_OUTPUT="${REVIEW_DIR}/REVIEW_IMPL_${TASK_NUM}.md"
+TEST_REQUEST="${SPEC_DIR}/TEST_REQUEST_${TASK_NUM}.md"
+TEST_REPORT="${REVIEW_DIR}/TEST_REPORT_${TASK_NUM}.md"
 PIPELINE_LOG="${LOG_DIR}/pipeline-${TASK_NUM}.log"
 
 # Timestamp
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
-echo -e "${CYAN}╔══════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║  SD002 3-Agent Pipeline                  ║${NC}"
-echo -e "${CYAN}║  Gemini(実装) → Codex(レビュー) → 判断   ║${NC}"
-echo -e "${CYAN}╚══════════════════════════════════════════╝${NC}"
+echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║  SD003 4-Agent Pipeline                           ║${NC}"
+echo -e "${CYAN}║  Gemini(実装) → Codex(レビュー) → Antigravity(テスト)║${NC}"
+echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "案件ID:     ${GREEN}${PROJECT_ID}${NC}"
 echo -e "タスク番号:  ${GREEN}${TASK_NUM}${NC}"
 echo -e "開始時刻:   ${TIMESTAMP}"
-echo -e "Options:    skip-review=${SKIP_REVIEW}, auto-apply=${AUTO_APPLY}, dry-run=${DRY_RUN}"
+echo -e "Options:    skip-review=${SKIP_REVIEW}, skip-test=${SKIP_TEST}, auto-apply=${AUTO_APPLY}, dry-run=${DRY_RUN}"
 echo ""
 
 # Create directories
@@ -132,7 +143,7 @@ fi
 # ============================================================
 # Step 1: Gemini CLI - Implementation via pipe
 # ============================================================
-echo -e "${BLUE}━━━ Step 1/3: Gemini CLI 実装 ━━━${NC}"
+echo -e "${BLUE}━━━ Step 1/4: Gemini CLI 実装 ━━━${NC}"
 echo "## Step 1: Gemini Implementation" >> "$PIPELINE_LOG"
 
 if [ "$DRY_RUN" = true ]; then
@@ -158,7 +169,7 @@ echo "" >> "$PIPELINE_LOG"
 # ============================================================
 if [ "$AUTO_APPLY" = true ]; then
     echo ""
-    echo -e "${BLUE}━━━ Step 2/3: Auto Apply & Commit ━━━${NC}"
+    echo -e "${BLUE}━━━ Step 2/4: Auto Apply & Commit ━━━${NC}"
     echo "## Step 2: Auto Apply" >> "$PIPELINE_LOG"
 
     if [ "$DRY_RUN" = true ]; then
@@ -199,7 +210,7 @@ fi
 # ============================================================
 if [ "$SKIP_REVIEW" = false ]; then
     echo ""
-    echo -e "${BLUE}━━━ Step 3/3: Codex レビュー ━━━${NC}"
+    echo -e "${BLUE}━━━ Step 3/4: Codex レビュー ━━━${NC}"
     echo "## Step 3: Codex Review" >> "$PIPELINE_LOG"
 
     if [ ! -f "$GEMINI_OUTPUT" ]; then
@@ -269,6 +280,43 @@ else
 fi
 
 # ============================================================
+# Step 4: Antigravity E2E Test
+# ============================================================
+if [ "$SKIP_REVIEW" = false ] && [ "$SKIP_TEST" = false ]; then
+    echo ""
+    echo -e "${BLUE}━━━ Step 4/4: Antigravity E2Eテスト ━━━${NC}"
+    echo "## Step 4: Antigravity E2E Test" >> "$PIPELINE_LOG"
+
+    if [ "$DRY_RUN" = true ]; then
+        echo -e "${YELLOW}[DRY-RUN] Would execute: agent-test.sh ${PROJECT_ID} ${TASK_NUM}${NC}"
+        echo "[DRY-RUN] Skipped" >> "$PIPELINE_LOG"
+    elif [ -f "$TEST_REQUEST" ]; then
+        # Execute Antigravity test pipeline
+        if "${SCRIPT_DIR}/agent-test.sh" "$PROJECT_ID" "$TASK_NUM"; then
+            echo -e "${GREEN}[OK] Antigravity テスト完了${NC}"
+            echo "Status: SUCCESS" >> "$PIPELINE_LOG"
+        else
+            echo -e "${YELLOW}[WARN] Antigravity テスト未完了（手動テストに切り替え）${NC}"
+            echo "Status: MANUAL_REQUIRED" >> "$PIPELINE_LOG"
+        fi
+    else
+        echo -e "${YELLOW}[SKIP] TEST_REQUEST未存在（/workflow:test を先に実行）${NC}"
+        echo "Status: NO_TEST_REQUEST" >> "$PIPELINE_LOG"
+    fi
+    echo "" >> "$PIPELINE_LOG"
+else
+    echo ""
+    if [ "$SKIP_TEST" = true ]; then
+        echo -e "${YELLOW}[SKIP] Antigravity テスト無効（--skip-test）${NC}"
+    else
+        echo -e "${YELLOW}[SKIP] Antigravity テスト無効（レビュースキップにより）${NC}"
+    fi
+    echo "## Step 4: Antigravity E2E Test" >> "$PIPELINE_LOG"
+    echo "Status: SKIPPED" >> "$PIPELINE_LOG"
+    echo "" >> "$PIPELINE_LOG"
+fi
+
+# ============================================================
 # Summary
 # ============================================================
 END_TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
@@ -283,14 +331,16 @@ echo ""
 echo "Output files:"
 [ -f "$GEMINI_OUTPUT" ] && echo -e "  Gemini:  ${GREEN}${GEMINI_OUTPUT}${NC}"
 [ -f "$REVIEW_OUTPUT" ] && echo -e "  Review:  ${GREEN}${REVIEW_OUTPUT}${NC}"
+[ -f "$TEST_REPORT" ] && echo -e "  Test:    ${GREEN}${TEST_REPORT}${NC}"
 echo -e "  Log:     ${GREEN}${PIPELINE_LOG}${NC}"
 echo ""
 echo "Next steps (Claude Code判断):"
 echo "  1. Gemini出力を確認:  cat ${GEMINI_OUTPUT}"
 [ "$SKIP_REVIEW" = false ] && echo "  2. レビュー結果を確認: cat ${REVIEW_OUTPUT}"
-echo "  3. 必要に応じて修正"
-echo "  4. テスト実行: npm test && npm run lint && npm run build"
-echo "  5. 工程更新: /workflow:status ${PROJECT_ID}"
+[ "$SKIP_TEST" = false ] && [ "$SKIP_REVIEW" = false ] && echo "  3. テスト結果を確認:   cat ${TEST_REPORT}"
+echo "  4. 必要に応じて修正"
+echo "  5. テスト実行: npm test && npm run lint && npm run build"
+echo "  6. 工程更新: /workflow:status ${PROJECT_ID}"
 
 # Finalize pipeline log
 {
@@ -299,6 +349,7 @@ echo "  5. 工程更新: /workflow:status ${PROJECT_ID}"
     PIPELINE_FLAGS=""
     if [ "$DRY_RUN" = true ]; then PIPELINE_FLAGS="${PIPELINE_FLAGS}DRY-RUN "; fi
     if [ "$SKIP_REVIEW" = true ]; then PIPELINE_FLAGS="${PIPELINE_FLAGS}SKIP-REVIEW "; fi
+    if [ "$SKIP_TEST" = true ]; then PIPELINE_FLAGS="${PIPELINE_FLAGS}SKIP-TEST "; fi
     if [ "$AUTO_APPLY" = true ]; then PIPELINE_FLAGS="${PIPELINE_FLAGS}AUTO-APPLY "; fi
     echo "Pipeline: ${PIPELINE_FLAGS:-STANDARD}"
 } >> "$PIPELINE_LOG"
