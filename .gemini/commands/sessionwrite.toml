@@ -67,7 +67,7 @@ Save session handoff and update project timeline.
 After saving session, update TIMELINE.md:
 
 1. Read current TIMELINE.md
-2. Extract main work summary (1 line, e.g., "Ralph Wiggum v1.1.0")
+2. Extract main work summary (1 line, e.g., \"Ralph Wiggum v1.1.0\")
 3. Add new entry at the top of the current month's table:
 
 ```markdown
@@ -75,7 +75,7 @@ After saving session, update TIMELINE.md:
 ```
 
 4. Increment total session count in Statistics
-5. Update "Latest Session" date
+5. Update \"Latest Session\" date
 
 ## User Input
 $ARGUMENTS

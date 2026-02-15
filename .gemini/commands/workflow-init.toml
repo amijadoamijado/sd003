@@ -42,15 +42,15 @@ mkdir -p .kiro/ai-coordination/workflow/log/{案件ID}
 `.kiro/ai-coordination/handoff/handoff-log.json` に新規案件を登録:
 ```json
 {
-  "active_projects": [
+  \"active_projects\": [
     {
-      "project_id": "{案件ID}",
-      "title": "{案件略称}",
-      "current_phase": 1,
-      "current_owner": "Claude Code",
-      "status": "initialized",
-      "created_at": "{現在日時ISO形式}",
-      "updated_at": "{現在日時ISO形式}"
+      \"project_id\": \"{案件ID}\",
+      \"title\": \"{案件略称}\",
+      \"current_phase\": 1,
+      \"current_owner\": \"Claude Code\",
+      \"status\": \"initialized\",
+      \"created_at\": \"{現在日時ISO形式}\",
+      \"updated_at\": \"{現在日時ISO形式}\"
     }
   ]
 }

@@ -8,7 +8,7 @@ prompt = """
 
 | 順序 | ファイル | 目的 |
 |------|---------|------|
-| 1 | `D:\claudecode\CLAUDE.md` | グローバル設定（UTF-8制約等） |
+| 1 | `D:\\claudecode\\CLAUDE.md` | グローバル設定（UTF-8制約等） |
 | 2 | `./CLAUDE.md` | プロジェクト設定（SD002ルール） |
 | 3 | `.kiro/sessions/session-current.md` | 現在のセッション（短期記憶） |
 | 4 | `.kiro/sessions/TIMELINE.md` | プロジェクト履歴（長期記憶） |
@@ -17,7 +17,7 @@ prompt = """
 
 ### Step 1: グローバル CLAUDE.md
 ```
-Read: D:\claudecode\CLAUDE.md
+Read: D:\\claudecode\\CLAUDE.md
 ```
 - UTF-8境界エラー防止ルール
 - 日本語ファイル操作制約

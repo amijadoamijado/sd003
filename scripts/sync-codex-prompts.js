@@ -7,7 +7,8 @@
  *   .claude/commands/ (all markdown files, recursive)
  *
  * Destination:
- *   .codex/prompts/
+ *   ~/.codex/prompts/
+ *   (override with CODEX_PROMPTS_DIR)
  *
  * Naming rules:
  * - Keep original relative path (e.g. kiro/spec-init.md)
@@ -16,6 +17,7 @@
  */
 
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,7 +26,10 @@ const __dirname = path.dirname(__filename);
 
 const projectRoot = path.resolve(__dirname, '..');
 const sourceRoot = path.join(projectRoot, '.claude', 'commands');
-const targetRoot = path.join(projectRoot, '.codex', 'prompts');
+const targetRootInput = process.env.CODEX_PROMPTS_DIR?.trim();
+const targetRoot = targetRootInput
+  ? path.resolve(projectRoot, targetRootInput)
+  : path.join(os.homedir(), '.codex', 'prompts');
 const manifestPath = path.join(targetRoot, '.sync-manifest.json');
 
 function toPosixPath(filePath) {
@@ -167,7 +172,7 @@ async function main() {
     version: 1,
     generatedAt: new Date().toISOString(),
     sourceRoot: '.claude/commands',
-    targetRoot: '.codex/prompts',
+    targetRoot,
     files: nextFiles,
     collisions
   };
@@ -175,6 +180,7 @@ async function main() {
   await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
 
   console.log(`[sync-codex-prompts] source files: ${sourceFiles.length}`);
+  console.log(`[sync-codex-prompts] target dir: ${targetRoot}`);
   console.log(`[sync-codex-prompts] generated prompts: ${nextFiles.length}`);
   console.log(`[sync-codex-prompts] files updated: ${writeCount}`);
   if (collisions.length > 0) {

@@ -11,24 +11,24 @@ prompt = """
 ```
 
 **Arguments:**
-- `scope_description`: リファクタリング対象（例: "getUserByIdをfetchUserにリネーム", "認証ロジックをサービスに抽出"）
+- `scope_description`: リファクタリング対象（例: \"getUserByIdをfetchUserにリネーム\", \"認証ロジックをサービスに抽出\"）
 
 ## スコープ未指定時
 
 引数なしで実行された場合、AskUserQuestionでスコープを確認:
 
 ```yaml
-Question: "リファクタリングの対象を選択してください"
-Header: "スコープ"
+Question: \"リファクタリングの対象を選択してください\"
+Header: \"スコープ\"
 Options:
-  - label: "シンボル/関数のリネーム"
-    description: "関数、変数、クラス名をコードベース全体で変更"
-  - label: "モジュール/サービスへの抽出"
-    description: "ロジックを別モジュールまたはサービスに分離"
-  - label: "重複コードの統合"
-    description: "重複パターンを共通ユーティリティに統合"
-  - label: "コードのクリーンアップ"
-    description: "不要なコード、デバッグ用コード、未使用の関数・変数を削除"
+  - label: \"シンボル/関数のリネーム\"
+    description: \"関数、変数、クラス名をコードベース全体で変更\"
+  - label: \"モジュール/サービスへの抽出\"
+    description: \"ロジックを別モジュールまたはサービスに分離\"
+  - label: \"重複コードの統合\"
+    description: \"重複パターンを共通ユーティリティに統合\"
+  - label: \"コードのクリーンアップ\"
+    description: \"不要なコード、デバッグ用コード、未使用の関数・変数を削除\"
 ```
 
 選択後、具体的な対象を入力させる。
@@ -53,7 +53,7 @@ Create initial checkpoint (checkpoint-000-init):
 
 ```bash
 # Stash current state or create branch
-git stash push -m "refactor-checkpoint-000-init"
+git stash push -m \"refactor-checkpoint-000-init\"
 # OR
 git checkout -b refactor/{session-id}
 ```
@@ -67,7 +67,7 @@ Launch 3 agents via Task tool **IN PARALLEL** (single message, multiple tool cal
 #### Agent 1: Scope Agent
 
 ```
-Prompt: Analyze the scope of refactoring: "$ARGUMENTS"
+Prompt: Analyze the scope of refactoring: \"$ARGUMENTS\"
 
 Find:
 1. All files that need modification
@@ -81,7 +81,7 @@ Output: File list with dependency order
 #### Agent 2: Pattern Agent
 
 ```
-Prompt: Detect patterns related to: "$ARGUMENTS"
+Prompt: Detect patterns related to: \"$ARGUMENTS\"
 
 Find:
 1. Naming conventions in the codebase
@@ -95,7 +95,7 @@ Output: Pattern guidelines for transformation
 #### Agent 3: Risk Agent
 
 ```
-Prompt: Assess risks for refactoring: "$ARGUMENTS"
+Prompt: Assess risks for refactoring: \"$ARGUMENTS\"
 
 Analyze:
 1. Test coverage of affected code
@@ -145,17 +145,17 @@ Save to: `.kiro/refactor/plans/{session-id}/analysis-report.md`
 AskUserQuestionで確認:
 
 ```yaml
-Question: "分析完了。{N}ファイルが{M}バッチに影響。続行しますか？"
-Header: "続行"
+Question: \"分析完了。{N}ファイルが{M}バッチに影響。続行しますか？\"
+Header: \"続行\"
 Options:
-  - label: "はい、実行計画を生成"
-    description: "/refactor:planでバッチマニフェストを作成"
-  - label: "影響ファイルを表示"
-    description: "決定前に全ファイルリストを表示"
-  - label: "スコープを変更"
-    description: "リファクタリング範囲を調整して再分析"
-  - label: "中止"
-    description: "リファクタリングセッションをキャンセル"
+  - label: \"はい、実行計画を生成\"
+    description: \"/refactor:planでバッチマニフェストを作成\"
+  - label: \"影響ファイルを表示\"
+    description: \"決定前に全ファイルリストを表示\"
+  - label: \"スコープを変更\"
+    description: \"リファクタリング範囲を調整して再分析\"
+  - label: \"中止\"
+    description: \"リファクタリングセッションをキャンセル\"
 ```
 
 ### Step 5: Next Steps
@@ -208,6 +208,6 @@ Claude:
 1. Creates session refactor-20260101-160000
 2. Launches 3 parallel agents
 3. Synthesizes analysis report
-4. Proposes: "15 files affected across 3 batches. Proceed?"
+4. Proposes: \"15 files affected across 3 batches. Proceed?\"
 ```
 """

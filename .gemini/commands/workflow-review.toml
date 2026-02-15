@@ -72,17 +72,17 @@ Geminiが実装した変更内容を取得する。
 ### Step 4: Codex CLI実行
 ```bash
 REVIEW_CONTENT=$(cat .kiro/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md)
-REVIEW_PROMPT="以下のレビュー依頼に従って、実装コードをレビューしてください。判定（Approve/Request Changes）と詳細コメントを出力してください。
+REVIEW_PROMPT=\"以下のレビュー依頼に従って、実装コードをレビューしてください。判定（Approve/Request Changes）と詳細コメントを出力してください。
 
-${REVIEW_CONTENT}"
-REVIEW_RESULT=$(printf '%s' "$REVIEW_PROMPT" | codex exec --full-auto 2>/dev/null)
+${REVIEW_CONTENT}\"
+REVIEW_RESULT=$(printf '%s' \"$REVIEW_PROMPT\" | codex exec --full-auto 2>/dev/null)
 ```
 
 **注意**:
 - `codex exec --full-auto` を使用（`codex review --commit` はサンドボックス制限でgit historyにアクセス不可）
 - `printf '%s'` を使用（`echo` はバックスラッシュ解釈の問題あり）
 - `2>/dev/null` でstderrのUI出力を除外し、stdoutのレビュー結果のみキャプチャする
-- 旧形式 `codex --full-auto -p "..."` は v0.98.0 で `-p` がprofile指定に変更されたため使用不可
+- 旧形式 `codex --full-auto -p \"...\"` は v0.98.0 で `-p` がprofile指定に変更されたため使用不可
 
 ### Step 5: レビュー結果保存
 Codexの出力を以下に保存:
@@ -93,13 +93,13 @@ Codexの出力を以下に保存:
 ### Step 6: handoff-log.json 更新
 ```json
 {
-  "timestamp": "{現在日時ISO形式}",
-  "type": "review_complete",
-  "project_id": "{案件ID}",
-  "from": "Codex",
-  "to": "Claude Code",
-  "file": "workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md",
-  "note": "{Approve/Request Changes}"
+  \"timestamp\": \"{現在日時ISO形式}\",
+  \"type\": \"review_complete\",
+  \"project_id\": \"{案件ID}\",
+  \"from\": \"Codex\",
+  \"to\": \"Claude Code\",
+  \"file\": \"workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md\",
+  \"note\": \"{Approve/Request Changes}\"
 }
 ```
 
@@ -127,7 +127,7 @@ Codexの出力を以下に保存:
 |--------|------|------|
 | Codex CLI未インストール | 未セットアップ | `npm install -g @openai/codex` を案内 |
 | `stdin is not a terminal` | 非インタラクティブ環境で `codex` 直接実行 | `codex exec --full-auto` を使用 |
-| `-p` がprofile扱いになる | v0.98.0で `-p` の意味が変更 | `printf ... \| codex exec --full-auto` を使用 |
+| `-p` がprofile扱いになる | v0.98.0で `-p` の意味が変更 | `printf ... \\| codex exec --full-auto` を使用 |
 | `unknown revision` | `codex review --commit` のサンドボックス制限 | `codex exec --full-auto` にdiffをパイプで渡す |
 | Codex実行失敗（その他） | ネットワーク/API等 | 手動レビューに切り替え |
 | レビュー結果が不明瞭 | 出力フォーマット不一致 | Claude Codeが補足レビュー |

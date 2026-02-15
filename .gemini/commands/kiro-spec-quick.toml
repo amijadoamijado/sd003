@@ -19,7 +19,7 @@ In Automatic Mode:
 - Execute ALL 4 phases in a continuous loop without stopping
 - Use TodoWrite to track progress (4 tasks: init, requirements, design, tasks)
 - Each phase completion updates TodoWrite and continues immediately
-- IGNORE any "Next Step" messages from Phase 2-4 (they are for standalone usage)
+- IGNORE any \"Next Step\" messages from Phase 2-4 (they are for standalone usage)
 - Stop ONLY after Phase 4 completes or if error occurs
 
 **Progress tracking with TodoWrite**:
@@ -44,17 +44,17 @@ Parse `$ARGUMENTS`:
 
 Example:
 ```
-"User profile with avatar upload --auto" → mode=automatic, description="User profile with avatar upload"
-"User profile feature" → mode=interactive, description="User profile feature"
+\"User profile with avatar upload --auto\" → mode=automatic, description=\"User profile with avatar upload\"
+\"User profile feature\" → mode=interactive, description=\"User profile feature\"
 ```
 
 **Create TodoWrite task list**:
 ```json
 [
-  {"content": "Initialize spec", "activeForm": "Initializing spec", "status": "pending"},
-  {"content": "Generate requirements", "activeForm": "Generating requirements", "status": "pending"},
-  {"content": "Generate design", "activeForm": "Generating design", "status": "pending"},
-  {"content": "Generate tasks", "activeForm": "Generating tasks", "status": "pending"}
+  {\"content\": \"Initialize spec\", \"activeForm\": \"Initializing spec\", \"status\": \"pending\"},
+  {\"content\": \"Generate requirements\", \"activeForm\": \"Generating requirements\", \"status\": \"pending\"},
+  {\"content\": \"Generate design\", \"activeForm\": \"Generating design\", \"status\": \"pending\"},
+  {\"content\": \"Generate tasks\", \"activeForm\": \"Generating tasks\", \"status\": \"pending\"}
 ]
 ```
 
@@ -74,7 +74,7 @@ Execute these 4 phases in order:
 
 1. **Generate Feature Name**:
    - Convert description to kebab-case
-   - Example: "User profile with avatar upload" → "user-profile-avatar-upload"
+   - Example: \"User profile with avatar upload\" → \"user-profile-avatar-upload\"
    - Keep name concise (2-4 words ideally)
 
 2. **Check Uniqueness**:
@@ -95,7 +95,7 @@ Execute these 4 phases in order:
    b. Replace placeholders:
    ```
    {{FEATURE_NAME}} → feature-name
-   {{TIMESTAMP}} → current ISO 8601 timestamp (use `date -u +"%Y-%m-%dT%H:%M:%SZ"`)
+   {{TIMESTAMP}} → current ISO 8601 timestamp (use `date -u +\"%Y-%m-%dT%H:%M:%SZ\"`)
    {{PROJECT_DESCRIPTION}} → description
    ```
 
@@ -114,9 +114,9 @@ Execute these 4 phases in order:
 
 **Automatic Mode**: IMMEDIATELY continue to Phase 2.
 
-**Interactive Mode**: Prompt "Continue to requirements generation? (yes/no)"
-- If "no": Stop, show current state
-- If "yes": Continue to Phase 2
+**Interactive Mode**: Prompt \"Continue to requirements generation? (yes/no)\"
+- If \"no\": Stop, show current state
+- If \"yes\": Continue to Phase 2
 
 ---
 
@@ -129,9 +129,9 @@ Execute these 4 phases in order:
 /kiro:spec-requirements {feature-name}
 ```
 
-Wait for completion. SubAgent will return with "次のステップ" message.
+Wait for completion. SubAgent will return with \"次のステップ\" message.
 
-**IMPORTANT**: In Automatic Mode, IGNORE the "次のステップ" message. It is for standalone usage.
+**IMPORTANT**: In Automatic Mode, IGNORE the \"次のステップ\" message. It is for standalone usage.
 
 **Update TodoWrite**: Mark task 2 as `completed`, task 3 as `in_progress`.
 
@@ -142,9 +142,9 @@ Wait for completion. SubAgent will return with "次のステップ" message.
 
 **Automatic Mode**: Task list shows 2/4 complete. IMMEDIATELY continue to Phase 3.
 
-**Interactive Mode**: Prompt "Continue to design generation? (yes/no)"
-- If "no": Stop, show current state
-- If "yes": Continue to Phase 3
+**Interactive Mode**: Prompt \"Continue to design generation? (yes/no)\"
+- If \"no\": Stop, show current state
+- If \"yes\": Continue to Phase 3
 
 ---
 
@@ -159,9 +159,9 @@ Wait for completion. SubAgent will return with "次のステップ" message.
 
 Note: `-y` flag auto-approves requirements.
 
-Wait for completion. SubAgent will return with "次のステップ" message.
+Wait for completion. SubAgent will return with \"次のステップ\" message.
 
-**IMPORTANT**: In Automatic Mode, IGNORE the "次のステップ" message.
+**IMPORTANT**: In Automatic Mode, IGNORE the \"次のステップ\" message.
 
 **Update TodoWrite**: Mark task 3 as `completed`, task 4 as `in_progress`.
 
@@ -172,9 +172,9 @@ Wait for completion. SubAgent will return with "次のステップ" message.
 
 **Automatic Mode**: Task list shows 3/4 complete. IMMEDIATELY continue to Phase 4.
 
-**Interactive Mode**: Prompt "Continue to tasks generation? (yes/no)"
-- If "no": Stop, show current state
-- If "yes": Continue to Phase 4
+**Interactive Mode**: Prompt \"Continue to tasks generation? (yes/no)\"
+- If \"no\": Stop, show current state
+- If \"yes\": Continue to Phase 4
 
 ---
 
@@ -210,15 +210,15 @@ Output final completion summary (see Output Description section) and exit.
 ### Automatic Mode Behavior
 - Do NOT stop between phases
 - Do NOT wait for user input
-- Do NOT be influenced by "次のステップ" messages from Phases 2-4
+- Do NOT be influenced by \"次のステップ\" messages from Phases 2-4
 - Update TodoWrite after each phase to maintain progress visibility
 - Continue loop until all 4 phases complete
 
 ### Interactive Mode Behavior
 - Prompt user after each phase
-- Wait for "yes/y" or "no/n" response
-- If "no": Stop gracefully, show completed phases
-- If "yes": Continue to next phase
+- Wait for \"yes/y\" or \"no/n\" response
+- If \"no\": Stop gracefully, show completed phases
+- If \"yes\": Continue to next phase
 
 ### Error Handling
 - Any phase failure stops the workflow
@@ -307,7 +307,7 @@ For complex features (integrations, security, APIs), use standard workflow:
 ### Argument Parsing
 - Use `$ARGUMENTS` to parse (NOT `$1`, `$2`)
 - Handle spaces in descriptions correctly
-- Example: `"Multi word description --auto"` → extract both parts correctly
+- Example: `\"Multi word description --auto\"` → extract both parts correctly
 
 ### Feature Name Generation
 - Convert to lowercase kebab-case
@@ -330,7 +330,7 @@ For complex features (integrations, security, APIs), use standard workflow:
 **Phase Execution Failed** (Phase 2-4):
 - Stop workflow
 - Show current state and completed phases
-- Suggest: "Continue manually from `/kiro:spec-{next-phase} {feature}`"
+- Suggest: \"Continue manually from `/kiro:spec-{next-phase} {feature}`\"
 
 **User Cancellation** (Interactive Mode):
 - Stop gracefully

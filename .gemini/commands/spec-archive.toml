@@ -51,12 +51,12 @@ Add entry to history array:
 
 ```json
 {
-  "history": [
+  \"history\": [
     {
-      "version": "[current version]",
-      "date": "YYYY-MM-DD",
-      "file": "{type}-YYYYMMDD-HHMMSS.md",
-      "note": "[user provided note or auto-generated]"
+      \"version\": \"[current version]\",
+      \"date\": \"YYYY-MM-DD\",
+      \"file\": \"{type}-YYYYMMDD-HHMMSS.md\",
+      \"note\": \"[user provided note or auto-generated]\"
     }
   ]
 }

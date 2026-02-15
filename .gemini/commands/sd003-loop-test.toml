@@ -70,7 +70,7 @@ Completion promise 'ALL_TESTS_PASS' detected. Task complete.
 
 ## SD003 Philosophy
 
-This command implements the "90% fast development, 10% perfectionism" principle:
+This command implements the \"90% fast development, 10% perfectionism\" principle:
 - Fast iteration with automatic retries
 - Midpoint completion (not incomplete, but complete)
 - Automatic escalation if stuck (see endgame phase)

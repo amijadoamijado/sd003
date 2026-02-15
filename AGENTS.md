@@ -99,9 +99,10 @@ npm test && npm run lint
 
 ### Claude互換コマンド同期
 - Source: `.claude/commands/**/*.md`
-- Target: `.codex/prompts/`
+- Target: `~/.codex/prompts/`
 - Sync command: `npm run sync:codex-prompts`
-- コマンド一覧表示: `/prompts`
+- コマンド実行: `/prompts:<name>`
+- コマンド候補表示: `/` を入力して `prompts:` で絞り込み
 
 例:
 - Claude `/bug-quick` -> Codex `/prompts:bug-quick`

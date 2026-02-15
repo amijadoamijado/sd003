@@ -38,15 +38,15 @@ Use: /refactor:rollback checkpoint-001
 AskUserQuestionで確認（提案型、自動実行しない）:
 
 ```yaml
-Question: "{target}にロールバックしますか？以下の変更が破棄されます: {affected_batches}"
-Header: "確認"
+Question: \"{target}にロールバックしますか？以下の変更が破棄されます: {affected_batches}\"
+Header: \"確認\"
 Options:
-  - label: "はい、ロールバック"
-    description: "{target}に復元し、{N}ファイルの変更を破棄"
-  - label: "いいえ、キャンセル"
-    description: "現在の状態を維持"
-  - label: "差分を表示"
-    description: "失われる変更内容を表示"
+  - label: \"はい、ロールバック\"
+    description: \"{target}に復元し、{N}ファイルの変更を破棄\"
+  - label: \"いいえ、キャンセル\"
+    description: \"現在の状態を維持\"
+  - label: \"差分を表示\"
+    description: \"失われる変更内容を表示\"
 ```
 
 ### Step 3: Execute Rollback
@@ -87,9 +87,9 @@ After successful rollback:
 
 ```json
 {
-  "batches": [
-    {"id": "batch-001", "status": "rolled_back"},
-    {"id": "batch-002", "status": "pending"}
+  \"batches\": [
+    {\"id\": \"batch-001\", \"status\": \"rolled_back\"},
+    {\"id\": \"batch-002\", \"status\": \"pending\"}
   ]
 }
 ```
@@ -153,7 +153,7 @@ Before rollback:
 3. **Preserve current state**
    ```bash
    # Create emergency backup before rollback
-   git stash push -m "pre-rollback-emergency-backup"
+   git stash push -m \"pre-rollback-emergency-backup\"
    ```
 
 ## Error Handling

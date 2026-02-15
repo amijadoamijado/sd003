@@ -18,9 +18,9 @@ Use the Task tool to invoke the SubAgent with file path patterns:
 
 ```
 Task(
-  subagent_type="general-purpose",
-  description="Create custom steering",
-  prompt="""
+  subagent_type=\"general-purpose\",
+  description=\"Create custom steering\",
+  prompt=\"\"\"
 Interactive Mode: Ask user for domain/topic
 
 File patterns to read:
@@ -28,7 +28,7 @@ File patterns to read:
 - .kiro/settings/rules/steering-principles.md
 
 JIT Strategy: Analyze codebase for relevant patterns as needed
-"""
+\"\"\"
 )
 ```
 

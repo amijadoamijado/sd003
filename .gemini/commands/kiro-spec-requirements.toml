@@ -20,9 +20,9 @@ Use the Task tool to invoke the SubAgent with file path patterns:
 
 ```
 Task(
-  subagent_type="general-purpose",
-  description="Generate EARS requirements",
-  prompt="""
+  subagent_type=\"general-purpose\",
+  description=\"Generate EARS requirements\",
+  prompt=\"\"\"
 Feature: $1
 Spec directory: .kiro/specs/$1/
 
@@ -34,7 +34,7 @@ File patterns to read:
 - .kiro/settings/templates/specs/requirements.md
 
 Mode: generate
-"""
+\"\"\"
 )
 ```
 

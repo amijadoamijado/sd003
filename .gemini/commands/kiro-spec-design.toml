@@ -4,7 +4,7 @@ prompt = """
 
 ## Parse Arguments
 - Feature name: `$1`
-- Auto-approve flag: `$2` (optional, "-y")
+- Auto-approve flag: `$2` (optional, \"-y\")
 
 ## Validate
 Check that requirements have been completed:
@@ -21,12 +21,12 @@ Use the Task tool to invoke the SubAgent with file path patterns:
 
 ```
 Task(
-  subagent_type="general-purpose",
-  description="Generate technical design",
-  prompt="""
+  subagent_type=\"general-purpose\",
+  description=\"Generate technical design\",
+  prompt=\"\"\"
 Feature: $1
 Spec directory: .kiro/specs/$1/
-Auto-approve: {true if $2 == "-y", else false}
+Auto-approve: {true if $2 == \"-y\", else false}
 
 File patterns to read:
 - .kiro/specs/$1/*.{json,md}
@@ -36,7 +36,7 @@ File patterns to read:
 
 Discovery: auto-detect based on requirements
 Mode: {generate or merge based on design.md existence}
-"""
+\"\"\"
 )
 ```
 

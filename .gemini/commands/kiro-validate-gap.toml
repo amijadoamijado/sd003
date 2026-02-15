@@ -10,10 +10,10 @@ Analyze implementation requirements and existing codebase for feature: **$1**
 - Architecture context: @.kiro/steering/structure.md
 - Technical constraints: @.kiro/steering/tech.md
 - Product context: @.kiro/steering/product.md
-- Custom steering: Load all "Always" mode custom steering files from .kiro/steering/
+- Custom steering: Load all \"Always\" mode custom steering files from .kiro/steering/
 
 ### Existing Spec Context
-- Current spec directory: !`bash -c 'ls -la .kiro/specs/$1/ 2>/dev/null || echo "No spec directory found"'`
+- Current spec directory: !`bash -c 'ls -la .kiro/specs/$1/ 2>/dev/null || echo \"No spec directory found\"'`
 - Requirements document: @.kiro/specs/$1/requirements.md
 - Spec metadata: @.kiro/specs/$1/spec.json
 
@@ -21,7 +21,7 @@ Analyze implementation requirements and existing codebase for feature: **$1**
 
 ### Prerequisites
 - Requirements document must exist: `.kiro/specs/$1/requirements.md`
-- If not exist, stop with message: "Run `/kiro:spec-requirements $1` first to generate requirements"
+- If not exist, stop with message: \"Run `/kiro:spec-requirements $1` first to generate requirements\"
 
 ### Analysis Process
 
@@ -96,7 +96,7 @@ Analyze implementation requirements and existing codebase for feature: **$1**
 
 ### Output Format
 
-Generate analysis in the language specified in spec.json (check `.kiro/specs/$1/spec.json` for "language" field):
+Generate analysis in the language specified in spec.json (check `.kiro/specs/$1/spec.json` for \"language\" field):
 
 #### Analysis Summary
 - Feature scope and complexity overview

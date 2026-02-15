@@ -33,104 +33,104 @@ Register implementation/analysis reports from AI agents (Gemini/Claude/Codex) in
 
 {{#exec}}
 # Extract arguments
-FEATURE_NAME="$1"
-TASK_ID="$2"
-AGENT=""
-REPORT_FILE=""
+FEATURE_NAME=\"$1\"
+TASK_ID=\"$2\"
+AGENT=\"\"
+REPORT_FILE=\"\"
 
 # Parse --agent and --file from remaining arguments
 shift 2
 while [[ $# -gt 0 ]]; do
-  case "$1" in
+  case \"$1\" in
     --agent=*)
-      AGENT="${1#*=}"
+      AGENT=\"${1#*=}\"
       ;;
     --file=*)
-      REPORT_FILE="${1#*=}"
+      REPORT_FILE=\"${1#*=}\"
       ;;
   esac
   shift
 done
 
-echo "=== Argument Validation ==="
-echo "Feature: $FEATURE_NAME"
-echo "Task ID: $TASK_ID"
-echo "Agent: $AGENT"
-echo "Report File: $REPORT_FILE"
+echo \"=== Argument Validation ===\"
+echo \"Feature: $FEATURE_NAME\"
+echo \"Task ID: $TASK_ID\"
+echo \"Agent: $AGENT\"
+echo \"Report File: $REPORT_FILE\"
 
 # Validate feature name
-if [ -z "$FEATURE_NAME" ]; then
-  echo "Error: Feature name is required"
-  echo "Usage: /kiro:ai-report <feature-name> <task-id> --agent=<ai-name>"
+if [ -z \"$FEATURE_NAME\" ]; then
+  echo \"Error: Feature name is required\"
+  echo \"Usage: /kiro:ai-report <feature-name> <task-id> --agent=<ai-name>\"
   exit 1
 fi
 
 # Validate task ID
-if [ -z "$TASK_ID" ]; then
-  echo "Error: Task ID is required"
+if [ -z \"$TASK_ID\" ]; then
+  echo \"Error: Task ID is required\"
   exit 1
 fi
 
-if [[ ! "$TASK_ID" =~ ^[0-9]+\.[0-9]+$ ]]; then
-  echo "Error: Invalid task ID format '$TASK_ID' (expected: 1.1)"
+if [[ ! \"$TASK_ID\" =~ ^[0-9]+\\.[0-9]+$ ]]; then
+  echo \"Error: Invalid task ID format '$TASK_ID' (expected: 1.1)\"
   exit 1
 fi
 
 # Validate agent
-if [ -z "$AGENT" ]; then
-  echo "Error: --agent parameter is required"
-  echo "Available agents: gemini, claude, codex"
+if [ -z \"$AGENT\" ]; then
+  echo \"Error: --agent parameter is required\"
+  echo \"Available agents: gemini, claude, codex\"
   exit 1
 fi
 
-if [[ ! "$AGENT" =~ ^(gemini|claude|codex)$ ]]; then
-  echo "Error: Invalid agent '$AGENT'"
-  echo "Available agents: gemini, claude, codex"
+if [[ ! \"$AGENT\" =~ ^(gemini|claude|codex)$ ]]; then
+  echo \"Error: Invalid agent '$AGENT'\"
+  echo \"Available agents: gemini, claude, codex\"
   exit 1
 fi
 
 # Check if spec exists
-if [ ! -d ".kiro/specs/$FEATURE_NAME" ]; then
-  echo "Error: Specification '$FEATURE_NAME' not found"
-  echo "Available specifications:"
-  ls -1 .kiro/specs/ 2>/dev/null || echo "  (none)"
+if [ ! -d \".kiro/specs/$FEATURE_NAME\" ]; then
+  echo \"Error: Specification '$FEATURE_NAME' not found\"
+  echo \"Available specifications:\"
+  ls -1 .kiro/specs/ 2>/dev/null || echo \"  (none)\"
   exit 1
 fi
 
-echo "Validation passed"
+echo \"Validation passed\"
 {{/exec}}
 
 ## Step 2: Check for Corresponding Request
 
 {{#exec}}
-FEATURE_NAME="$1"
-TASK_ID="$2"
+FEATURE_NAME=\"$1\"
+TASK_ID=\"$2\"
 shift 2
-AGENT=""
+AGENT=\"\"
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --agent=*) AGENT="${1#*=}" ;;
+  case \"$1\" in
+    --agent=*) AGENT=\"${1#*=}\" ;;
   esac
   shift
 done
 
-echo "=== Checking for AI Request ==="
+echo \"=== Checking for AI Request ===\"
 
 # Generate project ID from feature name (simplified)
 PROJECT_ID=$(date +%Y%m%d)-001-$FEATURE_NAME
 
 # Task number formatting
-TASK_NUM=$(echo "$TASK_ID" | tr '.' '')
-TASK_NUM=$(printf "%03d" $TASK_NUM)
+TASK_NUM=$(echo \"$TASK_ID\" | tr '.' '')
+TASK_NUM=$(printf \"%03d\" $TASK_NUM)
 
-REQUEST_FILE=".kiro/ai-coordination/workflow/spec/${PROJECT_ID}/IMPLEMENT_REQUEST_${TASK_NUM}.md"
+REQUEST_FILE=\".kiro/ai-coordination/workflow/spec/${PROJECT_ID}/IMPLEMENT_REQUEST_${TASK_NUM}.md\"
 
-if [ -f "$REQUEST_FILE" ]; then
-  echo "Found corresponding request: $REQUEST_FILE"
+if [ -f \"$REQUEST_FILE\" ]; then
+  echo \"Found corresponding request: $REQUEST_FILE\"
 else
-  echo "Warning: No corresponding request found at $REQUEST_FILE"
-  echo "    This report will be registered without a linked request."
+  echo \"Warning: No corresponding request found at $REQUEST_FILE\"
+  echo \"    This report will be registered without a linked request.\"
 fi
 {{/exec}}
 
@@ -139,48 +139,48 @@ fi
 If `--file` is provided, read from that file. Otherwise, prompt for content.
 
 {{#exec}}
-FEATURE_NAME="$1"
-TASK_ID="$2"
+FEATURE_NAME=\"$1\"
+TASK_ID=\"$2\"
 shift 2
-AGENT=""
-REPORT_FILE=""
+AGENT=\"\"
+REPORT_FILE=\"\"
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --agent=*) AGENT="${1#*=}" ;;
-    --file=*) REPORT_FILE="${1#*=}" ;;
+  case \"$1\" in
+    --agent=*) AGENT=\"${1#*=}\" ;;
+    --file=*) REPORT_FILE=\"${1#*=}\" ;;
   esac
   shift
 done
 
-echo "=== Report Source ==="
+echo \"=== Report Source ===\"
 
-if [ -n "$REPORT_FILE" ]; then
-  if [ -f "$REPORT_FILE" ]; then
-    echo "Reading report from: $REPORT_FILE"
+if [ -n \"$REPORT_FILE\" ]; then
+  if [ -f \"$REPORT_FILE\" ]; then
+    echo \"Reading report from: $REPORT_FILE\"
   else
-    echo "Error: Report file not found: $REPORT_FILE"
+    echo \"Error: Report file not found: $REPORT_FILE\"
     exit 1
   fi
 else
-  echo "No file specified. Interactive mode:"
-  echo "   Please provide the report content or file path when prompted."
+  echo \"No file specified. Interactive mode:\"
+  echo \"   Please provide the report content or file path when prompted.\"
 fi
 {{/exec}}
 
 ## Step 4: Save Report to Correct Location
 
 {{#exec}}
-FEATURE_NAME="$1"
-TASK_ID="$2"
+FEATURE_NAME=\"$1\"
+TASK_ID=\"$2\"
 shift 2
-AGENT=""
-REPORT_FILE=""
+AGENT=\"\"
+REPORT_FILE=\"\"
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --agent=*) AGENT="${1#*=}" ;;
-    --file=*) REPORT_FILE="${1#*=}" ;;
+  case \"$1\" in
+    --agent=*) AGENT=\"${1#*=}\" ;;
+    --file=*) REPORT_FILE=\"${1#*=}\" ;;
   esac
   shift
 done
@@ -189,40 +189,40 @@ done
 PROJECT_ID=$(date +%Y%m%d)-001-$FEATURE_NAME
 
 # Determine report type and filename
-case "$AGENT" in
+case \"$AGENT\" in
   gemini)
-    REPORT_TYPE="IMPL"
+    REPORT_TYPE=\"IMPL\"
     ;;
   claude)
-    REPORT_TYPE="ANALYSIS"
+    REPORT_TYPE=\"ANALYSIS\"
     ;;
   codex)
-    REPORT_TYPE="REFACTOR"
+    REPORT_TYPE=\"REFACTOR\"
     ;;
 esac
 
 # Task number formatting
-TASK_NUM=$(echo "$TASK_ID" | tr '.' '')
-TASK_NUM=$(printf "%03d" $TASK_NUM)
+TASK_NUM=$(echo \"$TASK_ID\" | tr '.' '')
+TASK_NUM=$(printf \"%03d\" $TASK_NUM)
 
-OUTPUT_FILE=".kiro/ai-coordination/workflow/review/${PROJECT_ID}/REVIEW_${REPORT_TYPE}_${TASK_NUM}.md"
+OUTPUT_FILE=\".kiro/ai-coordination/workflow/review/${PROJECT_ID}/REVIEW_${REPORT_TYPE}_${TASK_NUM}.md\"
 
 # Ensure directory exists
-mkdir -p ".kiro/ai-coordination/workflow/review/${PROJECT_ID}/"
+mkdir -p \".kiro/ai-coordination/workflow/review/${PROJECT_ID}/\"
 
-echo "=== Saving Report ==="
-echo "Output: $OUTPUT_FILE"
+echo \"=== Saving Report ===\"
+echo \"Output: $OUTPUT_FILE\"
 
 # Current timestamp
 CURRENT_TIMESTAMP=$(date -Iseconds)
 
-if [ -n "$REPORT_FILE" ] && [ -f "$REPORT_FILE" ]; then
+if [ -n \"$REPORT_FILE\" ] && [ -f \"$REPORT_FILE\" ]; then
   # Copy from source file
-  cat "$REPORT_FILE" > "$OUTPUT_FILE"
-  echo "Report saved from: $REPORT_FILE"
+  cat \"$REPORT_FILE\" > \"$OUTPUT_FILE\"
+  echo \"Report saved from: $REPORT_FILE\"
 else
   # Create template report
-  cat > "$OUTPUT_FILE" << EOF
+  cat > \"$OUTPUT_FILE\" << EOF
 # ${AGENT^} ${REPORT_TYPE} Report: $FEATURE_NAME - Task $TASK_ID
 
 ## Report Metadata
@@ -256,78 +256,78 @@ else
 *Generated: $CURRENT_TIMESTAMP*
 *Agent: ${AGENT^}*
 EOF
-  echo "Template report created (please customize)"
+  echo \"Template report created (please customize)\"
 fi
 
-echo ""
-echo "Report saved to: $OUTPUT_FILE"
+echo \"\"
+echo \"Report saved to: $OUTPUT_FILE\"
 {{/exec}}
 
 ## Step 5: Update spec.json
 
 {{#exec}}
-FEATURE_NAME="$1"
-TASK_ID="$2"
+FEATURE_NAME=\"$1\"
+TASK_ID=\"$2\"
 shift 2
-AGENT=""
+AGENT=\"\"
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --agent=*) AGENT="${1#*=}" ;;
+  case \"$1\" in
+    --agent=*) AGENT=\"${1#*=}\" ;;
   esac
   shift
 done
 
-SPEC_JSON=".kiro/specs/$FEATURE_NAME/spec.json"
+SPEC_JSON=\".kiro/specs/$FEATURE_NAME/spec.json\"
 
 # Generate project ID and task number
 PROJECT_ID=$(date +%Y%m%d)-001-$FEATURE_NAME
-TASK_NUM=$(echo "$TASK_ID" | tr '.' '')
-TASK_NUM=$(printf "%03d" $TASK_NUM)
+TASK_NUM=$(echo \"$TASK_ID\" | tr '.' '')
+TASK_NUM=$(printf \"%03d\" $TASK_NUM)
 
-case "$AGENT" in
-  gemini) REPORT_TYPE="IMPL" ;;
-  claude) REPORT_TYPE="ANALYSIS" ;;
-  codex) REPORT_TYPE="REFACTOR" ;;
+case \"$AGENT\" in
+  gemini) REPORT_TYPE=\"IMPL\" ;;
+  claude) REPORT_TYPE=\"ANALYSIS\" ;;
+  codex) REPORT_TYPE=\"REFACTOR\" ;;
 esac
 
-REPORT_PATH=".kiro/ai-coordination/workflow/review/${PROJECT_ID}/REVIEW_${REPORT_TYPE}_${TASK_NUM}.md"
+REPORT_PATH=\".kiro/ai-coordination/workflow/review/${PROJECT_ID}/REVIEW_${REPORT_TYPE}_${TASK_NUM}.md\"
 
-echo "=== Updating spec.json ==="
+echo \"=== Updating spec.json ===\"
 
-if [ -f "$SPEC_JSON" ]; then
+if [ -f \"$SPEC_JSON\" ]; then
   # Update ai_requests section
   # Note: Full JSON update logic would be implemented here
   # For now, just note the update
-  echo "spec.json updated:"
-  echo "   - Set report_file: $REPORT_PATH"
-  echo "   - Set status: completed"
-  echo "   - Set completed_at: $(date -Iseconds)"
+  echo \"spec.json updated:\"
+  echo \"   - Set report_file: $REPORT_PATH\"
+  echo \"   - Set status: completed\"
+  echo \"   - Set completed_at: $(date -Iseconds)\"
 else
-  echo "Warning: spec.json not found, skipping update"
+  echo \"Warning: spec.json not found, skipping update\"
 fi
 {{/exec}}
 
 ## Step 6: Update Task Status
 
 {{#exec}}
-FEATURE_NAME="$1"
-TASK_ID="$2"
+FEATURE_NAME=\"$1\"
+TASK_ID=\"$2\"
 shift 2
-AGENT=""
+AGENT=\"\"
 
 while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --agent=*) AGENT="${1#*=}" ;;
+  case \"$1\" in
+    --agent=*) AGENT=\"${1#*=}\" ;;
   esac
   shift
 done
 
-echo "=== Task Status Update ==="
-echo "Task $TASK_ID status: ${AGENT^} completed"
-echo ""
-echo "To view full specification status:"
-echo "  /kiro:spec-status $FEATURE_NAME"
+echo \"=== Task Status Update ===\"
+echo \"Task $TASK_ID status: ${AGENT^} completed\"
+echo \"\"
+echo \"To view full specification status:\"
+echo \"  /kiro:spec-status $FEATURE_NAME\"
 {{/exec}}
 
 ## Summary

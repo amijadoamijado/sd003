@@ -60,9 +60,12 @@ async function syncCommands() {
       body = content.substring(frontmatterMatch.index + frontmatterMatch[0].length).trim();
     }
 
+    // Escape backslashes and double quotes for TOML basic string
+    const escapedBody = body.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
     const finalTomlContent = `description = ${JSON.stringify(description)}
 prompt = """
-${body}
+${escapedBody}
 """
 `;
 

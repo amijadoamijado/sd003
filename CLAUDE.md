@@ -261,8 +261,8 @@ Bug occurs
 | Commands直下 | 30 |
 | Commands/kiro | 18 |
 | Rules | 17 |
-| Skills | 8 |
-| 合計 | 73 |
+| Skills | 12 |
+| 合計 | 77 |
 
 ---
 SD003 v2.13.0 | Updated: 2026-02-15

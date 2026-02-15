@@ -25,13 +25,13 @@ ls -la .kiro/cleanup/archive/
 セッションが指定されていない場合、AskUserQuestionで選択:
 
 ```yaml
-Question: "復元するセッションを選択してください"
-Header: "セッション"
+Question: \"復元するセッションを選択してください\"
+Header: \"セッション\"
 Options:
-  - label: "cleanup-20260102-150000 (8ファイル, 45.2KB)"
-    description: "2026-01-02 15:00に実行"
-  - label: "cleanup-20260101-093000 (3ファイル, 12.1KB)"
-    description: "2026-01-01 09:30に実行"
+  - label: \"cleanup-20260102-150000 (8ファイル, 45.2KB)\"
+    description: \"2026-01-02 15:00に実行\"
+  - label: \"cleanup-20260101-093000 (3ファイル, 12.1KB)\"
+    description: \"2026-01-01 09:30に実行\"
 ```
 
 ### Step 2: manifest.json読み込み
@@ -56,15 +56,15 @@ cat .kiro/cleanup/archive/{session-id}/manifest.json
 AskUserQuestionで確認:
 
 ```yaml
-Question: "復元を実行しますか？"
-Header: "復元確認"
+Question: \"復元を実行しますか？\"
+Header: \"復元確認\"
 Options:
-  - label: "全ファイルを復元"
-    description: "8ファイルを元の場所に復元"
-  - label: "ファイルを選択して復元"
-    description: "復元するファイルを個別選択"
-  - label: "キャンセル"
-    description: "何もしない"
+  - label: \"全ファイルを復元\"
+    description: \"8ファイルを元の場所に復元\"
+  - label: \"ファイルを選択して復元\"
+    description: \"復元するファイルを個別選択\"
+  - label: \"キャンセル\"
+    description: \"何もしない\"
 ```
 
 ### Step 4: 復元実行
@@ -79,13 +79,13 @@ mv .kiro/cleanup/archive/{session-id}/files/test_parser.js ./test_parser.js
 AskUserQuestionで確認:
 
 ```yaml
-Question: "復元完了。アーカイブフォルダを削除しますか？"
-Header: "削除確認"
+Question: \"復元完了。アーカイブフォルダを削除しますか？\"
+Header: \"削除確認\"
 Options:
-  - label: "削除する"
-    description: ".kiro/cleanup/archive/{session-id}/ を削除"
-  - label: "残す"
-    description: "アーカイブフォルダを保持"
+  - label: \"削除する\"
+    description: \".kiro/cleanup/archive/{session-id}/ を削除\"
+  - label: \"残す\"
+    description: \"アーカイブフォルダを保持\"
 ```
 
 ### Step 6: 完了報告

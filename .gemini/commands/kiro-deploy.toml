@@ -26,7 +26,7 @@ $ARGUMENTS
 
 1. 対象プロジェクトパスの存在確認
 2. 既存ファイルの有無確認
-3. **ソースパス確認**: `D:\claudecode\sd002`
+3. **ソースパス確認**: `D:\\claudecode\\sd002`
 
 ### Phase 2: ディレクトリ作成
 
@@ -68,7 +68,7 @@ mkdir -p <target>/materials/text
 
 ### Phase 3: ファイルコピー（🚨 省略禁止）
 
-**ソース**: `D:\claudecode\sd002`
+**ソース**: `D:\\claudecode\\sd002`
 
 ---
 
@@ -251,28 +251,28 @@ SD002 v2.11.0 で初期化。
 # === 必須ファイル確認 ===
 
 # Commands直下（6個の必須ファイル）
-[ -f ".claude/commands/sessionread.md" ] && echo "✅ sessionread.md" || echo "❌ sessionread.md"
-[ -f ".claude/commands/sessionwrite.md" ] && echo "✅ sessionwrite.md" || echo "❌ sessionwrite.md"
-[ -f ".claude/commands/sessionhistory.md" ] && echo "✅ sessionhistory.md" || echo "❌ sessionhistory.md"
-[ -f ".claude/commands/bug-quick.md" ] && echo "✅ bug-quick.md" || echo "❌ bug-quick.md"
-[ -f ".claude/commands/bug-trace.md" ] && echo "✅ bug-trace.md" || echo "❌ bug-trace.md"
-[ -f ".claude/commands/dialogue-resolution.md" ] && echo "✅ dialogue-resolution.md" || echo "❌ dialogue-resolution.md"
+[ -f \".claude/commands/sessionread.md\" ] && echo \"✅ sessionread.md\" || echo \"❌ sessionread.md\"
+[ -f \".claude/commands/sessionwrite.md\" ] && echo \"✅ sessionwrite.md\" || echo \"❌ sessionwrite.md\"
+[ -f \".claude/commands/sessionhistory.md\" ] && echo \"✅ sessionhistory.md\" || echo \"❌ sessionhistory.md\"
+[ -f \".claude/commands/bug-quick.md\" ] && echo \"✅ bug-quick.md\" || echo \"❌ bug-quick.md\"
+[ -f \".claude/commands/bug-trace.md\" ] && echo \"✅ bug-trace.md\" || echo \"❌ bug-trace.md\"
+[ -f \".claude/commands/dialogue-resolution.md\" ] && echo \"✅ dialogue-resolution.md\" || echo \"❌ dialogue-resolution.md\"
 
 # Commands/kiro（3個サンプル確認）
-[ -f ".claude/commands/kiro/spec-init.md" ] && echo "✅ kiro/spec-init.md" || echo "❌ kiro/spec-init.md"
-[ -f ".claude/commands/kiro/deploy.md" ] && echo "✅ kiro/deploy.md" || echo "❌ kiro/deploy.md"
-[ -f ".claude/commands/kiro/steering.md" ] && echo "✅ kiro/steering.md" || echo "❌ kiro/steering.md"
+[ -f \".claude/commands/kiro/spec-init.md\" ] && echo \"✅ kiro/spec-init.md\" || echo \"❌ kiro/spec-init.md\"
+[ -f \".claude/commands/kiro/deploy.md\" ] && echo \"✅ kiro/deploy.md\" || echo \"❌ kiro/deploy.md\"
+[ -f \".claude/commands/kiro/steering.md\" ] && echo \"✅ kiro/steering.md\" || echo \"❌ kiro/steering.md\"
 
 # Sessions（必須）
-[ -f ".kiro/sessions/session-current.md" ] && echo "✅ session-current.md" || echo "❌ session-current.md"
-[ -f ".kiro/sessions/TIMELINE.md" ] && echo "✅ TIMELINE.md" || echo "❌ TIMELINE.md"
+[ -f \".kiro/sessions/session-current.md\" ] && echo \"✅ session-current.md\" || echo \"❌ session-current.md\"
+[ -f \".kiro/sessions/TIMELINE.md\" ] && echo \"✅ TIMELINE.md\" || echo \"❌ TIMELINE.md\"
 
 # ファイル数カウント
-echo "--- File Counts ---"
-echo "Commands直下: $(ls -1 .claude/commands/*.md 2>/dev/null | wc -l) files"
-echo "Commands/kiro: $(ls -1 .claude/commands/kiro/*.md 2>/dev/null | wc -l) files"
-echo "Rules: $(find .claude/rules -name '*.md' 2>/dev/null | wc -l) files"
-echo "Skills: $(find .claude/skills -name '*.md' 2>/dev/null | wc -l) files"
+echo \"--- File Counts ---\"
+echo \"Commands直下: $(ls -1 .claude/commands/*.md 2>/dev/null | wc -l) files\"
+echo \"Commands/kiro: $(ls -1 .claude/commands/kiro/*.md 2>/dev/null | wc -l) files\"
+echo \"Rules: $(find .claude/rules -name '*.md' 2>/dev/null | wc -l) files\"
+echo \"Skills: $(find .claude/skills -name '*.md' 2>/dev/null | wc -l) files\"
 ```
 
 **期待値**:
@@ -348,7 +348,7 @@ echo "Skills: $(find .claude/skills -name '*.md' 2>/dev/null | wc -l) files"
 
 ### 検証で❌が出た
 
-1. ソースパス `D:\claudecode\sd002` を確認
+1. ソースパス `D:\\claudecode\\sd002` を確認
 2. 該当ファイルを手動コピー
 3. 再検証
 

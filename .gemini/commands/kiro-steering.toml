@@ -20,9 +20,9 @@ Use the Task tool to invoke the SubAgent with file path patterns:
 
 ```
 Task(
-  subagent_type="general-purpose",
-  description="Manage steering files",
-  prompt="""
+  subagent_type=\"general-purpose\",
+  description=\"Manage steering files\",
+  prompt=\"\"\"
 Mode: {bootstrap or sync based on detection}
 
 File patterns to read:
@@ -31,7 +31,7 @@ File patterns to read:
 - .kiro/settings/rules/steering-principles.md
 
 JIT Strategy: Fetch codebase files when needed, not upfront
-"""
+\"\"\"
 )
 ```
 
@@ -53,7 +53,7 @@ Show SubAgent summary to user:
 - All `.kiro/steering/*.md` loaded as project memory
 - Templates and principles are external for customization
 - Focus on patterns, not catalogs
-- "Golden Rule": New code following patterns shouldn't require steering updates
+- \"Golden Rule\": New code following patterns shouldn't require steering updates
 ---
 @req: REQ-SUBAGENTS-002
 """
