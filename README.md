@@ -161,6 +161,35 @@ bash .claude/skills/kiro-deploy/deploy.sh /path/to/your-project
 
 ---
 
+## Skills Ecosystem
+
+SD003 integrates with the [skills.sh](https://skills.sh/) open agent skills ecosystem (58,000+ skills).
+
+### Commands
+
+```bash
+/skills:find {query}                    # Search skills
+/skills:add {owner/repo} [--skill name] # Install a skill
+/skills:list                            # List installed skills
+```
+
+### CLI Usage
+
+```bash
+npx skills find "testing"      # Search for testing skills
+npx skills add vercel-labs/agent-skills --skill vercel-react-best-practices -y
+npx skills list                # List installed skills
+```
+
+### Trust Policy
+
+| Level | Source | Policy |
+|-------|--------|--------|
+| **Trusted** | `anthropics/skills`, `vercel-labs/skills`, `vercel-labs/agent-skills` | Install freely |
+| **Caution** | Other repositories | Review SKILL.md before installing |
+
+---
+
 ## 3-Tier GAS Testing Strategy
 
 | Tier | Tool | Directory | Speed | Fidelity | GCP Auth |
@@ -281,4 +310,4 @@ MIT License
 
 ---
 
-**SD003 Framework v2.12.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline + 24-Hour Development + 3-Tier Bug Resolution
+**SD003 Framework v2.13.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem

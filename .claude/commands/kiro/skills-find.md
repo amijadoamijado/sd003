@@ -1,0 +1,47 @@
+# スキル検索: /skills:find
+
+## 概要
+skills.shエコシステムからスキルを検索します。
+
+## 使用方法
+```
+/skills:find {検索クエリ}
+```
+
+## 引数
+- `検索クエリ`: 検索キーワード（英語推奨）
+
+## 実行手順
+
+### 1. 検索実行
+```bash
+npx skills find $ARGUMENTS
+```
+
+### 2. 結果表示
+検索結果をユーザーに提示する:
+- スキル名と説明
+- インストールコマンド (`npx skills add <owner/repo@skill> -y`)
+- skills.sh のリンク
+
+### 3. 信頼レベル確認
+検索結果のスキルについて信頼レベルを表示:
+
+| 信頼レベル | ソース | 扱い |
+|-----------|--------|------|
+| **Trusted** | `anthropics/skills`, `vercel-labs/skills`, `vercel-labs/agent-skills` | 自由にインストール可 |
+| **Caution** | その他のリポジトリ | SKILL.md確認後にインストール |
+
+### 4. インストール提案
+ユーザーが興味を示したスキルについて:
+```
+インストールしますか？
+npx skills add <owner/repo@skill> -y
+```
+
+## ユーザー入力
+$ARGUMENTS
+
+---
+
+**実行開始**: 上記手順に従ってスキルを検索してください。

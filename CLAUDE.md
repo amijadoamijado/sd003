@@ -167,6 +167,28 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 
 ---
 
+## Skills Ecosystem
+
+SD003は [skills.sh](https://skills.sh/) エコシステムと連携し、58,000+のオープンスキルを検索・インストール可能。
+
+### コマンド
+```
+/skills:find {query}    # スキル検索
+/skills:add {owner/repo} [--skill name]  # スキルインストール
+/skills:list            # インストール済み一覧
+```
+
+### スキル信頼ポリシー
+
+| 信頼レベル | ソース | 扱い |
+|-----------|--------|------|
+| **Trusted** | `anthropics/skills`, `vercel-labs/skills`, `vercel-labs/agent-skills` | 自由にインストール可 |
+| **Caution** | その他のリポジトリ | SKILL.md確認後にインストール |
+
+詳細: `.claude/rules/skills/skill-trust-policy.md`
+
+---
+
 ## Rule Reference
 
 | Category | Location |
@@ -174,6 +196,7 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 | **AI Coordination** | `rules/workflow/ai-coordination.md` |
 | **Architecture** | `rules/architecture/adapter-core-pattern.md` |
 | **Ralph Loop/Wiggum** | `rules/ralph-loop.md` |
+| **Skills Trust Policy** | `rules/skills/skill-trust-policy.md` |
 | Quality Standards | `rules/global/quality-standards.md` |
 | GAS Development | `rules/gas/` |
 | Testing | `rules/testing/` |
@@ -236,10 +259,10 @@ Bug occurs
 | カテゴリ | ファイル数 |
 |---------|-----------|
 | Commands直下 | 30 |
-| Commands/kiro | 15 |
-| Rules | 16 |
-| Skills | 7 |
-| 合計 | 68 |
+| Commands/kiro | 18 |
+| Rules | 17 |
+| Skills | 8 |
+| 合計 | 73 |
 
 ---
-SD003 v2.12.0 | Updated: 2026-02-15
+SD003 v2.13.0 | Updated: 2026-02-15

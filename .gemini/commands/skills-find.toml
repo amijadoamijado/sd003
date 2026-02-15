@@ -1,0 +1,38 @@
+description = "skills.shエコシステムからスキルを検索"
+prompt = """
+# スキル検索: /skills:find
+
+## 概要
+skills.shエコシステムからスキルを検索します。
+
+## 使用方法
+```
+/skills:find {検索クエリ}
+```
+
+## 実行手順
+
+### 1. 検索実行
+```bash
+npx skills find $ARGUMENTS
+```
+
+### 2. 結果表示
+検索結果をユーザーに提示:
+- スキル名と説明
+- インストールコマンド
+- skills.sh のリンク
+
+### 3. 信頼レベル確認
+| 信頼レベル | ソース |
+|-----------|--------|
+| **Trusted** | `anthropics/skills`, `vercel-labs/skills`, `vercel-labs/agent-skills` |
+| **Caution** | その他のリポジトリ |
+
+## ユーザー入力
+$ARGUMENTS
+
+---
+
+**実行開始**: 上記手順に従ってスキルを検索してください。
+"""

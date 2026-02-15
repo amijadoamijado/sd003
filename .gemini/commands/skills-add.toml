@@ -1,0 +1,40 @@
+description = "skills.shエコシステムからスキルをインストール"
+prompt = """
+# スキルインストール: /skills:add
+
+## 概要
+skills.shエコシステムからスキルをインストールします。
+
+## 使用方法
+```
+/skills:add {owner/repo} [--skill name]
+```
+
+## 実行手順
+
+### 1. 信頼レベル確認
+| 信頼レベル | ソース |
+|-----------|--------|
+| **Trusted** | `anthropics/skills`, `vercel-labs/skills`, `vercel-labs/agent-skills` |
+| **Caution** | その他のリポジトリ → SKILL.md確認後にインストール |
+
+### 2. インストール実行
+```bash
+npx skills add $ARGUMENTS -y
+```
+
+### 3. 結果確認
+```bash
+npx skills list
+```
+
+### 4. 完了報告
+- スキル名、ソース、信頼レベル、インストール先を報告
+
+## ユーザー入力
+$ARGUMENTS
+
+---
+
+**実行開始**: 上記手順に従ってスキルをインストールしてください。
+"""
