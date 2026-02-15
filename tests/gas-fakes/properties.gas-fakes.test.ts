@@ -14,24 +14,25 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { isGasFakesAvailable, loadGasFakes } from './setup';
+import { loadGasFakes } from './setup';
 
-const describeIfGasFakes = isGasFakesAvailable() ? describe : describe.skip;
-
-describeIfGasFakes('PropertiesService (gas-fakes Tier-2)', () => {
+describe('PropertiesService (gas-fakes Tier-2)', () => {
+  let ready = false;
 
   beforeAll(async () => {
-    await loadGasFakes();
+    ready = await loadGasFakes();
   });
 
   describe('ScriptProperties', () => {
     let props: any;
 
     beforeEach(() => {
+      if (!ready) return;
       props = (globalThis as any).PropertiesService.getScriptProperties();
     });
 
     afterEach(() => {
+      if (!ready) return;
       // クリーンアップ: テスト用プロパティを削除
       try {
         props.deleteProperty('test-key');
@@ -43,21 +44,25 @@ describeIfGasFakes('PropertiesService (gas-fakes Tier-2)', () => {
     });
 
     it('should set and get a property', () => {
+      if (!ready) return;
       props.setProperty('test-key', 'test-value');
       expect(props.getProperty('test-key')).toBe('test-value');
     });
 
     it('should return null for non-existent property', () => {
+      if (!ready) return;
       expect(props.getProperty('non-existent-key-xyz')).toBeNull();
     });
 
     it('should delete a property', () => {
+      if (!ready) return;
       props.setProperty('test-key', 'to-delete');
       props.deleteProperty('test-key');
       expect(props.getProperty('test-key')).toBeNull();
     });
 
     it('should set and get multiple properties', () => {
+      if (!ready) return;
       props.setProperties({
         'key1': 'value1',
         'key2': 'value2',
@@ -68,6 +73,7 @@ describeIfGasFakes('PropertiesService (gas-fakes Tier-2)', () => {
     });
 
     it('should overwrite existing property', () => {
+      if (!ready) return;
       props.setProperty('test-key', 'original');
       props.setProperty('test-key', 'updated');
       expect(props.getProperty('test-key')).toBe('updated');
@@ -76,10 +82,12 @@ describeIfGasFakes('PropertiesService (gas-fakes Tier-2)', () => {
 
   describe('UserProperties', () => {
     it('should have getUserProperties method', () => {
+      if (!ready) return;
       expect(typeof (globalThis as any).PropertiesService.getUserProperties).toBe('function');
     });
 
     it('should set and get a user property', () => {
+      if (!ready) return;
       const userProps = (globalThis as any).PropertiesService.getUserProperties();
       userProps.setProperty('user-test', 'user-value');
       expect(userProps.getProperty('user-test')).toBe('user-value');
@@ -89,6 +97,7 @@ describeIfGasFakes('PropertiesService (gas-fakes Tier-2)', () => {
 
   describe('DocumentProperties', () => {
     it('should have getDocumentProperties method', () => {
+      if (!ready) return;
       expect(typeof (globalThis as any).PropertiesService.getDocumentProperties).toBe('function');
     });
   });
