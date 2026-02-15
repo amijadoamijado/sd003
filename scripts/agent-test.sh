@@ -36,6 +36,7 @@ PROJECT_ID=""
 TASK_NUM=""
 DRY_RUN=false
 MANUAL_MODE=false
+REPORT_MISSING=false
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -155,9 +156,16 @@ elif [ "$MANUAL_MODE" = true ]; then
     echo ""
     echo "Status: MANUAL_DISPATCH" >> "$TEST_LOG"
 else
-    # Antigravity CLIが利用可能か確認
-    if command -v antigravity &> /dev/null || command -v gemini &> /dev/null; then
-        echo -e "${BLUE}Antigravityへテスト依頼中...${NC}"
+    # Antigravity CLIが利用可能か確認（検出されたバイナリを使用）
+    ANTIGRAVITY_BIN=""
+    if command -v antigravity &> /dev/null; then
+        ANTIGRAVITY_BIN="antigravity"
+    elif command -v gemini &> /dev/null; then
+        ANTIGRAVITY_BIN="gemini"
+    fi
+
+    if [ -n "$ANTIGRAVITY_BIN" ]; then
+        echo -e "${BLUE}Antigravityへテスト依頼中... (using: ${ANTIGRAVITY_BIN})${NC}"
 
         # Antigravityにパイプで送信
         TEST_CONTENT=$(cat "$TEST_REQUEST")
@@ -165,7 +173,7 @@ else
 
 ${TEST_CONTENT}"
 
-        if echo "$TEST_PROMPT" | gemini 2>&1 > "${TEST_REPORT}" ; then
+        if echo "$TEST_PROMPT" | "$ANTIGRAVITY_BIN" 2>&1 > "${TEST_REPORT}" ; then
             echo -e "${GREEN}[OK] Antigravity テスト完了${NC}"
             echo "Status: COMPLETED" >> "$TEST_LOG"
         else
@@ -200,6 +208,7 @@ if [ -f "$TEST_REPORT" ]; then
 else
     echo -e "${YELLOW}[PENDING] TEST_REPORT 未作成（Antigravityテスト待ち）${NC}"
     echo "Status: PENDING" >> "$TEST_LOG"
+    REPORT_MISSING=true
 fi
 echo "" >> "$TEST_LOG"
 
@@ -260,3 +269,9 @@ fi
     if [ "$MANUAL_MODE" = true ]; then TEST_FLAGS="${TEST_FLAGS}MANUAL "; fi
     echo "Pipeline: ${TEST_FLAGS:-STANDARD}"
 } >> "$TEST_LOG"
+
+# Exit with non-zero status if TEST_REPORT was not produced
+# This prevents agent-pipeline.sh from treating incomplete runs as success
+if [ "$REPORT_MISSING" = true ] && [ "$DRY_RUN" = false ] && [ "$MANUAL_MODE" = false ]; then
+    exit 2
+fi

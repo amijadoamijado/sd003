@@ -19,7 +19,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:gas-fakes": "jest --testPathPattern=tests/gas-fakes/",
+    "test:gas-fakes": "jest --testPathPattern=tests/gas-fakes/ --setupFiles=./tests/gas-fakes/setup.ts",
     "test:e2e": "playwright test",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
