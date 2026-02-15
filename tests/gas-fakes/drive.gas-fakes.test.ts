@@ -14,28 +14,26 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { loadGasFakes } from './setup';
+import { isGasFakesInstalled, loadGasFakes } from './setup';
 
-describe('DriveApp (gas-fakes Tier-2)', () => {
-  let ready = false;
+const describeIfGasFakes = isGasFakesInstalled() ? describe : describe.skip;
+
+describeIfGasFakes('DriveApp (gas-fakes Tier-2)', () => {
 
   beforeAll(async () => {
-    ready = await loadGasFakes();
+    await loadGasFakes();
   });
 
   describe('File operations', () => {
     it('should have DriveApp available as global', () => {
-      if (!ready) return;
       expect((globalThis as any).DriveApp).toBeDefined();
     });
 
     it('should have createFile method', () => {
-      if (!ready) return;
       expect(typeof (globalThis as any).DriveApp.createFile).toBe('function');
     });
 
     it('should create a text file', () => {
-      if (!ready) return;
       const file = (globalThis as any).DriveApp.createFile(
         'test-gas-fakes.txt',
         'Hello from gas-fakes test',
@@ -48,7 +46,6 @@ describe('DriveApp (gas-fakes Tier-2)', () => {
     });
 
     it('should get file by ID', () => {
-      if (!ready) return;
       const file = (globalThis as any).DriveApp.createFile(
         'get-by-id-test.txt',
         'content',
@@ -62,7 +59,6 @@ describe('DriveApp (gas-fakes Tier-2)', () => {
     });
 
     it('should get file content as string', () => {
-      if (!ready) return;
       const content = 'test content for blob';
       const file = (globalThis as any).DriveApp.createFile(
         'blob-test.txt',
@@ -78,12 +74,10 @@ describe('DriveApp (gas-fakes Tier-2)', () => {
 
   describe('Folder operations', () => {
     it('should have createFolder method', () => {
-      if (!ready) return;
       expect(typeof (globalThis as any).DriveApp.createFolder).toBe('function');
     });
 
     it('should create a folder', () => {
-      if (!ready) return;
       const folder = (globalThis as any).DriveApp.createFolder('gas-fakes-test-folder');
       expect(folder).toBeDefined();
       expect(folder.getName()).toBe('gas-fakes-test-folder');
@@ -92,7 +86,6 @@ describe('DriveApp (gas-fakes Tier-2)', () => {
     });
 
     it('should get root folder', () => {
-      if (!ready) return;
       const root = (globalThis as any).DriveApp.getRootFolder();
       expect(root).toBeDefined();
       expect(typeof root.getName).toBe('function');

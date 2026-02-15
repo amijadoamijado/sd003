@@ -14,28 +14,26 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { loadGasFakes } from './setup';
+import { isGasFakesInstalled, loadGasFakes } from './setup';
 
-describe('SpreadsheetApp (gas-fakes Tier-2)', () => {
-  let ready = false;
+const describeIfGasFakes = isGasFakesInstalled() ? describe : describe.skip;
+
+describeIfGasFakes('SpreadsheetApp (gas-fakes Tier-2)', () => {
 
   beforeAll(async () => {
-    ready = await loadGasFakes();
+    await loadGasFakes();
   });
 
   describe('Spreadsheet operations', () => {
     it('should have SpreadsheetApp available as global', () => {
-      if (!ready) return;
       expect((globalThis as any).SpreadsheetApp).toBeDefined();
     });
 
     it('should have create method', () => {
-      if (!ready) return;
       expect(typeof (globalThis as any).SpreadsheetApp.create).toBe('function');
     });
 
     it('should create a new spreadsheet', () => {
-      if (!ready) return;
       const ss = (globalThis as any).SpreadsheetApp.create('Test Spreadsheet');
       expect(ss).toBeDefined();
       expect(ss.getName()).toBe('Test Spreadsheet');
@@ -46,26 +44,22 @@ describe('SpreadsheetApp (gas-fakes Tier-2)', () => {
     let ss: any;
 
     beforeEach(() => {
-      if (!ready) return;
       ss = (globalThis as any).SpreadsheetApp.create('Sheet Test');
     });
 
     it('should get sheets from spreadsheet', () => {
-      if (!ready) return;
       const sheets = ss.getSheets();
       expect(Array.isArray(sheets)).toBe(true);
       expect(sheets.length).toBeGreaterThan(0);
     });
 
     it('should insert a new sheet', () => {
-      if (!ready) return;
       const initialCount = ss.getSheets().length;
       ss.insertSheet('New Sheet');
       expect(ss.getSheets().length).toBe(initialCount + 1);
     });
 
     it('should get sheet by name', () => {
-      if (!ready) return;
       const sheet = ss.getSheetByName('Sheet1');
       expect(sheet).toBeDefined();
     });
@@ -75,20 +69,17 @@ describe('SpreadsheetApp (gas-fakes Tier-2)', () => {
     let sheet: any;
 
     beforeEach(() => {
-      if (!ready) return;
       const ss = (globalThis as any).SpreadsheetApp.create('Range Test');
       sheet = ss.getSheets()[0];
     });
 
     it('should read and write single cell value', () => {
-      if (!ready) return;
       const range = sheet.getRange('A1');
       range.setValue('Hello');
       expect(range.getValue()).toBe('Hello');
     });
 
     it('should read and write range by A1 notation', () => {
-      if (!ready) return;
       const range = sheet.getRange('A1:B2');
       range.setValues([
         ['A', 'B'],
@@ -102,7 +93,6 @@ describe('SpreadsheetApp (gas-fakes Tier-2)', () => {
     });
 
     it('should handle getRange with row/col/numRows/numCols', () => {
-      if (!ready) return;
       const range = sheet.getRange(1, 1, 2, 2);
       range.setValues([
         [1, 2],
@@ -116,7 +106,6 @@ describe('SpreadsheetApp (gas-fakes Tier-2)', () => {
     });
 
     it('should handle getValues returning 2D array', () => {
-      if (!ready) return;
       sheet.getRange('A1').setValue('test');
       const values = sheet.getRange('A1:A1').getValues();
       expect(Array.isArray(values)).toBe(true);

@@ -4,11 +4,16 @@
  * Tier-2 テスト環境のセットアップファイル。
  * @mcpher/gas-fakes をインポートし、GASグローバル変数を注入する。
  *
- * ロード戦略:
- * - loadGasFakes() が唯一の可用性判定（実際の import() 成否で決定）
- * - require.resolve() はインストール有無の事前スクリーニングのみ（最適化）
- * - テストファイルは beforeAll で loadGasFakes() を呼び、戻り値で
- *   各テストの実行/スキップを制御する
+ * ロード戦略（2層ゲート）:
+ * - Layer 1 (sync): require.resolve() でインストール有無を判定
+ *   → 未インストール時は describe.skip でスイートごとスキップ
+ * - Layer 2 (async): loadGasFakes() で実際の import() を実行
+ *   → インストール済みなのにロード失敗 = ランタイム異常 → throw で suite を fail
+ *
+ * テストの見え方:
+ * - 未インストール → "skipped" (describe.skip)
+ * - インストール済み＋ロード成功 → テスト実行
+ * - インストール済み＋ロード失敗 → beforeAll throw → suite "failed"
  *
  * 注意:
  * - gas-fakes は ESM モジュール（"type": "module"）→ require() は使用不可
@@ -18,12 +23,13 @@
  * - SpreadsheetApp/DriveApp は GCP認証が必要な場合がある
  */
 
-// 事前スクリーニング: パッケージ未インストール時は import() を試みない（最適化）
-let gasFakesMayExist = false;
+// Layer 1: パッケージのインストール有無を同期判定
+// テストファイルが describe / describe.skip を決定するために使用
+let gasFakesInstalled = false;
 
 try {
   require.resolve('@mcpher/gas-fakes');
-  gasFakesMayExist = true;
+  gasFakesInstalled = true;
 } catch {
   console.warn(
     '[gas-fakes setup] @mcpher/gas-fakes not found. Tier-2 tests will be skipped.'
@@ -36,31 +42,24 @@ try {
 let gasFakesLoaded = false;
 
 /**
- * gas-fakes をロード済みかを返す（実際のグローバル注入完了後に true）
+ * パッケージがインストール済みかを返す（require.resolve ベース）。
+ * テストファイルのモジュール評価時に describe / describe.skip を選択するために使用。
  */
-export function isGasFakesLoaded(): boolean {
-  return gasFakesLoaded;
+export function isGasFakesInstalled(): boolean {
+  return gasFakesInstalled;
 }
 
 /**
- * gas-fakes の動的インポートを実行し、成否を返す。
- * これが Tier-2 テスト可用性の唯一の判定基準。
- * テストファイルの beforeAll から呼び出し、戻り値で各テストをガードする。
+ * Layer 2: gas-fakes の動的インポートを実行する。
+ * - 未インストール時: 何もせず return（describe.skip 済みのため到達しない想定）
+ * - インストール済み＋ロード成功: グローバル注入完了
+ * - インストール済み＋ロード失敗: throw → beforeAll が失敗し suite 全体が fail
  */
-export async function loadGasFakes(): Promise<boolean> {
-  if (gasFakesLoaded) return true;
-  if (!gasFakesMayExist) return false;
+export async function loadGasFakes(): Promise<void> {
+  if (gasFakesLoaded) return;
+  if (!gasFakesInstalled) return;
 
-  try {
-    // @ts-expect-error -- @mcpher/gas-fakes has no type declarations
-    await import('@mcpher/gas-fakes');
-    gasFakesLoaded = true;
-    return true;
-  } catch (error) {
-    console.warn(
-      '[gas-fakes setup] Failed to load @mcpher/gas-fakes:',
-      (error as Error).message
-    );
-    return false;
-  }
+  // @ts-expect-error -- @mcpher/gas-fakes has no type declarations
+  await import('@mcpher/gas-fakes');
+  gasFakesLoaded = true;
 }
