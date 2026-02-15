@@ -36,6 +36,7 @@ PROJECT_ID=""
 TASK_NUM=""
 DRY_RUN=false
 MANUAL_MODE=false
+USER_REQUESTED_MANUAL=false
 REPORT_MISSING=false
 
 while [[ $# -gt 0 ]]; do
@@ -46,6 +47,7 @@ while [[ $# -gt 0 ]]; do
             ;;
         --manual)
             MANUAL_MODE=true
+            USER_REQUESTED_MANUAL=true
             shift
             ;;
         --help|-h)
@@ -271,7 +273,9 @@ fi
 } >> "$TEST_LOG"
 
 # Exit with non-zero status if TEST_REPORT was not produced
-# This prevents agent-pipeline.sh from treating incomplete runs as success
-if [ "$REPORT_MISSING" = true ] && [ "$DRY_RUN" = false ] && [ "$MANUAL_MODE" = false ]; then
+# This prevents agent-pipeline.sh from treating incomplete runs as success.
+# Only skip this check for --dry-run and explicitly requested --manual mode.
+# Automatic fallbacks (CLI not found, dispatch failed) must still fail.
+if [ "$REPORT_MISSING" = true ] && [ "$DRY_RUN" = false ] && [ "$USER_REQUESTED_MANUAL" = false ]; then
     exit 2
 fi

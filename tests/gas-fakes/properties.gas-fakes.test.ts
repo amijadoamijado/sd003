@@ -14,19 +14,15 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const describeIfGasFakes = (
-  name: string,
-  fn: () => void
-): void => {
-  const hasGasFakes = typeof (globalThis as any).PropertiesService !== 'undefined';
-  if (hasGasFakes) {
-    describe(name, fn);
-  } else {
-    describe.skip(`${name} (gas-fakes not available)`, fn);
-  }
-};
+import { isGasFakesAvailable, loadGasFakes } from './setup';
+
+const describeIfGasFakes = isGasFakesAvailable() ? describe : describe.skip;
 
 describeIfGasFakes('PropertiesService (gas-fakes Tier-2)', () => {
+
+  beforeAll(async () => {
+    await loadGasFakes();
+  });
 
   describe('ScriptProperties', () => {
     let props: any;

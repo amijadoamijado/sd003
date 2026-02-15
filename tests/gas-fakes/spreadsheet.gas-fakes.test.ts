@@ -14,20 +14,15 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const describeIfGasFakes = (
-  name: string,
-  fn: () => void
-): void => {
-  // gas-fakes が利用可能かをランタイムで判定
-  const hasGasFakes = typeof (globalThis as any).SpreadsheetApp !== 'undefined';
-  if (hasGasFakes) {
-    describe(name, fn);
-  } else {
-    describe.skip(`${name} (gas-fakes not available)`, fn);
-  }
-};
+import { isGasFakesAvailable, loadGasFakes } from './setup';
+
+const describeIfGasFakes = isGasFakesAvailable() ? describe : describe.skip;
 
 describeIfGasFakes('SpreadsheetApp (gas-fakes Tier-2)', () => {
+
+  beforeAll(async () => {
+    await loadGasFakes();
+  });
 
   describe('Spreadsheet operations', () => {
     it('should have SpreadsheetApp available as global', () => {
