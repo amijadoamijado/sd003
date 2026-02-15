@@ -1,4 +1,4 @@
-# SD003フレームワーク展開スキル v2.3.0
+# SD003フレームワーク展開スキル v2.4.0
 
 ## 使用方法
 
@@ -215,7 +215,18 @@ cp "$SOURCE/docs/troubleshooting/RESOLUTION_LOG.md" "$TARGET_PROJECT/docs/troubl
 cp "$SOURCE/docs/quality-gates.md" "$TARGET_PROJECT/docs/" 2>/dev/null || true
 ```
 
-### Step 5: CLAUDE.md生成
+### Step 5: AGENTS.md生成
+
+Codex CLI用の設定ファイルを生成:
+
+```bash
+# AGENTS.md.templateからAGENTS.mdを生成
+sed "s/{{PROJECT_NAME}}/$(basename "$TARGET_PROJECT")/g; s/{{DATE}}/$(date +%Y-%m-%d)/g" \
+    "$SOURCE/.claude/skills/kiro-deploy/templates/AGENTS.md.template" \
+    > "$TARGET_PROJECT/AGENTS.md"
+```
+
+### Step 6: CLAUDE.md生成
 
 3フェーズ開発戦略を反映したCLAUDE.mdを生成:
 
@@ -271,7 +282,7 @@ cp "$SOURCE/docs/quality-gates.md" "$TARGET_PROJECT/docs/" 2>/dev/null || true
 SD003 v2.3.0 | 導入日: {DATE}
 ```
 
-### Step 6: gemini.md生成
+### Step 7: gemini.md生成
 
 ```markdown
 # {PROJECT_NAME} - Gemini CLI設定
@@ -299,7 +310,7 @@ SD003 v2.3.0 | 導入日: {DATE}
 SD003 v2.3.0
 ```
 
-### Step 7: データストア初期化
+### Step 8: データストア初期化
 
 ```bash
 # ID Registry
@@ -323,7 +334,7 @@ cat > "$TARGET_PROJECT/.kiro/ai-coordination/handoff/handoff-log.json" << EOF
 EOF
 ```
 
-### Step 8: 検証
+### Step 9: 検証
 
 ```bash
 # 必須ディレクトリ確認
@@ -344,6 +355,7 @@ REQUIRED_DIRS=(
 REQUIRED_FILES=(
     # 基本設定
     "CLAUDE.md"
+    "AGENTS.md"
     "gemini.md"
 
     # ⚠️ セッション管理（省略禁止）
@@ -389,7 +401,7 @@ REQUIRED_FILES=(
 ## 展開レポート
 
 ```
-=== SD003フレームワーク展開完了 (v2.10.0) ===
+=== SD003フレームワーク展開完了 (v2.13.0) ===
 
 【展開されたコンポーネント】
 

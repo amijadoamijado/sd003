@@ -74,4 +74,43 @@ npm run build && npm test && npm run lint
 
 ---
 
-**RULES.md v1.0** - Updated: 2026-02-11
+## ファイル配置ルール（全AI共通 - Single Source of Truth）
+
+このセクションは全AIモデル（Claude Code, Codex, Gemini CLI, Antigravity）に適用される。
+各AI設定ファイル（CLAUDE.md, AGENTS.md, gemini.md）はこのルールを参照すること。
+
+### 仕様書
+
+| ファイル | 保存先 |
+|---------|--------|
+| 要件定義書 | `.kiro/specs/{feature}/requirements.md` |
+| 技術設計書 | `.kiro/specs/{feature}/design.md` |
+| タスクリスト | `.kiro/specs/{feature}/tasks.md` |
+
+### AI協調ワークフロー
+
+| ファイル種別 | 保存先 |
+|-------------|--------|
+| 発注書 | `.kiro/ai-coordination/workflow/spec/{projectID}/WORK_ORDER.md` |
+| 実装指示 | `.kiro/ai-coordination/workflow/spec/{projectID}/IMPLEMENT_REQUEST_{NNN}.md` |
+| テスト依頼 | `.kiro/ai-coordination/workflow/spec/{projectID}/TEST_REQUEST_{NNN}.md` |
+| レビュー結果 | `.kiro/ai-coordination/workflow/review/{projectID}/REVIEW_{type}_{NNN}.md` |
+| テスト報告 | `.kiro/ai-coordination/workflow/review/{projectID}/TEST_REPORT_{NNN}.md` |
+
+### セッション
+
+| ファイル | 保存先 |
+|---------|--------|
+| 現在セッション | `.kiro/sessions/session-current.md` |
+| タイムライン | `.kiro/sessions/TIMELINE.md` |
+| セッション履歴 | `.kiro/sessions/session-YYYYMMDD-HHMMSS.md` |
+
+### 配置禁止
+
+- プロジェクトルート直下への新規ファイル作成
+- `.antigravity/` への依頼書作成
+- テンプレートなしの依頼書作成
+
+---
+
+**RULES.md v2.0** - Updated: 2026-02-15

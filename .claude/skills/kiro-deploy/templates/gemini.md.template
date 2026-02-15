@@ -37,5 +37,21 @@
 | 中盤 | AI協調ワークフロー + 高速イテレーション | spec-impl, spec-status |
 | 終盤 | 対話型解決法 + 本番モード | validate-* |
 
+## Common Rules
+
+**MUST READ**: `.handoff/RULES.md`
+
+## File Location Rules
+
+| カテゴリ | ファイル | 保存先 |
+|---------|---------|--------|
+| 仕様書 | requirements.md | `.kiro/specs/{feature}/` |
+| 仕様書 | design.md | `.kiro/specs/{feature}/` |
+| 仕様書 | tasks.md | `.kiro/specs/{feature}/` |
+| ワークフロー | IMPLEMENT_REQUEST | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
+| ワークフロー | REVIEW | `.kiro/ai-coordination/workflow/review/{projectID}/` |
+
+**配置禁止**: プロジェクトルート直下への新規作成
+
 ---
-SD003 v2.11.0 | 導入日: {{DATE}}
+SD003 v2.13.0 | 導入日: {{DATE}}

@@ -56,6 +56,27 @@
 /sessionwrite              # セッション保存
 ```
 
+## Common Rules
+
+**MUST READ**: `.handoff/RULES.md`
+
+## File Location Rules
+
+| カテゴリ | ファイル | 保存先 |
+|---------|---------|--------|
+| 仕様書 | requirements.md | `.kiro/specs/{feature}/` |
+| 仕様書 | design.md | `.kiro/specs/{feature}/` |
+| 仕様書 | tasks.md | `.kiro/specs/{feature}/` |
+| ワークフロー | WORK_ORDER.md | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
+| ワークフロー | IMPLEMENT_REQUEST | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
+| ワークフロー | TEST_REQUEST | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
+| ワークフロー | REVIEW | `.kiro/ai-coordination/workflow/review/{projectID}/` |
+| ワークフロー | TEST_REPORT | `.kiro/ai-coordination/workflow/review/{projectID}/` |
+| セッション | session-current.md | `.kiro/sessions/` |
+| セッション | TIMELINE.md | `.kiro/sessions/` |
+
+**配置禁止**: プロジェクトルート直下への新規作成、`.antigravity/` への依頼書作成
+
 ## 詳細ドキュメント
 
 必要時のみ参照:
@@ -75,4 +96,4 @@
 - 8段階品質ゲート全通過必須
 
 ---
-SD003 v2.11.0 | 導入日: {{DATE}}
+SD003 v2.13.0 | 導入日: {{DATE}}
