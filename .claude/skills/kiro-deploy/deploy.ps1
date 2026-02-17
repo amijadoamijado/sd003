@@ -1,4 +1,4 @@
-# SD003 Framework Deployment Script v3.0.0 (PowerShell)
+# SD003 Framework Deployment Script v3.1.0 (PowerShell)
 # Usage: powershell -ExecutionPolicy Bypass -File deploy.ps1 <target-project-path>
 
 param(
@@ -9,7 +9,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$SD003_VERSION = "3.0.0"
+$SD003_VERSION = "3.1.0"
 $FRAMEWORK_VERSION = "2.13.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
@@ -287,6 +287,18 @@ if (Test-Path $refactorCfgSrc) {
     $copyStats["Refactor Config"] = 0
 }
 
+# 4-20: tests/gas-fakes/setup.ts (single file)
+$gasFakesSrc = Join-Path $SOURCE_DIR "tests\gas-fakes\setup.ts"
+if (Test-Path $gasFakesSrc) {
+    $gasFakesDst = Join-Path $TargetProject "tests\gas-fakes"
+    if (-not (Test-Path $gasFakesDst)) { New-Item -ItemType Directory -Path $gasFakesDst -Force | Out-Null }
+    Copy-Item $gasFakesSrc (Join-Path $gasFakesDst "setup.ts") -Force
+    $copyStats["Gas Fakes Setup"] = 1
+} else {
+    Write-Host "  WARN: tests/gas-fakes/setup.ts not found" -ForegroundColor Yellow
+    $copyStats["Gas Fakes Setup"] = 0
+}
+
 Write-Host "[Phase 4/7] Dynamic copy completed" -ForegroundColor Green
 foreach ($key in $copyStats.Keys | Sort-Object) {
     Write-Host "  $key : $($copyStats[$key]) files"
@@ -411,6 +423,40 @@ $handoffContent = @"
 "@
 Set-Content -Path (Join-Path $TargetProject ".kiro\ai-coordination\handoff\handoff-log.json") -Value $handoffContent -Encoding UTF8
 
+# 5b: Inject gas-fakes into target package.json (if it exists)
+$targetPkg = Join-Path $TargetProject "package.json"
+if (Test-Path $targetPkg) {
+    $pkgContent = Get-Content $targetPkg -Raw -Encoding UTF8 | ConvertFrom-Json
+    $needsUpdate = $false
+
+    if (-not $pkgContent.devDependencies) {
+        $pkgContent | Add-Member -NotePropertyName "devDependencies" -NotePropertyValue ([PSCustomObject]@{}) -Force
+    }
+
+    if (-not $pkgContent.devDependencies.'@mcpher/gas-fakes') {
+        $pkgContent.devDependencies | Add-Member -NotePropertyName "@mcpher/gas-fakes" -NotePropertyValue "^1.2.0" -Force
+        $needsUpdate = $true
+    }
+
+    if (-not $pkgContent.scripts) {
+        $pkgContent | Add-Member -NotePropertyName "scripts" -NotePropertyValue ([PSCustomObject]@{}) -Force
+    }
+
+    if (-not $pkgContent.scripts.'test:gas-fakes') {
+        $pkgContent.scripts | Add-Member -NotePropertyName "test:gas-fakes" -NotePropertyValue "jest --testPathPatterns=tests/gas-fakes/ --setupFiles=./tests/gas-fakes/setup.ts --passWithNoTests" -Force
+        $needsUpdate = $true
+    }
+
+    if ($needsUpdate) {
+        $pkgContent | ConvertTo-Json -Depth 10 | Set-Content $targetPkg -Encoding UTF8
+        Write-Host "  [Phase 5b] gas-fakes injected into package.json" -ForegroundColor Green
+    } else {
+        Write-Host "  [Phase 5b] gas-fakes already present in package.json, skipping" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  [Phase 5b] No package.json found, skipping gas-fakes injection" -ForegroundColor Yellow
+}
+
 Write-Host "[Phase 5/7] Generated files created" -ForegroundColor Green
 
 # ============================================================
@@ -464,6 +510,7 @@ $verifyResults += Verify-Category -Label "Kiro Settings" -SourceRelPath ".kiro\s
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
 $verifyResults += Verify-Category -Label "Ralph" -SourceRelPath ".kiro\ralph" -Recurse
 $verifyResults += Verify-Category -Label "Steering" -SourceRelPath ".kiro\steering" -Recurse
+$verifyResults += Verify-Category -Label "Gas Fakes" -SourceRelPath "tests\gas-fakes" -Recurse
 
 # Display results
 foreach ($r in $verifyResults) {
@@ -519,8 +566,9 @@ if ($allPassed) {
 Write-Host ""
 Write-Host "Next Steps:" -ForegroundColor Cyan
 Write-Host "  1. cd $TargetProject"
-Write-Host "  2. Review CLAUDE.md"
-Write-Host "  3. Run /sessionread to verify"
-Write-Host "  4. Start with /kiro:spec-init {feature}"
+Write-Host "  2. npm install  (to install @mcpher/gas-fakes and other dependencies)"
+Write-Host "  3. Review CLAUDE.md"
+Write-Host "  4. Run /sessionread to verify"
+Write-Host "  5. Start with /kiro:spec-init {feature}"
 Write-Host ""
 Write-Host "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!" -ForegroundColor Green

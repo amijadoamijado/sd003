@@ -1,11 +1,11 @@
 #!/bin/bash
-# SD003 Framework Deployment Script v3.0.0 (Bash)
+# SD003 Framework Deployment Script v3.1.0 (Bash)
 # Usage: ./deploy.sh <target-project-path>
 
 set -e
 
 # Configuration
-SD003_VERSION="3.0.0"
+SD003_VERSION="3.1.0"
 FRAMEWORK_VERSION="2.13.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
@@ -244,6 +244,17 @@ else
     COPY_STATS["Refactor Config"]=0
 fi
 
+# 4-20: tests/gas-fakes/setup.ts (single file)
+GAS_FAKES_SRC="$SOURCE_DIR/tests/gas-fakes/setup.ts"
+if [ -f "$GAS_FAKES_SRC" ]; then
+    mkdir -p "$TARGET_PROJECT/tests/gas-fakes"
+    cp "$GAS_FAKES_SRC" "$TARGET_PROJECT/tests/gas-fakes/setup.ts"
+    COPY_STATS["Gas Fakes Setup"]=1
+else
+    echo "  WARN: tests/gas-fakes/setup.ts not found"
+    COPY_STATS["Gas Fakes Setup"]=0
+fi
+
 echo "[Phase 4/7] Dynamic copy completed"
 for key in "${!COPY_STATS[@]}"; do
     echo "  $key: ${COPY_STATS[$key]} files"
@@ -370,6 +381,30 @@ cat > "$TARGET_PROJECT/.kiro/ai-coordination/handoff/handoff-log.json" << EOF
 }
 EOF
 
+# 5b: Inject gas-fakes into target package.json (if it exists)
+TARGET_PKG="$TARGET_PROJECT/package.json"
+if [ -f "$TARGET_PKG" ]; then
+    # Check if gas-fakes is already present
+    if ! grep -q '"@mcpher/gas-fakes"' "$TARGET_PKG"; then
+        # Add @mcpher/gas-fakes to devDependencies using node
+        node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('$TARGET_PKG', 'utf8'));
+            if (!pkg.devDependencies) pkg.devDependencies = {};
+            pkg.devDependencies['@mcpher/gas-fakes'] = '^1.2.0';
+            if (!pkg.scripts) pkg.scripts = {};
+            if (!pkg.scripts['test:gas-fakes']) {
+                pkg.scripts['test:gas-fakes'] = 'jest --testPathPatterns=tests/gas-fakes/ --setupFiles=./tests/gas-fakes/setup.ts --passWithNoTests';
+            }
+            fs.writeFileSync('$TARGET_PKG', JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+        " 2>/dev/null && echo "  [Phase 5b] gas-fakes injected into package.json" || echo "  WARN: Failed to inject gas-fakes into package.json"
+    else
+        echo "  [Phase 5b] gas-fakes already present in package.json, skipping"
+    fi
+else
+    echo "  [Phase 5b] No package.json found, skipping gas-fakes injection"
+fi
+
 echo "[Phase 5/7] Generated files created"
 
 # ============================================================
@@ -416,6 +451,7 @@ verify_category "Kiro Settings" ".kiro/settings" ".kiro/settings" "*" "true"
 verify_category "Handoff" ".handoff" ".handoff" "*" "true"
 verify_category "Ralph" ".kiro/ralph" ".kiro/ralph" "*" "true"
 verify_category "Steering" ".kiro/steering" ".kiro/steering" "*" "true"
+verify_category "Gas Fakes" "tests/gas-fakes" "tests/gas-fakes" "*" "true"
 
 # Verify generated files
 echo ""
@@ -467,8 +503,9 @@ fi
 echo ""
 echo "Next Steps:"
 echo "  1. cd $TARGET_PROJECT"
-echo "  2. Review CLAUDE.md"
-echo "  3. Run /sessionread to verify"
-echo "  4. Start with /kiro:spec-init {feature}"
+echo "  2. npm install  (to install @mcpher/gas-fakes and other dependencies)"
+echo "  3. Review CLAUDE.md"
+echo "  4. Run /sessionread to verify"
+echo "  5. Start with /kiro:spec-init {feature}"
 echo ""
 echo "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!"
