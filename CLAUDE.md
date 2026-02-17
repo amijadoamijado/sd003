@@ -262,7 +262,8 @@ Bug occurs
 | Commands/kiro | 18 |
 | Rules | 17 |
 | Skills | 12 |
-| 合計 | 77 |
+| Tests/gas-fakes | 1 |
+| 合計 | 78 |
 
 ---
 SD003 v2.13.0 | Updated: 2026-02-15

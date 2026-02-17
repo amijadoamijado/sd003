@@ -6,7 +6,7 @@ description: |
 allowed-tools: Read, Write, Bash, Glob
 ---
 
-# SD003フレームワーク展開スキル v3.0.0
+# SD003フレームワーク展開スキル v3.1.0
 
 ## 概要
 
@@ -66,6 +66,18 @@ bash .claude/skills/kiro-deploy/deploy.sh <target-project-path>
 | 17 | `.kiro/ralph/` | ツリーコピー |
 | 18 | `.kiro/steering/` | ツリーコピー |
 | 19 | `.kiro/refactor/config.json` | 単体コピー |
+| 20 | `tests/gas-fakes/setup.ts` | 単体コピー |
+
+## gas-fakes 自動注入（Phase 5b）
+
+ターゲットプロジェクトに `package.json` が存在する場合、以下を自動注入：
+
+| 追加内容 | 値 |
+|---------|-----|
+| devDependencies | `"@mcpher/gas-fakes": "^1.2.0"` |
+| scripts | `"test:gas-fakes": "jest --testPathPatterns=tests/gas-fakes/ --setupFiles=./tests/gas-fakes/setup.ts --passWithNoTests"` |
+
+注意: `@mcpher/gas-fakes` が既に存在する場合はスキップ。
 
 ## 生成ファイル
 

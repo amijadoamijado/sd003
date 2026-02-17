@@ -35,13 +35,13 @@ describe('対象', () => {
 
 | Tier | ツール | ディレクトリ | 速度 | 忠実度 | GCP認証 |
 |------|--------|------------|------|--------|---------|
-| Tier-1 | GA001モック + LocalEnv | `tests/unit/`, `tests/integration/` | < 1s | 低 | 不要 |
+| Tier-1 | ローカルモック（GA001依存なし） | `tests/unit/`, `tests/integration/` | < 1s | 低 | 不要 |
 | Tier-2 | @mcpher/gas-fakes | `tests/gas-fakes/` | < 30s | 中-高 | 一部必要 |
 | Tier-3 | Antigravity E2E | 本番環境 | 分単位 | 最高 | 必要 |
 
-### Tier-1: GA001モック（ユニット）
-- LocalEnv使用で疑似GAS環境
-- 本番データ相当のテストデータ
+### Tier-1: ローカルモック（ユニット）
+- `tests/setup/gas-globals.ts` のローカルモックで疑似GAS環境
+- GA001フレームワーク非依存（段階的排除方針）
 - Core ビジネスロジックの高速検証
 
 ### Tier-2: gas-fakes（統合）
