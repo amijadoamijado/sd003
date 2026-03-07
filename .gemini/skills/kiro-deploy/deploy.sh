@@ -275,10 +275,10 @@ EOF
 OS_TYPE="$(uname -s 2>/dev/null || echo 'Unknown')"
 if [[ "$OS_TYPE" == *"MINGW"* ]] || [[ "$OS_TYPE" == *"MSYS"* ]] || [[ "$OS_TYPE" == *"CYGWIN"* ]]; then
     # Windows (Git Bash/MSYS)
-    HOOK_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd002-stop-hook.ps1\"'
+    HOOK_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"'
 else
     # Linux/Mac
-    HOOK_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd002-stop-hook.sh\"'
+    HOOK_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd003-stop-hook.sh\"'
 fi
 
 cat > "$TARGET_PROJECT/.claude/settings.json" << EOF

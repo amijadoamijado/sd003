@@ -38,8 +38,8 @@ Same error pattern 2nd time -> Stop, escalate to /dialogue-resolution
 
 | Hook | Phase | Purpose |
 |------|-------|---------|
-| `sd002-stop-hook.sh` | Midpoint | Loop until completion promise |
-| `sd002-stop-hook-endgame.sh` | Endgame | Track error patterns, escalate on 2nd occurrence |
+| `sd003-stop-hook.sh` | Midpoint | Loop until completion promise |
+| `sd003-stop-hook-endgame.sh` | Endgame | Track error patterns, escalate on 2nd occurrence |
 
 ## Environment Variables
 

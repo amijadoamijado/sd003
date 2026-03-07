@@ -164,10 +164,10 @@ SD002デプロイ時に自動配置されるRalph Loop関連ファイル：
 ### 配置ファイル
 | ファイル | 用途 | 環境 |
 |---------|------|------|
-| `.claude/hooks/sd002-stop-hook.ps1` | 中盤用stop-hook | Windows |
-| `.claude/hooks/sd002-stop-hook-endgame.ps1` | 終盤用 | Windows |
-| `.claude/hooks/sd002-stop-hook.sh` | 中盤用stop-hook | Linux/Mac |
-| `.claude/hooks/sd002-stop-hook-endgame.sh` | 終盤用 | Linux/Mac |
+| `.claude/hooks/sd003-stop-hook.ps1` | 中盤用stop-hook | Windows |
+| `.claude/hooks/sd003-stop-hook-endgame.ps1` | 終盤用 | Windows |
+| `.claude/hooks/sd003-stop-hook.sh` | 中盤用stop-hook | Linux/Mac |
+| `.claude/hooks/sd003-stop-hook-endgame.sh` | 終盤用 | Linux/Mac |
 | `.claude/commands/sd002-loop-*.md` | ループコマンド | 全環境 |
 | `.claude/rules/ralph-loop.md` | 運用ルール | 全環境 |
 

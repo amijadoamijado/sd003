@@ -1,4 +1,4 @@
-# SD002 Hooks
+# SD003 Hooks
 
 Claude Code公式hooks形式でRalph Loopを実装。
 
@@ -6,10 +6,10 @@ Claude Code公式hooks形式でRalph Loopを実装。
 
 | ファイル | 用途 | 環境 |
 |---------|------|------|
-| `sd002-stop-hook.ps1` | Midpoint用: テスト成功までループ | Windows |
-| `sd002-stop-hook-endgame.ps1` | Endgame用: 同一エラー2回でエスカレート | Windows |
-| `sd002-stop-hook.sh` | Midpoint用 | Linux/Mac |
-| `sd002-stop-hook-endgame.sh` | Endgame用 | Linux/Mac |
+| `sd003-stop-hook.ps1` | Midpoint用: テスト成功までループ | Windows |
+| `sd003-stop-hook-endgame.ps1` | Endgame用: 同一エラー2回でエスカレート | Windows |
+| `sd003-stop-hook.sh` | Midpoint用 | Linux/Mac |
+| `sd003-stop-hook-endgame.sh` | Endgame用 | Linux/Mac |
 
 ## 使い方
 
@@ -19,16 +19,16 @@ Claude Code公式hooks形式でRalph Loopを実装。
 
 ```json
 // Midpoint (Windows)
-"command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd002-stop-hook.ps1\""
+"command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\""
 
 // Endgame (Windows)
-"command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd002-stop-hook-endgame.ps1\""
+"command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook-endgame.ps1\""
 
 // Midpoint (Linux/Mac)
-"command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd002-stop-hook.sh\""
+"command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd003-stop-hook.sh\""
 
 // Endgame (Linux/Mac)
-"command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd002-stop-hook-endgame.sh\""
+"command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd003-stop-hook-endgame.sh\""
 ```
 
 ## 動作仕様

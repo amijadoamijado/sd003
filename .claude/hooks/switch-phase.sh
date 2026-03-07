@@ -1,16 +1,16 @@
 #!/bin/bash
-# SD002 Phase Switcher
+# SD003 Phase Switcher
 # Usage: ./switch-phase.sh [midpoint|endgame]
 
 SETTINGS_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/settings.json"
 
 case "$1" in
     midpoint)
-        HOOK_FILE="sd002-stop-hook.sh"
+        HOOK_FILE="sd003-stop-hook.sh"
         echo "Switching to MIDPOINT phase (loop until tests pass)"
         ;;
     endgame)
-        HOOK_FILE="sd002-stop-hook-endgame.sh"
+        HOOK_FILE="sd003-stop-hook-endgame.sh"
         echo "Switching to ENDGAME phase (escalate after 2 same errors)"
         ;;
     *)

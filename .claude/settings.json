@@ -8,7 +8,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd002-stop-hook.ps1\"",
+            "command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"",
             "timeout": 10
           }
         ]
@@ -38,21 +38,21 @@
     ]
   },
   "ralph-loop": {
-    "description": "SD002 Ralph Loop configuration",
+    "description": "SD003 Ralph Loop configuration",
     "midpoint": {
-      "hook": "sd002-stop-hook.ps1",
+      "hook": "sd003-stop-hook.ps1",
       "max_iterations": 20,
       "completion_promise": "ALL_TESTS_PASS"
     },
     "endgame": {
-      "hook": "sd002-stop-hook-endgame.ps1",
+      "hook": "sd003-stop-hook-endgame.ps1",
       "max_same_error": 2,
       "escalation": "/dialogue-resolution"
     },
     "note": "Windows PowerShell version. Switch hooks manually based on phase."
   },
   "refactoring": {
-    "description": "SD002 Refactoring System configuration",
+    "description": "SD003 Refactoring System configuration",
     "context_monitor_hook": "context-monitor-hook.ps1",
     "config_path": ".kiro/refactor/config.json",
     "skills": [

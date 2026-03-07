@@ -323,7 +323,7 @@ $settingsContent = @"
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"`$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd002-stop-hook.ps1\"",
+            "command": "powershell -ExecutionPolicy Bypass -File \"`$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"",
             "timeout": 10
           }
         ]
