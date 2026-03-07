@@ -12,13 +12,13 @@
 
 ### Primary (Midpoint Phase)
 ```bash
-/sd002:loop-test    # Loop until all tests pass
+/sd003:loop-test    # Loop until all tests pass
 ```
 
 ### Supplementary
 ```bash
-/sd002:loop-lint    # Loop until ESLint 0 errors
-/sd002:loop-type    # Loop until TypeScript strict passes
+/sd003:loop-lint    # Loop until ESLint 0 errors
+/sd003:loop-type    # Loop until TypeScript strict passes
 ```
 
 ## Escalation Protocol
@@ -44,13 +44,13 @@ Same error pattern 2nd time -> Stop, escalate to /dialogue-resolution
 ## Environment Variables
 
 ```bash
-SD002_MAX_ITERATIONS=20       # Max loop iterations
-SD002_COMPLETION_PROMISE="ALL_TESTS_PASS"  # Success marker
+SD003_MAX_ITERATIONS=20       # Max loop iterations
+SD003_COMPLETION_PROMISE="ALL_TESTS_PASS"  # Success marker
 ```
 
-## Integration with SD002 Philosophy
+## Integration with SD003 Philosophy
 
-This implements the SD002 error learning principle:
+This implements the SD003 error learning principle:
 
 1. **1st error occurrence**: Allowed, auto-fix attempted
 2. **2nd same error**: Warning, final Ralph attempt
@@ -73,11 +73,11 @@ The Ralph Loop automates steps 1-2. Step 3 requires `/dialogue-resolution`.
 
 ### Two-Layer Architecture
 
-| 項目 | 日中（sd002-loop-*） | 夜間（Ralph Wiggum） |
+| 項目 | 日中（sd003-loop-*） | 夜間（Ralph Wiggum） |
 |------|---------------------|---------------------|
-| コマンド | `/sd002:loop-*` | `/ralph-wiggum:*` |
+| コマンド | `/sd003:loop-*` | `/ralph-wiggum:*` |
 | max-iterations | 15-20 | 60 |
-| 環境変数 | `SD002_*` | `RALPH_*` |
+| 環境変数 | `SD003_*` | `RALPH_*` |
 | 完了マーカー | `ALL_TESTS_PASS` | `RALPH_NIGHTLY_COMPLETE` |
 | リカバリー | dialogue-resolution | 7パターン自動 |
 | 人間介入 | 随時可能 | ブロック時のみ |

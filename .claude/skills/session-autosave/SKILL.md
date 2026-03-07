@@ -59,7 +59,7 @@ The autosave adds refactoring-specific fields to the session:
 
 ## Session Info
 - Date: {current_date}
-- Project: SD002
+- Project: SD003
 - Branch: {current_branch}
 - Latest Commit: {commit_hash}
 - **Session Type**: Refactoring

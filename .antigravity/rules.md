@@ -148,7 +148,7 @@ Keywords "production", "deploy", or "release" activate:
 | Topic | Location |
 |-------|----------|
 | Quality Gates | `docs/quality-gates.md` |
-| Setup Guide | `docs/sd002-setup-guide.md` |
+| Setup Guide | `docs/sd003-setup-guide.md` |
 | Session Management | `docs/session-management.md` |
 | Troubleshooting | `docs/troubleshooting/` |
 | AI Coordination | `.claude/rules/workflow/ai-coordination.md` |

@@ -234,7 +234,7 @@ cat > "$OUTPUT_FILE" << EOF
 - Project: $FEATURE_NAME
 - Project ID: $PROJECT_ID
 - Date: $CURRENT_DATE
-- Requestor: SD002 Framework
+- Requestor: SD003 Framework
 - Agent: ${AGENT^}
 
 ## Objective

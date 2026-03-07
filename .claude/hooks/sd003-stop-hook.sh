@@ -1,5 +1,5 @@
 #!/bin/bash
-# SD002 Stop Hook - Midpoint Phase
+# SD003 Stop Hook - Midpoint Phase
 # Purpose: Loop until all tests pass (max 20 iterations)
 #
 # Exit codes:

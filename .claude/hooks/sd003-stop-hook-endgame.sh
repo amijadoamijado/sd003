@@ -1,5 +1,5 @@
 #!/bin/bash
-# SD002 Stop Hook - Endgame Phase
+# SD003 Stop Hook - Endgame Phase
 # Purpose: Track error patterns, escalate to /dialogue-resolution after 2nd occurrence
 #
 # Exit codes:

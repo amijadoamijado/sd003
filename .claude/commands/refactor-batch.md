@@ -125,7 +125,7 @@ If lint/type fails:
 Invoke Ralph Loop for test completion:
 
 ```
-/sd002:loop-test
+/sd003:loop-test
 ```
 
 Wait for:

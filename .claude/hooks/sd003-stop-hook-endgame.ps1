@@ -1,4 +1,4 @@
-# SD002 Stop Hook - Endgame Phase (Windows PowerShell)
+# SD003 Stop Hook - Endgame Phase (Windows PowerShell)
 # Purpose: Track error patterns, escalate to /dialogue-resolution after 2nd occurrence
 #
 # Exit codes:

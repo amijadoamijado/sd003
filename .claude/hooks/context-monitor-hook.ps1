@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Context Monitor Hook for SD002 Refactoring System
+    Context Monitor Hook for SD003 Refactoring System
 
 .DESCRIPTION
     Monitors context usage and triggers autonomous actions:

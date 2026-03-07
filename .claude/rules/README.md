@@ -1,6 +1,6 @@
 # .claude/rules/
 
-SD002フレームワークの開発ルール集。Claude Codeが自動読込する。
+SD003フレームワークの開発ルール集。Claude Codeが自動読込する。
 
 ## ルール一覧
 

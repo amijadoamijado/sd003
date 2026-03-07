@@ -12,7 +12,7 @@ allowed-tools: Read, Bash, Glob
 | 順序 | ファイル | 目的 |
 |------|---------|------|
 | 1 | `D:\claudecode\CLAUDE.md` | グローバル設定（UTF-8制約等） |
-| 2 | `./CLAUDE.md` | プロジェクト設定（SD002ルール） |
+| 2 | `./CLAUDE.md` | プロジェクト設定（SD003ルール） |
 | 3 | `.kiro/sessions/session-current.md` | 現在のセッション（短期記憶） |
 | 4 | `.kiro/sessions/TIMELINE.md` | プロジェクト履歴（長期記憶） |
 
@@ -30,7 +30,7 @@ Read: D:\claudecode\CLAUDE.md
 ```
 Read: ./CLAUDE.md
 ```
-- SD002フレームワーク設定
+- SD003フレームワーク設定
 - 技術スタック
 - AI協調ワークフロー
 
@@ -63,7 +63,7 @@ Read: .kiro/sessions/TIMELINE.md
 
 ## 2. プロジェクト設定
 ✅ CLAUDE.md (プロジェクト) 読み込み完了
-   - SD002 v[バージョン]
+   - SD003 v[バージョン]
 
 ## 3. 現在セッション
 📅 前回: [日時]

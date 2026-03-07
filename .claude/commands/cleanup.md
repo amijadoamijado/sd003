@@ -35,12 +35,12 @@ allowed-tools: Task, Read, Write, Bash, Glob, Grep, AskUserQuestion, TodoWrite
 ## 保護対象（絶対に移動しない）
 
 ```
-# sd002コアファイル
+# sd003コアファイル
 package.json, package-lock.json, tsconfig.json
 .gitignore, .eslintrc.*, .prettierrc.*
 CLAUDE.md, README.md, AGENTS.md
 
-# sd002コアディレクトリ
+# sd003コアディレクトリ
 /src/**, /tests/**, /docs/**
 /.kiro/**, /.claude/**, /.github/**
 /node_modules/**

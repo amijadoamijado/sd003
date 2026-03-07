@@ -52,7 +52,7 @@ materials/
 
 ### 保護対象（移動しない）
 - AI設定ファイル（agents.md, CLAUDE.md, gemini.md）
-- sd002コアファイル（package.json, tsconfig.json等）
+- sd003コアファイル（package.json, tsconfig.json等）
 - コアディレクトリ（/src, /tests, /.kiro等）
 - git変更中のファイル
 

@@ -1,4 +1,4 @@
-# SD002 Stop Hook - Midpoint Phase (Windows PowerShell)
+# SD003 Stop Hook - Midpoint Phase (Windows PowerShell)
 # Purpose: Loop until all tests pass (max 20 iterations)
 #
 # Exit codes:
