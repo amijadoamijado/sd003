@@ -458,7 +458,7 @@ if (Test-Path $targetPkg) {
 }
 
 # 5-8: User-level CLAUDE.md (initial setup for ~/.claude/CLAUDE.md)
-$userClaudeTemplate = Join-Path $SourceDir ".claude\skills\kiro-deploy\templates\user-claude.md.template"
+$userClaudeTemplate = Join-Path $SOURCE_DIR ".claude\skills\kiro-deploy\templates\user-claude.md.template"
 $userClaudeDir = Join-Path $env:USERPROFILE ".claude"
 $userClaudeFile = Join-Path $userClaudeDir "CLAUDE.md"
 if (Test-Path $userClaudeTemplate) {
@@ -526,7 +526,11 @@ $verifyResults += Verify-Category -Label "Kiro Settings" -SourceRelPath ".kiro\s
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
 $verifyResults += Verify-Category -Label "Ralph" -SourceRelPath ".kiro\ralph" -Recurse
 $verifyResults += Verify-Category -Label "Steering" -SourceRelPath ".kiro\steering" -Recurse
-$verifyResults += Verify-Category -Label "Gas Fakes" -SourceRelPath "tests\gas-fakes" -Recurse
+# Gas Fakes: only verify setup.ts exists (we deploy 1 file, not the whole directory)
+$gasFakesTarget = Join-Path $TargetProject "tests\gas-fakes\setup.ts"
+$gasFakesStatus = if (Test-Path $gasFakesTarget) { "PASS" } else { "FAIL" }
+if ($gasFakesStatus -eq "FAIL") { $allPassed = $false }
+$verifyResults += [PSCustomObject]@{ Category = "Gas Fakes (setup.ts)"; Source = 1; Target = $(if (Test-Path $gasFakesTarget) { 1 } else { 0 }); Status = $gasFakesStatus }
 
 # Display results
 foreach ($r in $verifyResults) {
