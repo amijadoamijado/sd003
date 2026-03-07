@@ -1,18 +1,18 @@
 #!/bin/bash
-# SD002 Framework Deployment Script v3.0.0 (Bash)
+# SD003 Framework Deployment Script v3.0.0 (Bash)
 # Usage: ./deploy.sh <target-project-path>
 
 set -e
 
 # Configuration
-SD002_VERSION="3.0.0"
+SD003_VERSION="3.0.0"
 FRAMEWORK_VERSION="2.11.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
-echo "=== SD002 Framework Deployment v${SD002_VERSION} ==="
+echo "=== SD003 Framework Deployment v${SD003_VERSION} ==="
 echo "Framework: v${FRAMEWORK_VERSION}"
 echo "Source: $SOURCE_DIR"
 echo "Target: $TARGET_PROJECT"
@@ -30,7 +30,7 @@ echo "[Phase 1/7] Target validated"
 # ============================================================
 # Phase 2: Backup
 # ============================================================
-BACKUP_DIR="$TARGET_PROJECT/.sd002-backup-$TIMESTAMP"
+BACKUP_DIR="$TARGET_PROJECT/.sd003-backup-$TIMESTAMP"
 mkdir -p "$BACKUP_DIR"
 
 for f in CLAUDE.md gemini.md; do
@@ -242,7 +242,7 @@ cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
 ## Progress Summary
 
 ### Completed
-- SD002 Framework v${FRAMEWORK_VERSION} deployed
+- SD003 Framework v${FRAMEWORK_VERSION} deployed
 
 ### In Progress
 - (none)
@@ -251,7 +251,7 @@ cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
 - P1 (Important): Run /sessionread to verify
 
 ### Notes
-Initialized with SD002 v${FRAMEWORK_VERSION}.
+Initialized with SD003 v${FRAMEWORK_VERSION}.
 EOF
 
 # 5-4: TIMELINE.md (new)
@@ -261,14 +261,14 @@ cat > "$TARGET_PROJECT/.kiro/sessions/TIMELINE.md" << EOF
 ## Overview
 - **Project**: $PROJECT_NAME
 - **Created**: $DATE
-- **Framework**: SD002 v${FRAMEWORK_VERSION}
+- **Framework**: SD003 v${FRAMEWORK_VERSION}
 
 ---
 
 ## Timeline
 
 ### $DATE - Project Initialized
-- SD002 Framework v${FRAMEWORK_VERSION} deployed
+- SD003 Framework v${FRAMEWORK_VERSION} deployed
 EOF
 
 # 5-5: .claude/settings.json (OS-aware)
@@ -395,7 +395,7 @@ echo "[Phase 6/7] Verification completed"
 # Phase 7: Report
 # ============================================================
 echo ""
-echo "=== SD002 Framework Deployment Report ==="
+echo "=== SD003 Framework Deployment Report ==="
 echo ""
 
 total_copied=0
@@ -421,4 +421,4 @@ echo "  2. Review CLAUDE.md"
 echo "  3. Run /sessionread to verify"
 echo "  4. Start with /kiro:spec-init {feature}"
 echo ""
-echo "SD002 v${FRAMEWORK_VERSION} (deploy v${SD002_VERSION}) deployed successfully!"
+echo "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!"

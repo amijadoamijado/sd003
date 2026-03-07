@@ -1,6 +1,6 @@
 # デプロイ戦略
 
-SD002フレームワークにおけるデプロイと手戻り防止の戦略。
+SD003フレームワークにおけるデプロイと手戻り防止の戦略。
 
 ## 手戻り防止戦略
 
@@ -40,7 +40,7 @@ myLogic(gasEnv);    // 本番実行
 
 ### Tool Search（MCP最適化）
 
-SD002導入時に以下の設定を必ず追加する：
+SD003導入時に以下の設定を必ず追加する：
 
 **`.claude/settings.local.json`**
 ```json
@@ -159,7 +159,7 @@ npm run verify:production
 
 ## Ralph Loop配置
 
-SD002デプロイ時に自動配置されるRalph Loop関連ファイル：
+SD003デプロイ時に自動配置されるRalph Loop関連ファイル：
 
 ### 配置ファイル
 | ファイル | 用途 | 環境 |
@@ -168,7 +168,7 @@ SD002デプロイ時に自動配置されるRalph Loop関連ファイル：
 | `.claude/hooks/sd003-stop-hook-endgame.ps1` | 終盤用 | Windows |
 | `.claude/hooks/sd003-stop-hook.sh` | 中盤用stop-hook | Linux/Mac |
 | `.claude/hooks/sd003-stop-hook-endgame.sh` | 終盤用 | Linux/Mac |
-| `.claude/commands/sd002-loop-*.md` | ループコマンド | 全環境 |
+| `.claude/commands/sd003-loop-*.md` | ループコマンド | 全環境 |
 | `.claude/rules/ralph-loop.md` | 運用ルール | 全環境 |
 
 ### 動作確認

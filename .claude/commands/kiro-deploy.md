@@ -1,9 +1,9 @@
 ---
-description: SD002フレームワークを新規プロジェクトに展開
+description: SD003フレームワークを新規プロジェクトに展開
 allowed-tools: Read, Write, Bash, Glob
 ---
 
-# SD002フレームワーク展開 v2.11.0
+# SD003フレームワーク展開 v2.11.0
 
 ## 使用方法
 
@@ -29,7 +29,7 @@ $ARGUMENTS
 
 1. 対象プロジェクトパスの存在確認
 2. 既存ファイルの有無確認
-3. **ソースパス確認**: `D:\claudecode\sd002`
+3. **ソースパス確認**: `D:\claudecode\sd003`
 
 ### Phase 2: ディレクトリ作成
 
@@ -71,7 +71,7 @@ mkdir -p <target>/materials/text
 
 ### Phase 3: ファイルコピー（🚨 省略禁止）
 
-**ソース**: `D:\claudecode\sd002`
+**ソース**: `D:\claudecode\sd003`
 
 ---
 
@@ -89,9 +89,9 @@ mkdir -p <target>/materials/text
 | 8 | workflow-order.md | ✓ |
 | 9 | workflow-request.md | ✓ |
 | 10 | workflow-status.md | ✓ |
-| 11 | sd002-loop-test.md | ✓ |
-| 12 | sd002-loop-lint.md | ✓ |
-| 13 | sd002-loop-type.md | ✓ |
+| 11 | sd003-loop-test.md | ✓ |
+| 12 | sd003-loop-lint.md | ✓ |
+| 13 | sd003-loop-type.md | ✓ |
 | 14 | ralph-wiggum-run.md | ✓ |
 | 15 | ralph-wiggum-status.md | ✓ |
 | 16 | ralph-wiggum-plan.md | ✓ |
@@ -182,7 +182,7 @@ mkdir -p <target>/materials/text
 ## Progress Summary
 
 ### Completed
-- SD002フレームワーク展開完了
+- SD003フレームワーク展開完了
 
 ### In Progress
 - (なし)
@@ -191,7 +191,7 @@ mkdir -p <target>/materials/text
 - (なし)
 
 ### Created/Modified Files
-- SD002フレームワークファイル群
+- SD003フレームワークファイル群
 
 ### Next Session Tasks
 - P0 (Urgent): なし
@@ -199,7 +199,7 @@ mkdir -p <target>/materials/text
 - P2 (Normal): なし
 
 ### Notes
-SD002 v2.11.0 で初期化。
+SD003 v2.11.0 で初期化。
 ```
 
 **TIMELINE.md テンプレート**:
@@ -209,14 +209,14 @@ SD002 v2.11.0 で初期化。
 ## Overview
 - **Project**: {PROJECT_NAME}
 - **Created**: {TIMESTAMP}
-- **Framework**: SD002 v2.11.0
+- **Framework**: SD003 v2.11.0
 
 ---
 
 ## Timeline
 
 ### {DATE} - Project Initialized
-- SD002フレームワーク展開
+- SD003フレームワーク展開
 - 初期セッション作成
 ```
 
@@ -293,7 +293,7 @@ echo "Skills: $(find .claude/skills -name '*.md' 2>/dev/null | wc -l) files"
 ### Phase 5: レポート出力
 
 ```
-=== SD002展開完了 ===
+=== SD003展開完了 ===
 
 対象: {PROJECT_PATH}
 バージョン: v2.11.0
@@ -336,7 +336,7 @@ echo "Skills: $(find .claude/skills -name '*.md' 2>/dev/null | wc -l) files"
 
 ### session-current.md と TIMELINE.md
 
-- **新規作成する**（sd002からコピーしない）
+- **新規作成する**（sd003からコピーしない）
 - プロジェクト固有の初期内容を記載
 
 ---
@@ -351,7 +351,7 @@ echo "Skills: $(find .claude/skills -name '*.md' 2>/dev/null | wc -l) files"
 
 ### 検証で❌が出た
 
-1. ソースパス `D:\claudecode\sd002` を確認
+1. ソースパス `D:\claudecode\sd003` を確認
 2. 該当ファイルを手動コピー
 3. 再検証
 

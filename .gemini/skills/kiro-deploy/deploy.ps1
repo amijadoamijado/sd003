@@ -1,4 +1,4 @@
-# SD002 Framework Deployment Script v3.0.0 (PowerShell)
+# SD003 Framework Deployment Script v3.0.0 (PowerShell)
 # Usage: powershell -ExecutionPolicy Bypass -File deploy.ps1 <target-project-path>
 
 param(
@@ -9,13 +9,13 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$SD002_VERSION = "3.0.0"
+$SD003_VERSION = "3.0.0"
 $FRAMEWORK_VERSION = "2.11.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
 
-Write-Host "=== SD002 Framework Deployment v${SD002_VERSION} ===" -ForegroundColor Cyan
+Write-Host "=== SD003 Framework Deployment v${SD003_VERSION} ===" -ForegroundColor Cyan
 Write-Host "Framework: v${FRAMEWORK_VERSION}"
 Write-Host "Source: $SOURCE_DIR"
 Write-Host "Target: $TargetProject"
@@ -33,7 +33,7 @@ Write-Host "[Phase 1/7] Target validated" -ForegroundColor Green
 # ============================================================
 # Phase 2: Backup
 # ============================================================
-$BackupDir = Join-Path $TargetProject ".sd002-backup-$TIMESTAMP"
+$BackupDir = Join-Path $TargetProject ".sd003-backup-$TIMESTAMP"
 New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
 
 $backupTargets = @("CLAUDE.md", "gemini.md")
@@ -280,7 +280,7 @@ $sessionCurrentContent = @"
 ## Progress Summary
 
 ### Completed
-- SD002 Framework v${FRAMEWORK_VERSION} deployed
+- SD003 Framework v${FRAMEWORK_VERSION} deployed
 
 ### In Progress
 - (none)
@@ -289,7 +289,7 @@ $sessionCurrentContent = @"
 - P1 (Important): Run /sessionread to verify
 
 ### Notes
-Initialized with SD002 v${FRAMEWORK_VERSION}.
+Initialized with SD003 v${FRAMEWORK_VERSION}.
 "@
 Set-Content -Path (Join-Path $TargetProject ".kiro\sessions\session-current.md") -Value $sessionCurrentContent -Encoding UTF8
 
@@ -300,14 +300,14 @@ $timelineContent = @"
 ## Overview
 - **Project**: $ProjectName
 - **Created**: $DATE
-- **Framework**: SD002 v${FRAMEWORK_VERSION}
+- **Framework**: SD003 v${FRAMEWORK_VERSION}
 
 ---
 
 ## Timeline
 
 ### $DATE - Project Initialized
-- SD002 Framework v${FRAMEWORK_VERSION} deployed
+- SD003 Framework v${FRAMEWORK_VERSION} deployed
 "@
 Set-Content -Path (Join-Path $TargetProject ".kiro\sessions\TIMELINE.md") -Value $timelineContent -Encoding UTF8
 
@@ -444,7 +444,7 @@ Write-Host "[Phase 6/7] Verification completed" -ForegroundColor Green
 # Phase 7: Report
 # ============================================================
 Write-Host ""
-Write-Host "=== SD002 Framework Deployment Report ===" -ForegroundColor Cyan
+Write-Host "=== SD003 Framework Deployment Report ===" -ForegroundColor Cyan
 Write-Host ""
 
 $totalCopied = ($copyStats.Values | Measure-Object -Sum).Sum
@@ -466,4 +466,4 @@ Write-Host "  2. Review CLAUDE.md"
 Write-Host "  3. Run /sessionread to verify"
 Write-Host "  4. Start with /kiro:spec-init {feature}"
 Write-Host ""
-Write-Host "SD002 v${FRAMEWORK_VERSION} (deploy v${SD002_VERSION}) deployed successfully!" -ForegroundColor Green
+Write-Host "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!" -ForegroundColor Green
