@@ -13,6 +13,28 @@ Project-local skills are available in `.gemini/skills/`.
 You can activate them using the `activate_skill` tool (if supported by your environment) or they will be automatically included in the system instructions.
 Available skills: `kiro-deploy`, `session-autosave`, `rollback-guard`, etc.
 
+## Core Principles
+- Always start complex tasks in plan mode. Iterate on the plan until
+  it's solid before executing.
+- After any correction, confirm with user before updating configuration
+  to prevent repetition.
+- Challenge changes: Justify every edit, prove it works, and compare
+  against main/master branch.
+- Use subagents for parallel compute and to keep main context clean.
+  Offload subtasks like verification or cleanup.
+
+## Workflow Orchestration
+- Run parallel sessions using git worktrees for isolation.
+- For bugs: Provide full context (e.g., logs) and
+  delegate end-to-end.
+- Use reusable skills/commands for daily repeats.
+
+## Environment
+- Environment: Windows 11, UTF-8 (BOM), CRLF.
+- Context management: 10% remaining -> save session, 5% -> emergency save.
+
+---
+
 ## CRITICAL: AI Coordination Workflow
 
 **Detailed rules: `.claude/rules/workflow/ai-coordination.md`**
@@ -166,4 +188,4 @@ Claude Code: 結果を読んで判断 → 承認 or 修正指示
 ```
 
 ---
-SD003 Framework v1.0.0
+SD003 Framework v2.13.0 | Updated: 2026-03-07

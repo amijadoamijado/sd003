@@ -457,6 +457,22 @@ if (Test-Path $targetPkg) {
     Write-Host "  [Phase 5b] No package.json found, skipping gas-fakes injection" -ForegroundColor Yellow
 }
 
+# 5-8: User-level CLAUDE.md (initial setup for ~/.claude/CLAUDE.md)
+$userClaudeTemplate = Join-Path $SourceDir ".claude\skills\kiro-deploy\templates\user-claude.md.template"
+$userClaudeDir = Join-Path $env:USERPROFILE ".claude"
+$userClaudeFile = Join-Path $userClaudeDir "CLAUDE.md"
+if (Test-Path $userClaudeTemplate) {
+    if (-not (Test-Path $userClaudeFile)) {
+        if (-not (Test-Path $userClaudeDir)) { New-Item -ItemType Directory -Path $userClaudeDir -Force | Out-Null }
+        Copy-Item $userClaudeTemplate $userClaudeFile
+        Write-Host "  [Phase 5-8] User CLAUDE.md created: $userClaudeFile" -ForegroundColor Green
+    } else {
+        Write-Host "  [Phase 5-8] User CLAUDE.md already exists, skipping: $userClaudeFile" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "  WARN: user-claude.md.template not found, skipping" -ForegroundColor Yellow
+}
+
 Write-Host "[Phase 5/7] Generated files created" -ForegroundColor Green
 
 # ============================================================

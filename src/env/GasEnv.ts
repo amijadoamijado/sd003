@@ -2,7 +2,7 @@
  * GAS Environment Implementation - SD002 Framework
  *
  * Google Apps Script本番環境での実装
- * GA001 v1.3.0のIEnvインターフェースを実装
+ * SD003ローカル定義のIEnvインターフェースを実装
  *
  * @version 2.0.0
  */
@@ -19,7 +19,7 @@ import type {
   ISession,
   IHtmlService,
   IDriveService,
-} from 'ga001-framework';
+} from '../interfaces/IEnv';
 
 /**
  * GasEnv: Google Apps Script本番環境実装

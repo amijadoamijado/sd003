@@ -90,6 +90,7 @@ bash .claude/skills/kiro-deploy/deploy.sh <target-project-path>
 | `.claude/settings.json` | OS検出して生成 |
 | `.kiro/ids/registry.json` | 新規生成 |
 | `.kiro/ai-coordination/handoff/handoff-log.json` | 新規生成 |
+| `~/.claude/CLAUDE.md` | テンプレートから初期配置（既存時スキップ） |
 
 ## 必須設定
 

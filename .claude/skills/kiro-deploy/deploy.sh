@@ -405,6 +405,22 @@ else
     echo "  [Phase 5b] No package.json found, skipping gas-fakes injection"
 fi
 
+# 5-8: User-level CLAUDE.md (initial setup for ~/.claude/CLAUDE.md)
+USER_CLAUDE_TEMPLATE="$SOURCE_DIR/.claude/skills/kiro-deploy/templates/user-claude.md.template"
+USER_CLAUDE_DIR="$HOME/.claude"
+USER_CLAUDE_FILE="$USER_CLAUDE_DIR/CLAUDE.md"
+if [ -f "$USER_CLAUDE_TEMPLATE" ]; then
+    if [ ! -f "$USER_CLAUDE_FILE" ]; then
+        mkdir -p "$USER_CLAUDE_DIR"
+        cp "$USER_CLAUDE_TEMPLATE" "$USER_CLAUDE_FILE"
+        echo "  [Phase 5-8] User CLAUDE.md created: $USER_CLAUDE_FILE"
+    else
+        echo "  [Phase 5-8] User CLAUDE.md already exists, skipping: $USER_CLAUDE_FILE"
+    fi
+else
+    echo "  WARN: user-claude.md.template not found, skipping"
+fi
+
 echo "[Phase 5/7] Generated files created"
 
 # ============================================================
@@ -451,7 +467,13 @@ verify_category "Kiro Settings" ".kiro/settings" ".kiro/settings" "*" "true"
 verify_category "Handoff" ".handoff" ".handoff" "*" "true"
 verify_category "Ralph" ".kiro/ralph" ".kiro/ralph" "*" "true"
 verify_category "Steering" ".kiro/steering" ".kiro/steering" "*" "true"
-verify_category "Gas Fakes" "tests/gas-fakes" "tests/gas-fakes" "*" "true"
+# Gas Fakes: only setup.ts is deployed (test files are project-specific)
+if [ -f "$TARGET_PROJECT/tests/gas-fakes/setup.ts" ]; then
+    echo "  [PASS] Gas Fakes Setup: 1/1"
+else
+    echo "  [FAIL] Gas Fakes Setup: 0/1"
+    ALL_PASSED=false
+fi
 
 # Verify generated files
 echo ""

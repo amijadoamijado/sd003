@@ -37,6 +37,28 @@
 | 中盤 | AI協調ワークフロー + 高速イテレーション | spec-impl, spec-status |
 | 終盤 | 対話型解決法 + 本番モード | validate-* |
 
+## Core Principles
+- Always start complex tasks in plan mode. Iterate on the plan until
+  it's solid before executing.
+- After any correction, confirm with user before updating configuration
+  to prevent repetition.
+- Challenge changes: Justify every edit, prove it works, and compare
+  against main/master branch.
+- Use subagents for parallel compute and to keep main context clean.
+  Offload subtasks like verification or cleanup.
+
+## Workflow Orchestration
+- Run parallel sessions using git worktrees for isolation.
+- For bugs: Provide full context (e.g., logs) and
+  delegate end-to-end.
+- Use reusable skills/commands for daily repeats.
+
+## Environment
+- Environment: Windows 11, UTF-8 (BOM), CRLF.
+- Context management: 10% remaining -> save session, 5% -> emergency save.
+
+---
+
 ## Common Rules
 
 **MUST READ**: `.handoff/RULES.md`

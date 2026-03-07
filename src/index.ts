@@ -11,13 +11,9 @@ export * from './spec-driven/id-registry';
 export * from './spec-driven/traceability-engine';
 export * from './spec-driven/quality-gate';
 
-// Core exports from GA001
+// Environment Interface Pattern (inline definitions, GA001-free)
 export * from './interfaces/IEnv';
-export * from './env/LocalEnv';
 export * from './env/GasEnv';
-
-// Mock services from GA001
-export * from './mocks';
 
 // SD002 specific exports
 // export * from './core/workflow';
@@ -42,7 +38,6 @@ export const METADATA = {
   author: 'SD002 Team',
   license: 'MIT',
   integrations: {
-    sd001: '3.0.0',
-    ga001: '1.3.0'
+    sd001: '3.0.0'
   }
 } as const;

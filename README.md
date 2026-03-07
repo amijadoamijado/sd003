@@ -108,7 +108,7 @@ bash .claude/skills/kiro-deploy/deploy.sh /path/to/your-project
 | 2 | 既存設定のバックアップ（`.sd003-backup-YYYYMMDD_HHMMSS/`） |
 | 3 | ディレクトリ構造作成 |
 | 4 | 動的コピー（12カテゴリ、ディレクトリ単位） |
-| 5 | 生成ファイル作成（CLAUDE.md, gemini.md, session等 7ファイル） |
+| 5 | 生成ファイル作成（CLAUDE.md, gemini.md, session等 7ファイル + ユーザーCLAUDE.md初期配置） |
 | 6 | 検証（ソースvsターゲットのファイル数比較） |
 | 7 | レポート出力 |
 
@@ -141,6 +141,20 @@ bash .claude/skills/kiro-deploy/deploy.sh /path/to/your-project
 (Get-ChildItem .claude/skills -Recurse -File).Count # Skills
 (Get-ChildItem .claude/hooks -Recurse -File).Count  # Hooks
 ```
+
+### ユーザーレベル CLAUDE.md の初期配置
+
+デプロイ時、`~/.claude/CLAUDE.md` が存在しない場合に自動配置されます。
+
+| 項目 | 内容 |
+|------|------|
+| テンプレート | `.claude/skills/kiro-deploy/templates/user-claude.md.template` |
+| 配置先 | `~/.claude/CLAUDE.md`（ユーザーホーム） |
+| 既存時 | **スキップ**（上書きしない） |
+| 内容 | plan mode、サブエージェント活用、コンテキスト管理等の基本方針 |
+
+> **重要**: このファイルはプロジェクト横断で全セッションに適用されます。
+> デプロイ後、必要に応じてユーザーの好みに合わせてカスタマイズしてください。
 
 ### コマンド動作確認
 
