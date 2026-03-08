@@ -16,6 +16,14 @@ TRANSCRIPT=$(echo "$INPUT" | jq -r '.transcript // empty' 2>/dev/null || echo ""
 
 # Check for test success markers
 if echo "$TRANSCRIPT" | grep -qE "(All tests pass|Tests:.*passing|0 failing|ALL_TESTS_PASS)"; then
+    # Validate test data quality before approving
+    VTD_SCRIPT="$(dirname "$0")/../../scripts/validate-test-data.sh"
+    if [ -f "$VTD_SCRIPT" ]; then
+        VTD_RESULT=$(bash "$VTD_SCRIPT" 2>&1) || {
+            echo '{"decision": "block", "reason": "Tests pass but test data quality validation failed. Fix VTD violations before proceeding."}'
+            exit 0
+        }
+    fi
     echo '{"decision": "approve", "reason": "All tests passed - stopping loop"}'
     exit 0
 fi

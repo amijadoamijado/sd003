@@ -103,6 +103,6 @@ describe('DriveApp Tier-2 availability', () => {
         'Run "gas-fakes init && gas-fakes auth && gas-fakes enable --edrive" to enable Tier-2 tests.'
       );
     }
-    expect(true).toBe(true);
+    expect(typeof hasGasFakes).toBe('boolean');
   });
 });

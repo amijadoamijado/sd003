@@ -33,7 +33,8 @@
     "spec:sync": "node dist/spec-driven/sync.js",
     "spec:validate": "node dist/spec-driven/validate.js",
     "qa:test": "npm run build && npm test && npm run test:e2e",
-    "qa:deploy:safe": "npm run qa:test && node dist/scripts/deploy-guard.js"
+    "qa:deploy:safe": "npm run qa:test && node dist/scripts/deploy-guard.js",
+    "test:validate-data": "powershell -ExecutionPolicy Bypass -File scripts/validate-test-data.ps1"
   },
   "keywords": [
     "spec-driven-development",

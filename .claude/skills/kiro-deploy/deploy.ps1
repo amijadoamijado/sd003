@@ -250,7 +250,29 @@ if (Test-Path $syncCodexSrc) {
     $copyStats["Sync Codex"] = 0
 }
 
-# 4-15: scripts/sync-gemini-features.js (single file)
+# 4-15a: scripts/validate-test-data.ps1 (single file)
+$vtdPs1Src = Join-Path $SOURCE_DIR "scripts\validate-test-data.ps1"
+if (Test-Path $vtdPs1Src) {
+    $scriptsDst = Join-Path $TargetProject "scripts"
+    if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
+    Copy-Item $vtdPs1Src (Join-Path $scriptsDst "validate-test-data.ps1") -Force
+    $copyStats["Validate Test Data (ps1)"] = 1
+} else {
+    $copyStats["Validate Test Data (ps1)"] = 0
+}
+
+# 4-15b: scripts/validate-test-data.sh (single file)
+$vtdShSrc = Join-Path $SOURCE_DIR "scripts\validate-test-data.sh"
+if (Test-Path $vtdShSrc) {
+    $scriptsDst = Join-Path $TargetProject "scripts"
+    if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
+    Copy-Item $vtdShSrc (Join-Path $scriptsDst "validate-test-data.sh") -Force
+    $copyStats["Validate Test Data (sh)"] = 1
+} else {
+    $copyStats["Validate Test Data (sh)"] = 0
+}
+
+# 4-16: scripts/sync-gemini-features.js (single file)
 $syncGeminiSrc = Join-Path $SOURCE_DIR "scripts\sync-gemini-features.js"
 if (Test-Path $syncGeminiSrc) {
     $scriptsDst = Join-Path $TargetProject "scripts"
@@ -390,7 +412,7 @@ $settingsContent = @"
           {
             "type": "command",
             "command": "powershell -ExecutionPolicy Bypass -File \"`$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }

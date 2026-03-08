@@ -22,6 +22,16 @@ if (-not $transcript) { $transcript = "" }
 
 # Check for test success markers
 if ($transcript -match "(All tests pass|Tests:.*passing|0 failing|ALL_TESTS_PASS)") {
+    # Validate test data quality before approving
+    $vtdScript = Join-Path $PSScriptRoot "..\..\scripts\validate-test-data.ps1"
+    if (Test-Path $vtdScript) {
+        $vtdResult = & powershell -ExecutionPolicy Bypass -File $vtdScript 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            $vtdOutput = $vtdResult -join "`n"
+            Write-Output "{`"decision`": `"block`", `"reason`": `"Tests pass but test data quality validation failed. Fix VTD violations before proceeding.`"}"
+            exit 0
+        }
+    }
     Write-Output '{"decision": "approve", "reason": "All tests passed - stopping loop"}'
     exit 0
 }

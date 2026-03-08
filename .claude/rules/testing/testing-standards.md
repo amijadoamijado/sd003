@@ -92,3 +92,32 @@ it('should return formatted date', () => {
   expect(result).toBe('2026-01-15'); // 実際に動かして確認済み
 });
 ```
+
+## 自動検証（Enforcement）
+
+以下のルールは `npm run test:validate-data` で自動検証される:
+
+| Rule | 検出対象 | 重要度 |
+|------|---------|-------|
+| VTD-001 | テストデータに空配列 `[]` | error |
+| VTD-002 | 全値が空/デフォルトのオブジェクト | error |
+| VTD-003 | `toBeDefined()` のみのアサーション | warning |
+| VTD-004 | `expect(true).toBe(true)` パターン | error |
+| VTD-005 | 値チェックなしのテストファイル | warning |
+
+### 実行タイミング
+- Ralph Loop停止判定時（自動） - stop hookがテスト成功前にvalidation実行
+- Codexレビュー時（レビュー観点6で手動確認）
+- `npm run test:validate-data`（任意実行）
+
+### 違反例（自動検出される）
+```typescript
+// VTD-001: 空配列 → error
+const testData = { headers: [], rows: [] };
+
+// VTD-004: トートロジー → error
+expect(true).toBe(true);
+
+// VTD-003: toBeDefined()のみ → warning
+expect(result).toBeDefined(); // これが唯一のアサーション
+```

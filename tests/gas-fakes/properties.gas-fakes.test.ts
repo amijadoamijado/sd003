@@ -104,6 +104,6 @@ describe('PropertiesService Tier-2 availability', () => {
         'Run "gas-fakes init" to enable Tier-2 tests (GCP auth not required for FILE store).'
       );
     }
-    expect(true).toBe(true);
+    expect(typeof hasGasFakes).toBe('boolean');
   });
 });

@@ -212,7 +212,25 @@ else
     COPY_STATS["Sync Codex"]=0
 fi
 
-# 4-15: scripts/sync-gemini-features.js (single file)
+# 4-15a: scripts/validate-test-data.ps1 (single file)
+if [ -f "$SOURCE_DIR/scripts/validate-test-data.ps1" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    cp "$SOURCE_DIR/scripts/validate-test-data.ps1" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Validate Test Data (ps1)"]=1
+else
+    COPY_STATS["Validate Test Data (ps1)"]=0
+fi
+
+# 4-15b: scripts/validate-test-data.sh (single file)
+if [ -f "$SOURCE_DIR/scripts/validate-test-data.sh" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    cp "$SOURCE_DIR/scripts/validate-test-data.sh" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Validate Test Data (sh)"]=1
+else
+    COPY_STATS["Validate Test Data (sh)"]=0
+fi
+
+# 4-16: scripts/sync-gemini-features.js (single file)
 if [ -f "$SOURCE_DIR/scripts/sync-gemini-features.js" ]; then
     mkdir -p "$TARGET_PROJECT/scripts"
     cp "$SOURCE_DIR/scripts/sync-gemini-features.js" "$TARGET_PROJECT/scripts/"
@@ -351,7 +369,7 @@ cat > "$TARGET_PROJECT/.claude/settings.json" << EOF
           {
             "type": "command",
             "command": "$HOOK_CMD",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }

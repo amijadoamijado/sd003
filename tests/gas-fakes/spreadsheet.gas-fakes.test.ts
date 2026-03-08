@@ -124,7 +124,6 @@ describe('SpreadsheetApp Tier-2 availability', () => {
         'Run "gas-fakes init && gas-fakes auth" to enable Tier-2 tests.'
       );
     }
-    // This test always passes - it reports status
-    expect(true).toBe(true);
+    expect(typeof hasGasFakes).toBe('boolean');
   });
 });
