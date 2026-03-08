@@ -414,6 +414,9 @@ if [ -f "$TARGET_PKG" ]; then
             if (!pkg.scripts['test:gas-fakes']) {
                 pkg.scripts['test:gas-fakes'] = 'jest --testPathPatterns=tests/gas-fakes/ --setupFiles=./tests/gas-fakes/setup.ts --passWithNoTests';
             }
+            if (!pkg.scripts['test:validate-data']) {
+                pkg.scripts['test:validate-data'] = 'powershell -ExecutionPolicy Bypass -File scripts/validate-test-data.ps1';
+            }
             fs.writeFileSync('$TARGET_PKG', JSON.stringify(pkg, null, 2) + '\n', 'utf8');
         " 2>/dev/null && echo "  [Phase 5b] gas-fakes injected into package.json" || echo "  WARN: Failed to inject gas-fakes into package.json"
     else

@@ -62,6 +62,20 @@ description: 変則TDD - 本番データ駆動テスト戦略
 2. Core層は標準形式前提でシンプルにテスト
 3. 結合テストは段階的に拡大
 
+## ⛔ 禁止事項（テストデータ品質）
+
+本番データ駆動の原則に違反するテストは `npm run test:validate-data` で自動検出される。
+
+| 禁止 | VTD Rule | 理由 |
+|------|----------|------|
+| 空配列でテスト（`headers: []`） | VTD-001 | 本番データの汚さを検証していない |
+| 全値が空/ゼロのオブジェクト | VTD-002 | ダミーデータは本番を再現しない |
+| `toBeDefined()` のみ | VTD-003 | 値の正しさを検証していない |
+| `expect(true).toBe(true)` | VTD-004 | 何も検証していない |
+| モックデータでのフォールバック | - | エラーを隠蔽する |
+
+詳細: `.claude/rules/testing/testing-standards.md`
+
 ## 詳細ガイド
 
 `docs/adapter-core-guide.md`

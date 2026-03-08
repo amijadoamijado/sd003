@@ -5,8 +5,10 @@
 | Phase | Ralph Loop | Completion Condition |
 |-------|------------|---------------------|
 | Early (Phase 1) | Not used | - |
-| Midpoint (Phase 2-3) | **Active** | All tests pass |
+| Midpoint (Phase 2-3) | **Active** | All tests pass + **VTD validation pass** |
 | Endgame (Phase 4-5) | Max 2 attempts | Same error 2x -> dialogue-resolution |
+
+> **重要**: テスト成功だけでは完了にならない。`validate-test-data` によるテストデータ品質検証（VTD-001〜005）も通過しなければ stop hook がブロックする。
 
 ## Commands
 

@@ -469,6 +469,11 @@ if (Test-Path $targetPkg) {
         $needsUpdate = $true
     }
 
+    if (-not $pkgContent.scripts.'test:validate-data') {
+        $pkgContent.scripts | Add-Member -NotePropertyName "test:validate-data" -NotePropertyValue "powershell -ExecutionPolicy Bypass -File scripts/validate-test-data.ps1" -Force
+        $needsUpdate = $true
+    }
+
     if ($needsUpdate) {
         $pkgContent | ConvertTo-Json -Depth 10 | Set-Content $targetPkg -Encoding UTF8
         Write-Host "  [Phase 5b] gas-fakes injected into package.json" -ForegroundColor Green
