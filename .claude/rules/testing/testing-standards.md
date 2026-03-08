@@ -53,18 +53,19 @@ describe('対象', () => {
 
 ### Tier-3: Antigravity E2E（本番）
 - 本番/ステージング環境でのUI確認
-- `/workflow:test` で TEST_REQUEST を作成
-- Antigravity がブラウザベースで実行
-- **Claude CodeでE2Eテストを実行する場合は `webapp-testing` スキルを使用すること**（Anthropic公式、Playwright内蔵）
-- Playwrightの手動インストールは不要（スキルが管理する）
+- **必ず `/workflow:test` で TEST_REQUEST を作成し、Antigravityに委譲する**
+- Antigravity がブラウザベースで実行（Google認証済みブラウザ使用）
+- Claude Codeが直接Playwrightを実行してはならない（GAS Web AppはGoogle認証が必要なため）
+- ローカルWeb Appのテストには `webapp-testing` スキルを使用可（Anthropic公式）
 
 ### Tier選択基準
-| テスト対象 | 推奨Tier |
-|-----------|---------|
-| Core ビジネスロジック | Tier-1 |
-| GAS API統合（Properties, Cache） | Tier-2 |
-| GAS API統合（Sheets, Drive） | Tier-2（GCP認証時）/ Tier-3 |
-| UI・フロー確認 | Tier-3 |
+| テスト対象 | 推奨Tier | 実行者 |
+|-----------|---------|--------|
+| Core ビジネスロジック | Tier-1 | Claude Code |
+| GAS API統合（Properties, Cache） | Tier-2 | Claude Code |
+| GAS API統合（Sheets, Drive） | Tier-2（GCP認証時）/ Tier-3 | Claude Code / Antigravity |
+| UI・フロー確認 | Tier-3 | **Antigravity**（`/workflow:test`） |
+| ローカルWeb App | `webapp-testing` スキル | Claude Code |
 
 ## ⛔ 禁止事項（最重要）
 
