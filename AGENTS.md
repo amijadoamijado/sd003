@@ -101,6 +101,13 @@ npm test && npm run lint
 - ESLint errors = 0
 - TypeScript strict mode
 
+### GASデプロイルール（厳守）
+- **`clasp push` のみ許可。`clasp deploy` / `clasp undeploy` はユーザー明示指示なしに実行禁止**
+- 引数なし `clasp deploy` は新規デプロイメントを作成する（既存URLが増える）
+- `clasp undeploy` は固定URLを消す（復旧不可能）
+- 固定URL更新が必要でも、まずユーザーに確認すること
+- 詳細: `.handoff/RULES.md` / `.claude/rules/gas/gas-constraints.md`
+
 ---
 
 ## Workflow Commands
