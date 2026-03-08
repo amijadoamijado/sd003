@@ -4,13 +4,21 @@ description: SD003フレームワーク品質基準（全ファイル適用）
 
 # 品質基準
 
+## 最上位原則: Work First
+
+**全ての品質基準は「動くソフトウェア」が存在することが前提。**
+動かないソフトウェアに品質基準を適用しても意味がない。
+
+詳細: `.claude/rules/global/work-first.md`
+
 ## TypeScript
 - strict mode必須
 - ESLintエラー0件
 - 型安全性確保
 
 ## テスト
-- カバレッジ80%以上
+- **前提: 対象ソフトウェアが実環境で動作確認済みであること**
+- カバレッジ80%以上（動いてから計測）
 - ユニット/統合/E2E全層
 - **テストの唯一の目的は本番エラーの発見と修正**（詳細: `.claude/rules/testing/testing-standards.md`）
 - テストデータ品質の自動検証: `npm run test:validate-data`（VTD-001〜005）

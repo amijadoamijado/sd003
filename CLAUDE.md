@@ -48,6 +48,49 @@ SD003: Spec-Driven Development framework integrating SD001 and GA001.
 
 ---
 
+## Work First - まず動かす原則（最上位・全ルールに優先）
+
+**詳細: `.claude/rules/global/work-first.md`**
+
+### 開発順序（厳守）
+```
+1. 最小コードで動かす（50行でいい）
+2. 実環境で動作確認する（ブラウザで開いて操作する）
+3. 動いたら、その動作を保証するテストを書く
+4. 必要になったら抽象化する
+5. 安定したらプロセス文書を書く
+```
+
+### 動作確認の義務
+- コード変更後、必ず実環境（ブラウザ）で動作確認する
+- テスト全パス・レビュー通過・型チェック通過は動作確認の代替にならない
+- 「動くはず」は禁止。「動いた」のみが確認
+
+### 変更前の3点固定
+| # | 項目 | 確認内容 |
+|---|------|---------|
+| 1 | 運用ルール | push/deployの使い分け |
+| 2 | 反映方法 | どのコマンドで反映するか |
+| 3 | 確認対象URL | どのURLで確認するか |
+
+### 変更仮説プロトコル
+```
+症状: [何が起きているか]
+仮説: [なぜそうなるか]
+確認方法: [どう検証するか]
+失敗時の次手: [仮説が外れたら何をするか]
+```
+
+### 禁止事項（Work First違反）
+- 動かないソフトウェアに対するテスト442個
+- 動かないソフトウェアに対するCodexレビュー
+- 動かないソフトウェアに対するワークフロー管理文書
+- 最初からの過剰な抽象化（Adapter-Core分離、Railway型等）
+- 原因確定前の修正反映の繰り返し
+- 複数の挙動を一度に変更すること
+
+---
+
 ## AI Coordination Workflow (MANDATORY)
 
 **Detailed rules: `.claude/rules/workflow/ai-coordination.md`**
@@ -147,8 +190,9 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 
 **Required**:
 - `ENABLE_TOOL_SEARCH=true` (MCP最適化、トークン85%削減)
-- GAS API via Env Interface only
-- Test coverage 80%+
+- **動作確認してからテスト・レビュー・文書作成に進む**（Work First原則）
+- GAS API via Env Interface only（動いてから適用）
+- Test coverage 80%+（動いてから計測）
 - ESLint errors = 0
 - TypeScript strict mode
 
@@ -156,6 +200,7 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 - Node.js APIs (`fs`, `path`, `process`)
 - Unauthorized spec changes
 - Creating requests outside `.kiro/ai-coordination/`
+- **動作確認なしでテスト・レビュー・文書作成に進む**（Work First違反）
 - **テストのためのテスト（本番エラー発見以外の目的のテスト）**
   - テストの唯一の目的は「本番環境のエラーを発見し修正すること」
   - モックデータ・ダミーデータ・空データでの検証は禁止
@@ -196,6 +241,7 @@ SD003は [skills.sh](https://skills.sh/) エコシステムと連携し、58,000
 
 | Category | Location |
 |---------|--------|
+| **Work First** | `rules/global/work-first.md` |
 | **AI Coordination** | `rules/workflow/ai-coordination.md` |
 | **Architecture** | `rules/architecture/adapter-core-pattern.md` |
 | **Ralph Loop/Wiggum** | `rules/ralph-loop.md` |
