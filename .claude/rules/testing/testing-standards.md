@@ -55,6 +55,8 @@ describe('対象', () => {
 - 本番/ステージング環境でのUI確認
 - `/workflow:test` で TEST_REQUEST を作成
 - Antigravity がブラウザベースで実行
+- **Claude CodeでE2Eテストを実行する場合は `webapp-testing` スキルを使用すること**（Anthropic公式、Playwright内蔵）
+- Playwrightの手動インストールは不要（スキルが管理する）
 
 ### Tier選択基準
 | テスト対象 | 推奨Tier |
