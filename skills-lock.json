@@ -1,6 +1,11 @@
 {
   "version": 1,
   "skills": {
+    "playwright-e2e-testing": {
+      "source": "bobmatnyc/claude-mpm-skills",
+      "sourceType": "github",
+      "computedHash": "4d834eae61bb2d437cffc28810894bd2173f7103b3881cbd338a523ce46b6f5a"
+    },
     "webapp-testing": {
       "source": "anthropics/skills",
       "sourceType": "github",

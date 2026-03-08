@@ -34,7 +34,8 @@
     "spec:validate": "node dist/spec-driven/validate.js",
     "qa:test": "npm run build && npm test && npm run test:e2e",
     "qa:deploy:safe": "npm run qa:test && node dist/scripts/deploy-guard.js",
-    "test:validate-data": "powershell -ExecutionPolicy Bypass -File scripts/validate-test-data.ps1"
+    "test:validate-data": "powershell -ExecutionPolicy Bypass -File scripts/validate-test-data.ps1",
+    "e2e:setup": "powershell -ExecutionPolicy Bypass -File .claude/skills/gas-e2e/scripts/setup-e2e.ps1"
   },
   "keywords": [
     "spec-driven-development",
