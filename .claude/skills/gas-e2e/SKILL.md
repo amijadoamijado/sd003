@@ -214,20 +214,33 @@ claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest
 - **`--autoConnect` 専用**の接続方式であり、MCP側がこの新方式に対応している必要がある
 - **MCP再登録後は新しいClaude Codeセッションで起動が必要**（現セッションでは反映されない）
 
-### 接続失敗時の対処（AIは上から順に試す）
+### 🚨 接続エラーのパターンと対処（Gemini CLI調査結果 2026-03-10）
+
+| エラー | 原因 | 対処 |
+|--------|------|------|
+| `Could not find DevToolsActivePort` | chrome://inspect未有効化 or Chrome未起動 | **Step 1**: chrome://inspect/#remote-debugging でONにする |
+| `Network.enable timed out` | **Chromeの「許可」ダイアログが未承認** | **Step 2**: Chrome画面に切替→許可ダイアログを承認 |
+| `/json/version` 404 | Chrome 144+新仕様（HTTP無効化、WS一本化） | **正常**。無視してよい。`--autoConnect`のみ使用 |
+| `ECONNREFUSED 127.0.0.1:9222` | Chrome再起動でchrome://inspect設定がリセット | **Step 1**をやり直す |
+
+### 接続手順（AIは必ずこの順序で実行）
 
 ```
-list_pages がエラー（"Could not find DevToolsActivePort"）
+Step 1: chrome://inspect/#remote-debugging が有効か確認
+    │   └─ 無効 → ユーザーに有効化を依頼（1回のみ）
     │
-    ├─ Step 1: 「chrome://inspect/#remote-debugging でリモートデバッグを有効にしてください」
-    │   └─ ユーザーが設定 → 再試行
+Step 2: list_pages を試行
+    │   ├─ 成功 → テスト実行へ
+    │   │
+    │   ├─ "DevToolsActivePort not found"
+    │   │   └─ Chromeが起動中か確認 → chrome://inspect設定を再確認
+    │   │
+    │   └─ "Network.enable timed out"
+    │       └─ ★★★ Chrome画面に「リモートデバッグ許可」ダイアログが出ている ★★★
+    │           → ユーザーに「Chromeに切替えて許可ダイアログを承認してください」と依頼
+    │           → 承認後に再試行（一度許可すればセッション中は再表示されない）
     │
-    ├─ Step 2: Chrome再起動が必要かも → 「Chrome再起動してください」と依頼
-    │   └─ ユーザーが再起動 → 再試行
-    │
-    ├─ Step 3: 接続時に許可ダイアログが出る → 「許可してください」と依頼
-    │
-    └─ Step 4: 上記で解決しない → Mode 3にフォールバック（最終手段）
+Step 3: 2回失敗 → Mode 3/4にフォールバック
 ```
 
 **⛔ AIが勝手にChromeを閉じる・再起動するのは禁止。ユーザーに依頼する。**
