@@ -1,9 +1,11 @@
 #!/bin/bash
-# block-clasp-deploy.sh - clasp deploy/undeploy を物理的にブロック
+# block-clasp-deploy.sh - clasp deploy の新規作成をブロック
 # PreToolUse hook for Claude Code
 #
-# clasp push のみ許可。deploy/undeploy は強制失敗。
-# AI の「守ります」は信用しない。仕組みで止める。
+# 許可: clasp deploy -i <ID> （既存デプロイメントの更新）
+# 許可: clasp deployments （一覧表示）
+# ブロック: clasp deploy（引数なし＝新規作成）
+# ブロック: clasp undeploy
 
 INPUT=$(cat)
 
@@ -14,14 +16,38 @@ if [ -z "$COMMAND" ]; then
   exit 0
 fi
 
-# clasp deploy / clasp undeploy を検出（直接実行・npm経由両方）
-if echo "$COMMAND" | grep -qiE 'clasp\s+(deploy|undeploy)'; then
+# clasp deployments（一覧表示）は常に許可
+if echo "$COMMAND" | grep -qiE 'clasp\s+deployments'; then
+  exit 0
+fi
+
+# clasp deploy -i（既存デプロイメント更新）は許可
+if echo "$COMMAND" | grep -qiE 'clasp\s+deploy\s+-i\s'; then
+  exit 0
+fi
+
+# clasp undeploy は常にブロック
+if echo "$COMMAND" | grep -qiE 'clasp\s+undeploy'; then
   cat <<'EOF'
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": "deny",
-    "permissionDecisionReason": "BLOCKED: clasp deploy/undeploy は禁止されています。GASのコード反映は clasp push のみ。固定URL更新が必要な場合はユーザーに確認してください。"
+    "permissionDecisionReason": "BLOCKED: clasp undeploy は禁止されています。"
+  }
+}
+EOF
+  exit 0
+fi
+
+# clasp deploy（-i なし＝新規作成）はブロック
+if echo "$COMMAND" | grep -qiE 'clasp\s+deploy'; then
+  cat <<'EOF'
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": "deny",
+    "permissionDecisionReason": "BLOCKED: clasp deploy（新規作成）は禁止。既存デプロイメントを更新するには clasp deploy -i <デプロイメントID> を使用してください。"
   }
 }
 EOF

@@ -1,8 +1,8 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 9
-- **Latest Session**: 2026-03-08
+- **Total Sessions**: 10
+- **Latest Session**: 2026-03-10
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-10 | gas-e2e iframe制約記録 + Mode優先順修正 + もたつき防止 | 8f15d55 | [Details](session-20260310-090634.md) |
 | 03-08 | gas-e2eスキル + clasp deploy物理ブロック + Work First原則 | 65b43f6 | [Details](session-20260308-213433.md) |
 | 03-08 | VTD Enforcement Layer追加 + テスト絶対原則明記 + oc001デプロイ | 0881eb5 | [Details](session-20260308-144850.md) |
 | 03-07 | CLAUDE.md統一 + GA001完全排除 + td001デプロイテストALL PASSED | - | [Details](session-20260307-095821.md) |

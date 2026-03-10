@@ -9,9 +9,9 @@ echo "=== GAS E2E Test Environment Setup ==="
 # Step 1: Playwright Chromium インストール
 echo ""
 echo "[1/3] Installing Playwright Chromium browser..."
-export PLAYWRIGHT_BROWSERS_PATH="F:/playwright-browsers"
+export PLAYWRIGHT_BROWSERS_PATH="D:/playwright-browsers"
 npx playwright install chromium
-echo "  Chromium installed to: F:/playwright-browsers"
+echo "  Chromium installed to: D:/playwright-browsers"
 
 # Step 2: OS依存ライブラリ
 echo ""
@@ -23,7 +23,7 @@ else
 fi
 
 # Step 3: 専用E2Eプロファイルディレクトリ作成
-PROFILE_DIR="F:/playwright-browsers/gas-e2e-profile"
+PROFILE_DIR="D:/playwright-browsers/gas-e2e-profile"
 echo ""
 echo "[3/3] Creating E2E profile directory..."
 if [ ! -d "$PROFILE_DIR" ]; then
