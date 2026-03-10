@@ -199,13 +199,20 @@ claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest
 
 **Note**: `--executable-path`は不要。autoConnectは既存のChromeに接続するため新しいブラウザを起動しない。
 
-### 3つの接続方式の比較（正確な情報）
+### 3つの接続方式の比較（検証済み 2026-03-10）
 
 | 方式 | フラグ | `--remote-debugging-port`? | `chrome://inspect` 設定? | Chrome版数 |
 |------|--------|--------------------------|-------------------------|-----------|
 | **autoConnect（推奨）** | `--autoConnect` | **不要** | **必要**（初回のみ） | **144+** |
 | manual port | `--browserUrl http://127.0.0.1:9222` | **必要**（認証デッドロック問題あり） | 不要 | 任意 |
 | WebSocket | `--wsEndpoint <url>` | 対象による | 不要 | 任意 |
+
+### ⚠️ 接続方式の注意点（検証済み）
+- `chrome://inspect/#remote-debugging` が開くポート9222は **従来のCDP HTTP APIではない**
+- `/json/version` や `/json` エンドポイントは404を返す
+- したがって `--browserUrl http://127.0.0.1:9222` では接続**できない**
+- **`--autoConnect` 専用**の接続方式であり、MCP側がこの新方式に対応している必要がある
+- **MCP再登録後は新しいClaude Codeセッションで起動が必要**（現セッションでは反映されない）
 
 ### 接続失敗時の対処（AIは上から順に試す）
 
