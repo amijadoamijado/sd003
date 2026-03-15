@@ -83,6 +83,35 @@ After saving session, update TIMELINE.md:
 ## User Input
 $ARGUMENTS
 
+## Codex Handoff（並行保存）
+
+セッション記録と同時に、Codex向けの引き継ぎファイルも更新する:
+
+```bash
+# .handoff/DONE.md を生成（Codex/Gemini向け引き継ぎ）
+```
+
+内容は session record の要約版:
+- 完了事項（箇条書き）
+- 未完了事項
+- 次のステップ
+- 関連ファイルパス
+
+**DONE.md は `.handoff/DONE.template.md` をベースに作成する。**
+
+## Git Commit
+
+After saving session files, TIMELINE, and DONE.md, commit the changes:
+
+```bash
+git add .kiro/sessions/session-*.md .kiro/sessions/TIMELINE.md .handoff/DONE.md
+git commit -m "session: [1行サマリー]
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
+```
+
+post-commit hookにより自動でGitHubにpushされる。
+
 ---
 
-**Execute**: Create session record, save to both history and current files, then update TIMELINE.md.
+**Execute**: Create session record, save to both history and current files, update TIMELINE.md, then git commit.

@@ -1,6 +1,6 @@
 ---
 description: 最新のセッション継続記録を読み込み表示
-allowed-tools: Read, Bash, Glob
+allowed-tools: Read, Bash, Glob, Agent
 ---
 
 # セッション読み込み（完全版）
@@ -105,4 +105,24 @@ Read: .kiro/sessions/TIMELINE.md
 
 ---
 
-**実行開始**: 上記4ファイルを順番に読み込み、要約を表示してください。
+## Step 5: セッションアーカイブ（バックグラウンド）
+
+**4ファイル読み込みと並行して**、以下のAgentをバックグラウンドで起動する:
+
+```
+Agent(run_in_background=true):
+  description: "archive old sessions"
+  prompt: |
+    古いClaude Codeセッションのアーカイブ状況を確認します。以下を実行してください:
+    1. bash ~/.claude/scripts/archive-sessions.sh 7 preview でプレビュー
+    2. 対象が0件なら「アーカイブ対象なし」と報告して終了
+    3. 対象がある場合は件数とサイズを報告（実行はしない）
+    4. 「/archive-sessions --execute で実行できます」と案内
+```
+
+**重要**: このAgentはバックグラウンドで実行し、メインの作業をブロックしない。
+完了通知が届いたら結果を簡潔にユーザーに伝える。
+
+---
+
+**実行開始**: 上記4ファイルを順番に読み込み（Step 1-4）、同時にStep 5のAgentをバックグラウンドで起動し、要約を表示してください。

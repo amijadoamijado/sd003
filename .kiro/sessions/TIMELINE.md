@@ -1,8 +1,8 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 12
-- **Latest Session**: 2026-03-10
+- **Total Sessions**: 17
+- **Latest Session**: 2026-03-15
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,11 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-15 | セッションアーカイブ + Claude/Codexスキル共有 + AI並列実行基盤 | aa15ed4 | [Details](session-20260315-115838.md) |
+| 03-12 | cf001デプロイ + 展開検証ALL PASSED | aa15ed4 | [Details](session-20260312-190512.md) |
+| 03-12 | at001デプロイ + deploy.ps1 gas-fakes自動生成改修 | aa15ed4 | [Details](session-20260312-160349.md) |
+| 03-12 | SD003 v2.13.0 ck001デプロイ + マルチAI対応確認 | aa15ed4 | [Details](session-20260312-110949.md) |
+| 03-10 | clasp deploy漏れ防止hook v2（3段階状態追跡） + Gemini調査確認 | aa15ed4 | [Details](session-20260310-154249.md) |
 | 03-10 | GAS E2E業界調査 + 2層戦略発見 + Gemini依頼 | 0a286a6 | [Details](session-20260310-125054.md) |
 | 03-10 | gas-e2e autoConnect接続分析 + browserUrl不可確定 | fe2c1ea | [Details](session-20260310-115808.md) |
 | 03-10 | gas-e2e iframe制約記録 + Mode優先順修正 + もたつき防止 | 8c46448 | [Details](session-20260310-090634.md) |
