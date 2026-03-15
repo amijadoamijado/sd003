@@ -1,7 +1,7 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 17
+- **Total Sessions**: 18
 - **Latest Session**: 2026-03-15
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-15 | cf001短期借入金バグ調査（CF+BS漏れ確定、321未処理） | e71e8b5 | [Details](session-20260315-135822.md) |
 | 03-15 | セッションアーカイブ + Claude/Codexスキル共有 + AI並列実行基盤 | aa15ed4 | [Details](session-20260315-115838.md) |
 | 03-12 | cf001デプロイ + 展開検証ALL PASSED | aa15ed4 | [Details](session-20260312-190512.md) |
 | 03-12 | at001デプロイ + deploy.ps1 gas-fakes自動生成改修 | aa15ed4 | [Details](session-20260312-160349.md) |

@@ -1,30 +1,24 @@
-# DONE - Session 2026-03-15
+# DONE - Session 2026-03-15 (2nd)
 
 ## 完了事項
-- セッションアーカイブシステム（archive-sessions.sh + build-session-index.py）
-- sessionreadにバックグラウンドarchive統合（previewのみ）
-- git post-commit hook（自動push）
-- Claude Code + Codex スキル共有基盤（~/shared-skills/ + Junction + sync-skills.ps1）
-- codex-dispatch / gemini-dispatch スキル
-- /workflow:impl に --codex フラグ追加
-- Codexレビュー2回、High指摘全件修正
-- sessionwriteにgit commit + DONE.md生成を追加
-- 全プロジェクト展開（oc001, at001, td001, ta001, cf001, ck001）
+- cf001プロジェクトの短期借入金元本返済(13期)処理フロー徹底調査
+- BUG確定 #1: FinancialStatementService.ts calculateMonthlyCF() で短期借入金(321)がCF未反映
+- BUG確定 #2: FinancialStatementService.ts updateBS() で短期借入金(321)のBS残高更新なし
+- 預金コード不整合の発見: CF計算は'111'、仕訳生成は'131'
 
 ## 未完了
-なし
+- [ ] cf001 FinancialStatementService.ts の calculateMonthlyCF() に321チェック追加
+- [ ] cf001 FinancialStatementService.ts の updateBS() に321残高更新処理追加
+- [ ] 預金コード '111' vs '131' 整合性確認・修正
+- [ ] 修正後の13期CF・BS出力検証（実データ）
 
 ## 次のステップ
-- 実プロジェクトでClaude Code→Codex並列実行を実戦テスト
-- /kiro:deploy にスキル共有（Junction設定）を組み込む
+- cf001 FinancialStatementService.ts バグ修正（CF + BS）
+- 対象ファイル: D:/claudecode/cf001/src/core/FinancialStatementService.ts
+- cf001ブランチ: feature/data-update-2603
 
 ## 関連ファイル
-- `~/.claude/scripts/archive-sessions.sh`
-- `~/.claude/scripts/build-session-index.py`
-- `~/shared-skills/sync-skills.ps1`
-- `~/shared-skills/codex-dispatch/SKILL.md`
-- `~/shared-skills/gemini-dispatch/SKILL.md`
-- `.claude/commands/sessionread.md`
-- `.claude/commands/sessionwrite.md`
-- `.claude/commands/workflow-impl.md`
-- `.git/hooks/post-commit`
+- `D:/claudecode/cf001/src/core/FinancialStatementService.ts` (バグ箇所)
+- `D:/claudecode/cf001/tests/manual/export-journals-v2.ts` (正常な参考実装)
+- `D:/claudecode/cf001/src/core/AggregateAccountMapping.ts` (科目コード定義)
+- `D:/claudecode/cf001/active/input/13_tb.csv` (13期試算表)
