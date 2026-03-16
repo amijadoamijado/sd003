@@ -191,6 +191,7 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 **Required**:
 - `ENABLE_TOOL_SEARCH=true` (MCP最適化、トークン85%削減)
 - **動作確認してからテスト・レビュー・文書作成に進む**（Work First原則）
+- **ファイル操作前にskills/確認必須**（詳細: `.claude/rules/skills/skill-check-before-action.md`）
 - GAS API via Env Interface only（動いてから適用）
 - Test coverage 80%+（動いてから計測）
 - ESLint errors = 0
