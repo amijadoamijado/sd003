@@ -240,6 +240,16 @@ SD003は [skills.sh](https://skills.sh/) エコシステムと連携し、58,000
 
 詳細: `.claude/rules/skills/skill-trust-policy.md`
 
+### オプション装備（Superpowers由来）
+
+| スキル | 用途 | ソース |
+|--------|------|--------|
+| git-worktrees | Worktree安全管理 | obra/superpowers (adapted) |
+| parallel-subagents | Claude内部並列 | obra/superpowers (adapted) |
+| find-duplicates | セマンティック重複検出 | obra/superpowers-lab |
+
+デプロイ時はデフォルト除外。`-IncludeOptional` で含める。
+
 ---
 
 ## Rule Reference

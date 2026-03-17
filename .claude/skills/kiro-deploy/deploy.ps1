@@ -3,7 +3,8 @@
 
 param(
     [Parameter(Mandatory=$true)]
-    [string]$TargetProject
+    [string]$TargetProject,
+    [switch]$IncludeOptional
 )
 
 $ErrorActionPreference = "Stop"
@@ -103,7 +104,8 @@ function Copy-DirTree {
     param(
         [string]$RelPath,
         [string]$Label,
-        [string]$Filter = "*"
+        [string]$Filter = "*",
+        [string[]]$Exclude = @()
     )
     $src = Join-Path $SOURCE_DIR $RelPath
     $dst = Join-Path $TargetProject $RelPath
@@ -123,6 +125,13 @@ function Copy-DirTree {
     # Copy entire tree preserving structure
     $items = Get-ChildItem -Path $src -Recurse -File -Filter $Filter
     foreach ($item in $items) {
+        # Exclude check
+        $skip = $false
+        foreach ($ex in $Exclude) {
+            if ($item.FullName -like "*\$ex\*") { $skip = $true; break }
+        }
+        if ($skip) { continue }
+
         $relativePath = $item.FullName.Substring($src.Length)
         $destPath = Join-Path $dst $relativePath
         $destDir = Split-Path $destPath -Parent
@@ -175,8 +184,14 @@ Copy-FlatDir -RelPath ".claude\commands\kiro" -Label "Commands/kiro" -Extension 
 # 4-3: .claude/rules/ (tree)
 Copy-DirTree -RelPath ".claude\rules" -Label "Rules" -Filter "*.md"
 
-# 4-4: .claude/skills/ (tree)
-Copy-DirTree -RelPath ".claude\skills" -Label "Skills"
+# 4-4: .claude/skills/ (tree) - optional skills excluded by default
+$optionalSkills = @()
+$optCfg = Join-Path $SOURCE_DIR ".claude\skills\kiro-deploy\optional-skills.json"
+if ((Test-Path $optCfg) -and (-not $IncludeOptional)) {
+    $optionalSkills = (Get-Content $optCfg | ConvertFrom-Json).optional_skills
+    Write-Host "  Optional skills excluded: $($optionalSkills -join ', ')" -ForegroundColor DarkGray
+}
+Copy-DirTree -RelPath ".claude\skills" -Label "Skills" -Exclude $optionalSkills
 
 # 4-5: .claude/hooks/ (tree)
 Copy-DirTree -RelPath ".claude\hooks" -Label "Hooks"
@@ -445,43 +460,54 @@ $handoffContent = @"
 "@
 Set-Content -Path (Join-Path $TargetProject ".kiro\ai-coordination\handoff\handoff-log.json") -Value $handoffContent -Encoding UTF8
 
-# 5b: Inject gas-fakes into target package.json (if it exists)
+# 5b: Inject gas-fakes into target package.json (create if not exists)
 $targetPkg = Join-Path $TargetProject "package.json"
-if (Test-Path $targetPkg) {
-    $pkgContent = Get-Content $targetPkg -Raw -Encoding UTF8 | ConvertFrom-Json
-    $needsUpdate = $false
+if (-not (Test-Path $targetPkg)) {
+    # Auto-create minimal package.json
+    $newPkgContent = @"
+{
+  "name": "$($ProjectName.ToLower() -replace '[^a-z0-9\-]', '-')",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {},
+  "devDependencies": {}
+}
+"@
+    Set-Content -Path $targetPkg -Value $newPkgContent -Encoding UTF8
+    Write-Host "  [Phase 5b] package.json created" -ForegroundColor Green
+}
 
-    if (-not $pkgContent.devDependencies) {
-        $pkgContent | Add-Member -NotePropertyName "devDependencies" -NotePropertyValue ([PSCustomObject]@{}) -Force
-    }
+$pkgContent = Get-Content $targetPkg -Raw -Encoding UTF8 | ConvertFrom-Json
+$needsUpdate = $false
 
-    if (-not $pkgContent.devDependencies.'@mcpher/gas-fakes') {
-        $pkgContent.devDependencies | Add-Member -NotePropertyName "@mcpher/gas-fakes" -NotePropertyValue "^1.2.0" -Force
-        $needsUpdate = $true
-    }
+if (-not $pkgContent.devDependencies) {
+    $pkgContent | Add-Member -NotePropertyName "devDependencies" -NotePropertyValue ([PSCustomObject]@{}) -Force
+}
 
-    if (-not $pkgContent.scripts) {
-        $pkgContent | Add-Member -NotePropertyName "scripts" -NotePropertyValue ([PSCustomObject]@{}) -Force
-    }
+if (-not $pkgContent.devDependencies.'@mcpher/gas-fakes') {
+    $pkgContent.devDependencies | Add-Member -NotePropertyName "@mcpher/gas-fakes" -NotePropertyValue "^1.2.0" -Force
+    $needsUpdate = $true
+}
 
-    if (-not $pkgContent.scripts.'test:gas-fakes') {
-        $pkgContent.scripts | Add-Member -NotePropertyName "test:gas-fakes" -NotePropertyValue "jest --testPathPatterns=tests/gas-fakes/ --setupFiles=./tests/gas-fakes/setup.ts --passWithNoTests" -Force
-        $needsUpdate = $true
-    }
+if (-not $pkgContent.scripts) {
+    $pkgContent | Add-Member -NotePropertyName "scripts" -NotePropertyValue ([PSCustomObject]@{}) -Force
+}
 
-    if (-not $pkgContent.scripts.'test:validate-data') {
-        $pkgContent.scripts | Add-Member -NotePropertyName "test:validate-data" -NotePropertyValue "powershell -ExecutionPolicy Bypass -File scripts/validate-test-data.ps1" -Force
-        $needsUpdate = $true
-    }
+if (-not $pkgContent.scripts.'test:gas-fakes') {
+    $pkgContent.scripts | Add-Member -NotePropertyName "test:gas-fakes" -NotePropertyValue "jest --testPathPatterns=tests/gas-fakes/ --setupFiles=./tests/gas-fakes/setup.ts --passWithNoTests" -Force
+    $needsUpdate = $true
+}
 
-    if ($needsUpdate) {
-        $pkgContent | ConvertTo-Json -Depth 10 | Set-Content $targetPkg -Encoding UTF8
-        Write-Host "  [Phase 5b] gas-fakes injected into package.json" -ForegroundColor Green
-    } else {
-        Write-Host "  [Phase 5b] gas-fakes already present in package.json, skipping" -ForegroundColor Yellow
-    }
+if (-not $pkgContent.scripts.'test:validate-data') {
+    $pkgContent.scripts | Add-Member -NotePropertyName "test:validate-data" -NotePropertyValue "powershell -ExecutionPolicy Bypass -File scripts/validate-test-data.ps1" -Force
+    $needsUpdate = $true
+}
+
+if ($needsUpdate) {
+    $pkgContent | ConvertTo-Json -Depth 10 | Set-Content $targetPkg -Encoding UTF8
+    Write-Host "  [Phase 5b] gas-fakes injected into package.json" -ForegroundColor Green
 } else {
-    Write-Host "  [Phase 5b] No package.json found, skipping gas-fakes injection" -ForegroundColor Yellow
+    Write-Host "  [Phase 5b] gas-fakes already present in package.json, skipping" -ForegroundColor Yellow
 }
 
 # 5-8: User-level CLAUDE.md (initial setup for ~/.claude/CLAUDE.md)

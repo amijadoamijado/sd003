@@ -11,6 +11,7 @@ SD003では外部スキルエコシステム（skills.sh / `npx skills`）と連
 |-----------|--------|------|
 | **Trusted** | `anthropics/skills`（Anthropic公式） | 自由にインストール可 |
 | **Trusted** | `vercel-labs/skills`, `vercel-labs/agent-skills`（Vercel Labs） | 自由にインストール可 |
+| **Reviewed** | `obra/superpowers`（91K+ stars, reviewed 2026-03-18） | 確認済み、適応版使用 |
 | **Local** | `.claude/skills/` 直下（SD003独自スキル） | プロジェクト管理下 |
 | **Caution** | その他のリポジトリ | SKILL.md確認後にインストール |
 
