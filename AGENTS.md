@@ -13,6 +13,14 @@
 
 ---
 
+## 言語設定（必須）
+
+**レビュー報告・ユーザーとのやりとりは全て日本語で対応すること。**
+英語での回答は禁止。コード内のコメントや変数名は英語のままでよいが、
+レビューコメント、報告書、質問への回答など、人間向けのテキストは日本語で出力する。
+
+---
+
 ## Core Principles
 - Always start complex tasks in plan mode. Iterate on the plan until
   it's solid before executing.
