@@ -1,22 +1,34 @@
-# DONE - Session 2026-03-16
+# DONE - Session 2026-03-18
 
 ## 完了事項
-- 「削除禁止・上書き禁止」ルールを4ファイルに追加（Excel上書き事故対策）
-  - `.handoff/RULES.md` — 全AI共通禁止事項に2行追加
-  - `.claude/rules/cleanup/file-organization.md` — ファイル保護ルールセクション追加
-  - `D:\claudecode\CLAUDE.md` — 3箇所に上書き禁止追加
-  - `D:\claudecode\sd003\CLAUDE.md` — Prohibitedリストに上書き禁止追加
-- セッションアーカイブ実行（16件/23MB → Google Drive）
-- セッションインデックス再生成（47セッション記録）
+- Superpowers部分統合（obra/superpowersから3スキルをオプション装備として導入）
+  - `git-worktrees` — Worktree安全管理スキル（P1）
+  - `parallel-subagents` — Claude内部並列実行ガイド（P2）
+  - `find-duplicates` — セマンティック重複検出（P3）
+- deploy.ps1にデプロイ除外機構を追加
+  - `-IncludeOptional`スイッチ + `Copy-DirTree`に`-Exclude`パラメータ
+  - `optional-skills.json`でオプションスキルを管理
+- skill-trust-policy.mdに`Reviewed`レベル追加（obra/superpowers）
+- CLAUDE.mdにオプション装備セクション追加
+- Codex日本語対応設定（AGENTS.md 2箇所に言語設定追加）
 
 ## 未完了
-- [ ] `/kiro:deploy` で他プロジェクトへ展開し上書き禁止ルール含まれることを確認
+- [ ] deploy.ps1のoptional除外動作をdry-run検証
+- [ ] git-worktreesスキルの実際のworktree作成テスト
+- [ ] parallel-subagentsの`/refactor:init` 3並列動作確認
+- [ ] find-duplicatesのsrc/配下重複検出実行
+- [ ] Codex日本語対応の効果確認（次回レビュー時）
 
 ## 次のステップ
-- 特になし（ルール追加完了）
+- P1検証タスクを順次実行
 
 ## 関連ファイル
-- `.handoff/RULES.md`
-- `.claude/rules/cleanup/file-organization.md`
-- `D:\claudecode\CLAUDE.md`
-- `D:\claudecode\sd003\CLAUDE.md`
+- `.claude/skills/git-worktrees/SKILL.md`
+- `.claude/skills/parallel-subagents/SKILL.md`
+- `.claude/skills/find-duplicates/SKILL.md`
+- `.claude/skills/kiro-deploy/optional-skills.json`
+- `.claude/skills/kiro-deploy/deploy.ps1`
+- `.claude/rules/skills/skill-trust-policy.md`
+- `CLAUDE.md`
+- `AGENTS.md`
+- `.handoff/AGENTS.md`
