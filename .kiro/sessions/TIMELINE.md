@@ -1,7 +1,7 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 24
+- **Total Sessions**: 25
 - **Latest Session**: 2026-03-21
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-21 | .kiro消失解決確認 + 再起動検証 | a6e7f8b | [Details](session-20260321-224421.md) |
 | 03-21 | dialogue-resolution .kiro root cause fixed | 7e327d4 | [Details](session-20260321-222657.md) |
 | 03-21 | SD003.1 + root-cause-first + 7 projects | 2fdd9e4 | [Details](session-20260321-215950.md) |
 | 03-21 | SD003.1 IMPORTANT IF restructure + block-at-submit + validation cases + browser-use検証 | df2851a | [Details](session-20260321-205056.md) |
