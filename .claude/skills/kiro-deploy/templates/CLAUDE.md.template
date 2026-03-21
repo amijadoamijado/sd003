@@ -1,99 +1,74 @@
-# {{PROJECT_NAME}} - SD003フレームワーク
+# {{PROJECT_NAME}} - AI Development Command Center
 
-## 開発フェーズ戦略
+## Session Start
 
-### 序盤: 計画フェーズ
-**仕様書ファースト** + **フロントエンド駆動**
+`/sessionread` → 4ファイル自動読込 | Crash Recovery: `claude --continue` + `/sessionread`
 
-- 要件定義 → 設計 → タスク分解 の順序厳守
-- UIモック/ワイヤーフレームを先に固める
-- ユーザー体験を起点にバックエンドを設計
+## Overview
 
-**コマンド:**
-```
-/kiro:spec-init {feature}           # 仕様書初期化
-/kiro:spec-requirements {feature}   # 要件定義
-/kiro:spec-design {feature}         # 技術設計
-/kiro:spec-tasks {feature}          # タスク分解
-```
+{{PROJECT_NAME}}: SD003 Spec-Driven Development. TypeScript (strict) + Google Apps Script + Env Interface Pattern.
 
-### 中盤: 実装フェーズ
-**AI協調ワークフロー** + **高速イテレーション**
+Common rules for all AI models: `.handoff/RULES.md`
+Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
 
-| AI | 役割 |
-|----|------|
-| Claude Code | 計画・工程管理 |
-| Codex | レビュー・品質チェック |
-| Gemini CLI | 高速実装 |
+## Work First（最上位・全ルールに優先）
 
-- 90%速度優先、細かい修正は後で
+開発順序: 動かす → 実環境で確認 → テスト → 抽象化 → 文書
 
-**コマンド:**
-```
-/workflow:init {slug}              # 案件初期化
-/workflow:order {案件ID}           # 発注書作成
-/workflow:request {案件ID} {番号}  # 実装指示
-/workflow:status {案件ID}          # 工程確認
+- コード変更後、必ず実環境（ブラウザ）で動作確認する
+- 「動くはず」は禁止。「動いた」のみが確認
+- 変更前に3点固定: 運用ルール、反映方法、確認対象URL
+- 変更前に仮説明文化: 症状、仮説、確認方法、失敗時の次手
+- 詳細: `.claude/rules/global/work-first.md`
+
+## Build & Test
+
+```bash
+npm run build && npm test && npm run lint
+npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 ```
 
-### 終盤: 完成フェーズ
-**対話型解決法** + **本番モード**
+## Required Settings
 
-- エラー収束しない → `/dialogue-resolution`
-- 「本番」キーワードで品質ゲート全通過必須
-- 唯一の成功基準:「必ず動く」
+`.claude/settings.local.json`: `"ENABLE_TOOL_SEARCH": "true"`
 
-**コマンド:**
-```
-/dialogue-resolution {エラー内容}  # 対話型問題解決
-/kiro:validate-impl {feature}      # 実装検証
-```
+## File Safety
 
-## セッション管理
-
-```
-/sessionread               # 前回セッション読込
-/sessionwrite              # セッション保存
-```
-
-## Common Rules
-
-**MUST READ**: `.handoff/RULES.md`
-
-## File Location Rules
-
-| カテゴリ | ファイル | 保存先 |
-|---------|---------|--------|
-| 仕様書 | requirements.md | `.kiro/specs/{feature}/` |
-| 仕様書 | design.md | `.kiro/specs/{feature}/` |
-| 仕様書 | tasks.md | `.kiro/specs/{feature}/` |
-| ワークフロー | WORK_ORDER.md | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
-| ワークフロー | IMPLEMENT_REQUEST | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
-| ワークフロー | TEST_REQUEST | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
-| ワークフロー | REVIEW | `.kiro/ai-coordination/workflow/review/{projectID}/` |
-| ワークフロー | TEST_REPORT | `.kiro/ai-coordination/workflow/review/{projectID}/` |
-| セッション | session-current.md | `.kiro/sessions/` |
-| セッション | TIMELINE.md | `.kiro/sessions/` |
-
-**配置禁止**: プロジェクトルート直下への新規作成、`.antigravity/` への依頼書作成
-
-## 詳細ドキュメント
-
-必要時のみ参照:
-| トピック | 場所 |
-|---------|------|
-| 品質ゲート | `docs/quality-gates.md` |
-| トラブルシューティング | `docs/troubleshooting/` |
-
-## クリティカルルール
-
-### 本番モード発動キーワード
-「**本番**」「**プロダクション**」「**デプロイ前**」
-
-発動時:
-- 全コードを1行ずつ精読
-- 正常系・異常系・エッジケース全テスト
-- 8段階品質ゲート全通過必須
+- rm禁止（アーカイブ移動）、ユーザー提供ファイル上書き禁止（別名で新規作成）
+- ルート直下への新規ファイル作成禁止
+- 詳細: `.claude/rules/cleanup/file-organization.md`
 
 ---
-SD003 v2.13.0 | 導入日: {{DATE}}
+
+## Conditional Context
+
+IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. Known constraints (iframe, CORS, @HEAD vs fixed deployment) must be reflected in code immediately. Details: `.claude/rules/gas/env-interface.md`, `.claude/rules/gas/gas-constraints.md`
+
+IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
+
+IMPORTANT: When coordinating with other AIs (Codex, Gemini, Antigravity), all documents go to `.kiro/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
+
+IMPORTANT: When refactoring, use checkpoint-based batches with `/refactor:init`. Context auto-compact at 70%, auto-clear at 85%. Rollback requires user confirmation. Details: `.claude/rules/refactoring/refactoring-system.md`
+
+IMPORTANT: If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Details: `.claude/rules/skills/skill-check-before-action.md`
+
+IMPORTANT: When debugging, use the 3-tier system: `/bug-quick` (5-15min, flow comparison) → `/bug-trace` (30-60min, 3-agent parallel) → `/dialogue-resolution` (AI reasoning check). Escalate on 2nd same error. Details: `.claude/rules/troubleshooting/`
+
+IMPORTANT: When in a loop session (`/sd003:loop-*`), follow Ralph Loop rules. Midpoint: loop freely. Endgame: same error 2x → stop and escalate. Details: `.claude/rules/ralph-loop.md`
+
+IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
+
+---
+
+## Quick Command Reference
+
+| Category | Commands |
+|----------|----------|
+| Spec-Driven | `/kiro:spec-init`, `spec-requirements`, `spec-design`, `spec-tasks`, `spec-impl` |
+| AI Workflow | `/workflow:init`, `order`, `request`, `impl`, `review`, `test`, `status` |
+| Loop | `/sd003:loop-test`, `loop-lint`, `loop-type` |
+| Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution` |
+| Session | `/sessionread`, `/sessionwrite`, `/sessionhistory` |
+
+---
+SD003 v2.14.0 | Deployed: {{DATE}} | Style: `.claude/rules/global/claude-md-style.md`

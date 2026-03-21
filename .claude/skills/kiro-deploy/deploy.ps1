@@ -11,7 +11,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $SD003_VERSION = "3.1.0"
-$FRAMEWORK_VERSION = "2.13.0"
+$FRAMEWORK_VERSION = "2.14.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -428,6 +428,23 @@ $settingsContent = @"
             "type": "command",
             "command": "powershell -ExecutionPolicy Bypass -File \"`$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
+            "timeout": 120
           }
         ]
       }
