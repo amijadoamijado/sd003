@@ -445,6 +445,33 @@ $settingsContent = @"
             "type": "command",
             "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
             "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/deploy-package-reminder.sh\"",
+            "timeout": 10
           }
         ]
       }
