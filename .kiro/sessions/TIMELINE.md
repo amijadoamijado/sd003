@@ -1,7 +1,7 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 23
+- **Total Sessions**: 24
 - **Latest Session**: 2026-03-21
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-21 | dialogue-resolution .kiro root cause fixed | 7e327d4 | [Details](session-20260321-222657.md) |
 | 03-21 | SD003.1 + root-cause-first + 7 projects | 2fdd9e4 | [Details](session-20260321-215950.md) |
 | 03-21 | SD003.1 IMPORTANT IF restructure + block-at-submit + validation cases + browser-use検証 | df2851a | [Details](session-20260321-205056.md) |
 | 03-18 | Superpowers部分統合（3スキル） + Codex日本語設定 | 5a653cd | [Details](session-20260318-110210.md) |
