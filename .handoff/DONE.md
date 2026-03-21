@@ -1,34 +1,26 @@
-# DONE - Session 2026-03-18
+# DONE - Session 2026-03-21
 
 ## 完了事項
-- Superpowers部分統合（obra/superpowersから3スキルをオプション装備として導入）
-  - `git-worktrees` — Worktree安全管理スキル（P1）
-  - `parallel-subagents` — Claude内部並列実行ガイド（P2）
-  - `find-duplicates` — セマンティック重複検出（P3）
-- deploy.ps1にデプロイ除外機構を追加
-  - `-IncludeOptional`スイッチ + `Copy-DirTree`に`-Exclude`パラメータ
-  - `optional-skills.json`でオプションスキルを管理
-- skill-trust-policy.mdに`Reviewed`レベル追加（obra/superpowers）
-- CLAUDE.mdにオプション装備セクション追加
-- Codex日本語対応設定（AGENTS.md 2箇所に言語設定追加）
+- SD003.1 Phase 1実装
+  - CLAUDE.md: 333行→78行、IMPORTANT IF条件付きブロック導入 (v2.14.0)
+  - block-commit-on-test-fail.sh: git commit時テスト強制フック（PreToolUse）
+  - claude-md-style.md: 条件付きブロック規約ルール
+  - VALIDATION_CASES.md: 検証ケース台帳テンプレート
+- browser-use v0.12実機検証（CDP接続・iframe検出OK、screenshot/DOM NG）
+- SD003 vs AGENTS.md記事 比較分析レビュー
+- セッションアーカイブ3件（1MB）→ Google Drive
 
 ## 未完了
-- [ ] deploy.ps1のoptional除外動作をdry-run検証
-- [ ] git-worktreesスキルの実際のworktree作成テスト
-- [ ] parallel-subagentsの`/refactor:init` 3並列動作確認
-- [ ] find-duplicatesのsrc/配下重複検出実行
-- [ ] Codex日本語対応の効果確認（次回レビュー時）
+- SD003.1 Phase 2: Stop hook拡張、deploy.ps1テンプレート更新、Dispatch/Channels文書化
+- validation-cases.md: 進行中プロジェクトへの適用
 
 ## 次のステップ
-- P1検証タスクを順次実行
+- Phase 2実装（1週間以内）
+- browser-use v1.0到達時に再評価（現行chrome-devtools-mcp維持）
 
 ## 関連ファイル
-- `.claude/skills/git-worktrees/SKILL.md`
-- `.claude/skills/parallel-subagents/SKILL.md`
-- `.claude/skills/find-duplicates/SKILL.md`
-- `.claude/skills/kiro-deploy/optional-skills.json`
-- `.claude/skills/kiro-deploy/deploy.ps1`
-- `.claude/rules/skills/skill-trust-policy.md`
-- `CLAUDE.md`
-- `AGENTS.md`
-- `.handoff/AGENTS.md`
+- `CLAUDE.md` — リストラクチャ済み（78行）
+- `.claude/hooks/block-commit-on-test-fail.sh` — 新フック
+- `.claude/rules/global/claude-md-style.md` — 新ルール
+- `.kiro/ai-coordination/workflow/templates/VALIDATION_CASES.md` — 新テンプレート
+- 統合設計プラン: `~/.claude/plans/parallel-honking-plum.md`

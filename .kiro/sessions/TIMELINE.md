@@ -1,8 +1,8 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 20
-- **Latest Session**: 2026-03-18
+- **Total Sessions**: 21
+- **Latest Session**: 2026-03-21
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-21 | SD003.1 IMPORTANT IF restructure + block-at-submit + validation cases + browser-use検証 | df2851a | [Details](session-20260321-205056.md) |
 | 03-18 | Superpowers部分統合（3スキル） + Codex日本語設定 | 5a653cd | [Details](session-20260318-110210.md) |
 | 03-16 | 削除禁止・上書き禁止ルール追加 + セッションアーカイブ | f1f3128 | [Details](session-20260316-122250.md) |
 | 03-15 | cf001短期借入金バグ調査（CF+BS漏れ確定、321未処理） | e71e8b5 | [Details](session-20260315-135822.md) |
