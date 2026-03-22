@@ -1,14 +1,11 @@
-# Session Record - 2026-03-21 22:44:21
+# Session Record - 2026-03-22 11:38:55
 ## Completed
-1. SD003.1 Phase 1 (CLAUDE.md 78行, hooks, validation-cases)
-2. Deploy v2.14.0 (PreToolUse + IMPORTANT IF template)
-3. browser-use CLI/SDK検証 + MCP登録
-4. .kiro消失: dialogue-resolution→git checkout HEAD原因確定→修正→HEAD復元
-5. root-cause-first rule + block-write-to-protected-dirs + deploy-package-reminder
-6. 7プロジェクトSD003展開
-7. Codex分析: cwdズレ仮説（要監視）
+1. .kiro消失問題 完全調査 + 根本原因確定（AIのBash破壊的コマンド + worktree force remove）
+2. block-kiro-destructive.sh（8パターンブロック、全テストPASS）
+3. kiro-watchdog.sh（消失検知+自動復元）
+4. 3層防御完成 + Write非永続化バグ発見
 ## P0 Next
 - git pull --rebase, Skills検証バグ, browser-use MCP
 ## Notes
-- .kiro消失は複合原因: (1)HEADからの実削除 (2)ワーキングツリーの定期的消失(原因調査中)
-- ワーキングツリー消失はツール呼び出し間で発生。bash内では安定。
+- .kiro消失の正体: AIのBash破壊的コマンド + git worktree remove --force後のindex不整合
+- deploy.ps1への新フック追加が必要（P1）

@@ -1,8 +1,8 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 25
-- **Latest Session**: 2026-03-21
+- **Total Sessions**: 26
+- **Latest Session**: 2026-03-22
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-22 | .kiro消失完全解決（3層防御 + worktree非永続化バグ発見） | e8b3905 | [Details](session-20260322-113855.md) |
 | 03-21 | .kiro消失解決確認 + 再起動検証 | a6e7f8b | [Details](session-20260321-224421.md) |
 | 03-21 | dialogue-resolution .kiro root cause fixed | 7e327d4 | [Details](session-20260321-222657.md) |
 | 03-21 | SD003.1 + root-cause-first + 7 projects | 2fdd9e4 | [Details](session-20260321-215950.md) |
