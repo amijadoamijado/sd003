@@ -35,6 +35,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-kiro-destructive.sh\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
             "timeout": 10
           },
