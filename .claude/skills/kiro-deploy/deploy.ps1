@@ -350,32 +350,46 @@ foreach ($key in $copyStats.Keys | Sort-Object) {
 # ============================================================
 $ProjectName = Split-Path $TargetProject -Leaf
 
-# 5-1: CLAUDE.md from template
-$claudeTemplate = Join-Path $SOURCE_DIR ".claude\skills\kiro-deploy\templates\CLAUDE.md.template"
-if (Test-Path $claudeTemplate) {
-    $content = Get-Content $claudeTemplate -Raw -Encoding UTF8
-    $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
-    $content = $content -replace '\{\{DATE\}\}', $DATE
-    $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
-    Set-Content -Path (Join-Path $TargetProject "CLAUDE.md") -Value $content -Encoding UTF8
+# 5-1: CLAUDE.md from template (skip if SD003-based, overwrite if legacy)
+$claudeMdPath = Join-Path $TargetProject "CLAUDE.md"
+if ((Test-Path $claudeMdPath) -and ((Get-Content $claudeMdPath -Raw -Encoding UTF8) -match "SD003")) {
+    Write-Host "  SKIP: CLAUDE.md already exists (SD003-based, preserving)" -ForegroundColor Cyan
 } else {
-    Write-Host "  WARN: CLAUDE.md.template not found, skipping" -ForegroundColor Yellow
+    $claudeTemplate = Join-Path $SOURCE_DIR ".claude\skills\kiro-deploy\templates\CLAUDE.md.template"
+    if (Test-Path $claudeTemplate) {
+        $content = Get-Content $claudeTemplate -Raw -Encoding UTF8
+        $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
+        $content = $content -replace '\{\{DATE\}\}', $DATE
+        $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
+        Set-Content -Path $claudeMdPath -Value $content -Encoding UTF8
+    } else {
+        Write-Host "  WARN: CLAUDE.md.template not found, skipping" -ForegroundColor Yellow
+    }
 }
 
-# 5-2: gemini.md from template
-$geminiTemplate = Join-Path $SOURCE_DIR ".claude\skills\kiro-deploy\templates\gemini.md.template"
-if (Test-Path $geminiTemplate) {
-    $content = Get-Content $geminiTemplate -Raw -Encoding UTF8
-    $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
-    $content = $content -replace '\{\{DATE\}\}', $DATE
-    $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
-    Set-Content -Path (Join-Path $TargetProject "gemini.md") -Value $content -Encoding UTF8
+# 5-2: gemini.md from template (skip if exists)
+$geminiMdPath = Join-Path $TargetProject "gemini.md"
+if (Test-Path $geminiMdPath) {
+    Write-Host "  SKIP: gemini.md already exists (preserving project customizations)" -ForegroundColor Cyan
 } else {
-    Write-Host "  WARN: gemini.md.template not found, skipping" -ForegroundColor Yellow
+    $geminiTemplate = Join-Path $SOURCE_DIR ".claude\skills\kiro-deploy\templates\gemini.md.template"
+    if (Test-Path $geminiTemplate) {
+        $content = Get-Content $geminiTemplate -Raw -Encoding UTF8
+        $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
+        $content = $content -replace '\{\{DATE\}\}', $DATE
+        $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
+        Set-Content -Path $geminiMdPath -Value $content -Encoding UTF8
+    } else {
+        Write-Host "  WARN: gemini.md.template not found, skipping" -ForegroundColor Yellow
+    }
 }
 
-# 5-3: session-current.md (new)
-$sessionCurrentContent = @"
+# 5-3: session-current.md (skip if exists)
+$sessionCurrentPath = Join-Path $TargetProject ".kiro\sessions\session-current.md"
+if (Test-Path $sessionCurrentPath) {
+    Write-Host "  SKIP: session-current.md already exists (preserving existing session)" -ForegroundColor Cyan
+} else {
+    $sessionCurrentContent = @"
 # Session Record
 
 ## Session Info
@@ -398,10 +412,15 @@ $sessionCurrentContent = @"
 ### Notes
 Initialized with SD003 v${FRAMEWORK_VERSION}.
 "@
-Set-Content -Path (Join-Path $TargetProject ".kiro\sessions\session-current.md") -Value $sessionCurrentContent -Encoding UTF8
+    Set-Content -Path $sessionCurrentPath -Value $sessionCurrentContent -Encoding UTF8
+}
 
-# 5-4: TIMELINE.md (new)
-$timelineContent = @"
+# 5-4: TIMELINE.md (skip if exists)
+$timelinePath = Join-Path $TargetProject ".kiro\sessions\TIMELINE.md"
+if (Test-Path $timelinePath) {
+    Write-Host "  SKIP: TIMELINE.md already exists (preserving existing timeline)" -ForegroundColor Cyan
+} else {
+    $timelineContent = @"
 # $ProjectName - Project Timeline
 
 ## Overview
@@ -416,10 +435,15 @@ $timelineContent = @"
 ### $DATE - Project Initialized
 - SD003 Framework v${FRAMEWORK_VERSION} deployed
 "@
-Set-Content -Path (Join-Path $TargetProject ".kiro\sessions\TIMELINE.md") -Value $timelineContent -Encoding UTF8
+    Set-Content -Path $timelinePath -Value $timelineContent -Encoding UTF8
+}
 
-# 5-5: .claude/settings.json (OS-aware)
-$settingsContent = @"
+# 5-5: .claude/settings.json (skip if exists)
+$settingsPath = Join-Path $TargetProject ".claude\settings.json"
+if (Test-Path $settingsPath) {
+    Write-Host "  SKIP: .claude/settings.json already exists (preserving custom hooks/permissions)" -ForegroundColor Cyan
+} else {
+    $settingsContent = @"
 {
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
@@ -483,11 +507,16 @@ $settingsContent = @"
   }
 }
 "@
-Set-Content -Path (Join-Path $TargetProject ".claude\settings.json") -Value $settingsContent -Encoding UTF8
+    Set-Content -Path $settingsPath -Value $settingsContent -Encoding UTF8
+}
 
-# 5-6: .kiro/ids/registry.json (new)
-$isoDate = Get-Date -Format "yyyy-MM-ddTHH:mm:ssK"
-$registryContent = @"
+# 5-6: .kiro/ids/registry.json (skip if exists)
+$registryPath = Join-Path $TargetProject ".kiro\ids\registry.json"
+if (Test-Path $registryPath) {
+    Write-Host "  SKIP: registry.json already exists (preserving existing IDs)" -ForegroundColor Cyan
+} else {
+    $isoDate = Get-Date -Format "yyyy-MM-ddTHH:mm:ssK"
+    $registryContent = @"
 {
   "version": "1.0.0",
   "created": "$isoDate",
@@ -497,16 +526,22 @@ $registryContent = @"
   "last_updated": "$isoDate"
 }
 "@
-Set-Content -Path (Join-Path $TargetProject ".kiro\ids\registry.json") -Value $registryContent -Encoding UTF8
+    Set-Content -Path $registryPath -Value $registryContent -Encoding UTF8
+}
 
-# 5-7: handoff-log.json (new)
-$handoffContent = @"
+# 5-7: handoff-log.json (skip if exists)
+$handoffPath = Join-Path $TargetProject ".kiro\ai-coordination\handoff\handoff-log.json"
+if (Test-Path $handoffPath) {
+    Write-Host "  SKIP: handoff-log.json already exists (preserving existing logs)" -ForegroundColor Cyan
+} else {
+    $handoffContent = @"
 {
   "version": "2.0.0",
   "entries": []
 }
 "@
-Set-Content -Path (Join-Path $TargetProject ".kiro\ai-coordination\handoff\handoff-log.json") -Value $handoffContent -Encoding UTF8
+    Set-Content -Path $handoffPath -Value $handoffContent -Encoding UTF8
+}
 
 # 5b: Inject gas-fakes into target package.json (create if not exists)
 $targetPkg = Join-Path $TargetProject "package.json"

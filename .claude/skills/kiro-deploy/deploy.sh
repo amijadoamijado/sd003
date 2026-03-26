@@ -283,9 +283,11 @@ done
 # ============================================================
 PROJECT_NAME=$(basename "$TARGET_PROJECT")
 
-# 5-1: CLAUDE.md from template
+# 5-1: CLAUDE.md from template (skip if SD003-based, overwrite if legacy)
 CLAUDE_TEMPLATE="$SOURCE_DIR/.claude/skills/kiro-deploy/templates/CLAUDE.md.template"
-if [ -f "$CLAUDE_TEMPLATE" ]; then
+if [ -f "$TARGET_PROJECT/CLAUDE.md" ] && grep -q "SD003" "$TARGET_PROJECT/CLAUDE.md"; then
+    echo "  SKIP: CLAUDE.md already exists (SD003-based, preserving)"
+elif [ -f "$CLAUDE_TEMPLATE" ]; then
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
         -e "s/{{DATE}}/$DATE/g" \
         -e "s/v2\.3\.0/v$FRAMEWORK_VERSION/g" \
@@ -294,9 +296,11 @@ else
     echo "  WARN: CLAUDE.md.template not found, skipping"
 fi
 
-# 5-2: gemini.md from template
+# 5-2: gemini.md from template (skip if exists)
 GEMINI_TEMPLATE="$SOURCE_DIR/.claude/skills/kiro-deploy/templates/gemini.md.template"
-if [ -f "$GEMINI_TEMPLATE" ]; then
+if [ -f "$TARGET_PROJECT/gemini.md" ]; then
+    echo "  SKIP: gemini.md already exists (preserving project customizations)"
+elif [ -f "$GEMINI_TEMPLATE" ]; then
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
         -e "s/{{DATE}}/$DATE/g" \
         -e "s/v2\.3\.0/v$FRAMEWORK_VERSION/g" \
@@ -305,8 +309,11 @@ else
     echo "  WARN: gemini.md.template not found, skipping"
 fi
 
-# 5-3: session-current.md (new)
-cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
+# 5-3: session-current.md (skip if exists)
+if [ -f "$TARGET_PROJECT/.kiro/sessions/session-current.md" ]; then
+    echo "  SKIP: session-current.md already exists (preserving existing session)"
+else
+    cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
 # Session Record
 
 ## Session Info
@@ -329,9 +336,13 @@ cat > "$TARGET_PROJECT/.kiro/sessions/session-current.md" << EOF
 ### Notes
 Initialized with SD003 v${FRAMEWORK_VERSION}.
 EOF
+fi
 
-# 5-4: TIMELINE.md (new)
-cat > "$TARGET_PROJECT/.kiro/sessions/TIMELINE.md" << EOF
+# 5-4: TIMELINE.md (skip if exists)
+if [ -f "$TARGET_PROJECT/.kiro/sessions/TIMELINE.md" ]; then
+    echo "  SKIP: TIMELINE.md already exists (preserving existing timeline)"
+else
+    cat > "$TARGET_PROJECT/.kiro/sessions/TIMELINE.md" << EOF
 # $PROJECT_NAME - Project Timeline
 
 ## Overview
@@ -346,6 +357,7 @@ cat > "$TARGET_PROJECT/.kiro/sessions/TIMELINE.md" << EOF
 ### $DATE - Project Initialized
 - SD003 Framework v${FRAMEWORK_VERSION} deployed
 EOF
+fi
 
 # 5-5: .claude/settings.json (OS-aware)
 OS_TYPE="$(uname -s 2>/dev/null || echo 'Unknown')"
@@ -357,7 +369,11 @@ else
     HOOK_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd003-stop-hook.sh\"'
 fi
 
-cat > "$TARGET_PROJECT/.claude/settings.json" << EOF
+# settings.json (skip if exists)
+if [ -f "$TARGET_PROJECT/.claude/settings.json" ]; then
+    echo "  SKIP: .claude/settings.json already exists (preserving custom hooks/permissions)"
+else
+    cat > "$TARGET_PROJECT/.claude/settings.json" << EOF
 {
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
@@ -377,10 +393,14 @@ cat > "$TARGET_PROJECT/.claude/settings.json" << EOF
   }
 }
 EOF
+fi
 
-# 5-6: .kiro/ids/registry.json (new)
-ISO_DATE=$(date -Iseconds 2>/dev/null || date +%Y-%m-%dT%H:%M:%S%z)
-cat > "$TARGET_PROJECT/.kiro/ids/registry.json" << EOF
+# 5-6: .kiro/ids/registry.json (skip if exists)
+if [ -f "$TARGET_PROJECT/.kiro/ids/registry.json" ]; then
+    echo "  SKIP: registry.json already exists (preserving existing IDs)"
+else
+    ISO_DATE=$(date -Iseconds 2>/dev/null || date +%Y-%m-%dT%H:%M:%S%z)
+    cat > "$TARGET_PROJECT/.kiro/ids/registry.json" << EOF
 {
   "version": "1.0.0",
   "created": "$ISO_DATE",
@@ -390,14 +410,19 @@ cat > "$TARGET_PROJECT/.kiro/ids/registry.json" << EOF
   "last_updated": "$ISO_DATE"
 }
 EOF
+fi
 
-# 5-7: handoff-log.json (new)
-cat > "$TARGET_PROJECT/.kiro/ai-coordination/handoff/handoff-log.json" << EOF
+# 5-7: handoff-log.json (skip if exists)
+if [ -f "$TARGET_PROJECT/.kiro/ai-coordination/handoff/handoff-log.json" ]; then
+    echo "  SKIP: handoff-log.json already exists (preserving existing logs)"
+else
+    cat > "$TARGET_PROJECT/.kiro/ai-coordination/handoff/handoff-log.json" << EOF
 {
   "version": "2.0.0",
   "entries": []
 }
 EOF
+fi
 
 # 5b: Inject gas-fakes into target package.json (if it exists)
 TARGET_PKG="$TARGET_PROJECT/package.json"
