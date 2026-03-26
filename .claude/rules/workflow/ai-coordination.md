@@ -65,7 +65,12 @@ Phase 3: 実装指示作成 (Claude Code)
     ↓ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Phase 4: 実装 (Gemini CLI)          ← /workflow:impl が自動実行
     ↓
+Phase 4.5: 視覚的評価 (Web UI案件のみ) ★NEW
+    ↓ スクショ撮影 → visual-review-checklist で採点
+    ↓ 50/70未満 → Phase 4 に差し戻し（UI修正）
+    ↓ 50/70以上 ↓
 Phase 5: 実装レビュー (Codex)       ← /workflow:review が自動実行
+    ↓ REVIEW_REPORT テンプレートでスコアリング（コード+UI）
     ↓ Approve / Request Changes → Phase 6
 Phase 6: 修正対応 (Gemini CLI)
     ↓ Approve
@@ -81,7 +86,7 @@ Phase 8: 工程完了 (Claude Code)
 | トリガー | 自動実行 | 説明 |
 |---------|---------|------|
 | `/workflow:request` 完了 | → `/workflow:impl` | 指示書作成後、Gemini CLI実行は必須 |
-| `/workflow:impl` 完了 | → `/workflow:review` | Gemini実装後、Codexレビュー依頼は必須 |
+| `/workflow:impl` 完了 | → visual-eval（Web UI案件） → `/workflow:review` | 実装後、UI評価+Codexレビューは必須 |
 | `/workflow:review` Approve | → `/workflow:test` | レビュー承認後、TEST_REQUEST自動作成＋Antigravityディスパッチ |
 
 ### 連鎖フロー図
@@ -90,8 +95,11 @@ Phase 8: 工程完了 (Claude Code)
   ├── Step 1-7: 実装指示書作成 + handoff記録
   └── Step 8: /workflow:impl {ID} {N} を自動実行
         ├── Step 1-8: Gemini CLI実行 → 検証 → コミット → handoff記録
-        └── Step 9: /workflow:review {ID} {N} を自動実行
-              ├── Step 1-8: レビュー依頼作成 → Codex実行 → 結果保存 → 完了報告
+        ├── Step 9 (Web UI案件): スクショ撮影 → visual-review-checklist採点
+        │     ├── 50/70以上: 次へ
+        │     └── 50/70未満: UI修正 → 再impl → 再採点
+        └── Step 10: /workflow:review {ID} {N} を自動実行
+              ├── Step 1-8: レビュー依頼作成（REVIEW_REPORTテンプレート使用）→ Codex実行 → 結果保存 → 完了報告
               └── Step 9 (Approve時): /workflow:test {ID} {N} を自動実行
                     ├── Step 1-3: TEST_REQUEST作成 → handoff記録
                     └── Step 4-6: Antigravityディスパッチ → 結果確認 → 完了報告
@@ -100,8 +108,36 @@ Phase 8: 工程完了 (Claude Code)
 **違反パターン（禁止）**:
 - 指示書を作っただけで止まる
 - Gemini実装が終わっただけで止まる
+- Web UI案件でスクショ評価をスキップする
+- レビューでスコアリングなしにApproveする
 - レビューApprove後にテスト依頼を出さずに止まる
 - 「次のステップ」を案内して終わる（案内ではなく実行せよ）
+
+## 視覚的評価（Visual Eval）ルール
+
+Web UIを含む案件では、実装完了後・レビュー前に視覚的評価を実施する。
+
+### フロー
+```
+impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
+  → visual-review-checklist.md で7項目採点
+  → 50/70以上: レビューへ進む（スクショをREVIEW_REPORTに添付）
+  → 50/70未満: UI修正して再impl
+```
+
+### ルール
+| ルール | 理由 |
+|--------|------|
+| スクショは実ブラウザから取得 | コードの見た目予測ではなく実画面を評価 |
+| REVIEW_REPORTに必ずUIスコアを記載 | コード品質だけでなくUI品質も定量評価 |
+| Request Changes時はUIスコアの低項目を明記 | 「何を直すか」を具体的にフィードバック |
+| IMPLEMENT_REQUESTのAcceptance Criteriaに照らして判定 | 指示と評価の基準を一致させる |
+
+### テンプレート使用の必須化
+| テンプレート | 使用タイミング | 必須 |
+|-------------|--------------|------|
+| `IMPLEMENT_REQUEST.md` | 実装指示作成時 | 必須（Acceptance Criteria含む） |
+| `REVIEW_REPORT.md` | レビュー報告作成時 | 必須（スコアリング含む） |
 
 ---
 
@@ -136,6 +172,8 @@ Phase 8: 工程完了 (Claude Code)
 ### テンプレート
 | テンプレート | 用途 |
 |-------------|------|
+| `templates/IMPLEMENT_REQUEST.md` | 実装指示（Acceptance Criteria付き） |
+| `templates/REVIEW_REPORT.md` | レビュー報告（スコアリング付き） |
 | `templates/TEST_REQUEST.md` | Antigravityへのテスト依頼 |
 | `templates/TEST_REPORT.md` | Antigravityからのテスト報告 |
 

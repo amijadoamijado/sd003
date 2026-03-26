@@ -76,6 +76,7 @@ $directories = @(
     ".kiro/ai-coordination/handoff",
     ".antigravity",
     ".handoff",
+    ".kiro\design",
     ".kiro/ralph",
     ".kiro/refactor",
     "docs/troubleshooting/bug-reports",
@@ -215,7 +216,10 @@ if (Test-Path $sessionTemplateSrc) {
     $copyStats["Session Template"] = 0
 }
 
-# 4-10: .kiro/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
+# 4-10a: .kiro/design/ (tree)
+Copy-DirTree -RelPath ".kiro\design" -Label "Design Tokens"
+
+# 4-10b: .kiro/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
 $workflowSrc = Join-Path $SOURCE_DIR ".kiro\ai-coordination\workflow"
 $workflowDst = Join-Path $TargetProject ".kiro\ai-coordination\workflow"
 $wfCount = 0
@@ -621,6 +625,7 @@ $verifyResults += Verify-Category -Label "Gemini Commands" -SourceRelPath ".gemi
 $verifyResults += Verify-Category -Label "Antigravity" -SourceRelPath ".antigravity" -Recurse
 $verifyResults += Verify-Category -Label "Kiro Settings" -SourceRelPath ".kiro\settings" -Recurse
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
+$verifyResults += Verify-Category -Label "Design" -SourceRelPath ".kiro\design" -Recurse
 $verifyResults += Verify-Category -Label "Ralph" -SourceRelPath ".kiro\ralph" -Recurse
 $verifyResults += Verify-Category -Label "Steering" -SourceRelPath ".kiro\steering" -Recurse
 # Gas Fakes: only verify setup.ts exists (we deploy 1 file, not the whole directory)
