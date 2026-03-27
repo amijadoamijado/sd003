@@ -1,8 +1,8 @@
-# SD003 Project Timeline
+﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 26
-- **Latest Session**: 2026-03-22
+- **Total Sessions**: 27
+- **Latest Session**: 2026-03-27
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-27 | GitHub sync fix (21 remote + 12 push + 41 hooks) | 68b47d6 | [Details](session-20260327-084800.md) |
 | 03-22 | .kiro消失完全解決（3層防御 + worktree非永続化バグ発見） | e8b3905 | [Details](session-20260322-113855.md) |
 | 03-21 | .kiro消失解決確認 + 再起動検証 | a6e7f8b | [Details](session-20260321-224421.md) |
 | 03-21 | dialogue-resolution .kiro root cause fixed | 7e327d4 | [Details](session-20260321-222657.md) |
@@ -41,3 +42,4 @@
 | 02-15 | パスルール一貫性修正（RULES.md v2.0 + 全AI設定統一） | a266cd5 | [Details](session-20260215-162159.md) |
 | 02-15 | デプロイパッケージ v2.13.0 同期 | 62a5e4a | [Details](session-current.md) |
 | 02-15 | Skills.sh統合 + gas-fakes 2層ゲート | dd1e485 | [Details](session-20260215-154240.md) |
+
