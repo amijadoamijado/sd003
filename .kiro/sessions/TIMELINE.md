@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 29
+- **Total Sessions**: 30
 - **Latest Session**: 2026-03-28
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-28 | .kiro disappearance root cause + fix | 9bfe1c8 | [Details](session-20260328-130800.md) |
 | 03-28 | watchdog fix + nm001 deploy | adc45ab | [Details](session-20260328-111700.md) |
 | 03-28 | GitHub full sync: 44/44 clean, auto-push, branch cleanup | 0ea6155 | [Details](session-20260328-003000.md) |
 | 03-27 | GitHub sync fix (21 remote + 12 push + 41 hooks) | 68b47d6 | [Details](session-20260327-084800.md) |
