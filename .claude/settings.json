@@ -1,6 +1,7 @@
 {
   "env": {
-    "ENABLE_TOOL_SEARCH": "true"
+    "ENABLE_TOOL_SEARCH": "true",
+    "KIRO_TEST": "trigger"
   },
   "hooks": {
     "PreToolUse": [
