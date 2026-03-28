@@ -1,9 +1,8 @@
-# DONE - 2026-03-28 16:38
+# DONE - 2026-03-28 16:51
 ## Completed
-- .sessions/ as stable save location (Write/Edit/Bash + git + commit all PASS)
-- .kiro→.sd migration (620+ refs, 100+ files)
-- Hook isolation 7/7 PASS
-- GitHub sync 44/44
-## Next
-- P0: Migrate sessionwrite commands/rules to .sessions/
-- P1: Deploy to all projects
+- GitHub sync 44/44 + branch cleanup
+- .kiro Bug Trace → root cause: sessionwrite + hook combo
+- .kiro→.sd migration (620+ refs), .sessions/ save location fix (35 files)
+- anthropics/claude-code#40139
+## Next (②-⑥)
+- sessionwrite安定テスト → deploy.ps1更新 → migrate script → nm002テスト
