@@ -65,7 +65,7 @@ $directories = @(
     ".gemini/commands",
     ".sd/specs",
     ".sd/steering",
-    ".sd/sessions",
+    ".sessions",
     ".sd/settings",
     ".sd/ids",
     ".sd/traceability",
@@ -206,10 +206,10 @@ Copy-DirTree -RelPath ".antigravity" -Label "Antigravity"
 # 4-8: .sd/settings/ (tree)
 Copy-DirTree -RelPath ".sd\settings" -Label "SD Settings"
 
-# 4-9: .sd/sessions/session-template.md (single file)
-$sessionTemplateSrc = Join-Path $SOURCE_DIR ".sd\sessions\session-template.md"
+# 4-9: .sessions/session-template.md (single file)
+$sessionTemplateSrc = Join-Path $SOURCE_DIR ".sessions\session-template.md"
 if (Test-Path $sessionTemplateSrc) {
-    Copy-Item $sessionTemplateSrc (Join-Path $TargetProject ".sd\sessions\session-template.md") -Force
+    Copy-Item $sessionTemplateSrc (Join-Path $TargetProject ".sessions\session-template.md") -Force
     $copyStats["Session Template"] = 1
 } else {
     Write-Host "  WARN: session-template.md not found" -ForegroundColor Yellow
@@ -385,7 +385,7 @@ if (Test-Path $geminiMdPath) {
 }
 
 # 5-3: session-current.md (skip if exists)
-$sessionCurrentPath = Join-Path $TargetProject ".sd\sessions\session-current.md"
+$sessionCurrentPath = Join-Path $TargetProject ".sessions\session-current.md"
 if (Test-Path $sessionCurrentPath) {
     Write-Host "  SKIP: session-current.md already exists (preserving existing session)" -ForegroundColor Cyan
 } else {
@@ -416,7 +416,7 @@ Initialized with SD003 v${FRAMEWORK_VERSION}.
 }
 
 # 5-4: TIMELINE.md (skip if exists)
-$timelinePath = Join-Path $TargetProject ".sd\sessions\TIMELINE.md"
+$timelinePath = Join-Path $TargetProject ".sessions\TIMELINE.md"
 if (Test-Path $timelinePath) {
     Write-Host "  SKIP: TIMELINE.md already exists (preserving existing timeline)" -ForegroundColor Cyan
 } else {
@@ -695,8 +695,8 @@ foreach ($r in $verifyResults) {
 $generatedFiles = @(
     "CLAUDE.md",
     "gemini.md",
-    ".sd\sessions\session-current.md",
-    ".sd\sessions\TIMELINE.md",
+    ".sessions\session-current.md",
+    ".sessions\TIMELINE.md",
     ".claude\settings.json",
     ".sd\ids\registry.json",
     ".sd\ai-coordination\handoff\handoff-log.json"

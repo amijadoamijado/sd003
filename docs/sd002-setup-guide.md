@@ -177,7 +177,7 @@ project/
 | 内容 | 配置先 |
 |-----|--------|
 | 開発ルール詳細 | `.claude/rules/` |
-| セッション履歴 | `.sd/sessions/` |
+| セッション履歴 | `.sessions/` |
 | 仕様書 | `.sd/specs/` |
 | トラブル解決ログ | `docs/troubleshooting/` |
 | 進捗・作業ログ | `docs/` または `.sd/` |

@@ -199,5 +199,5 @@ Disable autosave (not recommended):
 ## Dependencies
 
 - `/sessionwrite` command must be available
-- `.sd/sessions/` directory must exist
+- `.sessions/` directory must exist
 - `.sd/refactor/checkpoints/` directory for checkpoint registry

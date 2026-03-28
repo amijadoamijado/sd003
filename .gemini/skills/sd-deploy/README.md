@@ -48,7 +48,7 @@ mkdir -p "$TARGET_PROJECT/.gemini/commands"
 # SD
 mkdir -p "$TARGET_PROJECT/.sd/specs"
 mkdir -p "$TARGET_PROJECT/.sd/steering"
-mkdir -p "$TARGET_PROJECT/.sd/sessions"
+mkdir -p "$TARGET_PROJECT/.sessions"
 mkdir -p "$TARGET_PROJECT/.sd/settings/templates"
 mkdir -p "$TARGET_PROJECT/.sd/settings/rules"
 mkdir -p "$TARGET_PROJECT/.sd/ai-coordination/workflow/templates"
@@ -145,10 +145,10 @@ cp "$SOURCE/.gemini/commands/sd-steering-custom.toml" "$TARGET_PROJECT/.gemini/c
 cp "$SOURCE/.sd/settings/quality-gates.yaml" "$TARGET_PROJECT/.sd/settings/"
 cp -r "$SOURCE/.sd/settings/templates/" "$TARGET_PROJECT/.sd/settings/"
 cp -r "$SOURCE/.sd/settings/rules/" "$TARGET_PROJECT/.sd/settings/"
-cp "$SOURCE/.sd/sessions/session-template.md" "$TARGET_PROJECT/.sd/sessions/"
+cp "$SOURCE/.sessions/session-template.md" "$TARGET_PROJECT/.sessions/"
 
 # ⚠️ セッション初期化（必須 - コピーではなく新規作成）
-cat > "$TARGET_PROJECT/.sd/sessions/session-current.md" << EOF
+cat > "$TARGET_PROJECT/.sessions/session-current.md" << EOF
 # Session Record
 
 ## Session Info
@@ -177,7 +177,7 @@ cat > "$TARGET_PROJECT/.sd/sessions/session-current.md" << EOF
 Initial session setup from SD003 framework.
 EOF
 
-cat > "$TARGET_PROJECT/.sd/sessions/TIMELINE.md" << EOF
+cat > "$TARGET_PROJECT/.sessions/TIMELINE.md" << EOF
 # $(basename "$TARGET_PROJECT") Project Timeline
 
 > Auto-generated - Updated on /sessionwrite execution
@@ -334,7 +334,7 @@ REQUIRED_DIRS=(
     ".gemini/commands"
     ".sd/specs"
     ".sd/steering"
-    ".sd/sessions"
+    ".sessions"
     ".sd/settings"
     ".sd/ai-coordination/workflow"
     "docs/troubleshooting"
@@ -350,9 +350,9 @@ REQUIRED_FILES=(
     ".claude/commands/sessionread.md"
     ".claude/commands/sessionwrite.md"
     ".claude/commands/sessionhistory.md"
-    ".sd/sessions/session-current.md"
-    ".sd/sessions/session-template.md"
-    ".sd/sessions/TIMELINE.md"
+    ".sessions/session-current.md"
+    ".sessions/session-template.md"
+    ".sessions/TIMELINE.md"
     ".claude/rules/session/session-management.md"
 
     # ⚠️ SDコマンド（省略禁止 - v2.7.0追加）
@@ -423,9 +423,9 @@ REQUIRED_FILES=(
   └─ dialogue-resolution
 
 ■ セッションファイル（必須・初期化済み）
-  ├─ .sd/sessions/session-current.md  ← 新規作成
-  ├─ .sd/sessions/TIMELINE.md         ← 新規作成
-  └─ .sd/sessions/session-template.md
+  ├─ .sessions/session-current.md  ← 新規作成
+  ├─ .sessions/TIMELINE.md         ← 新規作成
+  └─ .sessions/session-template.md
 
 ■ Gemini Commands: 11個
   └─ sd-spec-*, sd-validate-*, sd-steering*

@@ -87,7 +87,7 @@ materials/
 - ユーザーが提供・共有したファイル（Excel, CSV, PDF, 画像等）
 - `materials/` 配下の成果物
 - `.sd/ai-coordination/` 配下の依頼書・報告書
-- `.sd/sessions/` 配下のセッション記録
+- `.sessions/` 配下のセッション記録
 
 **例外（上書きOK）**:
 - ソースコード（`src/`, `tests/`）

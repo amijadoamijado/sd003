@@ -86,7 +86,7 @@ cat /tmp/codex-impl-result.txt
 git checkout -- .sd/specs/ .sd/ralph/ 2>/dev/null || true
 ```
 
-⚠️ `.sd/ai-coordination/` と `.sd/sessions/` は復元しない（未コミットの依頼書・レビュー結果・セッション記録を保護）
+⚠️ `.sd/ai-coordination/` と `.sessions/` は復元しない（未コミットの依頼書・レビュー結果・セッション記録を保護）
 
 ### Step 5: 結果検証
 ```bash

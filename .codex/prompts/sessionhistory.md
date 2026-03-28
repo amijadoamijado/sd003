@@ -17,12 +17,12 @@ Display the project timeline - a chronological overview of all development sessi
 
 | File | Role |
 |------|------|
-| `.sd/sessions/TIMELINE.md` | Timeline (long-term memory) |
-| `.sd/sessions/session-current.md` | Current session (short-term) |
+| `.sessions/TIMELINE.md` | Timeline (long-term memory) |
+| `.sessions/session-current.md` | Current session (short-term) |
 
 ## Execution
 
-1. Read `.sd/sessions/TIMELINE.md`
+1. Read `.sessions/TIMELINE.md`
 2. Display full timeline content
 3. Show summary statistics
 
@@ -49,4 +49,4 @@ Display the project timeline - a chronological overview of all development sessi
 
 ---
 
-**Execute**: Read and display `.sd/sessions/TIMELINE.md`
+**Execute**: Read and display `.sessions/TIMELINE.md`

@@ -55,7 +55,7 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 | 6 | `.gemini/commands/*.toml` | フラットコピー |
 | 7 | `.antigravity/` | ツリーコピー |
 | 8 | `.sd/settings/` | ツリーコピー |
-| 9 | `.sd/sessions/session-template.md` | 単体コピー |
+| 9 | `.sessions/session-template.md` | 単体コピー |
 | 10 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
 | 11 | `docs/troubleshooting/` | ツリーコピー |
 | 12 | `docs/quality-gates.md` | 単体コピー |
@@ -85,8 +85,8 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 |---------|---------|
 | `CLAUDE.md` | テンプレートから生成 |
 | `gemini.md` | テンプレートから生成 |
-| `.sd/sessions/session-current.md` | 新規生成 |
-| `.sd/sessions/TIMELINE.md` | 新規生成 |
+| `.sessions/session-current.md` | 新規生成 |
+| `.sessions/TIMELINE.md` | 新規生成 |
 | `.claude/settings.json` | OS検出して生成 |
 | `.sd/ids/registry.json` | 新規生成 |
 | `.sd/ai-coordination/handoff/handoff-log.json` | 新規生成 |

@@ -124,7 +124,7 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 | 6 | `.gemini/commands/*.toml` | フラットコピー |
 | 7 | `.antigravity/` | ツリーコピー |
 | 8 | `.sd/settings/` | ツリーコピー |
-| 9 | `.sd/sessions/session-template.md` | 単体コピー |
+| 9 | `.sessions/session-template.md` | 単体コピー |
 | 10 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
 | 11 | `docs/troubleshooting/` | ツリーコピー |
 | 12 | `docs/quality-gates.md` | 単体コピー |
@@ -281,8 +281,8 @@ Bug発生
 Reads 4 files in order:
 1. `D:\claudecode\CLAUDE.md` (Global settings)
 2. `./CLAUDE.md` (Project settings)
-3. `.sd/sessions/session-current.md` (Current state)
-4. `.sd/sessions/TIMELINE.md` (History)
+3. `.sessions/session-current.md` (Current state)
+4. `.sessions/TIMELINE.md` (History)
 
 ### Session End
 ```

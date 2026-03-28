@@ -4,8 +4,8 @@
 
 | Layer | File | Purpose |
 |-------|------|---------|
-| Long-term | `.sd/sessions/TIMELINE.md` | Project history (timeline) |
-| Short-term | `.sd/sessions/session-current.md` | Current session details |
+| Long-term | `.sessions/TIMELINE.md` | Project history (timeline) |
+| Short-term | `.sessions/session-current.md` | Current session details |
 
 ## Commands
 
@@ -23,16 +23,16 @@
 |-------|------|---------|
 | 1 | `D:\claudecode\CLAUDE.md` | Global settings (UTF-8 constraints) |
 | 2 | `./CLAUDE.md` | Project settings |
-| 3 | `.sd/sessions/session-current.md` | Current session (short-term) |
-| 4 | `.sd/sessions/TIMELINE.md` | Project history (long-term) |
+| 3 | `.sessions/session-current.md` | Current session (short-term) |
+| 4 | `.sessions/TIMELINE.md` | Project history (long-term) |
 
 **Use at session start to load all context automatically.**
 
 ## File Locations
 
-- **History**: `.sd/sessions/session-YYYYMMDD-HHMMSS.md`
-- **Latest**: `.sd/sessions/session-current.md`
-- **Timeline**: `.sd/sessions/TIMELINE.md`
+- **History**: `.sessions/session-YYYYMMDD-HHMMSS.md`
+- **Latest**: `.sessions/session-current.md`
+- **Timeline**: `.sessions/TIMELINE.md`
 
 ## Saved Information
 
@@ -117,9 +117,9 @@ SD003を新規プロジェクトに展開する際、セッション管理は**�
 | 2 | `.claude/commands/sessionwrite.md` | コピー | ☐ |
 | 3 | `.claude/commands/sessionhistory.md` | コピー | ☐ |
 | 4 | `.claude/rules/session/session-management.md` | コピー | ☐ |
-| 5 | `.sd/sessions/session-template.md` | コピー | ☐ |
-| 6 | `.sd/sessions/session-current.md` | **新規作成** | ☐ |
-| 7 | `.sd/sessions/TIMELINE.md` | **新規作成** | ☐ |
+| 5 | `.sessions/session-template.md` | コピー | ☐ |
+| 6 | `.sessions/session-current.md` | **新規作成** | ☐ |
+| 7 | `.sessions/TIMELINE.md` | **新規作成** | ☐ |
 
 ### 注意事項
 

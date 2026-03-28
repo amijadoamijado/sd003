@@ -13,8 +13,8 @@ allowed-tools: Read, Bash, Glob, Agent
 |------|---------|------|
 | 1 | `D:\claudecode\CLAUDE.md` | グローバル設定（UTF-8制約等） |
 | 2 | `./CLAUDE.md` | プロジェクト設定（SD003ルール） |
-| 3 | `.sd/sessions/session-current.md` | 現在のセッション（短期記憶） |
-| 4 | `.sd/sessions/TIMELINE.md` | プロジェクト履歴（長期記憶） |
+| 3 | `.sessions/session-current.md` | 現在のセッション（短期記憶） |
+| 4 | `.sessions/TIMELINE.md` | プロジェクト履歴（長期記憶） |
 
 ## 実行手順
 
@@ -36,7 +36,7 @@ Read: ./CLAUDE.md
 
 ### Step 3: session-current.md
 ```
-Read: .sd/sessions/session-current.md
+Read: .sessions/session-current.md
 ```
 - 前回の作業状況
 - 進行中タスク
@@ -44,7 +44,7 @@ Read: .sd/sessions/session-current.md
 
 ### Step 4: TIMELINE.md
 ```
-Read: .sd/sessions/TIMELINE.md
+Read: .sessions/TIMELINE.md
 ```
 - プロジェクト全体の履歴
 - 過去セッションの概要

@@ -131,4 +131,4 @@ User can disable autonomous context management by setting in `.sd/refactor/confi
 
 - `/sessionwrite` command must be available
 - `/sessionread` command must be available
-- `.sd/sessions/` directory must exist
+- `.sessions/` directory must exist

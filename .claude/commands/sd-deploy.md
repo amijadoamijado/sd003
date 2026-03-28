@@ -53,7 +53,7 @@ mkdir -p <target>/.claude/skills/rollback-guard
 mkdir -p <target>/.claude/skills/sd-deploy
 mkdir -p <target>/.sd/specs
 mkdir -p <target>/.sd/steering
-mkdir -p <target>/.sd/sessions
+mkdir -p <target>/.sessions
 mkdir -p <target>/.sd/settings/templates
 mkdir -p <target>/.sd/settings/rules
 mkdir -p <target>/.sd/ai-coordination/workflow/templates
@@ -267,8 +267,8 @@ SD003 v2.11.0 で初期化。
 [ -f ".claude/commands/sd/steering.md" ] && echo "✅ sd/steering.md" || echo "❌ sd/steering.md"
 
 # Sessions（必須）
-[ -f ".sd/sessions/session-current.md" ] && echo "✅ session-current.md" || echo "❌ session-current.md"
-[ -f ".sd/sessions/TIMELINE.md" ] && echo "✅ TIMELINE.md" || echo "❌ TIMELINE.md"
+[ -f ".sessions/session-current.md" ] && echo "✅ session-current.md" || echo "❌ session-current.md"
+[ -f ".sessions/TIMELINE.md" ] && echo "✅ TIMELINE.md" || echo "❌ TIMELINE.md"
 
 # ファイル数カウント
 echo "--- File Counts ---"

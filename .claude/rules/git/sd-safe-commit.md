@@ -23,7 +23,7 @@ Refs: anthropics/claude-code#34330, #10011
 ### .sd/ファイル作成+commit
 ```bash
 # 1コマンドで全て完了
-echo "content" > .sd/sessions/file.txt && git add .sd/sessions/file.txt && git commit -m "message"
+echo "content" > .sessions/file.txt && git add .sessions/file.txt && git commit -m "message"
 ```
 
 ### 復元+commit
@@ -38,22 +38,22 @@ done && git add .sd/ && git commit -m "fix: restore .sd"
 ### sessionwrite
 ```bash
 # セッションファイル作成→TIMELINE更新→add→commitを1コマンドで
-cat > .sd/sessions/session-YYYYMMDD.md << 'EOF'
+cat > .sessions/session-YYYYMMDD.md << 'EOF'
 ...
 EOF
-cp .sd/sessions/session-YYYYMMDD.md .sd/sessions/session-current.md
-sed -i '...' .sd/sessions/TIMELINE.md
-git add .sd/sessions/ .handoff/DONE.md && git commit -m "session: ..."
+cp .sessions/session-YYYYMMDD.md .sessions/session-current.md
+sed -i '...' .sessions/TIMELINE.md
+git add .sessions/ .handoff/DONE.md && git commit -m "session: ..."
 ```
 
 ## 禁止パターン
 
 ```bash
 # NG: bash呼び出し1でファイル作成
-echo "content" > .sd/sessions/file.txt
+echo "content" > .sessions/file.txt
 
 # NG: bash呼び出し2でcommit（この間に.sd/が消える）
-git add .sd/sessions/file.txt && git commit -m "message"
+git add .sessions/file.txt && git commit -m "message"
 ```
 
 ## settings.json
@@ -71,7 +71,7 @@ git ls-tree -r <commit-hash> --name-only | grep "^.sd/" | while read f; do
 done && git add .sd/ && git commit -m "fix: restore .sd from <commit-hash>"
 ```
 
-HEADに.sd/がない場合は `git log --all -- .sd/sessions/TIMELINE.md` で最後に存在したcommitを特定。
+HEADに.sd/がない場合は `git log --all -- .sessions/TIMELINE.md` で最後に存在したcommitを特定。
 
 ## 全AIモデル共通
 

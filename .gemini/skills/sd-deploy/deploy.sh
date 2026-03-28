@@ -53,7 +53,7 @@ DIRS=(
     ".gemini/commands"
     ".sd/specs"
     ".sd/steering"
-    ".sd/sessions"
+    ".sessions"
     ".sd/settings"
     ".sd/ids"
     ".sd/traceability"
@@ -156,9 +156,9 @@ copy_dir_tree ".antigravity" "Antigravity" "*"
 # 4-8: .sd/settings/ (tree)
 copy_dir_tree ".sd/settings" "SD Settings" "*"
 
-# 4-9: .sd/sessions/session-template.md
-if [ -f "$SOURCE_DIR/.sd/sessions/session-template.md" ]; then
-    cp "$SOURCE_DIR/.sd/sessions/session-template.md" "$TARGET_PROJECT/.sd/sessions/"
+# 4-9: .sessions/session-template.md
+if [ -f "$SOURCE_DIR/.sessions/session-template.md" ]; then
+    cp "$SOURCE_DIR/.sessions/session-template.md" "$TARGET_PROJECT/.sessions/"
     COPY_STATS["Session Template"]=1
 else
     echo "  WARN: session-template.md not found"
@@ -230,7 +230,7 @@ else
 fi
 
 # 5-3: session-current.md (new)
-cat > "$TARGET_PROJECT/.sd/sessions/session-current.md" << EOF
+cat > "$TARGET_PROJECT/.sessions/session-current.md" << EOF
 # Session Record
 
 ## Session Info
@@ -255,7 +255,7 @@ Initialized with SD003 v${FRAMEWORK_VERSION}.
 EOF
 
 # 5-4: TIMELINE.md (new)
-cat > "$TARGET_PROJECT/.sd/sessions/TIMELINE.md" << EOF
+cat > "$TARGET_PROJECT/.sessions/TIMELINE.md" << EOF
 # $PROJECT_NAME - Project Timeline
 
 ## Overview
@@ -373,8 +373,8 @@ echo "  Generated files:"
 GENERATED_FILES=(
     "CLAUDE.md"
     "gemini.md"
-    ".sd/sessions/session-current.md"
-    ".sd/sessions/TIMELINE.md"
+    ".sessions/session-current.md"
+    ".sessions/TIMELINE.md"
     ".claude/settings.json"
     ".sd/ids/registry.json"
     ".sd/ai-coordination/handoff/handoff-log.json"

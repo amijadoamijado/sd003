@@ -10,8 +10,8 @@ SD002フレームワークにおけるセッション管理と継続性の確保
 ```
 
 **動作内容:**
-1. `.sd/sessions/session-YYYYMMDD-HHMMSS.md` を履歴として新規作成
-2. `.sd/sessions/session-current.md` を上書き保存
+1. `.sessions/session-YYYYMMDD-HHMMSS.md` を履歴として新規作成
+2. `.sessions/session-current.md` を上書き保存
 3. 以下の情報を記録：
    - 日時（YYYY-MM-DD HH:MM:SS）
    - プロジェクトパス
@@ -29,7 +29,7 @@ SD002フレームワークにおけるセッション管理と継続性の確保
 ```
 
 **動作内容:**
-1. `.sd/sessions/session-current.md` を読み込み
+1. `.sessions/session-current.md` を読み込み
 2. 最新の作業状況を把握
 3. 要約を表示（タスク数、優先度別リスト等）
 
@@ -104,7 +104,7 @@ SD002フレームワークにおけるセッション管理と継続性の確保
 
 | 記録種別 | 場所 |
 |---------|------|
-| プロジェクト全体セッション | `.sd/sessions/` |
+| プロジェクト全体セッション | `.sessions/` |
 | 引き継ぎ事項 | `.sd/ai-coordination/handoff/handoff-log.json` |
 
 ## 禁止事項

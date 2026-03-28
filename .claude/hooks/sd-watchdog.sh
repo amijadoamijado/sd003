@@ -22,7 +22,7 @@ if [ ! -d "$SD_DIR" ]; then
 fi
 
 if [ ! -d "$SESSIONS_DIR" ]; then
-  echo "🚨 WARNING: .sd/sessions/ missing." >&2
+  echo "🚨 WARNING: .sessions/ missing." >&2
   exit 0
 fi
 

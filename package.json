@@ -119,7 +119,7 @@
     ".gemini/",
     ".handoff/",
     ".sd/settings/",
-    ".sd/sessions/session-template.md",
+    ".sessions/session-template.md",
     ".sd/ai-coordination/workflow/",
     ".sd/ralph/",
     ".sd/steering/",

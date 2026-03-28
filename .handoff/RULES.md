@@ -152,9 +152,9 @@ npm run build && npm test && npm run lint
 
 | ファイル | 保存先 |
 |---------|--------|
-| 現在セッション | `.sd/sessions/session-current.md` |
-| タイムライン | `.sd/sessions/TIMELINE.md` |
-| セッション履歴 | `.sd/sessions/session-YYYYMMDD-HHMMSS.md` |
+| 現在セッション | `.sessions/session-current.md` |
+| タイムライン | `.sessions/TIMELINE.md` |
+| セッション履歴 | `.sessions/session-YYYYMMDD-HHMMSS.md` |
 
 ### 配置禁止
 
