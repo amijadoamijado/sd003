@@ -6,12 +6,31 @@ description: |
 allowed-tools: Read, Write, Bash, Glob
 ---
 
-# SD003フレームワーク展開スキル v3.1.0
+# SD003フレームワーク展開スキル v3.2.0
 
 ## 概要
 
-SD003フレームワーク（v2.13.0）を新規プロジェクトに展開する。
+SD003フレームワーク（v2.14.0）を新規プロジェクトに展開する。
 **ディレクトリ単位の動的コピー**により、ファイル追加時にスクリプト修正は不要。
+
+## 上書きポリシー（必須）
+
+| 種別 | ファイル | 動作 |
+|------|---------|------|
+| **ルール（上書き）** | CLAUDE.md, gemini.md, settings.json, rules/, commands/, hooks/, skills/ | 常に最新版で上書き |
+| **データ（SKIP+テンプレート）** | session-current.md, TIMELINE.md, registry.json, handoff-log.json | 存在しなければテンプレートから生成 |
+| **仕様書等** | .sd/specs/, .sessions/ 履歴 | 触らない |
+
+## テンプレートフォルダ（必須確認）
+
+新規ファイル生成時は必ずテンプレートフォルダを確認すること。インラインでheredoc生成は禁止。
+
+| テンプレート | 場所 |
+|-------------|------|
+| セッション関連 | `.sessions/templates/` |
+| deploy生成ファイル | `.claude/skills/sd-deploy/templates/` |
+
+**テンプレートにないファイルを新規追加する場合**: まずテンプレートファイルを作成してからdeploy.ps1に追加。
 
 ## 使用方法
 
