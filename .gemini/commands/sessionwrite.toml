@@ -1,6 +1,6 @@
 description = "Save session handoff and update timeline"
 prompt = """
-# Session Record Save
+# セッション記録 Save
 
 Save session handoff and update project timeline.
 
@@ -22,43 +22,43 @@ Save session handoff and update project timeline.
 6. **Update TIMELINE.md** (add new entry)
 7. Display completion message
 
-## Session Record Format
+## セッション記録 Format
 
 ```markdown
-# Session Record
+# セッション記録
 
-## Session Info
+## セッション情報
 - **Date**: [YYYY-MM-DD HH:MM:SS]
 - **Project**: [path]
 - **Branch**: [git branch]
 - **Latest Commit**: [hash + message]
 
-## Progress Summary
+## 作業サマリー
 
-### Completed
+### 完了
 [numbered list]
 
-### In Progress
+### 進行中
 [numbered list]
 
-### Unresolved Issues
+### 未解決
 [issues and attempted solutions]
 
-### Files Created/Modified
+### 作成・変更ファイル
 [categorized list]
 
-### Next Session Tasks
+### 次回タスク
 
-#### P0 (Urgent)
+#### P0（緊急）
 [immediate tasks]
 
-#### P1 (Important)
+#### P1（重要）
 [important but not urgent]
 
-#### P2 (Normal)
+#### P2（通常）
 [when time allows]
 
-### Notes
+### 備考
 [handoff notes]
 ```
 

@@ -79,30 +79,30 @@ Compare and determine what was lost
 Continue work
 ```
 
-## Record Format
+## 記録フォーマット
 
 ```markdown
-# Session Record
+# セッション記録
 
-## Session Info
+## セッション情報
 - **Date**: [YYYY-MM-DD HH:MM:SS]
 - **Project**: [path]
 - **Branch**: [branch name]
 - **Latest Commit**: [hash]
 
-## Progress Summary
+## 作業サマリー
 
-### Completed
-### In Progress
-### Unresolved Issues
-### Created/Modified Files
+### 完了
+### 進行中
+### 未解決
+### 作成・変更ファイル
 
-### Next Session Tasks
-- P0 (Urgent)
-- P1 (Important)
-- P2 (Normal)
+### 次回タスク
+- P0（緊急）
+- P1（重要）
+- P2（通常）
 
-### Notes
+### 備考
 ```
 
 ## Deployment to New Projects（⚠️ 省略禁止）
