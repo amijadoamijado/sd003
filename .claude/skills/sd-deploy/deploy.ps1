@@ -58,7 +58,7 @@ Write-Host "[Phase 2/7] Backup created: $BackupDir" -ForegroundColor Green
 # Phase 3: Create directory structure
 # ============================================================
 $directories = @(
-    ".claude/commands/kiro",
+    ".claude/commands/sd",
     ".claude/rules",
     ".claude/skills",
     ".claude/hooks",
@@ -180,7 +180,7 @@ function Copy-FlatDir {
 Copy-FlatDir -RelPath ".claude\commands" -Label "Commands" -Extension ".md"
 
 # 4-2: .claude/commands/kiro/*.md
-Copy-FlatDir -RelPath ".claude\commands\kiro" -Label "Commands/kiro" -Extension ".md"
+Copy-FlatDir -RelPath ".claude\commands\sd" -Label "Commands/sd" -Extension ".md"
 
 # 4-3: .claude/rules/ (tree)
 Copy-DirTree -RelPath ".claude\rules" -Label "Rules" -Filter "*.md"
@@ -667,7 +667,7 @@ function Verify-Category {
 }
 
 $verifyResults += Verify-Category -Label "Commands" -SourceRelPath ".claude\commands" -Filter "*.md"
-$verifyResults += Verify-Category -Label "Commands/kiro" -SourceRelPath ".claude\commands\kiro" -Filter "*.md"
+$verifyResults += Verify-Category -Label "Commands/sd" -SourceRelPath ".claude\commands\sd" -Filter "*.md"
 $verifyResults += Verify-Category -Label "Rules" -SourceRelPath ".claude\rules" -Filter "*.md" -Recurse
 $verifyResults += Verify-Category -Label "Skills" -SourceRelPath ".claude\skills" -Recurse
 $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" -Recurse
