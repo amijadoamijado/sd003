@@ -93,3 +93,4 @@ tmp/
 
 # .kiro/ - git管理外（Claude Codeランタイムのrefreshで消えるため）
 .kiro/
+# gitignore-verify
