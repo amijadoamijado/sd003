@@ -1,7 +1,6 @@
-# DONE - 2026-03-28 19:45
+# DONE - 2026-03-28 20:04
 ## Completed
-- GitHub sync 44/44
-- .kiro Bug Trace: PostToolUse no-matcher was the cause. Removed watchdog+agent-review
-- Bash Tool Policy, all AI configs updated, nm001 deploy
+- GitHub sync 44/44, .kiro/ disappearance fix (gitignore + post-commit sync)
+- sessionwrite updated, nm001 deploy
 ## Next
 - nm002 deploy, hook deploy to all projects
