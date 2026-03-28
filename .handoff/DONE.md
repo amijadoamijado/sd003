@@ -1,8 +1,7 @@
-# DONE - 2026-03-28 16:51
+# DONE - 2026-03-28 17:36
 ## Completed
-- GitHub sync 44/44 + branch cleanup
-- .kiro Bug Trace → root cause: sessionwrite + hook combo
-- .kiro→.sd migration (620+ refs), .sessions/ save location fix (35 files)
-- anthropics/claude-code#40139
-## Next (②-⑥)
-- sessionwrite安定テスト → deploy.ps1更新 → migrate script → nm002テスト
+- sessionwrite安定テスト PASS, nm002デプロイ ALL PASSED
+- nm002 kiro→sd migration, deploy.ps1 commands/sd修正
+- deploy.ps1 session上書きバグ発見 → テンプレート分離方式に改修予定
+## Next
+- P0: deploy.ps1テンプレート分離修正
