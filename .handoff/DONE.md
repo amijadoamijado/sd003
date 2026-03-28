@@ -1,7 +1,8 @@
-# DONE - 2026-03-28 16:15
+# DONE - 2026-03-28 16:11
 ## Completed
 - Hook isolation 7/7 PASS
-- Root cause: Write/Edit on git-tracked .kiro/ triggers runtime refresh → deletion
-- Fix: .kiro/ in .gitignore, post-commit hook handles sync
+- Root cause: Claude Code runtime deletes `.kiro/` by name
+- Fix: `.kiro/` → `.sd/` rename, fully stable
 ## Next
-- Deploy .kiro/.gitignore fix to all projects
+- P0: Full `.kiro/` → `.sd/` migration across framework
+- P1: Deploy to all projects + file bug report
