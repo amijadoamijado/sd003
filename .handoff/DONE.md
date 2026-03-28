@@ -1,7 +1,8 @@
-# DONE - 2026-03-28 17:51
+# DONE - 2026-03-28 19:02
 ## Completed
-- .sessions/ migration + 安定テスト PASS
-- nm002 deploy + kiro→sd migration
-- deploy.ps1: テンプレート分離 + 上書きポリシー (ルール=上書き、データ=SKIP)
+- 28 projects .kiro->.sd migrated (4 parallel agents + 3 individual)
+- ob001: git init + GitHub + SD003 deploy
+- Requirements template: WHEN/THEN/SHALL -> plain Japanese
+- deploy.ps1: template separation + overwrite policy
 ## Next
-- migrate-kiro-to-sd.ps1作成 → 全プロジェクト展開
+- Remaining ~16 projects, CLAUDE.md v2.15.0
