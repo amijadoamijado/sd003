@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 35
+- **Total Sessions**: 36
 - **Latest Session**: 2026-03-28
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-28 | deploy.ps1 overwrite policy + template separation + nm002 test | 845cfa3 | [Details](session-20260328-175100.md) |
 | 03-28 | nm002 deploy + kiro→sd migration + deploy overwrite bug found | f8d3e31 | [Details](session-20260328-173600.md) |
 | 03-28 | Full day: GitHub sync + .kiro bug trace + .sd migration + .sessions/ fix | ab6b3fd | [Details](session-20260328-165100.md) |
 | 03-28 | .sessions/ save location fix + .kiro→.sd migration | b278075 | [Details](session-20260328-163800.md) |
