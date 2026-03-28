@@ -1,8 +1,8 @@
-# DONE - 2026-03-28 16:11
+# DONE - 2026-03-28 16:23
 ## Completed
-- Hook isolation 7/7 PASS
-- Root cause: Claude Code runtime deletes `.sd/` by name
-- Fix: `.sd/` → `.sd/` rename, fully stable
+- .kiro→.sd full migration: 620+ refs, 100+ files, 30+ renames
+- Root cause: Claude Code runtime deletes .kiro/ by name
+- All slash commands, Codex, Gemini, hooks, rules updated
+- anthropics/claude-code#40139 filed
 ## Next
-- P0: Full `.sd/` → `.sd/` migration across framework
-- P1: Deploy to all projects + file bug report
+- Deploy .sd/ migration to all projects
