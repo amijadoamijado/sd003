@@ -1,0 +1,21 @@
+# Session Record
+
+## Session Info
+- **Date**: {{DATE}}
+- **Project**: {{PROJECT_NAME}}
+- **Branch**: main
+- **Latest Commit**: (initialized)
+
+## Progress Summary
+
+### Completed
+- SD003 Framework v{{FRAMEWORK_VERSION}} deployed
+
+### In Progress
+- (none)
+
+### Next Session Tasks
+- P1 (Important): Run /sessionread to verify
+
+### Notes
+Initialized with SD003 v{{FRAMEWORK_VERSION}}.

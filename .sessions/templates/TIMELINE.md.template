@@ -1,0 +1,13 @@
+# {{PROJECT_NAME}} - Project Timeline
+
+## Overview
+- **Project**: {{PROJECT_NAME}}
+- **Created**: {{DATE}}
+- **Framework**: SD003 v{{FRAMEWORK_VERSION}}
+
+---
+
+## Timeline
+
+### {{DATE}} - Project Initialized
+- SD003 Framework v{{FRAMEWORK_VERSION}} deployed

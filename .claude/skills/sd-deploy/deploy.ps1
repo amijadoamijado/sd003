@@ -206,14 +206,17 @@ Copy-DirTree -RelPath ".antigravity" -Label "Antigravity"
 # 4-8: .sd/settings/ (tree)
 Copy-DirTree -RelPath ".sd\settings" -Label "SD Settings"
 
-# 4-9: .sessions/session-template.md (single file)
-$sessionTemplateSrc = Join-Path $SOURCE_DIR ".sessions\session-template.md"
-if (Test-Path $sessionTemplateSrc) {
-    Copy-Item $sessionTemplateSrc (Join-Path $TargetProject ".sessions\session-template.md") -Force
-    $copyStats["Session Template"] = 1
+# 4-9: .sessions/templates/ (template files for new projects)
+$sessionTemplatesSrc = Join-Path $SOURCE_DIR ".sessions\templates"
+if (Test-Path $sessionTemplatesSrc) {
+    $targetTemplatesDir = Join-Path $TargetProject ".sessions\templates"
+    if (!(Test-Path $targetTemplatesDir)) { New-Item -ItemType Directory -Path $targetTemplatesDir -Force | Out-Null }
+    Copy-Item "$sessionTemplatesSrc\*" $targetTemplatesDir -Force
+    $templateCount = (Get-ChildItem $targetTemplatesDir -File).Count
+    $copyStats["Session Templates"] = $templateCount
 } else {
-    Write-Host "  WARN: session-template.md not found" -ForegroundColor Yellow
-    $copyStats["Session Template"] = 0
+    Write-Host "  WARN: .sessions/templates/ not found" -ForegroundColor Yellow
+    $copyStats["Session Templates"] = 0
 }
 
 # 4-10a: .sd/design/ (tree)
@@ -384,58 +387,38 @@ if (Test-Path $geminiMdPath) {
     }
 }
 
-# 5-3: session-current.md (skip if exists)
+# 5-3: session-current.md (skip if exists, use template from .sessions/templates/)
 $sessionCurrentPath = Join-Path $TargetProject ".sessions\session-current.md"
 if (Test-Path $sessionCurrentPath) {
     Write-Host "  SKIP: session-current.md already exists (preserving existing session)" -ForegroundColor Cyan
 } else {
-    $sessionCurrentContent = @"
-# Session Record
-
-## Session Info
-- **Date**: $DATE
-- **Project**: $ProjectName
-- **Branch**: main
-- **Latest Commit**: (initialized)
-
-## Progress Summary
-
-### Completed
-- SD003 Framework v${FRAMEWORK_VERSION} deployed
-
-### In Progress
-- (none)
-
-### Next Session Tasks
-- P1 (Important): Run /sessionread to verify
-
-### Notes
-Initialized with SD003 v${FRAMEWORK_VERSION}.
-"@
-    Set-Content -Path $sessionCurrentPath -Value $sessionCurrentContent -Encoding UTF8
+    $templatePath = Join-Path $SOURCE_DIR ".sessions\templates\session-current.md.template"
+    if (Test-Path $templatePath) {
+        $content = Get-Content $templatePath -Raw -Encoding UTF8
+        $content = $content -replace '\{\{DATE\}\}', $DATE
+        $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
+        $content = $content -replace '\{\{FRAMEWORK_VERSION\}\}', $FRAMEWORK_VERSION
+        Set-Content -Path $sessionCurrentPath -Value $content -Encoding UTF8
+    } else {
+        Write-Host "  WARN: session-current.md.template not found, skipping" -ForegroundColor Yellow
+    }
 }
 
-# 5-4: TIMELINE.md (skip if exists)
+# 5-4: TIMELINE.md (skip if exists, use template from .sessions/templates/)
 $timelinePath = Join-Path $TargetProject ".sessions\TIMELINE.md"
 if (Test-Path $timelinePath) {
     Write-Host "  SKIP: TIMELINE.md already exists (preserving existing timeline)" -ForegroundColor Cyan
 } else {
-    $timelineContent = @"
-# $ProjectName - Project Timeline
-
-## Overview
-- **Project**: $ProjectName
-- **Created**: $DATE
-- **Framework**: SD003 v${FRAMEWORK_VERSION}
-
----
-
-## Timeline
-
-### $DATE - Project Initialized
-- SD003 Framework v${FRAMEWORK_VERSION} deployed
-"@
-    Set-Content -Path $timelinePath -Value $timelineContent -Encoding UTF8
+    $templatePath = Join-Path $SOURCE_DIR ".sessions\templates\TIMELINE.md.template"
+    if (Test-Path $templatePath) {
+        $content = Get-Content $templatePath -Raw -Encoding UTF8
+        $content = $content -replace '\{\{DATE\}\}', $DATE
+        $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
+        $content = $content -replace '\{\{FRAMEWORK_VERSION\}\}', $FRAMEWORK_VERSION
+        Set-Content -Path $timelinePath -Value $content -Encoding UTF8
+    } else {
+        Write-Host "  WARN: TIMELINE.md.template not found, skipping" -ForegroundColor Yellow
+    }
 }
 
 # 5-5: .claude/settings.json (skip if exists)
