@@ -70,7 +70,7 @@ bash .claude/skills/kiro-deploy/deploy.sh <target-project-path>
 
 ## gas-fakes 自動注入（Phase 5b）
 
-ターゲットプロジェクトに `package.json` が存在する場合、以下を自動注入：
+ターゲットプロジェクトの `package.json` に以下を自動注入。`package.json` が存在しない場合は自動作成してから注入する：
 
 | 追加内容 | 値 |
 |---------|-----|
