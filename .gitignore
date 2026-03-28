@@ -90,3 +90,6 @@ tmp/
 # final-3
 # trace-test
 # no-write-tool
+
+# .kiro/ - git管理外（Claude Codeランタイムのrefreshで消えるため）
+.kiro/
