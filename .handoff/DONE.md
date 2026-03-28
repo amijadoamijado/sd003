@@ -1,6 +1,7 @@
-# DONE - 2026-03-28 20:04
+# DONE - 2026-03-28 21:20
 ## Completed
-- GitHub sync 44/44, .kiro/ disappearance fix (gitignore + post-commit sync)
-- sessionwrite updated, nm001 deploy
+- GitHub sync 44/44
+- .kiro/ fix: gitignore + GDrive backup (5-commit PASS, zero disappearance)
+- nm001 deploy, sessionwrite updated
 ## Next
-- nm002 deploy, hook deploy to all projects
+- 全44プロジェクトに新構成配布, nm002 deploy
