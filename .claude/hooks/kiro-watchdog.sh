@@ -3,7 +3,12 @@
 # PostToolUse hook for Claude Code (all tools)
 #
 # 消失検知時: 警告のみ。自動復元しない。
-# 根本原因: agent-review.sh (codex exec) が.kiro/を削除していた (2026-03-28確定)
+#
+# 根本原因 (2026-03-28 Bug Trace):
+#   Claude Codeランタイムがsettings.jsonの変更をgit commit経由で検知すると
+#   ワーキングツリーをリフレッシュし、modified状態の.kiro/ファイルが消失する。
+#   対策: settings.jsonを.gitignoreに追加（git管理外にした）
+#   Refs: anthropics/claude-code#34330, #10011
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 KIRO_DIR="$PROJECT_DIR/.kiro"
