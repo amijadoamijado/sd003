@@ -101,17 +101,21 @@ $ARGUMENTS
 
 ## Git Commit
 
-After saving session files, TIMELINE, and DONE.md, commit the changes:
+.kiro/ は .gitignore でgit管理外。post-commit hookが自動でGitHubに同期+Google Driveにバックアップする。
+sessionwriteでは .handoff/DONE.md だけ git add + commit する。
 
 ```bash
-git add .kiro/sessions/session-*.md .kiro/sessions/TIMELINE.md .handoff/DONE.md
+git add .handoff/DONE.md
 git commit -m "session: [1行サマリー]
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ```
 
-post-commit hookにより自動でGitHubにpushされる。
+post-commit hookが以下を自動実行:
+1. .kiro/ を git add -f して commit に含める（GitHub同期）
+2. async git push
+3. .kiro/ を G:\マイドライブ\kiro-backup\ にバックアップ
 
 ---
 
-**Execute**: Create session record, save to both history and current files, update TIMELINE.md, then git commit.
+**Execute**: Write/Edit で .kiro/ ファイルを更新し、git add .handoff/DONE.md && git commit する。
