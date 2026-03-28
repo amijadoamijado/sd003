@@ -1,7 +1,7 @@
-# DONE - 2026-03-28 21:32
+# DONE - 2026-03-28 15:54
 ## Completed
-- GitHub sync 44/44
-- .kiro/ fix: 3/21+のhook全削除でgit管理復帰、消失解決
-- nm001 deploy
+- Hook isolation test: 7/7 PASS (each tested with session restart)
+- Root cause confirmed: settings.json git-tracked → runtime refresh → .kiro/ deletion
+- All hooks restored and verified safe
 ## Next
-- nm002 deploy, 全プロジェクトのsettings.jsonからhook削除
+- nm002 deploy, deploy hooks to all projects
