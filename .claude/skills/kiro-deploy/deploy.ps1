@@ -510,6 +510,21 @@ if (Test-Path $settingsPath) {
     Set-Content -Path $settingsPath -Value $settingsContent -Encoding UTF8
 }
 
+# 5-5b: Ensure .claude/settings.json is in .gitignore (prevents .kiro/ disappearance bug)
+# Ref: anthropics/claude-code#34330 - Claude Code runtime refreshes working tree on settings.json git changes
+$gitignorePath = Join-Path $TargetProject ".gitignore"
+$settingsIgnoreLine = ".claude/settings.json"
+if (Test-Path $gitignorePath) {
+    $gitignoreContent = Get-Content $gitignorePath -Raw -Encoding UTF8
+    if ($gitignoreContent -notmatch [regex]::Escape($settingsIgnoreLine)) {
+        Add-Content -Path $gitignorePath -Value "`n# Claude Code settings (must not be git-tracked, causes .kiro/ disappearance)`n$settingsIgnoreLine"
+        Write-Host "  [Phase 5-5b] Added .claude/settings.json to .gitignore"
+    }
+} else {
+    Set-Content -Path $gitignorePath -Value "# Claude Code settings (must not be git-tracked)`n$settingsIgnoreLine`n" -Encoding UTF8
+    Write-Host "  [Phase 5-5b] Created .gitignore with .claude/settings.json exclusion"
+}
+
 # 5-6: .kiro/ids/registry.json (skip if exists)
 $registryPath = Join-Path $TargetProject ".kiro\ids\registry.json"
 if (Test-Path $registryPath) {
