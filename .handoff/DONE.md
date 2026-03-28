@@ -1,7 +1,7 @@
-# DONE - 2026-03-28 15:54
+# DONE - 2026-03-28 16:15
 ## Completed
-- Hook isolation test: 7/7 PASS (each tested with session restart)
-- Root cause confirmed: settings.json git-tracked → runtime refresh → .kiro/ deletion
-- All hooks restored and verified safe
+- Hook isolation 7/7 PASS
+- Root cause: Write/Edit on git-tracked .kiro/ triggers runtime refresh → deletion
+- Fix: .kiro/ in .gitignore, post-commit hook handles sync
 ## Next
-- nm002 deploy, deploy hooks to all projects
+- Deploy .kiro/.gitignore fix to all projects
