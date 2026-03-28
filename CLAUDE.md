@@ -62,6 +62,8 @@ IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design 
 
 IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
 
+IMPORTANT: When committing .kiro/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .kiro/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/kiro-safe-commit.md`
+
 IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before identifying root cause. Follow: 1) describe symptom, 2) list own recent actions, 3) hypothesize own actions as cause FIRST (external factors LAST), 4) verify hypothesis, 5) THEN implement fix + register + commit + package. "Being careful" is not a fix. Details: `.claude/rules/troubleshooting/root-cause-first.md`
 
 ---
