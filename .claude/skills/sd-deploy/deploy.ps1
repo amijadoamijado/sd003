@@ -353,38 +353,32 @@ foreach ($key in $copyStats.Keys | Sort-Object) {
 # ============================================================
 $ProjectName = Split-Path $TargetProject -Leaf
 
-# 5-1: CLAUDE.md from template (skip if SD003-based, overwrite if legacy)
+# 5-1: CLAUDE.md from template (ALWAYS overwrite - rules must be latest)
 $claudeMdPath = Join-Path $TargetProject "CLAUDE.md"
-if ((Test-Path $claudeMdPath) -and ((Get-Content $claudeMdPath -Raw -Encoding UTF8) -match "SD003")) {
-    Write-Host "  SKIP: CLAUDE.md already exists (SD003-based, preserving)" -ForegroundColor Cyan
+$claudeTemplate = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\CLAUDE.md.template"
+if (Test-Path $claudeTemplate) {
+    $content = Get-Content $claudeTemplate -Raw -Encoding UTF8
+    $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
+    $content = $content -replace '\{\{DATE\}\}', $DATE
+    $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
+    Set-Content -Path $claudeMdPath -Value $content -Encoding UTF8
+    if (Test-Path $claudeMdPath) { Write-Host "  UPDATE: CLAUDE.md (latest rules applied)" -ForegroundColor Green }
 } else {
-    $claudeTemplate = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\CLAUDE.md.template"
-    if (Test-Path $claudeTemplate) {
-        $content = Get-Content $claudeTemplate -Raw -Encoding UTF8
-        $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
-        $content = $content -replace '\{\{DATE\}\}', $DATE
-        $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
-        Set-Content -Path $claudeMdPath -Value $content -Encoding UTF8
-    } else {
-        Write-Host "  WARN: CLAUDE.md.template not found, skipping" -ForegroundColor Yellow
-    }
+    Write-Host "  WARN: CLAUDE.md.template not found, skipping" -ForegroundColor Yellow
 }
 
-# 5-2: gemini.md from template (skip if exists)
+# 5-2: gemini.md from template (ALWAYS overwrite - rules must be latest)
 $geminiMdPath = Join-Path $TargetProject "gemini.md"
-if (Test-Path $geminiMdPath) {
-    Write-Host "  SKIP: gemini.md already exists (preserving project customizations)" -ForegroundColor Cyan
+$geminiTemplate = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\gemini.md.template"
+if (Test-Path $geminiTemplate) {
+    $content = Get-Content $geminiTemplate -Raw -Encoding UTF8
+    $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
+    $content = $content -replace '\{\{DATE\}\}', $DATE
+    $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
+    Set-Content -Path $geminiMdPath -Value $content -Encoding UTF8
+    if (Test-Path $geminiMdPath) { Write-Host "  UPDATE: gemini.md (latest rules applied)" -ForegroundColor Green }
 } else {
-    $geminiTemplate = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\gemini.md.template"
-    if (Test-Path $geminiTemplate) {
-        $content = Get-Content $geminiTemplate -Raw -Encoding UTF8
-        $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
-        $content = $content -replace '\{\{DATE\}\}', $DATE
-        $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
-        Set-Content -Path $geminiMdPath -Value $content -Encoding UTF8
-    } else {
-        Write-Host "  WARN: gemini.md.template not found, skipping" -ForegroundColor Yellow
-    }
+    Write-Host "  WARN: gemini.md.template not found, skipping" -ForegroundColor Yellow
 }
 
 # 5-3: session-current.md (skip if exists, use template from .sessions/templates/)
@@ -421,17 +415,14 @@ if (Test-Path $timelinePath) {
     }
 }
 
-# 5-5: .claude/settings.json (skip if exists, use template)
+# 5-5: .claude/settings.json (ALWAYS overwrite - hooks must be latest)
 $settingsPath = Join-Path $TargetProject ".claude\settings.json"
-if (Test-Path $settingsPath) {
-    Write-Host "  SKIP: .claude/settings.json already exists (preserving custom hooks/permissions)" -ForegroundColor Cyan
+$templatePath = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\settings.json.template"
+if (Test-Path $templatePath) {
+    Copy-Item $templatePath $settingsPath -Force
+    Write-Host "  UPDATE: .claude/settings.json (latest hooks applied)" -ForegroundColor Green
 } else {
-    $templatePath = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\settings.json.template"
-    if (Test-Path $templatePath) {
-        Copy-Item $templatePath $settingsPath -Force
-    } else {
-        Write-Host "  WARN: settings.json.template not found, skipping" -ForegroundColor Yellow
-    }
+    Write-Host "  WARN: settings.json.template not found, skipping" -ForegroundColor Yellow
 }
 
 # 5-5b: Ensure .claude/settings.json is in .gitignore (prevents .sd/ disappearance bug)
