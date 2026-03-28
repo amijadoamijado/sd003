@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "created": "{{ISO_DATE}}",
+  "project": "{{PROJECT_NAME}}",
+  "requirements": {},
+  "specifications": {},
+  "last_updated": "{{ISO_DATE}}"
+}

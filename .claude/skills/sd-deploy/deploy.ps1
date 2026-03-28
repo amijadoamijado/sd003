@@ -421,76 +421,17 @@ if (Test-Path $timelinePath) {
     }
 }
 
-# 5-5: .claude/settings.json (skip if exists)
+# 5-5: .claude/settings.json (skip if exists, use template)
 $settingsPath = Join-Path $TargetProject ".claude\settings.json"
 if (Test-Path $settingsPath) {
     Write-Host "  SKIP: .claude/settings.json already exists (preserving custom hooks/permissions)" -ForegroundColor Cyan
 } else {
-    $settingsContent = @"
-{
-  "env": {
-    "ENABLE_TOOL_SEARCH": "true"
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"`$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"",
-            "timeout": 30
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
-            "timeout": 120
-          },
-          {
-            "type": "command",
-            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"`$CLAUDE_PROJECT_DIR/.claude/hooks/deploy-package-reminder.sh\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  }
-}
-"@
-    Set-Content -Path $settingsPath -Value $settingsContent -Encoding UTF8
+    $templatePath = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\settings.json.template"
+    if (Test-Path $templatePath) {
+        Copy-Item $templatePath $settingsPath -Force
+    } else {
+        Write-Host "  WARN: settings.json.template not found, skipping" -ForegroundColor Yellow
+    }
 }
 
 # 5-5b: Ensure .claude/settings.json is in .gitignore (prevents .sd/ disappearance bug)
@@ -508,37 +449,34 @@ if (Test-Path $gitignorePath) {
     Write-Host "  [Phase 5-5b] Created .gitignore with .claude/settings.json exclusion"
 }
 
-# 5-6: .sd/ids/registry.json (skip if exists)
+# 5-6: .sd/ids/registry.json (skip if exists, use template)
 $registryPath = Join-Path $TargetProject ".sd\ids\registry.json"
 if (Test-Path $registryPath) {
     Write-Host "  SKIP: registry.json already exists (preserving existing IDs)" -ForegroundColor Cyan
 } else {
-    $isoDate = Get-Date -Format "yyyy-MM-ddTHH:mm:ssK"
-    $registryContent = @"
-{
-  "version": "1.0.0",
-  "created": "$isoDate",
-  "project": "$ProjectName",
-  "requirements": {},
-  "specifications": {},
-  "last_updated": "$isoDate"
-}
-"@
-    Set-Content -Path $registryPath -Value $registryContent -Encoding UTF8
+    $templatePath = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\registry.json.template"
+    if (Test-Path $templatePath) {
+        $isoDate = Get-Date -Format "yyyy-MM-ddTHH:mm:ssK"
+        $content = Get-Content $templatePath -Raw -Encoding UTF8
+        $content = $content -replace '\{\{ISO_DATE\}\}', $isoDate
+        $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
+        Set-Content -Path $registryPath -Value $content -Encoding UTF8
+    } else {
+        Write-Host "  WARN: registry.json.template not found, skipping" -ForegroundColor Yellow
+    }
 }
 
-# 5-7: handoff-log.json (skip if exists)
+# 5-7: handoff-log.json (skip if exists, use template)
 $handoffPath = Join-Path $TargetProject ".sd\ai-coordination\handoff\handoff-log.json"
 if (Test-Path $handoffPath) {
     Write-Host "  SKIP: handoff-log.json already exists (preserving existing logs)" -ForegroundColor Cyan
 } else {
-    $handoffContent = @"
-{
-  "version": "2.0.0",
-  "entries": []
-}
-"@
-    Set-Content -Path $handoffPath -Value $handoffContent -Encoding UTF8
+    $templatePath = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\handoff-log.json.template"
+    if (Test-Path $templatePath) {
+        Copy-Item $templatePath $handoffPath -Force
+    } else {
+        Write-Host "  WARN: handoff-log.json.template not found, skipping" -ForegroundColor Yellow
+    }
 }
 
 # 5b: Inject gas-fakes into target package.json (create if not exists)
