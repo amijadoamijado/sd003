@@ -3,84 +3,93 @@ description: Save session handoff and update timeline
 allowed-tools: Bash, Write, Read
 ---
 
-# Session Record Save
+# セッション保存
 
-Save session handoff and update project timeline.
+セッション引き継ぎ記録を保存し、プロジェクトタイムラインを更新する。
 
-## Files
+## ファイル
 
-| File | Purpose |
-|------|---------|
-| `.sessions/session-YYYYMMDD-HHMMSS.md` | History (timestamped) |
-| `.sessions/session-current.md` | Latest version |
-| `.sessions/TIMELINE.md` | Project timeline |
+| ファイル | 用途 |
+|---------|------|
+| `.sessions/session-YYYYMMDD-HHMMSS.md` | 履歴（タイムスタンプ付き） |
+| `.sessions/session-current.md` | 最新版 |
+| `.sessions/TIMELINE.md` | プロジェクト履歴 |
 
-## Execution Steps
+## 実行手順
 
-1. Create `.sessions/` directory (if not exists)
-2. Generate timestamp (e.g., `20251123-143052`)
-3. Get git status (branch, latest commit)
-4. Create history file `.sessions/session-YYYYMMDD-HHMMSS.md`
-5. Copy to `.sessions/session-current.md`
-6. **Update TIMELINE.md** (add new entry)
-7. Display completion message
+1. `.sessions/` ディレクトリ作成（なければ）
+2. タイムスタンプ生成（例: `20251123-143052`）
+3. git状態取得（ブランチ、最新コミット）
+4. 履歴ファイル `.sessions/session-YYYYMMDD-HHMMSS.md` 作成
+5. `.sessions/session-current.md` にコピー
+6. **TIMELINE.md 更新**（新エントリ追加）
+7. 完了メッセージ表示
 
-## Session Record Format
+## 言語ルール（必須）
+
+**セッション記録は全て日本語で書くこと。** 英語禁止。
+- 見出し: 日本語
+- 完了事項: 日本語
+- 次回タスク: 日本語
+- 備考: 日本語
+- コミットメッセージのみ英語OK
+
+## セッション記録フォーマット
 
 ```markdown
-# Session Record
+# セッション記録
 
-## Session Info
-- **Date**: [YYYY-MM-DD HH:MM:SS]
-- **Project**: [path]
-- **Branch**: [git branch]
-- **Latest Commit**: [hash + message]
+## セッション情報
+- **日時**: [YYYY-MM-DD HH:MM:SS]
+- **プロジェクト**: [パス]
+- **ブランチ**: [git branch]
+- **最新コミット**: [hash + message]
 
-## Progress Summary
+## 作業サマリー
 
-### Completed
-[numbered list]
+### 完了
+[番号付きリスト・日本語]
 
-### In Progress
-[numbered list]
+### 進行中
+[番号付きリスト・日本語]
 
-### Unresolved Issues
-[issues and attempted solutions]
+### 未解決
+[課題と試した対策・日本語]
 
-### Files Created/Modified
-[categorized list]
+### 作成・変更ファイル
+[カテゴリ別リスト]
 
-### Next Session Tasks
+### 次回タスク
 
-#### P0 (Urgent)
-[immediate tasks]
+#### P0（緊急）
+[即対応が必要]
 
-#### P1 (Important)
-[important but not urgent]
+#### P1（重要）
+[緊急ではないが重要]
 
-#### P2 (Normal)
-[when time allows]
+#### P2（通常）
+[時間があれば]
 
-### Notes
-[handoff notes]
+### 備考
+[引き継ぎ事項・日本語]
 ```
 
-## TIMELINE.md Update
+## TIMELINE.md 更新
 
-After saving session, update TIMELINE.md:
+セッション保存後、TIMELINE.mdを更新する:
 
-1. Read current TIMELINE.md
-2. Extract main work summary (1 line, e.g., "Ralph Wiggum v1.1.0")
-3. Add new entry at the top of the current month's table:
+1. 現在のTIMELINE.mdを読む
+2. 主な作業内容を1行で要約
+3. 当月テーブルの先頭に新エントリ追加:
 
 ```markdown
 | MM-DD | [Main Work] | [Commit Hash] | [Details](session-YYYYMMDD-HHMMSS.md) |
 ```
 
-4. Increment total session count in Statistics
-5. Update "Latest Session" date
+4. 統計のTotal Sessions数をインクリメント
+5. Latest Session日付を更新
 
-## User Input
+## ユーザー入力
 $ARGUMENTS
 
 ## Codex Handoff（並行保存）
@@ -99,23 +108,19 @@ $ARGUMENTS
 
 **DONE.md は `.handoff/DONE.template.md` をベースに作成する。**
 
-## Git Commit
+## Gitコミット
 
-.sd/ は .gitignore でgit管理外。post-commit hookが自動でGitHubに同期+Google Driveにバックアップする。
-sessionwriteでは .handoff/DONE.md だけ git add + commit する。
+セッションファイル（.sessions/）と .handoff/DONE.md を git add + commit する。
 
 ```bash
-git add .handoff/DONE.md
+git add .sessions/ .handoff/DONE.md
 git commit -m "session: [1行サマリー]
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 ```
 
-post-commit hookが以下を自動実行:
-1. .sd/ を git add -f して commit に含める（GitHub同期）
-2. async git push
-3. .sd/ を G:\マイドライブ\sd-backup\ にバックアップ
+post-commit hookが非同期pushを自動実行。
 
 ---
 
-**Execute**: Write/Edit で .sd/ ファイルを更新し、git add .handoff/DONE.md && git commit する。
+**実行**: Write/Edit で .sessions/ ファイルを更新し、git add .sessions/ .handoff/DONE.md && git commit する。
