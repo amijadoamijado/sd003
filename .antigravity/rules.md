@@ -106,6 +106,8 @@ When user prompt contains these keywords, AUTOMATICALLY execute the correspondin
 - Node.js-only APIs (`fs`, `path`, `process`)
 - Unauthorized spec changes
 - Skipping tests
+- .kiro/ファイル変更をbash呼び出しをまたいでcommitする（同一コマンド内でadd+commit必須。詳細: `.claude/rules/git/kiro-safe-commit.md`）
+- `.claude/settings.json`をgit追跡する（.gitignoreに入れること）
 
 ## Protected Files (Do NOT move/delete)
 

@@ -108,6 +108,8 @@ npm test && npm run lint
 - Test coverage >=80%
 - ESLint errors = 0
 - TypeScript strict mode
+- **.kiro/ safe commit**: .kiro/ファイルの変更は同一bashコマンド内でgit add+commitまで完了すること。分割するとClaude Codeランタイムが.kiro/を消す。詳細: `.claude/rules/git/kiro-safe-commit.md`
+- **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること
 
 ### GASデプロイルール（厳守）
 - **`clasp push` のみ許可。`clasp deploy` / `clasp undeploy` はユーザー明示指示なしに実行禁止**
