@@ -38,6 +38,17 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 - ルート直下への新規ファイル作成禁止
 - 詳細: `.claude/rules/cleanup/file-organization.md`
 
+## Bash Tool Policy
+
+Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstdin消失、長文コマンド誤動作、ランタイムによるワーキングツリーリフレッシュ）。安定性を優先し、代替手段があればそちらを使う。バグが解消されればBash利用を解禁する。
+
+- **ファイル作成・編集**: Write/Edit tool優先。Bashのheredoc/リダイレクトは避ける
+- **.kiro/操作**: Write/Edit + pre-commit hookで自動ステージ。Bashでのgit add .kiro/は不要
+- **git commit**: 短い1行コマンドのみ。heredocでのcommitメッセージは避ける
+- **Bash使用OK**: git status, ls, npm, 短いコマンド
+- **監視対象バグ**: anthropics/claude-code #15599, #24956, #11225, #34330 — 解消確認後にBash制限を緩和
+- 詳細: `.claude/rules/git/kiro-safe-commit.md`
+
 ---
 
 ## Conditional Context
