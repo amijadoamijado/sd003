@@ -15,18 +15,18 @@ prompt = """
 
 ## 前提条件
 - 案件ディレクトリが存在すること（`/workflow:init` 済み）
-- `.kiro/ai-coordination/workflow/spec/{案件ID}/` が存在すること
+- `.sd/ai-coordination/workflow/spec/{案件ID}/` が存在すること
 
 ## 実行手順
 
 ### 1. 案件ディレクトリ確認
 ```bash
-ls .kiro/ai-coordination/workflow/spec/{案件ID}/
+ls .sd/ai-coordination/workflow/spec/{案件ID}/
 ```
 存在しない場合は `/workflow:init` を先に実行するよう案内。
 
 ### 2. 関連仕様書の確認
-`.kiro/specs/` 配下に関連する仕様書があれば確認し、発注書に反映。
+`.sd/specs/` 配下に関連する仕様書があれば確認し、発注書に反映。
 
 ### 3. ユーザーとの対話
 以下の情報を収集:
@@ -48,11 +48,11 @@ ls .kiro/ai-coordination/workflow/spec/{案件ID}/
 
 ### 4. WORK_ORDER.md 作成
 テンプレートを使用して発注書を作成:
-- テンプレート: `.kiro/ai-coordination/workflow/templates/WORK_ORDER.md`
-- 保存先: `.kiro/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md`
+- テンプレート: `.sd/ai-coordination/workflow/templates/WORK_ORDER.md`
+- 保存先: `.sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md`
 
 ### 5. PROJECT_STATUS.md 更新
-`.kiro/ai-coordination/workflow/log/{案件ID}/PROJECT_STATUS.md` を更新:
+`.sd/ai-coordination/workflow/log/{案件ID}/PROJECT_STATUS.md` を更新:
 - フェーズ1完了、フェーズ2（発注書レビュー）へ
 - タイムラインに記録追加
 
@@ -66,7 +66,7 @@ ls .kiro/ai-coordination/workflow/spec/{案件ID}/
       \"from\": \"Claude Code\",
       \"to\": \"Codex\",
       \"type\": \"work_order_review\",
-      \"artifact\": \".kiro/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md\",
+      \"artifact\": \".sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md\",
       \"timestamp\": \"{現在日時ISO形式}\",
       \"status\": \"pending\",
       \"result\": null
@@ -80,11 +80,11 @@ ls .kiro/ai-coordination/workflow/spec/{案件ID}/
 ## 発注書作成完了
 
 - **案件ID**: {案件ID}
-- **発注書**: .kiro/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md
+- **発注書**: .sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md
 
 ## 次のステップ
 1. Codexに発注書レビューを依頼してください
-   - 手順: `.kiro/ai-coordination/workflow/CODEX_GUIDE.md` 参照
+   - 手順: `.sd/ai-coordination/workflow/CODEX_GUIDE.md` 参照
 2. レビューApprove後、`/workflow:request {案件ID} 001` で実装指示を作成
 ```
 

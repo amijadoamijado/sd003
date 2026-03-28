@@ -117,7 +117,7 @@ Examples:
 
 ## Manual Override
 
-User can disable autonomous context management by setting in `.kiro/refactor/config.json`:
+User can disable autonomous context management by setting in `.sd/refactor/config.json`:
 
 ```json
 {
@@ -131,4 +131,4 @@ User can disable autonomous context management by setting in `.kiro/refactor/con
 
 - `/sessionwrite` command must be available
 - `/sessionread` command must be available
-- `.kiro/sessions/` directory must exist
+- `.sd/sessions/` directory must exist

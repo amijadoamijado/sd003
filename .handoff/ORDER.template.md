@@ -59,8 +59,8 @@ npm test -- --testNamePattern="login"
 ## 参照情報
 
 **関連仕様書**
-- `.kiro/specs/xxx/requirements.md` - セクション3.2
-- `.kiro/specs/xxx/design.md` - 認証アーキテクチャ
+- `.sd/specs/xxx/requirements.md` - セクション3.2
+- `.sd/specs/xxx/design.md` - 認証アーキテクチャ
 
 **関連ファイル**
 - `src/types/auth.ts` - 型定義

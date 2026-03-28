@@ -18,7 +18,7 @@
 
 1. **週次ディレクトリ作成**
    ```
-   .kiro/ralph/weekly/{YYYY-Www}/
+   .sd/ralph/weekly/{YYYY-Www}/
    ├── plan.md
    ├── daily/
    │   ├── mon.md
@@ -30,7 +30,7 @@
    ```
 
 2. **バックログ確認**
-   - `.kiro/ralph/backlog.md` から優先度順にタスクを選択
+   - `.sd/ralph/backlog.md` から優先度順にタスクを選択
    - 仕様書参照を確認
 
 3. **日別割り当て**
@@ -70,7 +70,7 @@
 - nightly-queue: daily/mon.md
 - 推定反復: 25
 - 想定成果: FW003完成
-- 仕様参照: .kiro/specs/fw003/
+- 仕様参照: .sd/specs/fw003/
 ```
 
 ## Best Practices
@@ -98,8 +98,8 @@
 
 ## Files
 
-- `.kiro/ralph/weekly/TEMPLATE/` - テンプレート
-- `.kiro/ralph/backlog.md` - バックログ
+- `.sd/ralph/weekly/TEMPLATE/` - テンプレート
+- `.sd/ralph/backlog.md` - バックログ
 
 ---
 

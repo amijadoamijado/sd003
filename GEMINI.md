@@ -6,12 +6,12 @@ SD003 now supports Gemini CLI custom slash commands and skills.
 
 ### Slash Commands
 Custom commands are synced from `.claude/commands/*.md` to `.gemini/commands/*.toml`.
-Usage: `/kiro:spec-init <description>`, `/workflow:impl <id> <task>`, etc.
+Usage: `/sd:spec-init <description>`, `/workflow:impl <id> <task>`, etc.
 
 ### Skills
 Project-local skills are available in `.gemini/skills/`.
 You can activate them using the `activate_skill` tool (if supported by your environment) or they will be automatically included in the system instructions.
-Available skills: `kiro-deploy`, `session-autosave`, `rollback-guard`, etc.
+Available skills: `sd-deploy`, `session-autosave`, `rollback-guard`, etc.
 
 ## Core Principles
 - Always start complex tasks in plan mode. Iterate on the plan until
@@ -61,7 +61,7 @@ Available skills: `kiro-deploy`, `session-autosave`, `rollback-guard`, etc.
 
 ### File Location Rules
 
-**ALL documents in `.kiro/ai-coordination/`**
+**ALL documents in `.sd/ai-coordination/`**
 
 | Read From | Write To |
 |-----------|----------|
@@ -76,8 +76,8 @@ Available skills: `kiro-deploy`, `session-autosave`, `rollback-guard`, etc.
 ### Key Paths
 | Path | Purpose |
 |------|---------|
-| `.kiro/ai-coordination/` | **AI coordination workflow** |
-| `.kiro/specs/` | Feature specifications |
+| `.sd/ai-coordination/` | **AI coordination workflow** |
+| `.sd/specs/` | Feature specifications |
 | `docs/` | Documentation |
 
 ### Templates
@@ -101,6 +101,8 @@ Available skills: `kiro-deploy`, `session-autosave`, `rollback-guard`, etc.
 - GAS API via Env Interface only
 - Test coverage >=80%
 - ESLint errors = 0
+- **.sd/ safe commit**: .sd/ファイルの変更は同一コマンド内でgit add+commitまで完了すること。分割するとランタイムが.sd/を消す。詳細: `.claude/rules/git/sd-safe-commit.md`
+- **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること
 
 ### GASデプロイルール（厳守）
 - **`clasp push` のみ許可。`clasp deploy` / `clasp undeploy` はユーザー明示指示なしに実行禁止**
@@ -135,7 +137,7 @@ npm test && npm run lint
 ## Reference
 - **AI Coordination**: `.claude/rules/workflow/ai-coordination.md`
 - **Quality Gates**: `docs/quality-gates.md`
-- **Templates**: `.kiro/ai-coordination/workflow/templates/`
+- **Templates**: `.sd/ai-coordination/workflow/templates/`
 
 ---
 
@@ -196,3 +198,5 @@ Claude Code: 結果を読んで判断 → 承認 or 修正指示
 
 ---
 SD003 Framework v2.13.0 | Updated: 2026-03-07
+b
+b

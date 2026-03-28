@@ -7,45 +7,45 @@ SD002は仕様書駆動開発(SD001)とGASモック環境(GA001)を統合したA
 
 ### Phase 0: Steering（任意）
 プロジェクト戦略ドキュメントの作成・更新
-- `.kiro/steering/product.md`
-- `.kiro/steering/tech.md`
-- `.kiro/steering/structure.md`
+- `.sd/steering/product.md`
+- `.sd/steering/tech.md`
+- `.sd/steering/structure.md`
 
 ### Phase 1: Specification
 
 #### Step 1: 仕様書初期化
 ```
-/prompts:kiro-spec-init "feature description"
+/prompts:sd-spec-init "feature description"
 ```
-作成: `.kiro/specs/{feature}/`
+作成: `.sd/specs/{feature}/`
 
 #### Step 2: 要件定義
 ```
-/prompts:kiro-spec-requirements {feature}
+/prompts:sd-spec-requirements {feature}
 ```
 更新: `requirements.md`
 
 #### Step 3: ギャップ分析
 ```
-/prompts:kiro-validate-gap {feature}
+/prompts:sd-validate-gap {feature}
 ```
 既存コードとのギャップ確認
 
 #### Step 4: 技術設計
 ```
-/prompts:kiro-spec-design {feature}
+/prompts:sd-spec-design {feature}
 ```
 更新: `design.md`
 
 #### Step 5: 設計検証
 ```
-/prompts:kiro-validate-design {feature}
+/prompts:sd-validate-design {feature}
 ```
 設計品質・GAS互換性確認
 
 #### Step 6: タスク生成
 ```
-/prompts:kiro-spec-tasks {feature}
+/prompts:sd-spec-tasks {feature}
 ```
 更新: `tasks.md`
 
@@ -53,19 +53,19 @@ SD002は仕様書駆動開発(SD001)とGASモック環境(GA001)を統合したA
 
 #### Step 7: 実装
 ```
-/prompts:kiro-spec-impl {feature} [tasks]
+/prompts:sd-spec-impl {feature} [tasks]
 ```
 TDD推奨、品質基準遵守
 
 #### Step 8: 実装検証
 ```
-/prompts:kiro-validate-impl {feature}
+/prompts:sd-validate-impl {feature}
 ```
 8段階品質ゲート通過確認
 
 ### Progress Check
 ```
-/prompts:kiro-spec-status {feature}
+/prompts:sd-spec-status {feature}
 ```
 
 ## 品質基準

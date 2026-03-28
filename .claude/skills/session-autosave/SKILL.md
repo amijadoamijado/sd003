@@ -167,7 +167,7 @@ Examples:
 
 ## Configuration
 
-In `.kiro/refactor/config.json`:
+In `.sd/refactor/config.json`:
 
 ```json
 {
@@ -199,5 +199,5 @@ Disable autosave (not recommended):
 ## Dependencies
 
 - `/sessionwrite` command must be available
-- `.kiro/sessions/` directory must exist
-- `.kiro/refactor/checkpoints/` directory for checkpoint registry
+- `.sd/sessions/` directory must exist
+- `.sd/refactor/checkpoints/` directory for checkpoint registry

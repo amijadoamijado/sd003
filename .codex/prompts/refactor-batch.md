@@ -20,7 +20,7 @@ allowed-tools: Task, Read, Write, Edit, Bash, Glob, Grep, TodoWrite, Skill
 ## Prerequisites
 
 - `/refactor:plan`が正常に完了していること
-- バッチマニフェストが`.kiro/refactor/plans/{session-id}/batch-manifest.json`に存在すること
+- バッチマニフェストが`.sd/refactor/plans/{session-id}/batch-manifest.json`に存在すること
 
 ## Execution Flow
 
@@ -50,7 +50,7 @@ For each batch in manifest:
 
 ```javascript
 const manifest = JSON.parse(
-  read('.kiro/refactor/plans/{session-id}/batch-manifest.json')
+  read('.sd/refactor/plans/{session-id}/batch-manifest.json')
 );
 
 const currentBatch = manifest.batches.find(b => b.status !== 'completed');

@@ -25,7 +25,7 @@ export function registerSpecSyncCommand(program: Command): void {
     .description('Synchronize specification documents and update traceability')
     .action(async () => {
       console.log('Starting specification synchronization...');
-      const specDirPath = path.join(process.cwd(), '.kiro', 'specs');
+      const specDirPath = path.join(process.cwd(), '.sd', 'specs');
 
       if (!fs.existsSync(specDirPath)) {
         console.warn(`Specification directory not found: ${specDirPath}`);

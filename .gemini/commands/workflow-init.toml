@@ -21,25 +21,25 @@ prompt = """
 - 例: `20251230-001-auth-feature`
 
 連番の決定:
-1. `.kiro/ai-coordination/workflow/spec/` 配下の既存案件IDを確認
+1. `.sd/ai-coordination/workflow/spec/` 配下の既存案件IDを確認
 2. 同日の最大連番 + 1 を使用
 3. 同日の案件がなければ 001 から開始
 
 ### 2. ディレクトリ作成
 ```bash
-mkdir -p .kiro/ai-coordination/workflow/spec/{案件ID}
-mkdir -p .kiro/ai-coordination/workflow/review/{案件ID}
-mkdir -p .kiro/ai-coordination/workflow/log/{案件ID}
+mkdir -p .sd/ai-coordination/workflow/spec/{案件ID}
+mkdir -p .sd/ai-coordination/workflow/review/{案件ID}
+mkdir -p .sd/ai-coordination/workflow/log/{案件ID}
 ```
 
 ### 3. PROJECT_STATUS.md 初期化
-`.kiro/ai-coordination/workflow/log/{案件ID}/PROJECT_STATUS.md` を作成:
-- テンプレート: `.kiro/ai-coordination/workflow/templates/PROJECT_STATUS.md`
+`.sd/ai-coordination/workflow/log/{案件ID}/PROJECT_STATUS.md` を作成:
+- テンプレート: `.sd/ai-coordination/workflow/templates/PROJECT_STATUS.md`
 - メタデータを現在日時で初期化
 - フェーズ1（発注書作成）を設定
 
 ### 4. handoff-log.json 更新
-`.kiro/ai-coordination/handoff/handoff-log.json` に新規案件を登録:
+`.sd/ai-coordination/handoff/handoff-log.json` に新規案件を登録:
 ```json
 {
   \"active_projects\": [

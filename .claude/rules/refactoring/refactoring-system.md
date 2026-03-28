@@ -52,7 +52,7 @@ Context-efficient refactoring with autonomous session management and proposal-ba
 | `rollback-guard` | Propose rollback | Test failure |
 
 ## 設定
-`.kiro/refactor/config.json`
+`.sd/refactor/config.json`
 
 ## 外部リソース
 - **LSP**: `ENABLE_LSP_TOOLS=1` or cclsp MCP

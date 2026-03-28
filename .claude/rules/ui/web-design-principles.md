@@ -123,7 +123,7 @@ GAS Web Appはiframe内（`script.googleusercontent.com`）で動作するため
 
 ## デザイントークンとの関係
 
-プロジェクトごとのカラー・フォント・余白は `.kiro/design/DESIGN_TOKENS.md` で定義する。
+プロジェクトごとのカラー・フォント・余白は `.sd/design/DESIGN_TOKENS.md` で定義する。
 このルールは「原則」、デザイントークンは「具体値」という関係。
 
 ## 評価方法

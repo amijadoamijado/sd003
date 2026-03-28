@@ -12,7 +12,7 @@ SD003: Spec-Driven Development framework integrating SD001 and GA001 for AI-driv
 | `tests/` | Tests |
 | `docs/` | Documentation |
 | `materials/` | Reference materials & deliverables |
-| `.kiro/` | Specs, sessions, settings |
+| `.sd/` | Specs, sessions, settings |
 | `.claude/rules/` | Development rules |
 
 ## Design Principles
@@ -31,7 +31,7 @@ request → impl(Gemini) → review(Codex) → test(Antigravity)
 ```
 レビュー Approve 時に `/workflow:test` が自動実行され、TEST_REQUEST が作成される。
 
-**運用ガイド**: `.kiro/ai-coordination/workflow/ANTIGRAVITY_GUIDE.md`
+**運用ガイド**: `.sd/ai-coordination/workflow/ANTIGRAVITY_GUIDE.md`
 
 ### Antigravity's Role
 | Role | Description |
@@ -54,13 +54,13 @@ When user prompt contains these keywords, AUTOMATICALLY execute the correspondin
 
 | Trigger Keyword | Action | Template |
 |----------------|--------|----------|
-| "test request", "test instruction" | Read TEST_REQUEST from spec folder | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
-| "test report", "report results" | Create TEST_REPORT in review folder | `.kiro/ai-coordination/workflow/review/{projectID}/` |
-| "create instruction", "create request" | Use template from templates folder | `.kiro/ai-coordination/workflow/templates/` |
+| "test request", "test instruction" | Read TEST_REQUEST from spec folder | `.sd/ai-coordination/workflow/spec/{projectID}/` |
+| "test report", "report results" | Create TEST_REPORT in review folder | `.sd/ai-coordination/workflow/review/{projectID}/` |
+| "create instruction", "create request" | Use template from templates folder | `.sd/ai-coordination/workflow/templates/` |
 
 ### File Location Rules (ABSOLUTE)
 
-**ALL requests and reports MUST be in `.kiro/ai-coordination/`**
+**ALL requests and reports MUST be in `.sd/ai-coordination/`**
 
 | File Type | Location | Example |
 |-----------|----------|---------|
@@ -78,17 +78,17 @@ When user prompt contains these keywords, AUTOMATICALLY execute the correspondin
 
 **When receiving a test request:**
 ```
-1. Look for TEST_REQUEST in: .kiro/ai-coordination/workflow/spec/{projectID}/
+1. Look for TEST_REQUEST in: .sd/ai-coordination/workflow/spec/{projectID}/
 2. Execute tests as specified
 3. Capture screenshots
-4. Create TEST_REPORT in: .kiro/ai-coordination/workflow/review/{projectID}/
+4. Create TEST_REPORT in: .sd/ai-coordination/workflow/review/{projectID}/
 5. Record in handoff-log.json
 ```
 
 **When asked to create a test request:**
 ```
-1. Use template: .kiro/ai-coordination/workflow/templates/TEST_REQUEST.md
-2. Save to: .kiro/ai-coordination/workflow/spec/{projectID}/TEST_REQUEST_{NNN}.md
+1. Use template: .sd/ai-coordination/workflow/templates/TEST_REQUEST.md
+2. Save to: .sd/ai-coordination/workflow/spec/{projectID}/TEST_REQUEST_{NNN}.md
 3. Record in handoff-log.json
 ```
 
@@ -106,7 +106,7 @@ When user prompt contains these keywords, AUTOMATICALLY execute the correspondin
 - Node.js-only APIs (`fs`, `path`, `process`)
 - Unauthorized spec changes
 - Skipping tests
-- .kiro/ファイル変更をbash呼び出しをまたいでcommitする（同一コマンド内でadd+commit必須。詳細: `.claude/rules/git/kiro-safe-commit.md`）
+- .sd/ファイル変更をbash呼び出しをまたいでcommitする（同一コマンド内でadd+commit必須。詳細: `.claude/rules/git/sd-safe-commit.md`）
 - `.claude/settings.json`をgit追跡する（.gitignoreに入れること）
 
 ## Protected Files (Do NOT move/delete)

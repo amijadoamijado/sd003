@@ -11,17 +11,17 @@ Save session handoff and update project timeline.
 
 | File | Purpose |
 |------|---------|
-| `.kiro/sessions/session-YYYYMMDD-HHMMSS.md` | History (timestamped) |
-| `.kiro/sessions/session-current.md` | Latest version |
-| `.kiro/sessions/TIMELINE.md` | Project timeline |
+| `.sd/sessions/session-YYYYMMDD-HHMMSS.md` | History (timestamped) |
+| `.sd/sessions/session-current.md` | Latest version |
+| `.sd/sessions/TIMELINE.md` | Project timeline |
 
 ## Execution Steps
 
-1. Create `.kiro/sessions/` directory (if not exists)
+1. Create `.sd/sessions/` directory (if not exists)
 2. Generate timestamp (e.g., `20251123-143052`)
 3. Get git status (branch, latest commit)
-4. Create history file `.kiro/sessions/session-YYYYMMDD-HHMMSS.md`
-5. Copy to `.kiro/sessions/session-current.md`
+4. Create history file `.sd/sessions/session-YYYYMMDD-HHMMSS.md`
+5. Copy to `.sd/sessions/session-current.md`
 6. **Update TIMELINE.md** (add new entry)
 7. Display completion message
 

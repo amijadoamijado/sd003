@@ -10,8 +10,8 @@ SD002フレームワークにおけるセッション管理と継続性の確保
 ```
 
 **動作内容:**
-1. `.kiro/sessions/session-YYYYMMDD-HHMMSS.md` を履歴として新規作成
-2. `.kiro/sessions/session-current.md` を上書き保存
+1. `.sd/sessions/session-YYYYMMDD-HHMMSS.md` を履歴として新規作成
+2. `.sd/sessions/session-current.md` を上書き保存
 3. 以下の情報を記録：
    - 日時（YYYY-MM-DD HH:MM:SS）
    - プロジェクトパス
@@ -29,7 +29,7 @@ SD002フレームワークにおけるセッション管理と継続性の確保
 ```
 
 **動作内容:**
-1. `.kiro/sessions/session-current.md` を読み込み
+1. `.sd/sessions/session-current.md` を読み込み
 2. 最新の作業状況を把握
 3. 要約を表示（タスク数、優先度別リスト等）
 
@@ -44,8 +44,8 @@ SD002フレームワークにおけるセッション管理と継続性の確保
 
 ### 開始時
 1. `/sessionread` で前回状況把握
-2. 仕様書の最新状態確認（`.kiro/specs/`）
-3. ステアリング確認（`.kiro/steering/`）
+2. 仕様書の最新状態確認（`.sd/specs/`）
+3. ステアリング確認（`.sd/steering/`）
 
 ### 作業中
 - 必要に応じてチェックポイント作成
@@ -104,8 +104,8 @@ SD002フレームワークにおけるセッション管理と継続性の確保
 
 | 記録種別 | 場所 |
 |---------|------|
-| プロジェクト全体セッション | `.kiro/sessions/` |
-| 引き継ぎ事項 | `.kiro/ai-coordination/handoff/handoff-log.json` |
+| プロジェクト全体セッション | `.sd/sessions/` |
+| 引き継ぎ事項 | `.sd/ai-coordination/handoff/handoff-log.json` |
 
 ## 禁止事項
 - ❌ セッション記録の省略

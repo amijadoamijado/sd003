@@ -23,7 +23,7 @@ Gemini CLI実装完了後、Codexにレビューを依頼する。
 
 ### Step 1: 実装指示の読み込み
 ```bash
-cat .kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
+cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
 ```
 レビュー対象のスコープを把握する。
 
@@ -36,7 +36,7 @@ git diff HEAD~1
 Geminiが実装した変更内容を取得する。
 
 ### Step 3: REVIEW_REQUEST_{タスク番号}.md 作成
-保存先: `.kiro/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md`
+保存先: `.sd/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md`
 
 内容:
 ```markdown
@@ -71,7 +71,7 @@ Geminiが実装した変更内容を取得する。
 
 ### Step 4: Codex CLI実行
 ```bash
-REVIEW_CONTENT=$(cat .kiro/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md)
+REVIEW_CONTENT=$(cat .sd/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md)
 REVIEW_PROMPT=\"以下のレビュー依頼に従って、実装コードをレビューしてください。判定（Approve/Request Changes）と詳細コメントを出力してください。
 
 ${REVIEW_CONTENT}\"
@@ -87,7 +87,7 @@ REVIEW_RESULT=$(printf '%s' \"$REVIEW_PROMPT\" | codex exec --full-auto 2>/dev/n
 ### Step 5: レビュー結果保存
 Codexの出力を以下に保存:
 ```
-.kiro/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md
+.sd/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md
 ```
 
 ### Step 6: handoff-log.json 更新
@@ -114,7 +114,7 @@ Codexの出力を以下に保存:
 - **案件ID**: {案件ID}
 - **タスク番号**: {タスク番号}
 - **判定**: {Approve/Request Changes}
-- **レビュー結果**: .kiro/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md
+- **レビュー結果**: .sd/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md
 
 ## 次のアクション
 {Approveの場合: テストフェーズへ}

@@ -10,7 +10,13 @@
       "Bash(tasklist:*)",
       "Bash(ls:*)",
       "Bash(node:*)",
-      "Skill(sessionwrite)"
+      "Skill(sessionwrite)",
+      "Bash(chmod +x D:/claudecode/sd003/.git/hooks/pre-commit)",
+      "WebSearch",
+      "Bash(chmod +x D:/claudecode/sd003/.git/hooks/post-commit)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(code --list-extensions)",
+      "Read(//g/マイドライブ/**)"
     ],
     "deny": [],
     "ask": []

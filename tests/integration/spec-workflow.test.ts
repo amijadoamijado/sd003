@@ -12,11 +12,11 @@ const mockArgv = (args: string[]) => {
 };
 
 describe('Spec-Driven Workflow Integration', () => {
-  const kiroDirPath = path.join(process.cwd(), '.kiro');
+  const kiroDirPath = path.join(process.cwd(), '.sd');
   const specsDirPath = path.join(kiroDirPath, 'specs');
 
   beforeEach(() => {
-    // Clean up .kiro directory before each test
+    // Clean up .sd directory before each test
     if (fs.existsSync(kiroDirPath)) {
       fs.rmSync(kiroDirPath, { recursive: true, force: true });
     }
@@ -40,7 +40,7 @@ describe('Spec-Driven Workflow Integration', () => {
   afterEach(() => {
     // Restore console output
     jest.restoreAllMocks();
-    // Clean up .kiro directory after each test
+    // Clean up .sd directory after each test
     if (fs.existsSync(kiroDirPath)) {
       fs.rmSync(kiroDirPath, { recursive: true, force: true });
     }

@@ -43,11 +43,11 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstdin消失、長文コマンド誤動作、ランタイムによるワーキングツリーリフレッシュ）。安定性を優先し、代替手段があればそちらを使う。バグが解消されればBash利用を解禁する。
 
 - **ファイル作成・編集**: Write/Edit tool優先。Bashのheredoc/リダイレクトは避ける
-- **.kiro/操作**: Write/Edit + pre-commit hookで自動ステージ。Bashでのgit add .kiro/は不要
+- **.sd/操作**: Write/Edit + pre-commit hookで自動ステージ。Bashでのgit add .sd/は不要
 - **git commit**: 短い1行コマンドのみ。heredocでのcommitメッセージは避ける
 - **Bash使用OK**: git status, ls, npm, 短いコマンド
 - **監視対象バグ**: anthropics/claude-code #15599, #24956, #11225, #34330 — 解消確認後にBash制限を緩和
-- 詳細: `.claude/rules/git/kiro-safe-commit.md`
+- 詳細: `.claude/rules/git/sd-safe-commit.md`
 
 ---
 
@@ -57,9 +57,9 @@ IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.j
 
 IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
 
-IMPORTANT: When coordinating with other AIs (Codex, Gemini, Antigravity), all documents go to `.kiro/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
+IMPORTANT: When coordinating with other AIs (Codex, Gemini, Antigravity), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
 
-IMPORTANT: When deploying SD003 to another project, use `/kiro:deploy` command only. Manual deploy is prohibited. Details: `.claude/skills/kiro-deploy/SKILL.md`
+IMPORTANT: When deploying SD003 to another project, use `/sd:deploy` command only. Manual deploy is prohibited. Details: `.claude/skills/sd-deploy/SKILL.md`
 
 IMPORTANT: When refactoring, use checkpoint-based batches with `/refactor:init`. Context auto-compact at 70%, auto-clear at 85%. Rollback requires user confirmation. Details: `.claude/rules/refactoring/refactoring-system.md`
 
@@ -73,7 +73,7 @@ IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design 
 
 IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
 
-IMPORTANT: When committing .kiro/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .kiro/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/kiro-safe-commit.md`
+IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .sd/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
 
 IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before identifying root cause. Follow: 1) describe symptom, 2) list own recent actions, 3) hypothesize own actions as cause FIRST (external factors LAST), 4) verify hypothesis, 5) THEN implement fix + register + commit + package. "Being careful" is not a fix. Details: `.claude/rules/troubleshooting/root-cause-first.md`
 
@@ -83,7 +83,7 @@ IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before ident
 
 | Category | Commands |
 |----------|----------|
-| Spec-Driven | `/kiro:spec-init`, `spec-requirements`, `spec-design`, `spec-tasks`, `spec-impl` |
+| Spec-Driven | `/sd:spec-init`, `spec-requirements`, `spec-design`, `spec-tasks`, `spec-impl` |
 | AI Workflow | `/workflow:init`, `order`, `request`, `impl`, `review`, `test`, `status` |
 | Loop | `/sd003:loop-test`, `loop-lint`, `loop-type` |
 | Night | `/ralph-wiggum:run`, `status`, `plan` |

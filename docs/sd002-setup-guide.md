@@ -4,10 +4,10 @@
 
 ---
 
-## 推奨: 自動展開（/kiro:deploy）
+## 推奨: 自動展開（/sd:deploy）
 
 ```
-/kiro:deploy <target-project-path>
+/sd:deploy <target-project-path>
 ```
 
 これにより以下が自動展開されます：
@@ -15,7 +15,7 @@
 - .claude/rules/（開発ルール集）
 - .claude/commands/（スラッシュコマンド）
 - .claude/skills/（スキル）
-- .kiro/（仕様書・セッション・設定）
+- .sd/（仕様書・セッション・設定）
 - .antigravity/（Antigravityルール）
 - docs/（ドキュメント）
 
@@ -33,7 +33,7 @@
 ```bash
 # SD002リポジトリからコピー
 cp -r {sd002}/.claude ./
-cp -r {sd002}/.kiro ./
+cp -r {sd002}/.sd ./
 cp -r {sd002}/docs ./
 
 # Gemini CLI使用時（オプション）
@@ -46,7 +46,7 @@ cp -r {sd002}/.antigravity ./
 ### 2. CLAUDE.md生成
 
 テンプレートを参照してプロジェクト固有の設定を作成:
-`.claude/skills/kiro-deploy/templates/CLAUDE.md.template`
+`.claude/skills/sd-deploy/templates/CLAUDE.md.template`
 
 ### 3. プロジェクト固有の調整
 
@@ -114,16 +114,16 @@ cp -r {sd002}/.antigravity ./
 │   └── ralph-loop.md            # Ralph Loop
 └── skills/                      # スキル
     ├── dialogue-resolution/
-    ├── kiro-deploy/
+    ├── sd-deploy/
     ├── context-autonomy/
     ├── session-autosave/
     └── rollback-guard/
 ```
 
-### .kiro/ 構造
+### .sd/ 構造
 
 ```
-.kiro/
+.sd/
 ├── specs/                # 仕様書
 ├── steering/             # ステアリング文書
 ├── sessions/             # セッション管理
@@ -177,10 +177,10 @@ project/
 | 内容 | 配置先 |
 |-----|--------|
 | 開発ルール詳細 | `.claude/rules/` |
-| セッション履歴 | `.kiro/sessions/` |
-| 仕様書 | `.kiro/specs/` |
+| セッション履歴 | `.sd/sessions/` |
+| 仕様書 | `.sd/specs/` |
 | トラブル解決ログ | `docs/troubleshooting/` |
-| 進捗・作業ログ | `docs/` または `.kiro/` |
+| 進捗・作業ログ | `docs/` または `.sd/` |
 
 ---
 
@@ -190,7 +190,7 @@ project/
 ┌─────────────────────────────────────────────┐
 │  序盤: 計画フェーズ                          │
 │  - 仕様書ファースト                          │
-│  - /kiro:spec-init → requirements → design  │
+│  - /sd:spec-init → requirements → design  │
 ├─────────────────────────────────────────────┤
 │  中盤: 実装フェーズ                          │
 │  - AI協調ワークフロー                        │
@@ -273,7 +273,7 @@ wc -l CLAUDE.md
 ### CLAUDE.mdが肥大化した場合
 1. 詳細を `.claude/rules/` に移動
 2. CLAUDE.mdには「詳細は rules/ 参照」と記載
-3. 進捗・ログは `docs/` または `.kiro/` に移動
+3. 進捗・ログは `docs/` または `.sd/` に移動
 
 ---
 
@@ -285,5 +285,5 @@ wc -l CLAUDE.md
 | v2.5.1 | 2026-01-02 | 必須コマンド確認セクション追加、cleanup/session必須明記 |
 | v2.5.0 | 2026-01-02 | CLAUDE.mdスリム化、rules構造刷新、Cleanup Tool追加、materials/導入 |
 | v2.4.0 | 2026-01-02 | Materials Folder、Cleanup Tool追加 |
-| v2.3.0 | 2025-12-31 | kiro-deploy スキル追加、3フェーズ開発戦略 |
+| v2.3.0 | 2025-12-31 | sd-deploy スキル追加、3フェーズ開発戦略 |
 | v2.2.0 | 2025-12-30 | AI協調ワークフロー追加 |

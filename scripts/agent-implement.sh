@@ -81,10 +81,10 @@ if [ -z "$PROJECT_ID" ] || [ -z "$TASK_NUM" ]; then
 fi
 
 # Paths
-SPEC_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/spec/${PROJECT_ID}"
+SPEC_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/spec/${PROJECT_ID}"
 REQUEST_FILE="${SPEC_DIR}/IMPLEMENT_REQUEST_${TASK_NUM}.md"
 WORK_ORDER_FILE="${SPEC_DIR}/WORK_ORDER.md"
-OUTPUT_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/log/${PROJECT_ID}"
+OUTPUT_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/log/${PROJECT_ID}"
 OUTPUT_FILE="${OUTPUT_DIR}/gemini-output-${TASK_NUM}.md"
 
 echo -e "${BLUE}========================================${NC}"

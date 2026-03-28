@@ -30,7 +30,7 @@ Read manifest and verify state:
 
 ```javascript
 const manifest = JSON.parse(
-  read('.kiro/refactor/plans/{session-id}/batch-manifest.json')
+  read('.sd/refactor/plans/{session-id}/batch-manifest.json')
 );
 
 const completedBatches = manifest.batches.filter(b => b.status === 'completed');
@@ -114,7 +114,7 @@ All must pass. If any fails:
 - Recommendation: Similar refactoring safe in future
 ```
 
-Save to: `.kiro/refactor/plans/{session-id}/completion-report.md`
+Save to: `.sd/refactor/plans/{session-id}/completion-report.md`
 
 ### Step 4: Cleanup
 
@@ -122,7 +122,7 @@ Save to: `.kiro/refactor/plans/{session-id}/completion-report.md`
 
 ```bash
 # Move checkpoints to archive
-mv .kiro/refactor/checkpoints/{session-id} .kiro/refactor/archive/{session-id}
+mv .sd/refactor/checkpoints/{session-id} .sd/refactor/archive/{session-id}
 ```
 
 #### Clear Stashes (Optional)
@@ -146,7 +146,7 @@ Run `/sessionwrite` with completion status:
 ## Completion Status
 - All batches: COMPLETED
 - Quality gates: ALL PASS
-- Report: .kiro/refactor/plans/{session-id}/completion-report.md
+- Report: .sd/refactor/plans/{session-id}/completion-report.md
 ```
 
 ### Step 6: Update Todo List
@@ -173,7 +173,7 @@ Summary:
 - Duration: 45 minutes
 - Quality: ALL PASS
 
-Report saved: .kiro/refactor/plans/{session-id}/completion-report.md
+Report saved: .sd/refactor/plans/{session-id}/completion-report.md
 
 Session archived. Ready for new refactoring.
 ```
@@ -271,5 +271,5 @@ REFACTOR_SESSION_COMPLETE
 
 Refactoring completed successfully!
 Summary: 3 batches, 6 files, 12 changes
-Report: .kiro/refactor/plans/refactor-20260101-160000/completion-report.md
+Report: .sd/refactor/plans/refactor-20260101-160000/completion-report.md
 ```

@@ -12,7 +12,7 @@ Archive specification files to history folder with timestamp.
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| feature | Yes | Feature name (folder under .kiro/specs/) |
+| feature | Yes | Feature name (folder under .sd/specs/) |
 | file | No | Specific file (requirements, design, tasks). If omitted, archives all. |
 
 ## Examples
@@ -25,12 +25,12 @@ Archive specification files to history folder with timestamp.
 
 ## Execution Steps
 
-1. Validate feature folder exists at `.kiro/specs/{feature}/`
+1. Validate feature folder exists at `.sd/specs/{feature}/`
 2. Generate timestamp: `YYYYMMDD-HHMMSS`
 3. Create `history/` folder if not exists
 4. For each target file:
-   - Read current content from `.kiro/specs/{feature}/{file}.md`
-   - Save to `.kiro/specs/{feature}/history/{file}-YYYYMMDD-HHMMSS.md`
+   - Read current content from `.sd/specs/{feature}/{file}.md`
+   - Save to `.sd/specs/{feature}/history/{file}-YYYYMMDD-HHMMSS.md`
 5. Update `spec.json` history section
 6. Display completion message
 

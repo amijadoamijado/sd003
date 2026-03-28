@@ -32,7 +32,7 @@ try {
 }
 
 # Configuration
-$configPath = Join-Path $env:CLAUDE_PROJECT_DIR ".kiro\refactor\config.json"
+$configPath = Join-Path $env:CLAUDE_PROJECT_DIR ".sd\refactor\config.json"
 $config = @{
     context_autonomy = @{
         enabled = $true

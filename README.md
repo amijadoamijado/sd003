@@ -71,7 +71,7 @@ npm run sync:codex-prompts
 
 主な互換マッピング:
 - Claude `/bug-quick` -> Codex `/prompts:bug-quick`
-- Claude `/kiro:spec-init` -> Codex `/prompts:kiro-spec-init` または `/prompts:kiro/spec-init`
+- Claude `/sd:spec-init` -> Codex `/prompts:sd-spec-init` または `/prompts:sd/spec-init`
 
 補足:
 - `/prompts` 単体は一覧コマンドではありません。
@@ -87,17 +87,17 @@ v3.0.0からディレクトリ単位の動的コピーに移行。**ファイル
 
 #### Windows（PowerShell）
 ```powershell
-powershell -ExecutionPolicy Bypass -File .claude/skills/kiro-deploy/deploy.ps1 /path/to/your-project
+powershell -ExecutionPolicy Bypass -File .claude/skills/sd-deploy/deploy.ps1 /path/to/your-project
 ```
 
 #### Linux/Mac（Bash）
 ```bash
-bash .claude/skills/kiro-deploy/deploy.sh /path/to/your-project
+bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 ```
 
 #### Claude Codeから実行
 ```
-/kiro:deploy /path/to/your-project
+/sd:deploy /path/to/your-project
 ```
 
 ### スクリプトの処理内容
@@ -117,15 +117,15 @@ bash .claude/skills/kiro-deploy/deploy.sh /path/to/your-project
 | # | ソース | コピー方式 |
 |---|--------|-----------|
 | 1 | `.claude/commands/*.md` | フラットコピー |
-| 2 | `.claude/commands/kiro/*.md` | フラットコピー |
+| 2 | `.claude/commands/sd/*.md` | フラットコピー |
 | 3 | `.claude/rules/` | ツリーコピー |
 | 4 | `.claude/skills/` | ツリーコピー |
 | 5 | `.claude/hooks/` | ツリーコピー |
 | 6 | `.gemini/commands/*.toml` | フラットコピー |
 | 7 | `.antigravity/` | ツリーコピー |
-| 8 | `.kiro/settings/` | ツリーコピー |
-| 9 | `.kiro/sessions/session-template.md` | 単体コピー |
-| 10 | `.kiro/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
+| 8 | `.sd/settings/` | ツリーコピー |
+| 9 | `.sd/sessions/session-template.md` | 単体コピー |
+| 10 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
 | 11 | `docs/troubleshooting/` | ツリーコピー |
 | 12 | `docs/quality-gates.md` | 単体コピー |
 
@@ -136,7 +136,7 @@ bash .claude/skills/kiro-deploy/deploy.sh /path/to/your-project
 ```powershell
 # Windows
 (Get-ChildItem .claude/commands/*.md).Count        # Commands直下
-(Get-ChildItem .claude/commands/kiro/*.md).Count    # Commands/kiro
+(Get-ChildItem .claude/commands/sd/*.md).Count    # Commands/sd
 (Get-ChildItem .claude/rules -Recurse -Filter *.md).Count  # Rules
 (Get-ChildItem .claude/skills -Recurse -File).Count # Skills
 (Get-ChildItem .claude/hooks -Recurse -File).Count  # Hooks
@@ -148,7 +148,7 @@ bash .claude/skills/kiro-deploy/deploy.sh /path/to/your-project
 
 | 項目 | 内容 |
 |------|------|
-| テンプレート | `.claude/skills/kiro-deploy/templates/user-claude.md.template` |
+| テンプレート | `.claude/skills/sd-deploy/templates/user-claude.md.template` |
 | 配置先 | `~/.claude/CLAUDE.md`（ユーザーホーム） |
 | 既存時 | **スキップ**（上書きしない） |
 | 内容 | plan mode、サブエージェント活用、コンテキスト管理等の基本方針 |
@@ -165,7 +165,7 @@ bash .claude/skills/kiro-deploy/deploy.sh /path/to/your-project
 | Bug quick | `/bug-quick` | フロー比較診断開始 |
 | Bug trace | `/bug-trace` | 3-Agent調査開始 |
 | Dialogue resolution | `/dialogue-resolution` | AI推論チェック開始 |
-| Kiro commands | `/kiro:spec-status` | 仕様一覧表示 |
+| SD commands | `/sd:spec-status` | 仕様一覧表示 |
 | Settings | Check `.claude/settings.local.json` | ENABLE_TOOL_SEARCH=true |
 
 **コマンドが認識されない場合**:
@@ -281,8 +281,8 @@ Bug発生
 Reads 4 files in order:
 1. `D:\claudecode\CLAUDE.md` (Global settings)
 2. `./CLAUDE.md` (Project settings)
-3. `.kiro/sessions/session-current.md` (Current state)
-4. `.kiro/sessions/TIMELINE.md` (History)
+3. `.sd/sessions/session-current.md` (Current state)
+4. `.sd/sessions/TIMELINE.md` (History)
 
 ### Session End
 ```
@@ -309,14 +309,14 @@ claude --continue
 - [Ralph Wiggum Deployment](docs/ralph-wiggum-deployment.md)
 
 ### Specifications
-- [Requirements](.kiro/specs/sd003-framework/requirements.md)
-- [Technical Design](.kiro/specs/sd003-framework/design.md)
-- [Implementation Tasks](.kiro/specs/sd003-framework/tasks.md)
-- [Ralph Wiggum Specs](.kiro/specs/ralph-wiggum/)
-- [Bug Trace Specs](.kiro/specs/bug-trace/)
-- [Dialogue Resolution Specs](.kiro/specs/dialogue-resolution/)
-- [gas-fakes Testing Specs](.kiro/specs/gas-fakes-testing/)
-- [Antigravity Pipeline Specs](.kiro/specs/antigravity-pipeline/)
+- [Requirements](.sd/specs/sd003-framework/requirements.md)
+- [Technical Design](.sd/specs/sd003-framework/design.md)
+- [Implementation Tasks](.sd/specs/sd003-framework/tasks.md)
+- [Ralph Wiggum Specs](.sd/specs/ralph-wiggum/)
+- [Bug Trace Specs](.sd/specs/bug-trace/)
+- [Dialogue Resolution Specs](.sd/specs/dialogue-resolution/)
+- [gas-fakes Testing Specs](.sd/specs/gas-fakes-testing/)
+- [Antigravity Pipeline Specs](.sd/specs/antigravity-pipeline/)
 
 ## License
 
@@ -325,3 +325,5 @@ MIT License
 ---
 
 **SD003 Framework v2.13.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem
+# clean state test
+# verify

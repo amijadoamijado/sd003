@@ -165,7 +165,7 @@ Options:
 ### Agent 1: Spec Agent (Specification Investigator)
 ```
 Prompt:
-You are investigating a bug. Read all relevant specification files in .kiro/specs/.
+You are investigating a bug. Read all relevant specification files in .sd/specs/.
 Focus on:
 - Expected behavior for this feature
 - Input/output specifications
@@ -335,7 +335,7 @@ Options:
 ## 仕様書更新提案 (Spec Update Proposal)
 
 ### 更新対象
-- **ファイル**: [.kiro/specs/{feature}/requirements.md or design.md]
+- **ファイル**: [.sd/specs/{feature}/requirements.md or design.md]
 - **セクション**: [Section name]
 
 ### 現在の記述

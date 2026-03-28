@@ -58,7 +58,7 @@ Options:
 
 ```bash
 # Find stash reference
-stash_ref=$(cat .kiro/refactor/checkpoints/{session-id}/{target}.json | jq -r '.stash_ref')
+stash_ref=$(cat .sd/refactor/checkpoints/{session-id}/{target}.json | jq -r '.stash_ref')
 
 # Pop the stash
 git stash pop $stash_ref
@@ -68,7 +68,7 @@ git stash pop $stash_ref
 
 ```bash
 # Find commit before changes
-commit=$(cat .kiro/refactor/checkpoints/{session-id}/{target}.json | jq -r '.commit_before')
+commit=$(cat .sd/refactor/checkpoints/{session-id}/{target}.json | jq -r '.commit_before')
 
 # Hard reset
 git reset --hard $commit
@@ -78,7 +78,7 @@ git reset --hard $commit
 
 ```bash
 # Reset to initial checkpoint
-initial=$(cat .kiro/refactor/checkpoints/{session-id}/checkpoint-000-init.json | jq -r '.commit_before')
+initial=$(cat .sd/refactor/checkpoints/{session-id}/checkpoint-000-init.json | jq -r '.commit_before')
 git reset --hard $initial
 ```
 
@@ -144,7 +144,7 @@ Before rollback:
 
 1. **Verify checkpoint exists**
    ```bash
-   test -f .kiro/refactor/checkpoints/{session-id}/{target}.json
+   test -f .sd/refactor/checkpoints/{session-id}/{target}.json
    ```
 
 2. **Check git status**

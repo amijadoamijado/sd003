@@ -26,7 +26,7 @@
 ## 依頼・報告の保存ルール（必須）
 
 ### 絶対ルール
-**全AIへの依頼・報告は `.kiro/ai-coordination/` 配下に統一する**
+**全AIへの依頼・報告は `.sd/ai-coordination/` 配下に統一する**
 
 | ファイル種別 | 保存先 | 例 |
 |-------------|--------|-----|
@@ -48,7 +48,7 @@
 |---------|------|--------------|
 | `.antigravity/` | Antigravityの動作ルール設定 | **NO** |
 | `.claude/` | Claude Codeの動作ルール設定 | **NO** |
-| `.kiro/ai-coordination/` | 依頼・報告・ログの集約 | **YES** |
+| `.sd/ai-coordination/` | 依頼・報告・ログの集約 | **YES** |
 
 ---
 
@@ -155,7 +155,7 @@ impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
 
 ```
 1. Claude Code: TEST_REQUEST_{NNN}.md を作成
-   → 保存先: .kiro/ai-coordination/workflow/spec/{案件ID}/
+   → 保存先: .sd/ai-coordination/workflow/spec/{案件ID}/
    → handoff-log.json に記録
 
 2. Antigravity: テスト実行
@@ -163,7 +163,7 @@ impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
    → スクリーンショット取得
 
 3. Antigravity: TEST_REPORT_{NNN}.md を作成
-   → 保存先: .kiro/ai-coordination/workflow/review/{案件ID}/
+   → 保存先: .sd/ai-coordination/workflow/review/{案件ID}/
    → handoff-log.json に記録
 
 4. Claude Code: 報告を確認し次のアクションを決定
@@ -213,7 +213,7 @@ impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
 ## ディレクトリ構造
 
 ```
-.kiro/ai-coordination/
+.sd/ai-coordination/
 ├── handoff/handoff-log.json    # 引き継ぎログ（v2.0.0）
 ├── sessions/                   # AI別セッション記録
 │   ├── antigravity/            # Antigravityのセッション
@@ -305,7 +305,7 @@ Claude Code (auto-detect):
      → NO: Ask user or auto-init with /workflow:init
      → YES: Get project ID
   2. Create TEST_REQUEST using template
-  3. Save to: .kiro/ai-coordination/workflow/spec/{projectID}/
+  3. Save to: .sd/ai-coordination/workflow/spec/{projectID}/
   4. Record in handoff-log.json
   5. Notify user with file path
 ```
@@ -314,7 +314,7 @@ Claude Code (auto-detect):
 
 | Rule | Enforcement |
 |------|-------------|
-| All requests/reports in `.kiro/ai-coordination/` | MANDATORY |
+| All requests/reports in `.sd/ai-coordination/` | MANDATORY |
 | Use template for document creation | MANDATORY |
 | Record in handoff-log.json | MANDATORY |
 | Initialize project before first document | MANDATORY |
@@ -322,5 +322,5 @@ Claude Code (auto-detect):
 ---
 
 ## 詳細ドキュメント
-- `.kiro/ai-coordination/workflow/README.md`
-- `.kiro/ai-coordination/workflow/CODEX_GUIDE.md`
+- `.sd/ai-coordination/workflow/README.md`
+- `.sd/ai-coordination/workflow/CODEX_GUIDE.md`

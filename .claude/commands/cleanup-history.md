@@ -21,7 +21,7 @@ allowed-tools: Read, Bash, Glob
 
 ```bash
 # アーカイブセッション一覧
-ls -lt .kiro/cleanup/archive/ | head -20
+ls -lt .sd/cleanup/archive/ | head -20
 ```
 
 ### Step 2: 各セッションのmanifest.json読み込み

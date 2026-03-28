@@ -20,7 +20,7 @@ allowed-tools: Task, Read, Write, Bash, Glob, Grep, AskUserQuestion, TodoWrite
 | `images/` | .png, .jpg, .jpeg, .gif, .webp, .svg |
 | `text/` | .txt, .md (CLAUDE.md, README.md除く) |
 
-### Category B: AI開発用一時ファイル → `.kiro/cleanup/archive/` へアーカイブ
+### Category B: AI開発用一時ファイル → `.sd/cleanup/archive/` へアーカイブ
 テストやデバッグ用の一時ファイル。必要なら復元可能。
 
 | パターン | 例 |
@@ -42,7 +42,7 @@ CLAUDE.md, README.md, AGENTS.md
 
 # sd002コアディレクトリ
 /src/**, /tests/**, /docs/**
-/.kiro/**, /.claude/**, /.github/**
+/.sd/**, /.claude/**, /.github/**
 /node_modules/**
 
 # 開発中ファイル（git status検出）
@@ -95,7 +95,7 @@ Glob/Bashでプロジェクト全体をスキャン：
 |----------|----------|--------|
 | data.csv | ユーザー入力データ | materials/csv/ |
 
-### Category B: 一時ファイル → .kiro/cleanup/archive/
+### Category B: 一時ファイル → .sd/cleanup/archive/
 | ファイル | 判断理由 |
 |----------|----------|
 | test_parser.js | テスト用一時ファイル |
@@ -140,7 +140,7 @@ mv report.xlsx materials/excel/
 ```bash
 # アーカイブディレクトリ作成
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-ARCHIVE_DIR=".kiro/cleanup/archive/cleanup-${TIMESTAMP}"
+ARCHIVE_DIR=".sd/cleanup/archive/cleanup-${TIMESTAMP}"
 mkdir -p "${ARCHIVE_DIR}/files"
 
 # ファイル移動（元パス構造維持）
@@ -155,7 +155,7 @@ mv test_parser.js "${ARCHIVE_DIR}/files/"
   "files": [
     {
       "original_path": "test_parser.js",
-      "archived_path": ".kiro/cleanup/archive/.../files/test_parser.js",
+      "archived_path": ".sd/cleanup/archive/.../files/test_parser.js",
       "reason": "AI判断: テスト用一時ファイル",
       "size_bytes": 1234,
       "git_status": "untracked"
@@ -178,7 +178,7 @@ mv test_parser.js "${ARCHIVE_DIR}/files/"
 - excel: 1ファイル
 - images: 5ファイル
 
-### Category B: .kiro/cleanup/archive/ へアーカイブ
+### Category B: .sd/cleanup/archive/ へアーカイブ
 - Session: cleanup-20260102-150000
 - Files: 8ファイル
 - Size: 45.2KB

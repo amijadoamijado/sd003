@@ -22,10 +22,10 @@ interface SpecFrontMatter {
 export function registerSpecValidateCommand(program: Command): void {
   program
     .command('spec:validate')
-    .description('Validate all specification documents in .kiro/specs/')
+    .description('Validate all specification documents in .sd/specs/')
     .action(async () => {
       console.log('Starting specification validation...');
-      const specDirPath = path.join(process.cwd(), '.kiro', 'specs');
+      const specDirPath = path.join(process.cwd(), '.sd', 'specs');
 
       if (!fs.existsSync(specDirPath)) {
         console.warn(`Specification directory not found: ${specDirPath}`);

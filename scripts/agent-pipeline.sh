@@ -100,9 +100,9 @@ if [ -z "$PROJECT_ID" ] || [ -z "$TASK_NUM" ]; then
 fi
 
 # Paths
-SPEC_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/spec/${PROJECT_ID}"
-REVIEW_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/review/${PROJECT_ID}"
-LOG_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/log/${PROJECT_ID}"
+SPEC_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/spec/${PROJECT_ID}"
+REVIEW_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/review/${PROJECT_ID}"
+LOG_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/log/${PROJECT_ID}"
 REQUEST_FILE="${SPEC_DIR}/IMPLEMENT_REQUEST_${TASK_NUM}.md"
 GEMINI_OUTPUT="${LOG_DIR}/gemini-output-${TASK_NUM}.md"
 REVIEW_OUTPUT="${REVIEW_DIR}/REVIEW_IMPL_${TASK_NUM}.md"

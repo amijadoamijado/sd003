@@ -23,13 +23,13 @@ prompt = """
 
 ### 1. 発注書の読み込み
 ```
-.kiro/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md
+.sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md
 ```
 から該当タスクの詳細を抽出。
 
 ### 2. レビュー結果の確認
 ```
-.kiro/ai-coordination/workflow/review/{案件ID}/REVIEW_WORK_ORDER.md
+.sd/ai-coordination/workflow/review/{案件ID}/REVIEW_WORK_ORDER.md
 ```
 が存在し、判定が Approve であることを確認。
 
@@ -39,7 +39,7 @@ PROJECT_STATUS.md で完了状態を確認。
 
 ### 4. 実装指示の詳細生成
 テンプレートを使用して実装指示を作成:
-- テンプレート: `.kiro/ai-coordination/workflow/templates/IMPLEMENT_REQUEST.md`
+- テンプレート: `.sd/ai-coordination/workflow/templates/IMPLEMENT_REQUEST.md`
 
 以下を具体化:
 - **ブランチ名**: `feature/{案件ID}/{タスク番号}-{slug}`
@@ -49,7 +49,7 @@ PROJECT_STATUS.md で完了状態を確認。
 - **コミット方針**: 標準形式を適用
 
 ### 5. IMPLEMENT_REQUEST_{タスク番号}.md 作成
-保存先: `.kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md`
+保存先: `.sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md`
 
 ### 6. PROJECT_STATUS.md 更新
 - フェーズ3（実装指示作成）完了、フェーズ4（実装）へ
@@ -66,7 +66,7 @@ PROJECT_STATUS.md で完了状態を確認。
       \"from\": \"Claude Code\",
       \"to\": \"Gemini CLI\",
       \"type\": \"implement_request\",
-      \"artifact\": \".kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md\",
+      \"artifact\": \".sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md\",
       \"timestamp\": \"{現在日時ISO形式}\",
       \"status\": \"pending\",
       \"result\": null
@@ -85,7 +85,7 @@ PROJECT_STATUS.md で完了状態を確認。
 
 - **案件ID**: {案件ID}
 - **タスク番号**: {タスク番号}
-- **実装指示**: .kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
+- **実装指示**: .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
 - **Gemini実行結果**: {パス/失敗}
 - **コミット**: {ハッシュ}
 ```

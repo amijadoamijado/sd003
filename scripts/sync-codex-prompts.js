@@ -11,8 +11,8 @@
  *   (override with CODEX_PROMPTS_DIR)
  *
  * Naming rules:
- * - Keep original relative path (e.g. kiro/spec-init.md)
- * - Add flat alias for nested files (e.g. kiro-spec-init.md)
+ * - Keep original relative path (e.g. sd/spec-init.md)
+ * - Add flat alias for nested files (e.g. sd-spec-init.md)
  * - If a flat alias conflicts with an existing command, keep the first one
  */
 

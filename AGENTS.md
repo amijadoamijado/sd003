@@ -64,7 +64,7 @@
 
 ### File Location Rules
 
-**ALL documents in `.kiro/ai-coordination/`**
+**ALL documents in `.sd/ai-coordination/`**
 
 | Read From | Write To |
 |-----------|----------|
@@ -108,7 +108,7 @@ npm test && npm run lint
 - Test coverage >=80%
 - ESLint errors = 0
 - TypeScript strict mode
-- **.kiro/ safe commit**: .kiro/ファイルの変更は同一bashコマンド内でgit add+commitまで完了すること。分割するとClaude Codeランタイムが.kiro/を消す。詳細: `.claude/rules/git/kiro-safe-commit.md`
+- **.sd/ safe commit**: .sd/ファイルの変更は同一bashコマンド内でgit add+commitまで完了すること。分割するとClaude Codeランタイムが.sd/を消す。詳細: `.claude/rules/git/sd-safe-commit.md`
 - **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること
 
 ### GASデプロイルール（厳守）
@@ -124,16 +124,16 @@ npm test && npm run lint
 
 ### Specification
 ```
-/prompts:kiro-spec-init "description"
-/prompts:kiro-spec-requirements {feature}
-/prompts:kiro-spec-design {feature}
-/prompts:kiro-spec-tasks {feature}
+/prompts:sd-spec-init "description"
+/prompts:sd-spec-requirements {feature}
+/prompts:sd-spec-design {feature}
+/prompts:sd-spec-tasks {feature}
 ```
 
 ### Implementation
 ```
-/prompts:kiro-spec-impl {feature}
-/prompts:kiro-validate-impl {feature}
+/prompts:sd-spec-impl {feature}
+/prompts:sd-validate-impl {feature}
 ```
 
 ### Claude互換コマンド同期
@@ -145,14 +145,14 @@ npm test && npm run lint
 
 例:
 - Claude `/bug-quick` -> Codex `/prompts:bug-quick`
-- Claude `/kiro:spec-init` -> Codex `/prompts:kiro-spec-init` または `/prompts:kiro/spec-init`
+- Claude `/sd:spec-init` -> Codex `/prompts:sd-spec-init` または `/prompts:sd/spec-init`
 
 ---
 
 ## Reference
 - **AI Coordination**: `.claude/rules/workflow/ai-coordination.md`
 - **Quality Gates**: `docs/quality-gates.md`
-- **Templates**: `.kiro/ai-coordination/workflow/templates/`
+- **Templates**: `.sd/ai-coordination/workflow/templates/`
 
 ---
 SD003 Framework v2.13.0 | Updated: 2026-03-07

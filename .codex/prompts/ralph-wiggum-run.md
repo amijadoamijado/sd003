@@ -28,7 +28,7 @@
 ## Execution Flow
 
 ```
-1. ロック取得 (.kiro/ralph/.lock)
+1. ロック取得 (.sd/ralph/.lock)
      ↓
 2. キューファイル読み込み
      ↓
@@ -75,10 +75,10 @@
 
 | File | Purpose |
 |------|---------|
-| `.kiro/ralph/nightly-queue.md` | 実行キュー |
-| `.kiro/ralph/recovery/checkpoints/` | チェックポイント |
-| `.kiro/ralph/logs/{date}-*.md` | 実行ログ |
-| `.kiro/ai-coordination/workflow/review/ralph/` | 朝のレビューレポート |
+| `.sd/ralph/nightly-queue.md` | 実行キュー |
+| `.sd/ralph/recovery/checkpoints/` | チェックポイント |
+| `.sd/ralph/logs/{date}-*.md` | 実行ログ |
+| `.sd/ai-coordination/workflow/review/ralph/` | 朝のレビューレポート |
 
 ## Related Commands
 
@@ -87,8 +87,8 @@
 
 ## Specification
 
-- `.kiro/specs/ralph-wiggum/requirements.md`
-- `.kiro/specs/ralph-wiggum/design.md`
+- `.sd/specs/ralph-wiggum/requirements.md`
+- `.sd/specs/ralph-wiggum/design.md`
 
 ---
 

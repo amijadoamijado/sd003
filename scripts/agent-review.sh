@@ -8,7 +8,7 @@
 #   bash scripts/agent-review.sh <依頼書パス> [--dry-run]
 #
 # Examples:
-#   bash scripts/agent-review.sh .kiro/ai-coordination/workflow/spec/20260101-001-auth/IMPLEMENT_REQUEST_001.md
+#   bash scripts/agent-review.sh .sd/ai-coordination/workflow/spec/20260101-001-auth/IMPLEMENT_REQUEST_001.md
 #   bash scripts/agent-review.sh review_request.md --dry-run
 #
 # Exit codes:
@@ -50,7 +50,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --help      このヘルプを表示"
             echo ""
             echo "Examples:"
-            echo "  $0 .kiro/ai-coordination/workflow/spec/20260101-001-auth/IMPLEMENT_REQUEST_001.md"
+            echo "  $0 .sd/ai-coordination/workflow/spec/20260101-001-auth/IMPLEMENT_REQUEST_001.md"
             echo "  $0 review_request.md --dry-run"
             exit 0
             ;;
@@ -95,10 +95,10 @@ TIMESTAMP_FILE=$(date '+%Y%m%d-%H%M%S')
 REQUEST_BASENAME=$(basename "$REQUEST_FILE" .md)
 
 if [ -n "$PROJECT_ID" ]; then
-    REVIEW_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/review/${PROJECT_ID}"
+    REVIEW_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/review/${PROJECT_ID}"
     REVIEW_OUTPUT="${REVIEW_DIR}/REVIEW_${REQUEST_BASENAME}_${TIMESTAMP_FILE}.md"
 else
-    REVIEW_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/review"
+    REVIEW_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/review"
     REVIEW_OUTPUT="${REVIEW_DIR}/REVIEW_${REQUEST_BASENAME}_${TIMESTAMP_FILE}.md"
 fi
 

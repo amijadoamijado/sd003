@@ -19,7 +19,7 @@ allowed-tools: Task, Read, Write, Bash, Glob, Grep, TodoWrite
 ## Prerequisites
 
 - `/refactor:init`が正常に完了していること
-- 分析レポートが`.kiro/refactor/plans/{session-id}/analysis-report.md`に存在すること
+- 分析レポートが`.sd/refactor/plans/{session-id}/analysis-report.md`に存在すること
 
 ## Execution Steps
 
@@ -104,7 +104,7 @@ Create batch manifest JSON:
 }
 ```
 
-Save to: `.kiro/refactor/plans/{session-id}/batch-manifest.json`
+Save to: `.sd/refactor/plans/{session-id}/batch-manifest.json`
 
 ### Step 4: Generate Execution Plan Document
 
@@ -188,7 +188,7 @@ If any batch fails:
 3. Use `/refactor:rollback checkpoint-{N}` to restore
 ```
 
-Save to: `.kiro/refactor/plans/{session-id}/execution-plan.md`
+Save to: `.sd/refactor/plans/{session-id}/execution-plan.md`
 
 ### Step 5: Update Todo List
 
@@ -214,7 +214,7 @@ Execution plan generated:
 - Total files: 6
 - Estimated time: 28 min
 
-Plan saved to: .kiro/refactor/plans/{session-id}/
+Plan saved to: .sd/refactor/plans/{session-id}/
 
 Next step: /refactor:batch to start execution
 ```
@@ -229,7 +229,7 @@ Next step: /refactor:batch to start execution
 ## Files Created
 
 ```
-.kiro/refactor/plans/{session-id}/
+.sd/refactor/plans/{session-id}/
 ├── analysis-report.md (from /refactor:init)
 ├── batch-manifest.json (NEW)
 └── execution-plan.md (NEW)

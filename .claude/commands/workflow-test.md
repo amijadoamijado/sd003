@@ -26,15 +26,15 @@ Codexレビュー Approve 後、Antigravity に E2Eテストを依頼する。
 
 ### Step 1: 実装指示・レビュー結果の読み込み
 ```bash
-cat .kiro/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
-cat .kiro/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md
+cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
+cat .sd/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{タスク番号}.md
 ```
 テスト対象のスコープとレビュー結果を把握する。
 
 ### Step 2: TEST_REQUEST_{タスク番号}.md 作成
-テンプレート `.kiro/ai-coordination/workflow/templates/TEST_REQUEST.md` をベースに作成。
+テンプレート `.sd/ai-coordination/workflow/templates/TEST_REQUEST.md` をベースに作成。
 
-保存先: `.kiro/ai-coordination/workflow/spec/{案件ID}/TEST_REQUEST_{タスク番号}.md`
+保存先: `.sd/ai-coordination/workflow/spec/{案件ID}/TEST_REQUEST_{タスク番号}.md`
 
 内容:
 ```markdown
@@ -95,7 +95,7 @@ Antigravityが不在の場合:
 ### Step 5: TEST_REPORT 待機確認
 以下のファイルを確認:
 ```
-.kiro/ai-coordination/workflow/review/{案件ID}/TEST_REPORT_{タスク番号}.md
+.sd/ai-coordination/workflow/review/{案件ID}/TEST_REPORT_{タスク番号}.md
 ```
 存在する場合は読み込んで結果を報告する。
 存在しない場合はPending状態で完了。
@@ -106,7 +106,7 @@ Antigravityが不在の場合:
 
 - **案件ID**: {案件ID}
 - **タスク番号**: {タスク番号}
-- **TEST_REQUEST**: .kiro/ai-coordination/workflow/spec/{案件ID}/TEST_REQUEST_{タスク番号}.md
+- **TEST_REQUEST**: .sd/ai-coordination/workflow/spec/{案件ID}/TEST_REQUEST_{タスク番号}.md
 - **ステータス**: {Pending / Dispatched / Completed}
 
 ## 次のアクション

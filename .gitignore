@@ -39,9 +39,9 @@ tmp/
 *.tmp
 
 # SD001 specific
-.kiro/backups/
-.kiro/sync-reports/
-.kiro/_frozen/
+.sd/backups/
+.sd/sync-reports/
+.sd/_frozen/
 
 # Claude artifacts
 .claude/artifacts/
@@ -91,8 +91,8 @@ tmp/
 # trace-test
 # no-write-tool
 
-# .kiro/ - git管理外（Claude Codeランタイムのrefreshで消えるため）
-.kiro/
+# .sd/ - git管理外（Claude Codeランタイムのrefreshで消えるため）
+.sd/
 # gitignore-verify
 # persist
 # sd-test

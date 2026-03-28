@@ -109,8 +109,8 @@ copy_item() {
     fi
 }
 
-echo -e "${BLUE}Step 1: Deploying .kiro/ralph/ directory...${NC}"
-copy_item "$SD002_ROOT/.kiro/ralph" "$TARGET_DIR/.kiro/ralph" "directory"
+echo -e "${BLUE}Step 1: Deploying .sd/ralph/ directory...${NC}"
+copy_item "$SD002_ROOT/.sd/ralph" "$TARGET_DIR/.sd/ralph" "directory"
 
 echo ""
 echo -e "${BLUE}Step 2: Deploying commands...${NC}"
@@ -134,7 +134,7 @@ fi
 if [ "$WITH_SPECS" = true ]; then
     echo ""
     echo -e "${BLUE}Step 4: Deploying specifications...${NC}"
-    copy_item "$SD002_ROOT/.kiro/specs/ralph-wiggum" "$TARGET_DIR/.kiro/specs/ralph-wiggum" "specs"
+    copy_item "$SD002_ROOT/.sd/specs/ralph-wiggum" "$TARGET_DIR/.sd/specs/ralph-wiggum" "specs"
 fi
 
 echo ""
@@ -154,6 +154,6 @@ echo "Next steps:"
 echo "  1. Review deployed files in $TARGET_DIR"
 echo "  2. Update CLAUDE.md with Ralph Wiggum reference"
 echo "  3. Create weekly plan: /ralph-wiggum:plan"
-echo "  4. Setup nightly queue: .kiro/ralph/nightly-queue.md"
+echo "  4. Setup nightly queue: .sd/ralph/nightly-queue.md"
 echo ""
 echo "Documentation: $TARGET_DIR/docs/ralph-wiggum-deployment.md"

@@ -87,12 +87,12 @@ if [ -z "$PROJECT_ID" ] || [ -z "$TASK_NUM" ]; then
 fi
 
 # Paths
-SPEC_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/spec/${PROJECT_ID}"
-REVIEW_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/review/${PROJECT_ID}"
-LOG_DIR="${PROJECT_ROOT}/.kiro/ai-coordination/workflow/log/${PROJECT_ID}"
+SPEC_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/spec/${PROJECT_ID}"
+REVIEW_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/review/${PROJECT_ID}"
+LOG_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/log/${PROJECT_ID}"
 TEST_REQUEST="${SPEC_DIR}/TEST_REQUEST_${TASK_NUM}.md"
 TEST_REPORT="${REVIEW_DIR}/TEST_REPORT_${TASK_NUM}.md"
-HANDOFF_LOG="${PROJECT_ROOT}/.kiro/ai-coordination/handoff/handoff-log.json"
+HANDOFF_LOG="${PROJECT_ROOT}/.sd/ai-coordination/handoff/handoff-log.json"
 TEST_LOG="${LOG_DIR}/test-${TASK_NUM}.log"
 
 # Timestamp

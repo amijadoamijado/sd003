@@ -1,0 +1,41 @@
+# {{PROJECT_NAME}} - Gemini CLI設定
+
+## 利用可能コマンド
+
+### 仕様書駆動開発（序盤）
+```
+/sd:spec-init {feature}           # 仕様書初期化
+/sd:spec-requirements {feature}   # 要件定義
+/sd:spec-design {feature}         # 技術設計
+/sd:spec-tasks {feature}          # タスク分解
+```
+
+### 実装（中盤）
+```
+/sd:spec-impl {feature}           # TDD方式で実装
+/sd:spec-status {feature}         # 進捗確認
+```
+
+### 検証（終盤）
+```
+/sd:validate-design {feature}     # 設計検証
+/sd:validate-gap {feature}        # ギャップ分析
+/sd:validate-impl {feature}       # 実装検証
+```
+
+### ステアリング
+```
+/sd:steering                      # ステアリング文書作成
+/sd:steering-custom               # カスタムステアリング
+```
+
+## 開発フェーズ戦略
+
+| フェーズ | 戦略 | 主要コマンド |
+|---------|------|-------------|
+| 序盤 | 仕様書ファースト + フロントエンド駆動 | spec-init, spec-requirements, spec-design |
+| 中盤 | AI協調ワークフロー + 高速イテレーション | spec-impl, spec-status |
+| 終盤 | 対話型解決法 + 本番モード | validate-* |
+
+---
+SD003 v2.11.0 | 導入日: {{DATE}}

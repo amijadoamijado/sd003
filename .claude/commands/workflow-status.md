@@ -21,7 +21,7 @@ allowed-tools: Bash, Write, Read, Glob, Grep
 
 ### 1. PROJECT_STATUS.md 読み込み
 ```
-.kiro/ai-coordination/workflow/log/{案件ID}/PROJECT_STATUS.md
+.sd/ai-coordination/workflow/log/{案件ID}/PROJECT_STATUS.md
 ```
 
 ### 2. 関連ファイルの状態確認

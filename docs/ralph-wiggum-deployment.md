@@ -29,8 +29,8 @@ Ralph Wiggum is a night-mode autonomous execution system that enables 24-hour de
 
 ```bash
 # 1. Copy required directories
-cp -r .kiro/ralph/ your-project/.kiro/ralph/
-cp -r .kiro/specs/ralph-wiggum/ your-project/.kiro/specs/ralph-wiggum/
+cp -r .sd/ralph/ your-project/.sd/ralph/
+cp -r .sd/specs/ralph-wiggum/ your-project/.sd/specs/ralph-wiggum/
 cp -r .claude/commands/ralph-wiggum-*.md your-project/.claude/commands/
 
 # 2. Update rules (append to existing or copy)
@@ -43,7 +43,7 @@ cat .claude/rules/ralph-loop.md >> your-project/.claude/rules/ralph-loop.md
 
 ```
 your-project/
-├── .kiro/
+├── .sd/
 │   ├── ralph/                          # Runtime directory
 │   │   ├── nightly-queue.md            # Daily task queue
 │   │   ├── backlog.md                  # Task backlog
@@ -85,7 +85,7 @@ your-project/
 
 ### Queue Configuration
 
-Edit `.kiro/ralph/nightly-queue.md`:
+Edit `.sd/ralph/nightly-queue.md`:
 
 ```yaml
 # Queue Configuration
@@ -132,7 +132,7 @@ Ralph Wiggum operates alongside the daytime Ralph Loop system:
 
 ### Daily: Queue Setup
 
-Edit `.kiro/ralph/nightly-queue.md` with tasks for the night.
+Edit `.sd/ralph/nightly-queue.md` with tasks for the night.
 
 ### Nighttime: Execution
 
@@ -150,7 +150,7 @@ Edit `.kiro/ralph/nightly-queue.md` with tasks for the night.
 
 Ralph Wiggum integrates with the AI Coordination Workflow:
 
-1. **Morning Report**: Auto-generates `TEST_REPORT` in `.kiro/ai-coordination/workflow/review/ralph/`
+1. **Morning Report**: Auto-generates `TEST_REPORT` in `.sd/ai-coordination/workflow/review/ralph/`
 2. **Handoff Log**: Records in `handoff-log.json`
 3. **Session Continuity**: Preserves context for next session
 
@@ -160,21 +160,21 @@ Ralph Wiggum integrates with the AI Coordination Workflow:
 
 | Issue | Solution |
 |-------|----------|
-| Lock file stuck | Delete `.kiro/ralph/.lock` |
+| Lock file stuck | Delete `.sd/ralph/.lock` |
 | Checkpoint corrupted | Use `--resume` with previous checkpoint |
 | Recovery exhausted | Review logs, fix manually, resume |
 
 ### Log Locations
 
-- Success: `.kiro/ralph/logs/{date}-result.md`
-- Blocked: `.kiro/ralph/logs/{date}-blocked.md`
-- Errors: `.kiro/ralph/logs/{date}-errors.md`
+- Success: `.sd/ralph/logs/{date}-result.md`
+- Blocked: `.sd/ralph/logs/{date}-blocked.md`
+- Errors: `.sd/ralph/logs/{date}-errors.md`
 
 ## Customization
 
 ### Adding Custom Recovery Patterns
 
-Edit `.kiro/ralph/recovery/strategies.md` to add project-specific patterns.
+Edit `.sd/ralph/recovery/strategies.md` to add project-specific patterns.
 
 ### Adjusting Iteration Limits
 

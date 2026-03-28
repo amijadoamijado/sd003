@@ -1,7 +1,7 @@
 ---
-description: 仕様書バージョン管理（.kiro/specs/配下適用）
+description: 仕様書バージョン管理（.sd/specs/配下適用）
 paths:
-  - ".kiro/specs/**/*"
+  - ".sd/specs/**/*"
 ---
 
 # 仕様書バージョン管理
@@ -13,7 +13,7 @@ paths:
 ## フォルダ構造
 
 ```
-.kiro/specs/{feature}/
+.sd/specs/{feature}/
 ├── spec.json               # メタデータ（バージョン管理）
 ├── requirements.md         # 最新版（常に現在の要件）
 ├── design.md               # 最新版（常に現在の設計）

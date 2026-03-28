@@ -3,7 +3,7 @@
 ## Materials Folder（参考資料・成果物）
 
 ユーザーの参考資料やAIが生成した成果物を整理保存するフォルダ。
-開発用一時ファイル（`.kiro/cleanup/`）とは明確に分離。
+開発用一時ファイル（`.sd/cleanup/`）とは明確に分離。
 
 ### 構造
 ```
@@ -24,7 +24,7 @@ materials/
 | CSV/Excel成果物 | `materials/csv/`, `materials/excel/` | `materials/csv/report.csv` |
 | 画像・PDF | `materials/images/`, `materials/pdf/` | `materials/pdf/spec.pdf` |
 | テスト用一時ファイル | `tests/fixtures/` | `tests/fixtures/sample.json` |
-| ログ・デバッグ出力 | `logs/` または `.kiro/` | `logs/debug.log` |
+| ログ・デバッグ出力 | `logs/` または `.sd/` | `logs/debug.log` |
 
 **違反時**: `/cleanup` コマンドで自動整理される
 
@@ -47,18 +47,18 @@ materials/
 **Category A: 参考資料・成果物** → `/materials/` へ整理
 - csv, xlsx, pdf, png, jpg, txt など
 
-**Category B: AI開発用一時ファイル** → `.kiro/cleanup/archive/` へアーカイブ
+**Category B: AI開発用一時ファイル** → `.sd/cleanup/archive/` へアーカイブ
 - test_*, temp_*, debug_*, *_backup.* など
 
 ### 保護対象（移動しない）
 - AI設定ファイル（agents.md, CLAUDE.md, gemini.md）
 - sd003コアファイル（package.json, tsconfig.json等）
-- コアディレクトリ（/src, /tests, /.kiro等）
+- コアディレクトリ（/src, /tests, /.sd等）
 - git変更中のファイル
 
 ### アーカイブ構造
 ```
-.kiro/cleanup/archive/
+.sd/cleanup/archive/
 └── cleanup-YYYYMMDD-HHMMSS/
     ├── files/          # 移動ファイル（元パス構造維持）
     └── manifest.json   # 履歴（復元用）
@@ -73,7 +73,7 @@ materials/
 
 | 操作 | 禁止 | 代替 |
 |------|------|------|
-| `rm file` | NG | `mv file .kiro/cleanup/archive/` |
+| `rm file` | NG | `mv file .sd/cleanup/archive/` |
 | ファイル統合で旧版削除 | NG | 旧版をアーカイブへ移動 |
 | リネーム元ファイル削除 | NG | 元ファイルをアーカイブへ移動 |
 
@@ -86,8 +86,8 @@ materials/
 **上書き禁止対象**:
 - ユーザーが提供・共有したファイル（Excel, CSV, PDF, 画像等）
 - `materials/` 配下の成果物
-- `.kiro/ai-coordination/` 配下の依頼書・報告書
-- `.kiro/sessions/` 配下のセッション記録
+- `.sd/ai-coordination/` 配下の依頼書・報告書
+- `.sd/sessions/` 配下のセッション記録
 
 **例外（上書きOK）**:
 - ソースコード（`src/`, `tests/`）
@@ -99,7 +99,7 @@ materials/
 2. 修正版は別名で新規作成（例: `_v2`, `_modified`）
 
 **スクリプト再生成の手順**:
-1. 既存ファイルをアーカイブにバックアップ（`cp file .kiro/cleanup/archive/`）
+1. 既存ファイルをアーカイブにバックアップ（`cp file .sd/cleanup/archive/`）
 2. スクリプトを実行して上書き
 
 **例外**: ユーザーが明示的に「上書きしてよい」「削除してよい」と指示した場合のみ許可。

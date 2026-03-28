@@ -71,7 +71,7 @@ The Ralph Loop automates steps 1-2. Step 3 requires `/dialogue-resolution`.
 
 ## Night Mode (Ralph Wiggum)
 
-夜間自律実行用の拡張システム。詳細: `.kiro/ralph/README.md`
+夜間自律実行用の拡張システム。詳細: `.sd/ralph/README.md`
 
 ### Two-Layer Architecture
 
@@ -114,5 +114,5 @@ RALPH_BLOCKED_PROMISE="RALPH_NIGHTLY_BLOCKED"
 
 ### Specification
 
-- Requirements: `.kiro/specs/ralph-wiggum/requirements.md`
-- Design: `.kiro/specs/ralph-wiggum/design.md`
+- Requirements: `.sd/specs/ralph-wiggum/requirements.md`
+- Design: `.sd/specs/ralph-wiggum/design.md`

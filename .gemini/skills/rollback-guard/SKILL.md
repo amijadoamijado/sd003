@@ -64,7 +64,7 @@ Options:
 ### Checkpoint Structure
 
 ```
-.kiro/refactor/checkpoints/{session-id}/
+.sd/refactor/checkpoints/{session-id}/
 ├── checkpoint-000-init.json
 ├── checkpoint-001-batch-a.json
 └── checkpoint-002-batch-b.json
@@ -100,7 +100,7 @@ Options:
 
 ```bash
 # Read checkpoint metadata
-checkpoint=$(cat .kiro/refactor/checkpoints/{session-id}/checkpoint-{latest}.json)
+checkpoint=$(cat .sd/refactor/checkpoints/{session-id}/checkpoint-{latest}.json)
 stash_ref=$(echo $checkpoint | jq -r '.stash_ref')
 
 # Apply rollback
@@ -113,7 +113,7 @@ git reset --hard $(echo $checkpoint | jq -r '.commit_before')
 
 ```bash
 # List available checkpoints
-ls -la .kiro/refactor/checkpoints/{session-id}/
+ls -la .sd/refactor/checkpoints/{session-id}/
 
 # User selects checkpoint-{N}
 # Execute rollback to that point
@@ -125,7 +125,7 @@ git reset --hard {commit_from_checkpoint}
 ```
 # No rollback executed
 # Log decision for traceability
-echo "Manual fix selected at $(date)" >> .kiro/refactor/decisions.log
+echo "Manual fix selected at $(date)" >> .sd/refactor/decisions.log
 ```
 
 #### Option 4: Escalate
@@ -142,7 +142,7 @@ echo "Manual fix selected at $(date)" >> .kiro/refactor/decisions.log
 Track error signatures to detect repeated failures:
 
 ```
-.kiro/refactor/.error-patterns.log
+.sd/refactor/.error-patterns.log
 
 Format:
 {timestamp}|{error_signature}|{occurrence_count}
@@ -197,7 +197,7 @@ Examples:
 
 ## Configuration
 
-In `.kiro/refactor/config.json`:
+In `.sd/refactor/config.json`:
 
 ```json
 {
@@ -223,4 +223,4 @@ In `.kiro/refactor/config.json`:
 - Git for stash/reset operations
 - `/sessionwrite` command
 - `/dialogue-resolution` command for escalation
-- `.kiro/refactor/checkpoints/` directory
+- `.sd/refactor/checkpoints/` directory

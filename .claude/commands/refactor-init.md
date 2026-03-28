@@ -48,8 +48,8 @@ Generate session ID and create directory structure:
 Session ID: refactor-{YYYYMMDD}-{HHMMSS}
 
 Directories:
-.kiro/refactor/checkpoints/{session-id}/
-.kiro/refactor/plans/{session-id}/
+.sd/refactor/checkpoints/{session-id}/
+.sd/refactor/plans/{session-id}/
 ```
 
 Create initial checkpoint (checkpoint-000-init):
@@ -141,7 +141,7 @@ Combine all agent outputs into analysis report:
 - Risk Level: {low/medium/high}
 ```
 
-Save to: `.kiro/refactor/plans/{session-id}/analysis-report.md`
+Save to: `.sd/refactor/plans/{session-id}/analysis-report.md`
 
 ### Step 4: User Confirmation
 
@@ -181,7 +181,7 @@ Options:
 ## Session Files Created
 
 ```
-.kiro/refactor/
+.sd/refactor/
 ├── checkpoints/{session-id}/
 │   └── checkpoint-000-init.json
 └── plans/{session-id}/

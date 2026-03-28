@@ -38,7 +38,7 @@ PATTERNS=(
   ".claude/commands/"
   ".claude/settings.json"
   ".handoff/"
-  ".kiro/ai-coordination/workflow/templates/"
+  ".sd/ai-coordination/workflow/templates/"
   "CLAUDE.md"
 )
 
@@ -64,8 +64,8 @@ if [ "$DEPLOY_AFFECTED" = true ]; then
     echo -e "$AFFECTED_FILES"
     echo ""
     echo "確認すべきファイル:"
-    echo "  - .claude/skills/kiro-deploy/deploy.ps1 (FRAMEWORK_VERSION, Phase 5 settings.json)"
-    echo "  - .claude/skills/kiro-deploy/templates/CLAUDE.md.template"
+    echo "  - .claude/skills/sd-deploy/deploy.ps1 (FRAMEWORK_VERSION, Phase 5 settings.json)"
+    echo "  - .claude/skills/sd-deploy/templates/CLAUDE.md.template"
     echo ""
     echo "不要な場合（ルール文言のみの修正等）はこの警告を無視してください。"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

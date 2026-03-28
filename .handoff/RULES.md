@@ -8,7 +8,7 @@
 | ディレクトリ | 役割 |
 |-------------|------|
 | `.handoff/` | 引き継ぎパック（ORDER.md、DONE.md） |
-| `.kiro/specs/` | 仕様書（requirements.md、design.md、tasks.md） |
+| `.sd/specs/` | 仕様書（requirements.md、design.md、tasks.md） |
 | `src/` | 実装コード |
 | `tests/` | テストコード |
 | `dist/` | ビルド出力（.gitignore） |
@@ -99,7 +99,7 @@ npm run build && npm test && npm run lint
 - [ ] **原因確定前の修正反映の繰り返し**
 - [ ] プロジェクトルート直下へのファイル新規作成
 - [ ] 既存の命名規則を無視した変更
-- [ ] `.kiro/specs/` 内の仕様書を無断で変更
+- [ ] `.sd/specs/` 内の仕様書を無断で変更
 - [ ] テストを書かずに実装のみを完了とする
 - [ ] DONE.mdを出力せずに作業を終了する
 - [ ] **テストのためのテスト**（本番エラー発見以外の目的のテスト）
@@ -107,8 +107,8 @@ npm run build && npm test && npm run lint
 - [ ] **フォールバック付きテスト**（失敗時にスキップ/デフォルト値で通過するテスト）
 - [ ] **VTD検証未通過のままテスト完了とする**（`npm run test:validate-data` で確認必須）
 - [ ] **ファイルの直接削除（rm）**（アーカイブフォルダへ移動すること）
-- [ ] **.kiro/ファイル変更をbash呼び出しをまたいでcommitする**（同一コマンド内でadd+commit必須。詳細: `.claude/rules/git/kiro-safe-commit.md`）
-- [ ] **`.claude/settings.json`をgit追跡する**（.gitignoreに入れること。追跡するとランタイムが.kiro/を消す）
+- [ ] **.sd/ファイル変更をbash呼び出しをまたいでcommitする**（同一コマンド内でadd+commit必須。詳細: `.claude/rules/git/sd-safe-commit.md`）
+- [ ] **`.claude/settings.json`をgit追跡する**（.gitignoreに入れること。追跡するとランタイムが.sd/を消す）
 - [ ] **ユーザー提供ファイル・成果物の上書き**（元ファイル保持、修正版は別名で新規作成）
 - [ ] **skills/フォルダ未確認でのファイル操作**（該当スキルがあればその手順に厳密に従うこと）
 
@@ -117,7 +117,7 @@ npm run build && npm test && npm run lint
 
 ## 仕様書の読み方
 
-作業開始前に、必ず `.kiro/specs/` を確認してください：
+作業開始前に、必ず `.sd/specs/` を確認してください：
 
 1. `requirements.md` - 何を作るべきか
 2. `design.md` - どう設計するか
@@ -134,27 +134,27 @@ npm run build && npm test && npm run lint
 
 | ファイル | 保存先 |
 |---------|--------|
-| 要件定義書 | `.kiro/specs/{feature}/requirements.md` |
-| 技術設計書 | `.kiro/specs/{feature}/design.md` |
-| タスクリスト | `.kiro/specs/{feature}/tasks.md` |
+| 要件定義書 | `.sd/specs/{feature}/requirements.md` |
+| 技術設計書 | `.sd/specs/{feature}/design.md` |
+| タスクリスト | `.sd/specs/{feature}/tasks.md` |
 
 ### AI協調ワークフロー
 
 | ファイル種別 | 保存先 |
 |-------------|--------|
-| 発注書 | `.kiro/ai-coordination/workflow/spec/{projectID}/WORK_ORDER.md` |
-| 実装指示 | `.kiro/ai-coordination/workflow/spec/{projectID}/IMPLEMENT_REQUEST_{NNN}.md` |
-| テスト依頼 | `.kiro/ai-coordination/workflow/spec/{projectID}/TEST_REQUEST_{NNN}.md` |
-| レビュー結果 | `.kiro/ai-coordination/workflow/review/{projectID}/REVIEW_{type}_{NNN}.md` |
-| テスト報告 | `.kiro/ai-coordination/workflow/review/{projectID}/TEST_REPORT_{NNN}.md` |
+| 発注書 | `.sd/ai-coordination/workflow/spec/{projectID}/WORK_ORDER.md` |
+| 実装指示 | `.sd/ai-coordination/workflow/spec/{projectID}/IMPLEMENT_REQUEST_{NNN}.md` |
+| テスト依頼 | `.sd/ai-coordination/workflow/spec/{projectID}/TEST_REQUEST_{NNN}.md` |
+| レビュー結果 | `.sd/ai-coordination/workflow/review/{projectID}/REVIEW_{type}_{NNN}.md` |
+| テスト報告 | `.sd/ai-coordination/workflow/review/{projectID}/TEST_REPORT_{NNN}.md` |
 
 ### セッション
 
 | ファイル | 保存先 |
 |---------|--------|
-| 現在セッション | `.kiro/sessions/session-current.md` |
-| タイムライン | `.kiro/sessions/TIMELINE.md` |
-| セッション履歴 | `.kiro/sessions/session-YYYYMMDD-HHMMSS.md` |
+| 現在セッション | `.sd/sessions/session-current.md` |
+| タイムライン | `.sd/sessions/TIMELINE.md` |
+| セッション履歴 | `.sd/sessions/session-YYYYMMDD-HHMMSS.md` |
 
 ### 配置禁止
 

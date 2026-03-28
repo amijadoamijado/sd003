@@ -15,7 +15,7 @@ Display version history for a specification.
 
 | Argument | Required | Description |
 |----------|----------|-------------|
-| feature | Yes | Feature name (folder under .kiro/specs/) |
+| feature | Yes | Feature name (folder under .sd/specs/) |
 
 ## Examples
 
@@ -26,7 +26,7 @@ Display version history for a specification.
 
 ## Execution Steps
 
-1. Validate feature folder exists at `.kiro/specs/{feature}/`
+1. Validate feature folder exists at `.sd/specs/{feature}/`
 2. Read `spec.json` for metadata and history array
 3. List files in `history/` folder
 4. Display formatted history table

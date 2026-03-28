@@ -5,7 +5,7 @@ SD002は仕様書駆動開発(SD001)とGASモック環境(GA001)を統合したA
 
 ## 必読ドキュメント
 1. `CLAUDE.md` - プロジェクト設定
-2. `.kiro/specs/` - 仕様書
+2. `.sd/specs/` - 仕様書
 3. `docs/` - 詳細ドキュメント
 
 ## 開発原則
@@ -13,7 +13,7 @@ SD002は仕様書駆動開発(SD001)とGASモック環境(GA001)を統合したA
 ### 仕様書駆動開発
 - Requirements → Design → Tasks → Implementation
 - 仕様書なしの実装禁止
-- `.kiro/specs/{feature}/` に仕様書配置
+- `.sd/specs/{feature}/` に仕様書配置
 
 ### GAS環境制約
 - Node.js API禁止（`fs`, `path`, `process`）
@@ -29,16 +29,16 @@ SD002は仕様書駆動開発(SD001)とGASモック環境(GA001)を統合したA
 
 ### Phase 1: Specification
 ```
-/kiro:spec-init "description"
-/kiro:spec-requirements {feature}
-/kiro:spec-design {feature}
-/kiro:spec-tasks {feature}
+/sd:spec-init "description"
+/sd:spec-requirements {feature}
+/sd:spec-design {feature}
+/sd:spec-tasks {feature}
 ```
 
 ### Phase 2: Implementation
 ```
-/kiro:spec-impl {feature}
-/kiro:spec-status {feature}
+/sd:spec-impl {feature}
+/sd:spec-status {feature}
 ```
 
 ## タスク完了報告

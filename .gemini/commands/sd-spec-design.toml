@@ -1,0 +1,61 @@
+description = "Create comprehensive technical design for a specification"
+prompt = """
+# Technical Design Generator
+
+## Parse Arguments
+- Feature name: `$1`
+- Auto-approve flag: `$2` (optional, \"-y\")
+
+## Validate
+Check that requirements have been completed:
+- Verify `.sd/specs/$1/` exists
+- Verify `.sd/specs/$1/requirements.md` exists
+
+If validation fails, inform user to complete requirements phase first.
+
+## Invoke SubAgent
+
+Delegate design generation to spec-design-agent:
+
+Use the Task tool to invoke the SubAgent with file path patterns:
+
+```
+Task(
+  subagent_type=\"general-purpose\",
+  description=\"Generate technical design\",
+  prompt=\"\"\"
+Feature: $1
+Spec directory: .sd/specs/$1/
+Auto-approve: {true if $2 == \"-y\", else false}
+
+File patterns to read:
+- .sd/specs/$1/*.{json,md}
+- .sd/steering/*.md
+- .sd/settings/rules/design-*.md
+- .sd/settings/templates/specs/design.md
+
+Discovery: auto-detect based on requirements
+Mode: {generate or merge based on design.md existence}
+\"\"\"
+)
+```
+
+## Display Result
+
+Show SubAgent summary to user, then provide next step guidance:
+
+### Next Phase: Task Generation
+
+**If Design Approved**:
+- Review generated design at `.sd/specs/$1/design.md`
+- **Optional**: Run `/sd:validate-design $1` for interactive quality review
+- Then `/sd:spec-tasks $1 -y` to generate implementation tasks
+
+**If Modifications Needed**:
+- Provide feedback and re-run `/sd:spec-design $1`
+- Existing design used as reference (merge mode)
+
+**Note**: Design approval is mandatory before proceeding to task generation.
+---
+@req: REQ-SUBAGENTS-002
+"""

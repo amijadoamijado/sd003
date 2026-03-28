@@ -22,7 +22,7 @@ allowed-tools: Read, Write, Bash, Glob, AskUserQuestion
 
 ```bash
 # アーカイブセッション一覧
-ls -la .kiro/cleanup/archive/
+ls -la .sd/cleanup/archive/
 ```
 
 セッションが指定されていない場合、AskUserQuestionで選択:
@@ -40,7 +40,7 @@ Options:
 ### Step 2: manifest.json読み込み
 
 ```bash
-cat .kiro/cleanup/archive/{session-id}/manifest.json
+cat .sd/cleanup/archive/{session-id}/manifest.json
 ```
 
 復元対象ファイル一覧を表示:
@@ -74,7 +74,7 @@ Options:
 
 ```bash
 # 各ファイルを元の場所に復元
-mv .kiro/cleanup/archive/{session-id}/files/test_parser.js ./test_parser.js
+mv .sd/cleanup/archive/{session-id}/files/test_parser.js ./test_parser.js
 ```
 
 ### Step 5: アーカイブフォルダ削除提案
@@ -86,7 +86,7 @@ Question: "復元完了。アーカイブフォルダを削除しますか？"
 Header: "削除確認"
 Options:
   - label: "削除する"
-    description: ".kiro/cleanup/archive/{session-id}/ を削除"
+    description: ".sd/cleanup/archive/{session-id}/ を削除"
   - label: "残す"
     description: "アーカイブフォルダを保持"
 ```

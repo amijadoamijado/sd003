@@ -15,10 +15,10 @@ interface SpecFrontMatter {
 export function registerSpecListCommand(program: Command): void {
   program
     .command('spec:list')
-    .description('List all specification documents in .kiro/specs/')
+    .description('List all specification documents in .sd/specs/')
     .action(async () => {
       console.log('Listing specifications...');
-      const specDirPath = path.join(process.cwd(), '.kiro', 'specs');
+      const specDirPath = path.join(process.cwd(), '.sd', 'specs');
 
       if (!fs.existsSync(specDirPath)) {
         console.warn(`Specification directory not found: ${specDirPath}`);

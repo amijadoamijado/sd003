@@ -13,18 +13,18 @@ import { execFileSync } from 'child_process';
 console.log('SD003 Framework - Postinstall');
 console.log('==============================\n');
 
-// .kiro ディレクトリ構造の作成
-const kiroStructure = [
-  '.kiro',
-  '.kiro/specs',
-  '.kiro/settings',
-  '.kiro/traceability',
-  '.kiro/ids',
-  '.kiro/backups'
+// .sd ディレクトリ構造の作成
+const sdStructure = [
+  '.sd',
+  '.sd/specs',
+  '.sd/settings',
+  '.sd/traceability',
+  '.sd/ids',
+  '.sd/backups'
 ];
 
-console.log('Creating .kiro directory structure...');
-kiroStructure.forEach(dir => {
+console.log('Creating .sd directory structure...');
+sdStructure.forEach(dir => {
   const dirPath = path.join(process.cwd(), dir);
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });

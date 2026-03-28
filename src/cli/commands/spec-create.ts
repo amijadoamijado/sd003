@@ -13,7 +13,7 @@ export function registerSpecCreateCommand(program: Command): void {
       try {
         const specId = IdRegistry.generateId('REQ'); // Assuming new specs are requirements
         const specFileName = `${specId}-${name.toLowerCase().replace(/\s/g, '-')}.md`;
-        const specDirPath = path.join(process.cwd(), '.kiro', 'specs');
+        const specDirPath = path.join(process.cwd(), '.sd', 'specs');
         const specFilePath = path.join(specDirPath, specFileName);
 
         if (!fs.existsSync(specDirPath)) {
