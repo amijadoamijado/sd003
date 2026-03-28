@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 37
+- **Total Sessions**: 38
 - **Latest Session**: 2026-03-28
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-28 | sessionwrite日本語化 + スキルテンプレートルール + 全25PJ反映 | 0d486c4 | [Details](session-20260328-195000.md) |
 | 03-28 | 28 projects .kiro->.sd migrated + ob001 deploy + requirements template | 409271b | [Details](session-20260328-190200.md) |
 | 03-28 | deploy.ps1 overwrite policy + template separation + nm002 test | 845cfa3 | [Details](session-20260328-175100.md) |
 | 03-28 | nm002 deploy + kiro→sd migration + deploy overwrite bug found | f8d3e31 | [Details](session-20260328-173600.md) |

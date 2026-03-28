@@ -1,8 +1,11 @@
-# Session Record - 2026-03-28 19:02
-## Completed (Full Day Final)
-1. 28 projects .kiro->.sd migrated + ob001 deploy
-2. Requirements template redesigned (plain Japanese)
-3. deploy.ps1 template separation + overwrite policy
-4. .sessions/ stable, all hooks safe
-## P1 Next
-- Remaining projects, CLAUDE.md v2.15.0
+# セッション記録 - 2026-03-28 19:50
+## 完了
+1. sessionwrite日本語化 + 全25PJ反映
+2. 28PJ .kiro→.sd マイグレーション完了
+3. deploy.ps1テンプレート分離 + 上書きポリシー
+4. 要件定義書テンプレート改善
+## 次回タスク
+- P1: CLAUDE.md v2.15.0、残りPJ展開
+## 備考
+- sessionwriteに「日本語で書くこと」明記済み
+- テンプレートは別フォルダに分離済み
