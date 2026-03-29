@@ -4,29 +4,29 @@
 
 ### 仕様書駆動開発（序盤）
 ```
-/kiro:spec-init {feature}           # 仕様書初期化
-/kiro:spec-requirements {feature}   # 要件定義
-/kiro:spec-design {feature}         # 技術設計
-/kiro:spec-tasks {feature}          # タスク分解
+/sd:spec-init {feature}           # 仕様書初期化
+/sd:spec-requirements {feature}   # 要件定義
+/sd:spec-design {feature}         # 技術設計
+/sd:spec-tasks {feature}          # タスク分解
 ```
 
 ### 実装（中盤）
 ```
-/kiro:spec-impl {feature}           # TDD方式で実装
-/kiro:spec-status {feature}         # 進捗確認
+/sd:spec-impl {feature}           # TDD方式で実装
+/sd:spec-status {feature}         # 進捗確認
 ```
 
 ### 検証（終盤）
 ```
-/kiro:validate-design {feature}     # 設計検証
-/kiro:validate-gap {feature}        # ギャップ分析
-/kiro:validate-impl {feature}       # 実装検証
+/sd:validate-design {feature}     # 設計検証
+/sd:validate-gap {feature}        # ギャップ分析
+/sd:validate-impl {feature}       # 実装検証
 ```
 
 ### ステアリング
 ```
-/kiro:steering                      # ステアリング文書作成
-/kiro:steering-custom               # カスタムステアリング
+/sd:steering                      # ステアリング文書作成
+/sd:steering-custom               # カスタムステアリング
 ```
 
 ## 開発フェーズ戦略
@@ -67,11 +67,11 @@
 
 | カテゴリ | ファイル | 保存先 |
 |---------|---------|--------|
-| 仕様書 | requirements.md | `.kiro/specs/{feature}/` |
-| 仕様書 | design.md | `.kiro/specs/{feature}/` |
-| 仕様書 | tasks.md | `.kiro/specs/{feature}/` |
-| ワークフロー | IMPLEMENT_REQUEST | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
-| ワークフロー | REVIEW | `.kiro/ai-coordination/workflow/review/{projectID}/` |
+| 仕様書 | requirements.md | `.sd/specs/{feature}/` |
+| 仕様書 | design.md | `.sd/specs/{feature}/` |
+| 仕様書 | tasks.md | `.sd/specs/{feature}/` |
+| ワークフロー | IMPLEMENT_REQUEST | `.sd/ai-coordination/workflow/spec/{projectID}/` |
+| ワークフロー | REVIEW | `.sd/ai-coordination/workflow/review/{projectID}/` |
 
 **配置禁止**: プロジェクトルート直下への新規作成
 

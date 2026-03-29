@@ -179,7 +179,7 @@ function Copy-FlatDir {
 # 4-1: .claude/commands/*.md
 Copy-FlatDir -RelPath ".claude\commands" -Label "Commands" -Extension ".md"
 
-# 4-2: .claude/commands/kiro/*.md
+# 4-2: .claude/commands/sd/*.md
 Copy-FlatDir -RelPath ".claude\commands\sd" -Label "Commands/sd" -Extension ".md"
 
 # 4-3: .claude/rules/ (tree)

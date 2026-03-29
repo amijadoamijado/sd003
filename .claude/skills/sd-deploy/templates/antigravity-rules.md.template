@@ -12,7 +12,7 @@
 | `tests/` | Tests |
 | `docs/` | Documentation |
 | `materials/` | Reference materials & deliverables |
-| `.kiro/` | Specs, sessions, settings |
+| `.sd/` | Specs, sessions, settings |
 
 ## Design Principles
 1. **Spec-First** - Requirements -> Design -> Implementation -> Test

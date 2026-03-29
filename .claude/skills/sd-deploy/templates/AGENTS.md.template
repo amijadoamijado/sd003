@@ -43,16 +43,16 @@
 
 | カテゴリ | ファイル | 保存先 |
 |---------|---------|--------|
-| 仕様書 | requirements.md | `.kiro/specs/{feature}/` |
-| 仕様書 | design.md | `.kiro/specs/{feature}/` |
-| 仕様書 | tasks.md | `.kiro/specs/{feature}/` |
-| ワークフロー | WORK_ORDER.md | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
-| ワークフロー | IMPLEMENT_REQUEST | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
-| ワークフロー | TEST_REQUEST | `.kiro/ai-coordination/workflow/spec/{projectID}/` |
-| ワークフロー | REVIEW | `.kiro/ai-coordination/workflow/review/{projectID}/` |
-| ワークフロー | TEST_REPORT | `.kiro/ai-coordination/workflow/review/{projectID}/` |
-| セッション | session-current.md | `.kiro/sessions/` |
-| セッション | TIMELINE.md | `.kiro/sessions/` |
+| 仕様書 | requirements.md | `.sd/specs/{feature}/` |
+| 仕様書 | design.md | `.sd/specs/{feature}/` |
+| 仕様書 | tasks.md | `.sd/specs/{feature}/` |
+| ワークフロー | WORK_ORDER.md | `.sd/ai-coordination/workflow/spec/{projectID}/` |
+| ワークフロー | IMPLEMENT_REQUEST | `.sd/ai-coordination/workflow/spec/{projectID}/` |
+| ワークフロー | TEST_REQUEST | `.sd/ai-coordination/workflow/spec/{projectID}/` |
+| ワークフロー | REVIEW | `.sd/ai-coordination/workflow/review/{projectID}/` |
+| ワークフロー | TEST_REPORT | `.sd/ai-coordination/workflow/review/{projectID}/` |
+| セッション | session-current.md | `.sd/sessions/` |
+| セッション | TIMELINE.md | `.sd/sessions/` |
 
 **配置禁止**: プロジェクトルート直下、`.antigravity/` への依頼書作成
 
@@ -128,16 +128,16 @@ npm test && npm run lint
 
 ### Specification
 ```
-/prompts:kiro-spec-init "description"
-/prompts:kiro-spec-requirements {feature}
-/prompts:kiro-spec-design {feature}
-/prompts:kiro-spec-tasks {feature}
+/prompts:sd-spec-init "description"
+/prompts:sd-spec-requirements {feature}
+/prompts:sd-spec-design {feature}
+/prompts:sd-spec-tasks {feature}
 ```
 
 ### Implementation
 ```
-/prompts:kiro-spec-impl {feature}
-/prompts:kiro-validate-impl {feature}
+/prompts:sd-spec-impl {feature}
+/prompts:sd-validate-impl {feature}
 ```
 
 ### Claude互換コマンド同期
@@ -149,14 +149,14 @@ npm test && npm run lint
 
 例:
 - Claude `/bug-quick` -> Codex `/prompts:bug-quick`
-- Claude `/kiro:spec-init` -> Codex `/prompts:kiro-spec-init` または `/prompts:kiro/spec-init`
+- Claude `/sd:spec-init` -> Codex `/prompts:sd-spec-init` または `/prompts:sd/spec-init`
 
 ---
 
 ## Reference
 - **AI Coordination**: `.claude/rules/workflow/ai-coordination.md`
 - **Quality Gates**: `docs/quality-gates.md`
-- **Templates**: `.kiro/ai-coordination/workflow/templates/`
+- **Templates**: `.sd/ai-coordination/workflow/templates/`
 
 ---
 SD003 Framework v2.13.0 | 導入日: {{DATE}}
