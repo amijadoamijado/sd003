@@ -1,0 +1,10 @@
+---
+description: 要件定義 - ゴールと検証観点を対話で整理し要件定義書を生成
+allowed-tools: Read, Glob, Grep, AskUserQuestion, Write
+---
+
+# Blueprint Gate
+
+Read and follow `.claude/skills/blueprint-gate/SKILL.md`.
+
+$ARGUMENTS

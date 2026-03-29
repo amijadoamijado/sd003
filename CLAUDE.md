@@ -6,7 +6,9 @@
 
 ## Overview
 
-SD003: Spec-Driven Development framework. TypeScript (strict) + Google Apps Script + Env Interface Pattern.
+SD003: Work First + 痛みから生まれた仕組みの集合体。
+TypeScript (strict) + Google Apps Script + Env Interface Pattern.
+AI協調: Claude Code(司令塔) + Codex(レビュー) + Gemini(実装) + Antigravity(E2E)
 
 Common rules for all AI models: `.handoff/RULES.md`
 Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
@@ -20,6 +22,15 @@ Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
 - 変更前に3点固定: 運用ルール、反映方法、確認対象URL
 - 変更前に仮説明文化: 症状、仮説、確認方法、失敗時の次手
 - 詳細: `.claude/rules/global/work-first.md`
+
+## Blueprint Gate（設計ゲート）
+
+1時間以上かかるタスク OR ゴールが言語化できない場合 → `/blueprint-gate` 必須。
+ゴール未定義で走り出して修正の嵐になるのは Work First違反。
+
+- 対話でゴール→アウトプット→検証観点→背景→現状を引き出す
+- 承認プロセスなし。動くものが最終判定
+- 詳細: `.claude/skills/blueprint-gate/SKILL.md`
 
 ## Build & Test
 
@@ -59,7 +70,7 @@ IMPORTANT: When running tests or writing test code, enforce production data TDD.
 
 IMPORTANT: When coordinating with other AIs (Codex, Gemini, Antigravity), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
 
-IMPORTANT: When deploying SD003 to another project, use `/sd:deploy` command only. Manual deploy is prohibited. Details: `.claude/skills/sd-deploy/SKILL.md`
+IMPORTANT: When deploying SD003 to another project, use `/sd-deploy` command only. Manual deploy is prohibited. Details: `.claude/skills/sd-deploy/SKILL.md`
 
 IMPORTANT: When refactoring, use checkpoint-based batches with `/refactor:init`. Context auto-compact at 70%, auto-clear at 85%. Rollback requires user confirmation. Details: `.claude/rules/refactoring/refactoring-system.md`
 
@@ -83,13 +94,15 @@ IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before ident
 
 | Category | Commands |
 |----------|----------|
-| Spec-Driven | `/sd:spec-init`, `spec-requirements`, `spec-design`, `spec-tasks`, `spec-impl` |
+| Blueprint | `/blueprint-gate` |
 | AI Workflow | `/workflow:init`, `order`, `request`, `impl`, `review`, `test`, `status` |
 | Loop | `/sd003:loop-test`, `loop-lint`, `loop-type` |
 | Night | `/ralph-wiggum:run`, `status`, `plan` |
 | Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution` |
 | Session | `/sessionread`, `/sessionwrite`, `/sessionhistory` |
-| Skills | `/skills:find`, `/skills:add`, `/skills:list` |
+| Skills | `/sd:skills-find`, `skills-add`, `skills-list` |
+| Refactor | `/refactor:init`, `plan`, `batch`, `complete`, `rollback` |
+| Cleanup | `/cleanup`, `restore`, `history` |
 
 ---
-SD003 v2.14.0 | Updated: 2026-03-21 | Style: `.claude/rules/global/claude-md-style.md`
+SD003 v3.0.0 | Updated: 2026-03-29 | Style: `.claude/rules/global/claude-md-style.md`
