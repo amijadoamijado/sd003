@@ -1,13 +1,13 @@
 #!/bin/bash
-# sd-watchdog.sh - .sd/ ディレクトリ消失検知ウォッチドッグ
+# sd-watchdog.sh - .sd/ directory disappearance watchdog
 # PostToolUse hook for Claude Code (all tools)
 #
-# 消失検知時: 警告のみ。自動復元しない。
+# On disappearance: warn only. No auto-restore.
 #
-# 根本原因 (2026-03-28 Bug Trace):
-#   Claude Codeランタイムがsettings.jsonの変更をgit commit経由で検知すると
-#   ワーキングツリーをリフレッシュし、modified状態の.sd/ファイルが消失する。
-#   対策: settings.jsonを.gitignoreに追加（git管理外にした）
+# Root cause (2026-03-28 Bug Trace):
+#   Claude Code runtime detects settings.json changes via git commit,
+#   refreshes worktree, and modified .sd/ files disappear.
+#   Fix: added settings.json to .gitignore (removed from git tracking)
 #   Refs: anthropics/claude-code#34330, #10011
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"

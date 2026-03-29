@@ -1,16 +1,17 @@
 #!/bin/bash
-# deploy-package-reminder.sh - git commit後にデプロイパッケージ未更新を警告
+# deploy-package-reminder.sh - Warn about unupdated deploy package after git commit
 # PostToolUse hook for Claude Code (Bash)
 #
-# git commit を検知し、変更されたファイルがデプロイ対象（hooks, rules, skills,
-# templates, settings.json等）を含む場合、deploy.ps1/テンプレートの更新を促す。
+# Detects git commit and warns if changed files include deploy targets
+# (hooks, rules, skills, templates, settings.json etc.) but deploy.ps1/templates
+# were not updated.
 
 INPUT=$(cat)
 
-# command フィールドを抽出
+# Extract command field
 COMMAND=$(echo "$INPUT" | sed -n 's/.*"command"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
 
-# git commit 以外は無視
+# Skip non git-commit commands
 if [ -z "$COMMAND" ]; then
   exit 0
 fi
@@ -19,18 +20,18 @@ if ! echo "$COMMAND" | grep -qiE 'git\s+commit'; then
   exit 0
 fi
 
-# 直前のコミットで変更されたファイルを取得
+# Get files changed in the last commit
 CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
 
 if [ -z "$CHANGED" ]; then
   exit 0
 fi
 
-# デプロイ対象ファイルが変更されたかチェック
+# Check if deploy target files were changed
 DEPLOY_AFFECTED=false
 AFFECTED_FILES=""
 
-# チェック対象パターン
+# Patterns to check
 PATTERNS=(
   ".claude/hooks/"
   ".claude/rules/"
@@ -51,23 +52,23 @@ for pattern in "${PATTERNS[@]}"; do
 done
 
 if [ "$DEPLOY_AFFECTED" = true ]; then
-  # deploy.ps1自体が更新されているかチェック
+  # Check if deploy.ps1 itself was updated
   DEPLOY_UPDATED=$(echo "$CHANGED" | grep "deploy.ps1\|deploy.sh\|CLAUDE.md.template" || true)
 
   if [ -z "$DEPLOY_UPDATED" ]; then
     echo ""
     echo "⚠️  DEPLOY PACKAGE REMINDER ⚠️"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "デプロイ対象ファイルが変更されましたが、パッケージ（deploy.ps1/テンプレート）が未更新です。"
+    echo "Deploy target files changed but package (deploy.ps1/templates) not updated."
     echo ""
-    echo "変更されたデプロイ対象:"
+    echo "Changed deploy targets:"
     echo -e "$AFFECTED_FILES"
     echo ""
-    echo "確認すべきファイル:"
+    echo "Files to check:"
     echo "  - .claude/skills/sd-deploy/deploy.ps1 (FRAMEWORK_VERSION, Phase 5 settings.json)"
     echo "  - .claude/skills/sd-deploy/templates/CLAUDE.md.template"
     echo ""
-    echo "不要な場合（ルール文言のみの修正等）はこの警告を無視してください。"
+    echo "Ignore this warning if only rule text was modified."
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   fi
 fi

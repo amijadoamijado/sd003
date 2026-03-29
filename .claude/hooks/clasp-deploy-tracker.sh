@@ -1,21 +1,21 @@
 #!/bin/bash
-# clasp-deploy-tracker.sh - GASファイル修正→push→deployの状態追跡
+# clasp-deploy-tracker.sh - Track GAS file edit -> push -> deploy state
 # PostToolUse hook for Claude Code
 #
-# 状態遷移:
-#   GASファイル編集 → needs-push
-#   clasp push      → needs-deploy（pushリマインダー表示）
-#   clasp deploy -i → clear（完了）
+# State transitions:
+#   GAS file edit   -> needs-push
+#   clasp push      -> needs-deploy (shows push reminder)
+#   clasp deploy -i -> clear (done)
 #
-# 状態ファイル: $CLAUDE_PROJECT_DIR/.clasp-deploy-state
+# State file: $CLAUDE_PROJECT_DIR/.clasp-deploy-state
 #
-# 引数: $1 = ツール名 (Edit, Write, Bash)
+# Args: $1 = tool name (Edit, Write, Bash)
 
 TOOL_NAME="${1:-Bash}"
 STATE_FILE="${CLAUDE_PROJECT_DIR:-.}/.clasp-deploy-state"
 INPUT=$(cat)
 
-# --- JSON からフィールド抽出 ---
+# --- Extract field from JSON ---
 extract_field() {
   local field="$1"
   local python_cmd=""
@@ -37,17 +37,17 @@ except:
   fi
 }
 
-# --- GASソースファイル判定 ---
+# --- GAS source file detection ---
 is_gas_file() {
   local path="$1"
-  # GAS関連: .ts, .js, .html (src/ 配下), Code.gs 等
+  # GAS files: .ts, .js, .html (under src/), Code.gs etc
   if echo "$path" | grep -qiE '(src/.*\.(ts|js|html)|\.gs$|appsscript\.json)'; then
     return 0
   fi
   return 1
 }
 
-# --- 状態読取 ---
+# --- Read state ---
 read_state() {
   if [ -f "$STATE_FILE" ]; then
     cat "$STATE_FILE"
@@ -56,18 +56,18 @@ read_state() {
   fi
 }
 
-# --- 状態書込 ---
+# --- Write state ---
 write_state() {
   echo "$1" > "$STATE_FILE"
 }
 
-# --- 状態クリア ---
+# --- Clear state ---
 clear_state() {
   rm -f "$STATE_FILE"
 }
 
 # ============================================================
-# Edit / Write ツール: GASファイル編集の検出
+# Edit / Write tool: detect GAS file edits
 # ============================================================
 if [ "$TOOL_NAME" = "Edit" ] || [ "$TOOL_NAME" = "Write" ]; then
   FILE_PATH=$(extract_field "file_path")
@@ -77,7 +77,7 @@ if [ "$TOOL_NAME" = "Edit" ] || [ "$TOOL_NAME" = "Write" ]; then
       write_state "needs-push"
       cat <<'EOF' >&2
 
-📝 GASファイル変更検出 → clasp push が必要です
+GAS file change detected -> clasp push required
 EOF
     fi
   fi
@@ -85,7 +85,7 @@ EOF
 fi
 
 # ============================================================
-# Bash ツール: clasp push / deploy の検出
+# Bash tool: detect clasp push / deploy
 # ============================================================
 if [ "$TOOL_NAME" = "Bash" ]; then
   COMMAND=$(extract_field "command")
@@ -93,31 +93,29 @@ if [ "$TOOL_NAME" = "Bash" ]; then
     exit 0
   fi
 
-  # --- clasp deploy -i 検出 → 状態クリア（完了） ---
+  # --- clasp deploy -i detected -> clear state (done) ---
   if echo "$COMMAND" | grep -qiE 'clasp\s+deploy\s+-i\s'; then
     clear_state
     cat <<'EOF' >&2
 
-✅ clasp deploy 完了 → 本番URLに反映済み
+clasp deploy done -> reflected in production URL
 EOF
     exit 0
   fi
 
-  # --- clasp push 検出 → needs-deploy に遷移 ---
+  # --- clasp push detected -> transition to needs-deploy ---
   if echo "$COMMAND" | grep -qiE 'clasp\s+push'; then
     write_state "needs-deploy"
     cat <<'EOF' >&2
 
-⚠️ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️  clasp push 完了 → deploy を忘れないでください！
-⚠️
-⚠️  push は @HEAD（開発版）のみ更新します。
-⚠️  本番URLに反映するには deploy が必要:
-⚠️
-⚠️    clasp deploy -i <デプロイメントID>
-⚠️
-⚠️  デプロイメントID確認: clasp deployments
-⚠️ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WARNING: clasp push done -> don't forget to deploy!
+
+  push only updates @HEAD (dev version).
+  To reflect in production URL:
+
+    clasp deploy -i <deploymentID>
+
+  Check deployment ID: clasp deployments
 EOF
     exit 0
   fi

@@ -1,10 +1,10 @@
 #!/bin/bash
-# clasp-deploy-check-stop.sh - セッション終了時にdeploy漏れチェック
+# clasp-deploy-check-stop.sh - Check for missed deploys on session exit
 # Stop hook for Claude Code
 #
-# .clasp-deploy-state が残っている場合、警告を出力する
-# needs-push: GASファイル編集済みだがpush未実施
-# needs-deploy: push済みだがdeploy未実施
+# Warns if .clasp-deploy-state remains:
+# needs-push: GAS files edited but not pushed
+# needs-deploy: pushed but not deployed
 
 STATE_FILE="${CLAUDE_PROJECT_DIR:-.}/.clasp-deploy-state"
 
@@ -18,31 +18,27 @@ case "$STATE" in
   "needs-push")
     cat <<'EOF' >&2
 
-🚨 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚨  GASファイルが変更されていますが push されていません！
-🚨
-🚨  以下を実行してください:
-🚨    1. clasp push
-🚨    2. clasp deploy -i <デプロイメントID>
-🚨
-🚨  本番URLに反映されていない変更があります。
-🚨 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WARNING: GAS files changed but NOT pushed!
+
+  Run:
+    1. clasp push
+    2. clasp deploy -i <deploymentID>
+
+  Changes are not reflected in production URL.
 EOF
     exit 1
     ;;
   "needs-deploy")
     cat <<'EOF' >&2
 
-🚨 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🚨  clasp push 済みですが deploy されていません！
-🚨
-🚨  本番URLに反映するには:
-🚨    clasp deploy -i <デプロイメントID>
-🚨
-🚨  デプロイメントID確認: clasp deployments
-🚨
-🚨  @HEAD のみ更新された状態です。本番URLは古いままです。
-🚨 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WARNING: clasp push done but NOT deployed!
+
+  To reflect in production URL:
+    clasp deploy -i <deploymentID>
+
+  Check deployment ID: clasp deployments
+
+  Only @HEAD is updated. Production URL still uses old version.
 EOF
     exit 1
     ;;
