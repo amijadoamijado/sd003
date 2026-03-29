@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 40
+- **Total Sessions**: 41
 - **Latest Session**: 2026-03-29
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-29 | git hooks .kiro→.sd修正 + テンプレート.kiro残存発見 | be50618 | [Details](session-20260329-214753.md) |
 | 03-29 | Codex/Geminiアーカイブ済みコマンド42件削除 + Blueprint Gate追加 | 09db501 | [Details](session-20260329-194013.md) |
 | 03-29 | v3.0.0: Blueprint Gate作成 + sd/コマンド14個アーカイブ + CLAUDE.md全面改訂 | ea524d1 | [Details](session-20260329-191700.md) |
 | 03-28 | sessionwrite日本語化 + スキルテンプレートルール + 全25PJ反映 | 0d486c4 | [Details](session-20260328-195000.md) |
