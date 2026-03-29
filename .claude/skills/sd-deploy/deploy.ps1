@@ -343,6 +343,25 @@ if (Test-Path $gasFakesSrc) {
     $copyStats["Gas Fakes Setup"] = 0
 }
 
+# 4-21: .git/hooks/ (from templates/git-hooks/)
+$gitHooksSrc = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\git-hooks"
+$gitHooksDst = Join-Path $TargetProject ".git\hooks"
+$hookCount = 0
+if (Test-Path $gitHooksSrc -PathType Container) {
+    if (-not (Test-Path $gitHooksDst)) { New-Item -ItemType Directory -Path $gitHooksDst -Force | Out-Null }
+    $hookFiles = Get-ChildItem -Path $gitHooksSrc -File
+    foreach ($hook in $hookFiles) {
+        $targetHook = Join-Path $gitHooksDst $hook.Name
+        # 上書き: 既存hookがあっても最新版で上書き（sd003と同一動作を保証）
+        Copy-Item $hook.FullName $targetHook -Force
+        $hookCount++
+    }
+    Write-Host "  Git Hooks: $hookCount file(s) installed" -ForegroundColor Cyan
+} else {
+    Write-Host "  WARN: templates/git-hooks/ not found" -ForegroundColor Yellow
+}
+$copyStats["Git Hooks"] = $hookCount
+
 Write-Host "[Phase 4/7] Dynamic copy completed" -ForegroundColor Green
 foreach ($key in $copyStats.Keys | Sort-Object) {
     Write-Host "  $key : $($copyStats[$key]) files"

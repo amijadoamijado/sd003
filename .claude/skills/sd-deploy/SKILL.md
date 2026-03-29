@@ -86,6 +86,7 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 | 18 | `.sd/steering/` | ツリーコピー |
 | 19 | `.sd/refactor/config.json` | 単体コピー |
 | 20 | `tests/gas-fakes/setup.ts` | 単体コピー |
+| 21 | `.git/hooks/` | templates/git-hooks/ からコピー（自動push + .sd/自動ステージ） |
 
 ## gas-fakes 自動注入（Phase 5b）
 

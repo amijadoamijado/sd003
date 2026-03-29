@@ -1,0 +1,21 @@
+#!/bin/bash
+# post-commit hook: async push + Google Drive backup
+#
+# .sd/ はgit管理外。GitHubへの同期はしない（git add -fがランタイムの消失を誘発するため）。
+# Google Driveへのバックアップのみ行う。
+
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+[ "$BRANCH" = "HEAD" ] && exit 0
+git remote get-url origin >/dev/null 2>&1 || exit 0
+
+# 非同期push（.sd/は含まない）
+nohup git push origin "$BRANCH" > /dev/null 2>&1 &
+
+# Google Drive backup（非同期）
+GDRIVE_BACKUP="G:/マイドライブ/sd-backup"
+PROJECT_NAME=$(basename "$(pwd)")
+if [ -d "$GDRIVE_BACKUP" ] && [ -d ".sd" ]; then
+    nohup cp -r .sd/ "$GDRIVE_BACKUP/$PROJECT_NAME/" > /dev/null 2>&1 &
+fi
+
+exit 0
