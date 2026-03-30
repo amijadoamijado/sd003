@@ -1,10 +1,9 @@
-# 完了報告 - 2026-03-30 09:16
+# 完了報告 - 2026-03-30 11:07
 
 ## 完了
-- 全プロジェクトのhookスクリプトBOM+mojibake問題を調査・修正
-- sd003正本8ファイルの日本語コメント+メッセージを全て英語化
-- 全13プロジェクトにsd003正本からhookスクリプトを再配布・コミット
-- 全26プロジェクトの最終確認完了（日本語hookゼロ）
+- claude.ai MCP統合5サービスの一括ブロック設定（Notion, Gmail, Google Calendar, Canva, Excalidraw）
+- グローバルsettings.jsonのpermissions.denyで全プロジェクト適用
+- settings.json異常内容（PowerShellコード混入）の修正
 
 ## 未完了
 - nm002のGitHubリポジトリ作成（remote未設定）
@@ -16,5 +15,4 @@
 - spec-archive/spec-historyコマンドの整理
 
 ## 関連ファイル
-- `.claude/hooks/*.sh` — 全8ファイル英語化
-- 配布先: PC001, SB001, ad001, as001, cf001, er001, fw5yp, nm001, nm002, oc001, at001, ck001, ob001
+- `C:\Users\a-odajima\.claude\settings.json` — グローバルMCPブロック設定
