@@ -1,12 +1,10 @@
-# 完了報告 - 2026-03-29 22:38
+# 完了報告 - 2026-03-30 09:16
 
 ## 完了
-- Codex/Geminiからアーカイブ済みコマンド42ファイル削除 + Blueprint Gate追加
-- git hooksの .kiro→.sd 更新
-- sd-deployテンプレート5ファイルの .kiro→.sd 置換完了
-- 全22プロジェクトにテンプレート修正を同期
-- deploy.ps1に `.git/hooks/` 自動インストール追加（設計漏れ修正）
-- 全21プロジェクトにgit hooksインストール
+- 全プロジェクトのhookスクリプトBOM+mojibake問題を調査・修正
+- sd003正本8ファイルの日本語コメント+メッセージを全て英語化
+- 全13プロジェクトにsd003正本からhookスクリプトを再配布・コミット
+- 全26プロジェクトの最終確認完了（日本語hookゼロ）
 
 ## 未完了
 - nm002のGitHubリポジトリ作成（remote未設定）
@@ -15,9 +13,8 @@
 ## 次のステップ
 - nm002のGitHub repo作成 + remote追加
 - Blueprint Gateを実案件で試用
-- sd-deployで他PJにv3.0.0展開
+- spec-archive/spec-historyコマンドの整理
 
 ## 関連ファイル
-- `.claude/skills/sd-deploy/deploy.ps1` — Phase 4-21追加
-- `.claude/skills/sd-deploy/templates/git-hooks/` — 新規
-- `.claude/skills/sd-deploy/SKILL.md` — コピー対象更新
+- `.claude/hooks/*.sh` — 全8ファイル英語化
+- 配布先: PC001, SB001, ad001, as001, cf001, er001, fw5yp, nm001, nm002, oc001, at001, ck001, ob001

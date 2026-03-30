@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 42
-- **Latest Session**: 2026-03-29
+- **Total Sessions**: 43
+- **Latest Session**: 2026-03-30
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-30 | hookスクリプトmojibake修正 + 全ファイル英語化 + 全13PJ再配布 | ea3d7df | [Details](session-20260330-091653.md) |
 | 03-29 | テンプレート.kiro掃除 + .git/hooks/自動デプロイ実装 + 全22PJ同期 | a623c65 | [Details](session-20260329-223801.md) |
 | 03-29 | git hooks .kiro→.sd修正 + テンプレート.kiro残存発見 | be50618 | [Details](session-20260329-214753.md) |
 | 03-29 | Codex/Geminiアーカイブ済みコマンド42件削除 + Blueprint Gate追加 | 09db501 | [Details](session-20260329-194013.md) |
