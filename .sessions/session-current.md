@@ -1,61 +1,36 @@
 # セッション記録
 
 ## セッション情報
-- **日時**: 2026-03-31 19:42:36
+- **日時**: 2026-03-31 20:28:59
 - **プロジェクト**: D:\claudecode\sd003
 - **ブランチ**: master
-- **最新コミット**: 4d114d4 feat: integrate official codex-plugin-cc into SD003 workflow (Phase 2)
+- **最新コミット**: 382619a session: codex-plugin-cc公式プラグイン導入 + Codex呼び出し全面移行（Phase 1+2）
 
 ## 作業サマリー
 
 ### 完了
-1. OpenAI公式Codexプラグイン（codex-plugin-cc）の調査・導入
-2. Phase 1: 全Codex呼び出しを `codex exec --full-auto` から `codex review --commit/--uncommitted` に移行（5ファイル）
+1. codex-plugin-cc公式プラグインの調査・インストール・認証確認（v1.0.1）
+2. Phase 1: 全Codex呼び出しを `codex exec --full-auto` → `codex review --commit/--uncommitted` に移行（5ファイル）
 3. Phase 2: ワークフローコマンドを公式プラグイン `/codex:review`, `/codex:rescue` に統合（3ファイル）
-4. プラグインインストール: `claude plugin marketplace add openai/codex-plugin-cc` + `claude plugin install codex@openai-codex`
-5. `/codex:setup` で認証・接続確認完了（v1.0.1, authenticated）
-6. Codex prompts同期確認（`npm run sync:codex-prompts` → 37 prompts, 2 updated）
+4. obsidian-skills プラグインのインストール（kepano/obsidian-skills v1.0.1）
+5. Obsidian MCP接続のトラブルシューティング — 根本原因特定済み
 
 ### 進行中
-なし
+1. Obsidian MCP接続修復 — 新セッションで解決見込み（キャッシュクリア）
 
 ### 未解決
-なし
-
-### 作成・変更ファイル
-
-**Phase 1（コミット 231aca3）**
-| ファイル | 変更内容 |
-|---------|----------|
-| `.claude/commands/workflow-review.md` | Step 4: `codex exec` → `codex review --commit` |
-| `.claude/commands/workflow-impl.md` | Step 3b: 廃止フラグ除去 |
-| `.claude/hooks/agent-review.sh` | `codex exec` → `codex review --commit` |
-| `scripts/agent-review.sh` | 同上 + dry-run表示更新 |
-| `scripts/agent-pipeline.sh` | `--auto-apply`有無で `--commit/--uncommitted` 分岐 |
-
-**Phase 2（コミット 4d114d4）**
-| ファイル | 変更内容 |
-|---------|----------|
-| `.claude/commands/workflow-review.md` | `/codex:review --wait` に統合 + フォールバック |
-| `.claude/commands/workflow-impl.md` | `/codex:rescue` に統合 + フォールバック |
-| `.claude/rules/workflow/ai-coordination.md` | Codex欄にプラグインコマンド追記 |
+- Claude Codeが旧mcp-toolsのツール定義をキャッシュ → 新セッション起動で解決見込み
 
 ### 次回タスク
 
 #### P0（緊急）
-なし
+1. 新セッション起動 → Obsidian MCP接続確認
+2. obsidian-skills 動作確認
 
 #### P1（重要）
-1. `/codex:review` の実diffでのE2E動作確認
-2. `/codex:adversarial-review` のテスト（認証変更・リファクタリング系）
-3. 全プロジェクトへの sd-deploy 再配布（Codex連携更新分）
+1. `/codex:review` の実diff E2E確認
+2. sd-deploy 再配布
 
 #### P2（通常）
-1. review gate（`/codex:setup --enable-review-gate`）の評価（使用量との兼ね合い）
-2. codex-dispatch スキルの公式プラグインベースへの書き換え検討
-
-### 備考
-- 公式プラグインは2026-03-30にGitHubリリース、npmには未登録だが `claude plugin marketplace` 経由でインストール可能
-- Bashスクリプト（hooks, agent-pipeline）はスラッシュコマンド使用不可のため native CLI 維持
-- review gateは使用量ドレインの警告があるため今回は無効のまま
-- 計画レビューで5つの問題点を指摘され、2段階移行に修正した経緯あり
+1. defuddle インストール
+2. review gate 評価
