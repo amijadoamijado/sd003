@@ -1,42 +1,42 @@
 # セッション記録
 
 ## セッション情報
-- **日時**: 2026-03-31 21:09:26
+- **日時**: 2026-03-31 23:18:49
 - **プロジェクト**: D:\claudecode\sd003
 - **ブランチ**: master
-- **最新コミット**: 569378d session: Obsidian MCP修復 + obsidian-skills導入 + Codex移行完了
+- **最新コミット**: 64c06e2 session: Obsidian CLI有効化 + セッションアーカイブ11件
 
 ## 作業サマリー
 
 ### 完了
-1. セッション読み込み（4ファイル）完了
-2. 古いセッションアーカイブ実行（11件 / 24MB → Google Drive）
-3. Obsidian CLI有効化完了
+1. Obsidian CLI有効化 + 動作確認 + シンボリックリンク作成
+2. Codex公式プラグイン全機能テスト + Windows対応修正（app-server.mjs shell:true）
+3. 佑峯会 R7.4決算後提出書類調査（法務局・保健所・千葉県）
+4. 役員任期2年周期特定 → R.07役員変更あり確定
+5. 登記費用確認（自分で申請、費用0円）
+6. R.07法務局フォルダ書類チェック開始
 
 ### 進行中
-なし
+1. R.07法務局提出書類の内容チェック（.doc読取り中断）
 
 ### 未解決
-なし
-
-### 作成・変更ファイル
-| カテゴリ | ファイル | 変更内容 |
-|---------|---------|----------|
-| Obsidian設定 | `D:\Program Files\obsidian\.obsidian\app.json` | `enableCli: true` 追加 |
+- .docファイル読み取り手段
 
 ### 次回タスク
 
 #### P0（緊急）
-1. Obsidian CLI動作確認（obsidian helpの実行）
+1. R.07法務局提出書類チェック完了
+2. R.07保健所提出書類準備
 
 #### P1（重要）
-1. `/codex:review` の実diff E2E確認
-2. sd-deploy 再配布
+1. sd-deploy 再配布
+2. 社員総会議事録に第3号議案（役員報酬据置）反映
 
 #### P2（通常）
 1. defuddle インストール
 2. review gate 評価
 
 ### 備考
-- Obsidianバージョン: 1.12.7（asar）、インストール先: `D:\Program Files\obsidian\`
-- Vault: `D:\Program Files\obsidian\`
+- Obsidian CLIパス: `D:\Program Files\obsidian\Obsidian.com`
+- 佑峯会過去資料: `C:\Users\a-odajima\Desktop\佑峯会\登記・保健所\`
+- 司法書士: 白戸美紀（今期は委任せず）
