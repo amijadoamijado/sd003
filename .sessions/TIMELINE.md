@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 46
+- **Total Sessions**: 47
 - **Latest Session**: 2026-03-31
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-31 | Obsidian CLI有効化 + セッションアーカイブ11件 | 569378d | [Details](session-20260331-210926.md) |
 | 03-31 | Obsidian MCP修復 + obsidian-skills導入 + Codex移行完了 | 382619a | [Details](session-20260331-202859.md) |
 | 03-31 | codex-plugin-cc公式プラグイン導入 + Codex呼び出し全面移行（Phase 1+2） | 4d114d4 | [Details](session-20260331-194236.md) |
 | 03-30 | claude.ai MCP統合5サービス一括ブロック（グローバルsettings.json） | 222d516 | [Details](session-20260330-110700.md) |
