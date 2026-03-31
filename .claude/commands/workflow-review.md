@@ -79,18 +79,14 @@ Geminiが実装した変更内容を取得する。
 
 ### Step 4: Codex CLI実行
 ```bash
-REVIEW_CONTENT=$(cat .sd/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md)
-REVIEW_PROMPT="以下のレビュー依頼に従って、実装コードをレビューしてください。判定（Approve/Request Changes）と詳細コメントを出力してください。
-
-${REVIEW_CONTENT}"
-REVIEW_RESULT=$(printf '%s' "$REVIEW_PROMPT" | codex exec --full-auto 2>/dev/null)
+COMMIT_SHA=$(git rev-parse --short HEAD)
+REVIEW_PROMPT=$(cat .sd/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md)
+REVIEW_RESULT=$(codex review --commit "$COMMIT_SHA" "$REVIEW_PROMPT" 2>/dev/null)
 ```
 
-**注意**:
-- `codex exec --full-auto` を使用（`codex review --commit` はサンドボックス制限でgit historyにアクセス不可）
-- `printf '%s'` を使用（`echo` はバックスラッシュ解釈の問題あり）
-- `2>/dev/null` でstderrのUI出力を除外し、stdoutのレビュー結果のみキャプチャする
-- 旧形式 `codex --full-auto -p "..."` は v0.98.0 で `-p` がprofile指定に変更されたため使用不可
+- `codex review --commit <SHA>` で最新コミットを直接レビュー
+- レビュー指示書はコマンド引数として渡すためstdinパイプ不要
+- stderr混入・printfの対策不要で手順が簡潔になる
 
 ### Step 5: レビュー結果保存
 Codexの出力を以下に保存:
@@ -150,9 +146,9 @@ request → impl → review → test（Approve時）
 | エラー | 原因 | 対応 |
 |--------|------|------|
 | Codex CLI未インストール | 未セットアップ | `npm install -g @openai/codex` を案内 |
-| `stdin is not a terminal` | 非インタラクティブ環境で `codex` 直接実行 | `codex exec --full-auto` を使用 |
-| `-p` がprofile扱いになる | v0.98.0で `-p` の意味が変更 | `printf ... \| codex exec --full-auto` を使用 |
-| `unknown revision` | `codex review --commit` のサンドボックス制限 | `codex exec --full-auto` にdiffをパイプで渡す |
+| `stdin is not a terminal` | 非インタラクティブ環境で `codex review` を直接実行 | `codex review --commit HEAD` や `--uncommitted` を使用 |
+| `-p` がprofile扱いになる | v0.98.0で `-p` の意味が変更 | `codex review` ではプロンプトを引数で渡すため不要 |
+| `unknown revision` | 旧 `codex --full-auto -p` では差分指定が難しい | `codex review --commit` でコミット差分を指定、`--uncommitted` で作業ツリーを対象 |
 | Codex実行失敗（その他） | ネットワーク/API等 | 手動レビューに切り替え |
 | レビュー結果が不明瞭 | 出力フォーマット不一致 | Claude Codeが補足レビュー |
 

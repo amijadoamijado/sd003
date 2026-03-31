@@ -243,11 +243,19 @@ $(cat "$GEMINI_OUTPUT")
 
         # Execute Codex review
         echo -e "${BLUE}Codex CLIへレビュー依頼中...${NC}"
-        REVIEW_RESULT=$(echo "$REVIEW_PROMPT" | codex exec --full-auto 2>&1) || {
-            echo -e "${YELLOW}[WARN] Codex CLI実行に失敗（手動レビューに切り替え）${NC}"
-            echo "Status: CODEX_UNAVAILABLE" >> "$PIPELINE_LOG"
-            REVIEW_RESULT="[Codex CLI unavailable - manual review required]"
-        }
+        if [ "$AUTO_APPLY" = true ]; then
+            REVIEW_RESULT=$(codex review --commit HEAD "$REVIEW_PROMPT" 2>/dev/null) || {
+                echo -e "${YELLOW}[WARN] Codex CLI実行に失敗（手動レビューに切り替え）${NC}"
+                echo "Status: CODEX_UNAVAILABLE" >> "$PIPELINE_LOG"
+                REVIEW_RESULT="[Codex CLI unavailable - manual review required]"
+            }
+        else
+            REVIEW_RESULT=$(codex review --uncommitted "$REVIEW_PROMPT" 2>/dev/null) || {
+                echo -e "${YELLOW}[WARN] Codex CLI実行に失敗（手動レビューに切り替え）${NC}"
+                echo "Status: CODEX_UNAVAILABLE" >> "$PIPELINE_LOG"
+                REVIEW_RESULT="[Codex CLI unavailable - manual review required]"
+            }
+        fi
 
         # Save review result
         {

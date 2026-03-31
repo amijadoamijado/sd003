@@ -108,7 +108,8 @@ echo "REVIEW: Running Codex auto-review for commit ${COMMIT_HASH}..." >&2
 REVIEW_RESULT=""
 REVIEW_EXIT=0
 
-REVIEW_RESULT=$(printf '%s' "$REVIEW_PROMPT" | codex exec --full-auto 2>/dev/null) || REVIEW_EXIT=$?
+COMMIT_SHA=$(git rev-parse --short HEAD)
+REVIEW_RESULT=$(codex review --commit "$COMMIT_SHA" "$REVIEW_PROMPT" 2>/dev/null) || REVIEW_EXIT=$?
 
 if [ $REVIEW_EXIT -ne 0 ] && [ -z "$REVIEW_RESULT" ]; then
   echo "REVIEW_ERROR: Codex failed with exit code ${REVIEW_EXIT}" >&2

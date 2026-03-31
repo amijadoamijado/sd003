@@ -129,7 +129,7 @@ if [ "$DRY_RUN" = true ]; then
     echo "$REQUEST_CONTENT" | head -20
     [ "$(echo "$REQUEST_CONTENT" | wc -l)" -gt 20 ] && echo "... (truncated)"
     echo ""
-    echo -e "${YELLOW}[DRY-RUN] 実行時のコマンド: codex exec --full-auto < <依頼書内容>${NC}"
+    echo -e "${YELLOW}[DRY-RUN] 実行時のコマンド: codex review --commit HEAD <依頼書内容>${NC}"
     exit 0
 fi
 
@@ -139,7 +139,7 @@ echo -e "${BLUE}Codex CLIへレビュー依頼中...${NC}"
 REVIEW_RESULT=""
 REVIEW_EXIT=0
 
-REVIEW_RESULT=$(echo "$REQUEST_CONTENT" | codex exec --full-auto 2>/dev/null) || REVIEW_EXIT=$?
+REVIEW_RESULT=$(codex review --commit HEAD "$REQUEST_CONTENT" 2>/dev/null) || REVIEW_EXIT=$?
 
 if [ $REVIEW_EXIT -ne 0 ] && [ -z "$REVIEW_RESULT" ]; then
     echo -e "${RED}[FAIL] Codex CLIがエラーコード ${REVIEW_EXIT} で終了${NC}"

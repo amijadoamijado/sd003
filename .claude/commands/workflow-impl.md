@@ -69,13 +69,11 @@ cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番
 #### 3b: Codex CLI（--codex指定時）
 
 ```bash
-codex exec "$(cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md)" -C . --skip-git-repo-check -o /tmp/codex-impl-result.txt
+codex exec "$(cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md)" 2>/dev/null
 ```
 
-Codex実行後、結果を確認:
-```bash
-cat /tmp/codex-impl-result.txt
-```
+- `--skip-git-repo-check` や `-C .` は最新 CLI では不要なため省略（既存 repo で実行）
+- `-o` で結果をファイル化する手順は不要になったため削除
 
 ### Step 4: .sd/ 限定復元
 実装AIが`.sd/`の設定ファイルを変更・削除する場合があるため、設定系のみ復元する。
