@@ -4,7 +4,7 @@
 | AI | 役割 | コマンド |
 |----|------|---------|
 | Claude Code | 計画・工程管理 | `/workflow:init`, `/workflow:order`, `/workflow:request`, `/workflow:status` |
-| Codex | レビュー・チェック | `/workflow:review`（自動連鎖） |
+| Codex | レビュー・チェック・タスク委譲 | `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`（公式プラグイン）, `/workflow:review`（自動連鎖） |
 | Gemini CLI | 実装 | `/workflow:impl`（自動連鎖） |
 | Antigravity | E2Eテスト・探索的調査・本番確認 | `/workflow:test`（自動連鎖） |
 

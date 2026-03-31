@@ -68,12 +68,20 @@ cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番
 
 #### 3b: Codex CLI（--codex指定時）
 
+公式プラグインの `/codex:rescue` で Codex にタスクを委譲する:
+
+```
+/codex:rescue implement the changes described in IMPLEMENT_REQUEST_{タスク番号}.md following the acceptance criteria
+```
+
+- `/codex:rescue` は Codex サブエージェントにタスクを委譲する公式コマンド
+- `--background` で非同期実行可能（`/codex:status` で進捗、`/codex:result` で結果取得）
+- Codex が作業ディレクトリから IMPLEMENT_REQUEST を直接読み取る
+
+**フォールバック**: プラグインが利用不可の場合は native CLI で実行:
 ```bash
 codex exec "$(cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md)" 2>/dev/null
 ```
-
-- `--skip-git-repo-check` や `-C .` は最新 CLI では不要なため省略（既存 repo で実行）
-- `-o` で結果をファイル化する手順は不要になったため削除
 
 ### Step 4: .sd/ 限定復元
 実装AIが`.sd/`の設定ファイルを変更・削除する場合があるため、設定系のみ復元する。

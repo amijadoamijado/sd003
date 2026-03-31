@@ -77,16 +77,30 @@ Geminiが実装した変更内容を取得する。
 - **Request Changes**: 修正必要 → Phase 6（修正）へ
 ```
 
-### Step 4: Codex CLI実行
+### Step 4: Codex公式プラグインでレビュー実行
+
+REVIEW_REQUEST 作成後、公式プラグインでレビューを実行する:
+
+```
+/codex:review --wait
+```
+
+- Codex が最新コミットの差分を自動検出してレビューする
+- `--wait` でフォアグラウンド実行（結果を待ってから Step 5 に進む）
+- `--background` に切り替えれば非同期実行も可能（`/codex:status` で進捗確認）
+- REVIEW_REQUEST はワークディレクトリに存在するため、Codex がコンテキストとして読み取る
+
+対立的レビュー（認証変更・リファクタリング等の隠れたリスク検出）が必要な場合:
+```
+/codex:adversarial-review --wait
+```
+
+**フォールバック**: プラグインが利用不可の場合は Phase 1 の native CLI で実行:
 ```bash
 COMMIT_SHA=$(git rev-parse --short HEAD)
 REVIEW_PROMPT=$(cat .sd/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md)
 REVIEW_RESULT=$(codex review --commit "$COMMIT_SHA" "$REVIEW_PROMPT" 2>/dev/null)
 ```
-
-- `codex review --commit <SHA>` で最新コミットを直接レビュー
-- レビュー指示書はコマンド引数として渡すためstdinパイプ不要
-- stderr混入・printfの対策不要で手順が簡潔になる
 
 ### Step 5: レビュー結果保存
 Codexの出力を以下に保存:
@@ -145,10 +159,10 @@ request → impl → review → test（Approve時）
 
 | エラー | 原因 | 対応 |
 |--------|------|------|
-| Codex CLI未インストール | 未セットアップ | `npm install -g @openai/codex` を案内 |
-| `stdin is not a terminal` | 非インタラクティブ環境で `codex review` を直接実行 | `codex review --commit HEAD` や `--uncommitted` を使用 |
-| `-p` がprofile扱いになる | v0.98.0で `-p` の意味が変更 | `codex review` ではプロンプトを引数で渡すため不要 |
-| `unknown revision` | 旧 `codex --full-auto -p` では差分指定が難しい | `codex review --commit` でコミット差分を指定、`--uncommitted` で作業ツリーを対象 |
+| Codexプラグイン未インストール | 未セットアップ | `/codex:setup` を実行、または `claude plugin install codex@openai-codex` |
+| Codex CLI未インストール | 未セットアップ | `npm install -g @openai/codex` → `/codex:setup` |
+| Codex未認証 | ログインが必要 | `!codex login` を実行 |
+| プラグイン利用不可 | セッション問題等 | フォールバック: `codex review --commit HEAD` を直接実行 |
 | Codex実行失敗（その他） | ネットワーク/API等 | 手動レビューに切り替え |
 | レビュー結果が不明瞭 | 出力フォーマット不一致 | Claude Codeが補足レビュー |
 
