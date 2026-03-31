@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 44
-- **Latest Session**: 2026-03-30
+- **Total Sessions**: 45
+- **Latest Session**: 2026-03-31
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 03-31 | codex-plugin-cc公式プラグイン導入 + Codex呼び出し全面移行（Phase 1+2） | 4d114d4 | [Details](session-20260331-194236.md) |
 | 03-30 | claude.ai MCP統合5サービス一括ブロック（グローバルsettings.json） | 222d516 | [Details](session-20260330-110700.md) |
 | 03-30 | hookスクリプトmojibake修正 + 全ファイル英語化 + 全13PJ再配布 | ea3d7df | [Details](session-20260330-091653.md) |
 | 03-29 | テンプレート.kiro掃除 + .git/hooks/自動デプロイ実装 + 全22PJ同期 | a623c65 | [Details](session-20260329-223801.md) |

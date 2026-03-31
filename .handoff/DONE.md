@@ -1,18 +1,24 @@
-# 完了報告 - 2026-03-30 11:07
+# 完了報告 - 2026-03-31 19:42
 
 ## 完了
-- claude.ai MCP統合5サービスの一括ブロック設定（Notion, Gmail, Google Calendar, Canva, Excalidraw）
-- グローバルsettings.jsonのpermissions.denyで全プロジェクト適用
-- settings.json異常内容（PowerShellコード混入）の修正
+- OpenAI公式Codexプラグイン（codex-plugin-cc v1.0.1）のインストール・認証完了
+- Phase 1: 全Codex呼び出しを `codex exec --full-auto` → `codex review --commit/--uncommitted` に移行（5ファイル）
+- Phase 2: ワークフローコマンドを公式プラグイン `/codex:review`, `/codex:rescue` に統合（3ファイル）
+- Bashスクリプト（hooks, pipeline）はnative CLI維持（スラッシュコマンド不可のため）
 
 ## 未完了
-- nm002のGitHubリポジトリ作成（remote未設定）
-- Blueprint Gateの実プロジェクト試用
+- `/codex:review` の実diffでのE2E動作確認
+- `/codex:adversarial-review` のテスト
+- 全プロジェクトへの sd-deploy 再配布
 
 ## 次のステップ
-- nm002のGitHub repo作成 + remote追加
-- Blueprint Gateを実案件で試用
-- spec-archive/spec-historyコマンドの整理
+- E2E動作確認: `/codex:review --wait` を実diffで実行
+- sd-deploy再配布: Codex連携更新分を全プロジェクトに展開
 
 ## 関連ファイル
-- `C:\Users\a-odajima\.claude\settings.json` — グローバルMCPブロック設定
+- `.claude/commands/workflow-review.md` — レビューコマンド（公式プラグイン統合済み）
+- `.claude/commands/workflow-impl.md` — 実装コマンド（rescue統合済み）
+- `.claude/rules/workflow/ai-coordination.md` — AI協調ルール（Codex欄更新済み）
+- `.claude/hooks/agent-review.sh` — 自動レビューhook（native CLI）
+- `scripts/agent-review.sh` — 手動レビュースクリプト（native CLI）
+- `scripts/agent-pipeline.sh` — パイプラインスクリプト（native CLI）
