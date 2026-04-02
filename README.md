@@ -51,30 +51,17 @@ See: [Ralph Wiggum Deployment Guide](docs/ralph-wiggum-deployment.md)
 | IDE/CLI | Config Files | Commands |
 |---------|-------------|----------|
 | Claude Code | CLAUDE.md, .claude/rules/ | .claude/commands/ |
-| Codex CLI | AGENTS.md, `~/.codex/prompts/` | `/prompts:*`（`.claude/commands`から自動同期） |
+| Codex CLI | AGENTS.md, `~/.codex/skills/` | `$skill-name`（v0.117+で/prompts廃止） |
 | Gemini CLI | GEMINI.md, .gemini/commands/ | TOML |
 | Cursor | .cursor/rules/ | - |
 | Windsurf | AGENTS.md, .windsurf/workflows/ | - |
 | Antigravity | GEMINI.md, .antigravity/rules.md | `/workflow:test` (ANTIGRAVITY_GUIDE.md) |
 
-### Codex Slash Commands
+### Codex CLI カスタマイズ
 
-Codex CLI はカスタムコマンドを `/prompts:*` 形式で実行します。
-
-```bash
-# Claudeのコマンド定義をCodex用に同期
-npm run sync:codex-prompts
-
-# 実行例
-/prompts:sessionwrite
-```
-
-主な互換マッピング:
-- Claude `/bug-quick` -> Codex `/prompts:bug-quick`
-- Claude `/sd:spec-init` -> Codex `/prompts:sd-spec-init` または `/prompts:sd/spec-init`
-
-補足:
-- `/prompts` 単体は一覧コマンドではありません。
+Codex CLI v0.117以降、`/prompts:*`は廃止。カスタマイズ方法:
+- **プロジェクト指示**: `AGENTS.md`（従来通り）
+- **スキル**: `~/.codex/skills/` または `.agents/skills/`（フォルダ+SKILL.md形式）
 - 候補は `/` を入力して `prompts:` で絞り込みます。
 
 ---

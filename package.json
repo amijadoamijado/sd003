@@ -14,7 +14,6 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "sync:codex-prompts": "node scripts/sync-codex-prompts.js",
     "sync:gemini": "node scripts/sync-gemini-features.js",
     "test": "jest",
     "test:watch": "jest --watch",

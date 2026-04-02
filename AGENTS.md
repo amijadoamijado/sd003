@@ -136,17 +136,6 @@ npm test && npm run lint
 /prompts:sd-validate-impl {feature}
 ```
 
-### Claude互換コマンド同期
-- Source: `.claude/commands/**/*.md`
-- Target: `~/.codex/prompts/`
-- Sync command: `npm run sync:codex-prompts`
-- コマンド実行: `/prompts:<name>`
-- コマンド候補表示: `/` を入力して `prompts:` で絞り込み
-
-例:
-- Claude `/bug-quick` -> Codex `/prompts:bug-quick`
-- Claude `/sd:spec-init` -> Codex `/prompts:sd-spec-init` または `/prompts:sd/spec-init`
-
 ---
 
 ## Reference
@@ -155,7 +144,4 @@ npm test && npm run lint
 - **Templates**: `.sd/ai-coordination/workflow/templates/`
 
 ---
-SD003 Framework v2.13.0 | Updated: 2026-03-07
-a
-a
-a
+SD003 Framework v2.14.0 | Updated: 2026-04-02

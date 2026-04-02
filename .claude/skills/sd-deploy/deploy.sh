@@ -203,14 +203,7 @@ fi
 # 4-13: .handoff/ (tree)
 copy_dir_tree ".handoff" "Handoff" "*"
 
-# 4-14: scripts/sync-codex-prompts.js (single file)
-if [ -f "$SOURCE_DIR/scripts/sync-codex-prompts.js" ]; then
-    mkdir -p "$TARGET_PROJECT/scripts"
-    cp "$SOURCE_DIR/scripts/sync-codex-prompts.js" "$TARGET_PROJECT/scripts/"
-    COPY_STATS["Sync Codex"]=1
-else
-    COPY_STATS["Sync Codex"]=0
-fi
+
 
 # 4-15a: scripts/validate-test-data.ps1 (single file)
 if [ -f "$SOURCE_DIR/scripts/validate-test-data.ps1" ]; then

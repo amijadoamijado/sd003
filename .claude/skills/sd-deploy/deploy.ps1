@@ -261,16 +261,7 @@ if (Test-Path $qgSrc) {
 # 4-13: .handoff/ (tree)
 Copy-DirTree -RelPath ".handoff" -Label "Handoff"
 
-# 4-14: scripts/sync-codex-prompts.js (single file)
-$syncCodexSrc = Join-Path $SOURCE_DIR "scripts\sync-codex-prompts.js"
-if (Test-Path $syncCodexSrc) {
-    $scriptsDst = Join-Path $TargetProject "scripts"
-    if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
-    Copy-Item $syncCodexSrc (Join-Path $scriptsDst "sync-codex-prompts.js") -Force
-    $copyStats["Sync Codex"] = 1
-} else {
-    $copyStats["Sync Codex"] = 0
-}
+
 
 # 4-15a: scripts/validate-test-data.ps1 (single file)
 $vtdPs1Src = Join-Path $SOURCE_DIR "scripts\validate-test-data.ps1"
