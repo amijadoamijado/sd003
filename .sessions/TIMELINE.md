@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 51
-- **Latest Session**: 2026-04-02
+- **Total Sessions**: 52
+- **Latest Session**: 2026-04-03
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 04-03 | at001 .kiro完全廃止 + SD003再デプロイ（.sd統一） | 1e681c67 | [Details](session-20260403-125244.md) |
 | 04-02 | Codex Custom Prompts廃止整理 + 用語混同修正（Slash Commands≠Custom Prompts） | f0d3f91 | [Details](session-20260402-155050.md) |
 | 04-02 | .codex/prompts/廃止対応（全PJ削除+sd-deploy修正+sync撤去） | dbde941 | [Details](session-20260402-154054.md) |
 | 04-02 | nm002スラッシュコマンド修復（@req除去+frontmatter追加）+ 全カスタマイズ差分調査 | 6e39c6a | [Details](session-20260402-142804.md) |
