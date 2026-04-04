@@ -1,10 +1,10 @@
 #!/bin/bash
-# pre-commit hook: .sd/ の変更を自動ステージ
+# pre-commit hook: .sd/ の変更を自動ステージ（-f 強制）
 #
 # 目的: .sd/ ファイルが modified 状態のままcommitされることを防ぐ。
-# ただし .sd/ がディスク上に存在しない場合はスキップ（削除を防ぐ）。
+# .sd/ は .gitignore に含まれるため、git add -f が必須。
 #
-# 背景: 2026-03-28 Bug Trace で確定。
+# 背景: 2026-03-28 Bug Trace で確定。2026-04-04 gitignore起因の再発で -f 追加。
 # Refs: anthropics/claude-code#34330
 
 # .sd/ がディスク上に存在しない場合はスキップ
@@ -12,21 +12,28 @@ if [ ! -d ".sd" ]; then
     exit 0
 fi
 
-# modified（変更あり、ディスク上に存在する）ファイルのみステージ
-sd_modified=$(git diff --name-only .sd/ 2>/dev/null | wc -l)
-sd_untracked=$(git ls-files --others --exclude-standard .sd/ 2>/dev/null | wc -l)
-total=$((sd_modified + sd_untracked))
+# git管理下の .sd/ ファイルがディスク上で変更されているか確認
+# .gitignore対象のため --no-index で比較
+staged=0
 
-if [ "$total" -gt 0 ]; then
-    # modified ファイルをステージ（存在するもののみ）
-    git diff --name-only .sd/ 2>/dev/null | while read f; do
-        [ -f "$f" ] && git add "$f"
-    done
-    # untracked ファイルをステージ
-    git ls-files --others --exclude-standard .sd/ 2>/dev/null | while read f; do
-        [ -f "$f" ] && git add "$f"
-    done
-    echo "[pre-commit] auto-staged $total .sd/ file(s)"
-fi
+# 方法: HEADに存在する .sd/ ファイルとディスク上を比較
+git ls-tree -r HEAD --name-only 2>/dev/null | grep "^\.sd/" | while read f; do
+    if [ -f "$f" ]; then
+        # ファイルが存在し、HEADと差分があればステージ
+        if ! git diff --quiet HEAD -- "$f" 2>/dev/null; then
+            git add -f "$f"
+            echo "[pre-commit] auto-staged (modified): $f"
+        fi
+    fi
+done
+
+# ディスク上に存在するが git 未追跡の .sd/ ファイルもステージ
+# --exclude-standard は使わない（.gitignore対象を検出するため）
+find .sd/ -type f 2>/dev/null | while read f; do
+    if ! git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+        git add -f "$f"
+        echo "[pre-commit] auto-staged (new): $f"
+    fi
+done
 
 exit 0
