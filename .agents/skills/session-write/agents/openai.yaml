@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Write"
+  short_description: "Save session handoff files for SD003"
+  default_prompt: "Save the current SD003 session into the handoff files and timeline."

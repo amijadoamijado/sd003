@@ -122,18 +122,41 @@ npm test && npm run lint
 
 ## Workflow Commands
 
+**注意**: Codex CLI は Claude Code の `.claude/commands/*.md` 型スラッシュコマンドを直接読まない。
+SD003 では `.claude/commands/**/*.md` を authoring source とし、`python scripts/sync-cli-commands.py` で以下を生成する。
+
+- `.sd/commands/specs/*.md`（共通正本）
+- `.agents/skills/*/SKILL.md`（Codex）
+- `.gemini/commands/*.toml`（Gemini CLI）
+
+Claude 以外の生成物は直接手編集せず、`.claude/commands/` を修正して再同期すること。
+
 ### Specification
 ```
-/prompts:sd-spec-init "description"
-/prompts:sd-spec-requirements {feature}
-/prompts:sd-spec-design {feature}
-/prompts:sd-spec-tasks {feature}
+$workflow-init {案件略称}
+$workflow-order {案件ID}
+$workflow-request {案件ID} {タスク番号}
+$workflow-status {案件ID}
+$workflow-review {案件ID}
+$workflow-impl {案件ID} {タスク番号}
+$workflow-test {案件ID} {タスク番号}
 ```
 
-### Implementation
+### Session Skills
 ```
-/prompts:sd-spec-impl {feature}
-/prompts:sd-validate-impl {feature}
+$sessionread
+$sessionwrite
+$sessionhistory
+```
+
+### Utility Skills
+```
+$bug-quick
+$bug-trace
+$cleanup
+$refactor-plan
+$skills-find
+$sd-deploy
 ```
 
 ---

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Read"
+  short_description: "Read session context files for SD003"
+  default_prompt: "Read the SD003 session context files and summarize the current state."

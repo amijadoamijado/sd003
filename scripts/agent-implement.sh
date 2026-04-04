@@ -1,7 +1,7 @@
 #!/bin/bash
 # agent-implement.sh - Gemini CLIへの実装依頼（非インタラクティブ・パイプ実行）
 #
-# SD002 AI協調ワークフローにおいて、IMPLEMENT_REQUESTをGemini CLIに
+# SD003 AI協調ワークフローにおいて、IMPLEMENT_REQUESTをGemini CLIに
 # パイプで渡し、非インタラクティブに実装を実行するスクリプト。
 #
 # Usage:
@@ -141,7 +141,7 @@ $(cat "$FULL_TARGET")
 fi
 
 # Build prompt
-PROMPT="あなたはSD002フレームワークの実装担当AIです。
+PROMPT="あなたはSD003フレームワークの実装担当AIです。
 以下の実装指示に従い、コードを実装してください。
 
 ## 制約事項

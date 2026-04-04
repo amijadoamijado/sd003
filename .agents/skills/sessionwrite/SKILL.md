@@ -1,0 +1,132 @@
+---
+name: sessionwrite
+description: Codex equivalent of the SD003 custom command `/sessionwrite`. Use when the user invokes `/sessionwrite`, `sessionwrite`, `session-write`.
+---
+
+# セッション保存
+
+この skill は Claude Code の `/sessionwrite` を Codex で再現するためのものです。
+本文に Claude 固有の記法やツール名が含まれる場合も、Codex では同等の手順に置き換えて実行してください。
+
+## Original Command Body
+# セッション保存
+
+セッション引き継ぎ記録を保存し、プロジェクトタイムラインを更新する。
+
+## ファイル
+
+| ファイル | 用途 |
+|---------|------|
+| `.sessions/session-YYYYMMDD-HHMMSS.md` | 履歴（タイムスタンプ付き） |
+| `.sessions/session-current.md` | 最新版 |
+| `.sessions/TIMELINE.md` | プロジェクト履歴 |
+
+## 実行手順
+
+1. `.sessions/` ディレクトリ作成（なければ）
+2. タイムスタンプ生成（例: `20251123-143052`）
+3. git状態取得（ブランチ、最新コミット）
+4. 履歴ファイル `.sessions/session-YYYYMMDD-HHMMSS.md` 作成
+5. `.sessions/session-current.md` にコピー
+6. **TIMELINE.md 更新**（新エントリ追加）
+7. 完了メッセージ表示
+
+## 言語ルール（必須）
+
+**セッション記録は全て日本語で書くこと。** 英語禁止。
+- 見出し: 日本語
+- 完了事項: 日本語
+- 次回タスク: 日本語
+- 備考: 日本語
+- コミットメッセージのみ英語OK
+
+## セッション記録フォーマット
+
+```markdown
+# セッション記録
+
+## セッション情報
+- **日時**: [YYYY-MM-DD HH:MM:SS]
+- **プロジェクト**: [パス]
+- **ブランチ**: [git branch]
+- **最新コミット**: [hash + message]
+
+## 作業サマリー
+
+### 完了
+[番号付きリスト・日本語]
+
+### 進行中
+[番号付きリスト・日本語]
+
+### 未解決
+[課題と試した対策・日本語]
+
+### 作成・変更ファイル
+[カテゴリ別リスト]
+
+### 次回タスク
+
+#### P0（緊急）
+[即対応が必要]
+
+#### P1（重要）
+[緊急ではないが重要]
+
+#### P2（通常）
+[時間があれば]
+
+### 備考
+[引き継ぎ事項・日本語]
+```
+
+## TIMELINE.md 更新
+
+セッション保存後、TIMELINE.mdを更新する:
+
+1. 現在のTIMELINE.mdを読む
+2. 主な作業内容を1行で要約
+3. 当月テーブルの先頭に新エントリ追加:
+
+```markdown
+| MM-DD | [Main Work] | [Commit Hash] | [Details](session-YYYYMMDD-HHMMSS.md) |
+```
+
+4. 統計のTotal Sessions数をインクリメント
+5. Latest Session日付を更新
+
+## ユーザー入力
+$ARGUMENTS
+
+## Codex Handoff（並行保存）
+
+セッション記録と同時に、Codex向けの引き継ぎファイルも更新する:
+
+```bash
+# .handoff/DONE.md を生成（Codex/Gemini向け引き継ぎ）
+```
+
+内容は session record の要約版:
+- 完了事項（箇条書き）
+- 未完了事項
+- 次のステップ
+- 関連ファイルパス
+
+**DONE.md は `.handoff/DONE.template.md` をベースに作成する。**
+
+## Gitコミット
+
+セッションファイル（.sessions/）と .handoff/DONE.md を git add + commit する。
+
+```bash
+git add .sessions/ .handoff/DONE.md
+git commit -m "session: [1行サマリー]
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
+```
+
+post-commit hookが非同期pushを自動実行。
+
+---
+
+**実行**: Write/Edit で .sessions/ ファイルを更新し、git add .sessions/ .handoff/DONE.md && git commit する。

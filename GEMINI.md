@@ -5,8 +5,16 @@
 SD003 now supports Gemini CLI custom slash commands and skills.
 
 ### Slash Commands
-Custom commands are synced from `.claude/commands/*.md` to `.gemini/commands/*.toml`.
-Usage: `/sd:spec-init <description>`, `/workflow:impl <id> <task>`, etc.
+Custom commands are authored in `.claude/commands/**/*.md`, normalized into `.sd/commands/specs/*.md`, and then generated into `.gemini/commands/*.toml`.
+
+Sync command:
+```bash
+python scripts/sync-cli-commands.py
+python scripts/sync-cli-commands.py --check
+python scripts/sync-cli-commands.py --deploy-codex-home
+```
+
+Gemini CLI should consume the generated `.gemini/commands/*.toml` files, not hand-maintained copies.
 
 ### Skills
 Project-local skills are available in `.gemini/skills/`.
@@ -144,14 +152,14 @@ npm test && npm run lint
 ## Non-Interactive Piping (CLI Automation)
 
 Gemini CLIは非インタラクティブモードでパイプ入力をサポートしています。
-SD002ワークフローでは、IMPLEMENT_REQUESTをパイプで渡して自動実装を実行できます。
+SD003ワークフローでは、IMPLEMENT_REQUESTをパイプで渡して自動実装を実行できます。
 
 ### 基本構文
 ```bash
 echo "プロンプト" | gemini
 ```
 
-### SD002 Agent Scripts
+### SD003 Agent Scripts
 
 | Script | Description | Usage |
 |--------|-------------|-------|

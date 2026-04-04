@@ -1,4 +1,4 @@
-description = "No description"
+description = "/ralph-wiggum:status - Execution Status"
 prompt = """
 # /ralph-wiggum:status - Execution Status
 
@@ -96,5 +96,4 @@ prompt = """
 ---
 
 **Phase**: Any (Read-only status check)
-
 """

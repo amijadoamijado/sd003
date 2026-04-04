@@ -1,4 +1,4 @@
-description = "No description"
+description = "/sd003:loop-type - TypeScript Type-Check Loop"
 prompt = """
 # /sd003:loop-type - TypeScript Type-Check Loop
 
@@ -51,7 +51,7 @@ Your type-check script should output `TYPE_CHECK_PASS` when there are no errors:
 
 ```javascript
 // In package.json scripts
-\"type-check\": \"tsc --noEmit && echo 'TYPE_CHECK_PASS'\"
+"type-check": "tsc --noEmit && echo 'TYPE_CHECK_PASS'"
 ```
 
 ## Related Commands
@@ -70,5 +70,4 @@ Supplementary command for the midpoint phase. Use when:
 **Phase**: Midpoint (Phase 2-3)
 **Stop Hook**: `.claude/hooks/sd003-stop-hook.sh`
 **Completion Promise**: `TYPE_CHECK_PASS`
-
 """

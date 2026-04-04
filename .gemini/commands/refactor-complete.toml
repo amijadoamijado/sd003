@@ -126,7 +126,7 @@ mv .sd/refactor/checkpoints/{session-id} .sd/refactor/archive/{session-id}
 
 ```bash
 # List refactor-related stashes
-git stash list | grep \"refactor-checkpoint\"
+git stash list | grep "refactor-checkpoint"
 
 # Offer to clear (user choice)
 ```
@@ -228,12 +228,12 @@ After successful completion:
 1. **Git commit** (optional):
    ```bash
    git add -A
-   git commit -m \"refactor: {scope}\"
+   git commit -m "refactor: {scope}"
    ```
 
 2. **PR creation** (optional):
    ```bash
-   gh pr create --title \"Refactor: {scope}\"
+   gh pr create --title "Refactor: {scope}"
    ```
 
 3. **Cleanup stashes**:

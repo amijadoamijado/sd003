@@ -1,0 +1,81 @@
+---
+name: sd003-loop-type
+description: Codex equivalent of the SD003 custom command `/sd003:loop-type`. Use when the user invokes `/sd003:loop-type`, `sd003-loop-type`.
+---
+
+# /sd003:loop-type - TypeScript Type-Check Loop
+
+この skill は Claude Code の `/sd003:loop-type` を Codex で再現するためのものです。
+本文に Claude 固有の記法やツール名が含まれる場合も、Codex では同等の手順に置き換えて実行してください。
+
+## Original Command Body
+# /sd003:loop-type - TypeScript Type-Check Loop
+
+Run TypeScript type-checking in a loop until all type errors are resolved.
+
+## Purpose
+
+This command activates the Ralph Loop mechanism to automatically retry TypeScript compilation until all type errors are resolved. Use this as a supplementary command for strict type compliance.
+
+## Usage
+
+```
+/sd003:loop-type [max-iterations]
+```
+
+## Parameters
+
+- `max-iterations` (optional): Maximum number of retry attempts. Default: 15
+
+## How It Works
+
+1. Runs `npx tsc --noEmit`
+2. If type errors exist, the stop-hook blocks the session end
+3. Claude analyzes the errors and attempts to fix
+4. Repeat until:
+   - All type errors resolved (output contains `TYPE_CHECK_PASS`)
+   - Max iterations reached
+   - User manually interrupts
+
+## Completion Promise
+
+The loop completes when the output contains: `TYPE_CHECK_PASS`
+
+Set `SD003_COMPLETION_PROMISE=TYPE_CHECK_PASS` before running this command.
+
+## Example Usage
+
+```bash
+# Set completion promise for type-check
+export SD003_COMPLETION_PROMISE=TYPE_CHECK_PASS
+export SD003_MAX_ITERATIONS=15
+
+# Run type-check loop
+/sd003:loop-type
+```
+
+## Expected Output Format
+
+Your type-check script should output `TYPE_CHECK_PASS` when there are no errors:
+
+```javascript
+// In package.json scripts
+"type-check": "tsc --noEmit && echo 'TYPE_CHECK_PASS'"
+```
+
+## Related Commands
+
+- `/sd003:loop-test` - Test completion loop (primary)
+- `/sd003:loop-lint` - ESLint completion loop
+
+## SD003 Philosophy
+
+Supplementary command for the midpoint phase. Use when:
+- TypeScript strict mode violations need resolution
+- Type safety is critical before proceeding
+
+---
+
+**Phase**: Midpoint (Phase 2-3)
+**Stop Hook**: `.claude/hooks/sd003-stop-hook.sh`
+**Completion Promise**: `TYPE_CHECK_PASS`

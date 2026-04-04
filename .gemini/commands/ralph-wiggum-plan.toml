@@ -1,4 +1,4 @@
-description = "No description"
+description = "/ralph-wiggum:plan - Weekly Planning"
 prompt = """
 # /ralph-wiggum:plan - Weekly Planning
 
@@ -106,5 +106,4 @@ prompt = """
 ---
 
 **Phase**: Daytime (Planning)
-
 """

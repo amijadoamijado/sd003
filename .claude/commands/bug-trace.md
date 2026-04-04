@@ -689,7 +689,7 @@ Options:
 
 | Element | Description | Example |
 |---------|-------------|---------|
-| PROJECT | Project ID (uppercase) | NM001, SD002 |
+| PROJECT | Project ID (uppercase) | NM001, SD003 |
 | SEQ | Sequential number per project (3 digits) | 001, 002, 003 |
 | TIMESTAMP | DateTime (yyyymmddhhmm) | 202601011530 |
 

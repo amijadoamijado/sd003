@@ -20,9 +20,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Get script directory (SD002 root)
+# Get script directory (SD003 root)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SD002_ROOT="$(dirname "$SCRIPT_DIR")"
+SD003_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Parse arguments
 TARGET_DIR=""
@@ -81,7 +81,7 @@ echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Ralph Wiggum Deployment${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
-echo -e "Source:  ${GREEN}$SD002_ROOT${NC}"
+echo -e "Source:  ${GREEN}$SD003_ROOT${NC}"
 echo -e "Target:  ${GREEN}$TARGET_DIR${NC}"
 echo -e "Options: with-specs=${WITH_SPECS}, dry-run=${DRY_RUN}"
 echo ""
@@ -110,13 +110,13 @@ copy_item() {
 }
 
 echo -e "${BLUE}Step 1: Deploying .sd/ralph/ directory...${NC}"
-copy_item "$SD002_ROOT/.sd/ralph" "$TARGET_DIR/.sd/ralph" "directory"
+copy_item "$SD003_ROOT/.sd/ralph" "$TARGET_DIR/.sd/ralph" "directory"
 
 echo ""
 echo -e "${BLUE}Step 2: Deploying commands...${NC}"
 mkdir -p "$TARGET_DIR/.claude/commands" 2>/dev/null || true
 for cmd in ralph-wiggum-run.md ralph-wiggum-status.md ralph-wiggum-plan.md; do
-    copy_item "$SD002_ROOT/.claude/commands/$cmd" "$TARGET_DIR/.claude/commands/$cmd" "command"
+    copy_item "$SD003_ROOT/.claude/commands/$cmd" "$TARGET_DIR/.claude/commands/$cmd" "command"
 done
 
 echo ""
@@ -125,21 +125,21 @@ if [ -f "$TARGET_DIR/.claude/rules/ralph-loop.md" ]; then
     echo -e "${YELLOW}[INFO] ralph-loop.md already exists, appending Night Mode section...${NC}"
     if [ "$DRY_RUN" = false ]; then
         # Extract Night Mode section from source
-        sed -n '/^## Night Mode/,$p' "$SD002_ROOT/.claude/rules/ralph-loop.md" >> "$TARGET_DIR/.claude/rules/ralph-loop.md"
+        sed -n '/^## Night Mode/,$p' "$SD003_ROOT/.claude/rules/ralph-loop.md" >> "$TARGET_DIR/.claude/rules/ralph-loop.md"
     fi
 else
-    copy_item "$SD002_ROOT/.claude/rules/ralph-loop.md" "$TARGET_DIR/.claude/rules/ralph-loop.md" "rule"
+    copy_item "$SD003_ROOT/.claude/rules/ralph-loop.md" "$TARGET_DIR/.claude/rules/ralph-loop.md" "rule"
 fi
 
 if [ "$WITH_SPECS" = true ]; then
     echo ""
     echo -e "${BLUE}Step 4: Deploying specifications...${NC}"
-    copy_item "$SD002_ROOT/.sd/specs/ralph-wiggum" "$TARGET_DIR/.sd/specs/ralph-wiggum" "specs"
+    copy_item "$SD003_ROOT/.sd/specs/ralph-wiggum" "$TARGET_DIR/.sd/specs/ralph-wiggum" "specs"
 fi
 
 echo ""
 echo -e "${BLUE}Step 5: Deploying deployment guide...${NC}"
-copy_item "$SD002_ROOT/docs/ralph-wiggum-deployment.md" "$TARGET_DIR/docs/ralph-wiggum-deployment.md" "docs"
+copy_item "$SD003_ROOT/docs/ralph-wiggum-deployment.md" "$TARGET_DIR/docs/ralph-wiggum-deployment.md" "docs"
 
 echo ""
 echo -e "${BLUE}========================================${NC}"

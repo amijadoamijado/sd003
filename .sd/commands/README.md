@@ -21,6 +21,7 @@
 ```powershell
 python D:\claudecode\sd003\scripts\sync-cli-commands.py
 python D:\claudecode\sd003\scripts\sync-cli-commands.py --check
+python D:\claudecode\sd003\scripts\sync-cli-commands.py --deploy-codex-home
 ```
 
 ## 命名

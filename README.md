@@ -8,7 +8,7 @@
 
 ## Overview
 
-SD002 integrates **SD001 (Spec-Driven Development Framework)** with **GA001 (GAS Local Testing Environment)** for next-generation development.
+SD003 integrates **SD001 (Spec-Driven Development Framework)** with **GA001 (GAS Local Testing Environment)** for next-generation development.
 
 ### Key Features
 
@@ -51,18 +51,41 @@ See: [Ralph Wiggum Deployment Guide](docs/ralph-wiggum-deployment.md)
 | IDE/CLI | Config Files | Commands |
 |---------|-------------|----------|
 | Claude Code | CLAUDE.md, .claude/rules/ | .claude/commands/ |
-| Codex CLI | AGENTS.md, `~/.codex/skills/` | `$skill-name`（v0.117+で/prompts廃止） |
-| Gemini CLI | GEMINI.md, .gemini/commands/ | TOML |
+| Codex CLI | AGENTS.md, `.agents/skills/`, `~/.codex/skills/` | `$skill-name` |
+| Gemini CLI | GEMINI.md, `.gemini/commands/` | TOML |
 | Cursor | .cursor/rules/ | - |
 | Windsurf | AGENTS.md, .windsurf/workflows/ | - |
 | Antigravity | GEMINI.md, .antigravity/rules.md | `/workflow:test` (ANTIGRAVITY_GUIDE.md) |
 
+### Multi-CLI コマンド同期
+
+SD003 のカスタムコマンドは、以下の流れで Claude / Codex / Gemini に同期します。
+
+- authoring source: `.claude/commands/**/*.md`
+- canonical spec: `.sd/commands/specs/*.md`
+- generated targets:
+  - `.gemini/commands/*.toml`
+  - `.agents/skills/*/SKILL.md`
+
+同期コマンド:
+
+```powershell
+python scripts/sync-cli-commands.py
+python scripts/sync-cli-commands.py --check
+python scripts/sync-cli-commands.py --deploy-codex-home
+```
+
+Claude 以外の生成物は直接手編集せず、`.claude/commands/` を修正して再同期します。
+
 ### Codex CLI カスタマイズ
 
-Codex CLI v0.117以降、`/prompts:*`は廃止。カスタマイズ方法:
+Codex CLI v0.117以降、Claude Code の `.claude/commands/*.md` 型 slash command は直接読みません。カスタマイズ方法:
 - **プロジェクト指示**: `AGENTS.md`（従来通り）
-- **スキル**: `~/.codex/skills/` または `.agents/skills/`（フォルダ+SKILL.md形式）
-- 候補は `/` を入力して `prompts:` で絞り込みます。
+- **スキル**: `~/.codex/skills/` または `.agents/skills/`（共通正本から自動生成）
+- SD003 のコマンド群は `.agents/skills/` に生成されます。
+- セッション系の canonical 名は `sessionread` / `sessionwrite` / `sessionhistory` です。
+- 互換 alias として `session-read` / `session-write` も残します。
+- `python scripts/sync-cli-commands.py --deploy-codex-home` で生成済み skill を `~/.codex/skills/` に配布できます。
 
 ---
 
@@ -159,6 +182,19 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 1. `.claude/commands/` フォルダがプロジェクトルートに存在するか確認
 2. 必須ファイルが全て存在するか確認
 3. Claude Codeを再起動
+
+### Codex での同等操作
+
+| Purpose | Claude Code | Codex CLI | Gemini CLI |
+|---------|-------------|-----------|------------|
+| Session read | `/sessionread` | `$sessionread` または `$session-read` | `sessionread.toml` |
+| Session write | `/sessionwrite` | `$sessionwrite` または `$session-write` | `sessionwrite.toml` |
+| Session history | `/sessionhistory` | `$sessionhistory` | `sessionhistory.toml` |
+| Workflow init | `/workflow:init` | `$workflow-init` | `workflow-init.toml` |
+| Skills find | `/skills:find` | `$skills-find` | `skills-find.toml` |
+| SD deploy | `/sd:deploy` | `$sd-deploy` | `sd-deploy.toml` |
+
+> Codex では `.claude/commands` を直接読まず、同期生成された `.agents/skills/` または `~/.codex/skills/` を使います。Gemini では同期生成された `.gemini/commands/*.toml` を使います。
 
 ---
 

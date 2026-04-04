@@ -106,7 +106,7 @@ mkdir -p "$REVIEW_DIR"
 
 # Display info
 echo -e "${CYAN}╔══════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║  SD002 Manual Code Review (Mode B)       ║${NC}"
+echo -e "${CYAN}║  SD003 Manual Code Review (Mode B)       ║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "依頼書:     ${GREEN}${REQUEST_FILE}${NC}"

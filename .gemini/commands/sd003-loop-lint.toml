@@ -1,4 +1,4 @@
-description = "No description"
+description = "/sd003:loop-lint - ESLint Completion Loop"
 prompt = """
 # /sd003:loop-lint - ESLint Completion Loop
 
@@ -51,7 +51,7 @@ Your lint script should output `LINT_CLEAN` when there are no errors:
 
 ```javascript
 // In package.json scripts
-\"lint\": \"eslint . && echo 'LINT_CLEAN'\"
+"lint": "eslint . && echo 'LINT_CLEAN'"
 ```
 
 Or modify your ESLint configuration to output this on success.
@@ -72,5 +72,4 @@ Supplementary command for the midpoint phase. Use when:
 **Phase**: Midpoint (Phase 2-3)
 **Stop Hook**: `.claude/hooks/sd003-stop-hook.sh`
 **Completion Promise**: `LINT_CLEAN`
-
 """

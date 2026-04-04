@@ -59,17 +59,17 @@ ls .sd/ai-coordination/workflow/spec/{案件ID}/
 ### 6. handoff-log.json 更新
 ```json
 {
-  \"handoff_history\": [
+  "handoff_history": [
     {
-      \"id\": \"HO-{連番}\",
-      \"project_id\": \"{案件ID}\",
-      \"from\": \"Claude Code\",
-      \"to\": \"Codex\",
-      \"type\": \"work_order_review\",
-      \"artifact\": \".sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md\",
-      \"timestamp\": \"{現在日時ISO形式}\",
-      \"status\": \"pending\",
-      \"result\": null
+      "id": "HO-{連番}",
+      "project_id": "{案件ID}",
+      "from": "Claude Code",
+      "to": "Codex",
+      "type": "work_order_review",
+      "artifact": ".sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md",
+      "timestamp": "{現在日時ISO形式}",
+      "status": "pending",
+      "result": null
     }
   ]
 }

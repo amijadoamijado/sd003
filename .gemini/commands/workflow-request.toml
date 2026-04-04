@@ -59,17 +59,17 @@ PROJECT_STATUS.md で完了状態を確認。
 ### 7. handoff-log.json 更新
 ```json
 {
-  \"handoff_history\": [
+  "handoff_history": [
     {
-      \"id\": \"HO-{連番}\",
-      \"project_id\": \"{案件ID}\",
-      \"from\": \"Claude Code\",
-      \"to\": \"Gemini CLI\",
-      \"type\": \"implement_request\",
-      \"artifact\": \".sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md\",
-      \"timestamp\": \"{現在日時ISO形式}\",
-      \"status\": \"pending\",
-      \"result\": null
+      "id": "HO-{連番}",
+      "project_id": "{案件ID}",
+      "from": "Claude Code",
+      "to": "Gemini CLI",
+      "type": "implement_request",
+      "artifact": ".sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md",
+      "timestamp": "{現在日時ISO形式}",
+      "status": "pending",
+      "result": null
     }
   ]
 }

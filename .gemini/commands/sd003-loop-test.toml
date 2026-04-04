@@ -1,4 +1,4 @@
-description = "No description"
+description = "/sd003:loop-test - Test Completion Loop"
 prompt = """
 # /sd003:loop-test - Test Completion Loop
 
@@ -70,7 +70,7 @@ Completion promise 'ALL_TESTS_PASS' detected. Task complete.
 
 ## SD003 Philosophy
 
-This command implements the \"90% fast development, 10% perfectionism\" principle:
+This command implements the "90% fast development, 10% perfectionism" principle:
 - Fast iteration with automatic retries
 - Midpoint completion (not incomplete, but complete)
 - Automatic escalation if stuck (see endgame phase)
@@ -79,5 +79,4 @@ This command implements the \"90% fast development, 10% perfectionism\" principl
 
 **Phase**: Midpoint (Phase 2-3)
 **Stop Hook**: `.claude/hooks/sd003-stop-hook.sh`
-
 """

@@ -32,12 +32,12 @@ prompt = """
 ## 保護対象（絶対に移動しない）
 
 ```
-# sd002コアファイル
+# sd003コアファイル
 package.json, package-lock.json, tsconfig.json
 .gitignore, .eslintrc.*, .prettierrc.*
 CLAUDE.md, README.md, AGENTS.md
 
-# sd002コアディレクトリ
+# sd003コアディレクトリ
 /src/**, /tests/**, /docs/**
 /.sd/**, /.claude/**, /.github/**
 /node_modules/**
@@ -108,17 +108,17 @@ Glob/Bashでプロジェクト全体をスキャン：
 AskUserQuestionで確認:
 
 ```yaml
-Question: \"整理を実行しますか？\"
-Header: \"実行確認\"
+Question: "整理を実行しますか？"
+Header: "実行確認"
 Options:
-  - label: \"はい、実行する\"
-    description: \"上記のファイルを整理します\"
-  - label: \"Category Aのみ実行\"
-    description: \"materialsへの整理のみ実行\"
-  - label: \"Category Bのみ実行\"
-    description: \"一時ファイルのアーカイブのみ実行\"
-  - label: \"キャンセル\"
-    description: \"何もしない\"
+  - label: "はい、実行する"
+    description: "上記のファイルを整理します"
+  - label: "Category Aのみ実行"
+    description: "materialsへの整理のみ実行"
+  - label: "Category Bのみ実行"
+    description: "一時ファイルのアーカイブのみ実行"
+  - label: "キャンセル"
+    description: "何もしない"
 ```
 
 ### Step 4: 実行
@@ -137,30 +137,30 @@ mv report.xlsx materials/excel/
 ```bash
 # アーカイブディレクトリ作成
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-ARCHIVE_DIR=\".sd/cleanup/archive/cleanup-${TIMESTAMP}\"
-mkdir -p \"${ARCHIVE_DIR}/files\"
+ARCHIVE_DIR=".sd/cleanup/archive/cleanup-${TIMESTAMP}"
+mkdir -p "${ARCHIVE_DIR}/files"
 
 # ファイル移動（元パス構造維持）
-mv test_parser.js \"${ARCHIVE_DIR}/files/\"
+mv test_parser.js "${ARCHIVE_DIR}/files/"
 ```
 
 #### manifest.json作成（Category Bのみ）
 ```json
 {
-  \"session_id\": \"cleanup-20260102-150000\",
-  \"created_at\": \"2026-01-02T15:00:00Z\",
-  \"files\": [
+  "session_id": "cleanup-20260102-150000",
+  "created_at": "2026-01-02T15:00:00Z",
+  "files": [
     {
-      \"original_path\": \"test_parser.js\",
-      \"archived_path\": \".sd/cleanup/archive/.../files/test_parser.js\",
-      \"reason\": \"AI判断: テスト用一時ファイル\",
-      \"size_bytes\": 1234,
-      \"git_status\": \"untracked\"
+      "original_path": "test_parser.js",
+      "archived_path": ".sd/cleanup/archive/.../files/test_parser.js",
+      "reason": "AI判断: テスト用一時ファイル",
+      "size_bytes": 1234,
+      "git_status": "untracked"
     }
   ],
-  \"summary\": {
-    \"total_files\": 5,
-    \"total_size_bytes\": 12345
+  "summary": {
+    "total_files": 5,
+    "total_size_bytes": 12345
   }
 }
 ```

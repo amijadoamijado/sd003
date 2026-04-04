@@ -221,7 +221,7 @@ if [ "$SKIP_REVIEW" = false ]; then
         echo "[DRY-RUN] Skipped" >> "$PIPELINE_LOG"
     else
         # Build review prompt
-        REVIEW_PROMPT="以下のコードをレビューしてください。SD002フレームワークの品質基準に基づいて評価してください。
+        REVIEW_PROMPT="以下のコードをレビューしてください。SD003フレームワークの品質基準に基づいて評価してください。
 
 ## レビュー観点
 1. TypeScript strictモード準拠

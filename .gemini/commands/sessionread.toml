@@ -8,8 +8,8 @@ prompt = """
 
 | 順序 | ファイル | 目的 |
 |------|---------|------|
-| 1 | `D:\\claudecode\\CLAUDE.md` | グローバル設定（UTF-8制約等） |
-| 2 | `./CLAUDE.md` | プロジェクト設定（SD002ルール） |
+| 1 | `D:\claudecode\CLAUDE.md` | グローバル設定（UTF-8制約等） |
+| 2 | `./CLAUDE.md` | プロジェクト設定（SD003ルール） |
 | 3 | `.sessions/session-current.md` | 現在のセッション（短期記憶） |
 | 4 | `.sessions/TIMELINE.md` | プロジェクト履歴（長期記憶） |
 
@@ -17,7 +17,7 @@ prompt = """
 
 ### Step 1: グローバル CLAUDE.md
 ```
-Read: D:\\claudecode\\CLAUDE.md
+Read: D:\claudecode\CLAUDE.md
 ```
 - UTF-8境界エラー防止ルール
 - 日本語ファイル操作制約
@@ -27,7 +27,7 @@ Read: D:\\claudecode\\CLAUDE.md
 ```
 Read: ./CLAUDE.md
 ```
-- SD002フレームワーク設定
+- SD003フレームワーク設定
 - 技術スタック
 - AI協調ワークフロー
 
@@ -60,7 +60,7 @@ Read: .sessions/TIMELINE.md
 
 ## 2. プロジェクト設定
 ✅ CLAUDE.md (プロジェクト) 読み込み完了
-   - SD002 v[バージョン]
+   - SD003 v[バージョン]
 
 ## 3. 現在セッション
 📅 前回: [日時]
@@ -102,5 +102,25 @@ Read: .sessions/TIMELINE.md
 
 ---
 
-**実行開始**: 上記4ファイルを順番に読み込み、要約を表示してください。
+## Step 5: セッションアーカイブ（バックグラウンド）
+
+**4ファイル読み込みと並行して**、以下のAgentをバックグラウンドで起動する:
+
+```
+Agent(run_in_background=true):
+  description: "archive old sessions"
+  prompt: |
+    古いClaude Codeセッションのアーカイブ状況を確認します。以下を実行してください:
+    1. bash ~/.claude/scripts/archive-sessions.sh 7 preview でプレビュー
+    2. 対象が0件なら「アーカイブ対象なし」と報告して終了
+    3. 対象がある場合は件数とサイズを報告（実行はしない）
+    4. 「/archive-sessions --execute で実行できます」と案内
+```
+
+**重要**: このAgentはバックグラウンドで実行し、メインの作業をブロックしない。
+完了通知が届いたら結果を簡潔にユーザーに伝える。
+
+---
+
+**実行開始**: 上記4ファイルを順番に読み込み（Step 1-4）、同時にStep 5のAgentをバックグラウンドで起動し、要約を表示してください。
 """

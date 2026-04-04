@@ -1,4 +1,4 @@
-description = "No description"
+description = "/ralph-wiggum:run - Night Mode Execution"
 prompt = """
 # /ralph-wiggum:run - Night Mode Execution
 
@@ -96,5 +96,4 @@ prompt = """
 
 **Phase**: Nighttime (Autonomous)
 **Completion Promise**: `RALPH_NIGHTLY_COMPLETE` / `RALPH_NIGHTLY_BLOCKED`
-
 """

@@ -51,53 +51,53 @@ Create batch manifest JSON:
 
 ```json
 {
-  \"session_id\": \"refactor-20260101-160000\",
-  \"scope\": \"rename getUserById to fetchUser\",
-  \"total_files\": 15,
-  \"total_batches\": 3,
-  \"batches\": [
+  "session_id": "refactor-20260101-160000",
+  "scope": "rename getUserById to fetchUser",
+  "total_files": 15,
+  "total_batches": 3,
+  "batches": [
     {
-      \"id\": \"batch-001\",
-      \"name\": \"Core interfaces\",
-      \"files\": [
-        \"src/interfaces/IUser.ts\",
-        \"src/types/user.ts\"
+      "id": "batch-001",
+      "name": "Core interfaces",
+      "files": [
+        "src/interfaces/IUser.ts",
+        "src/types/user.ts"
       ],
-      \"dependencies\": [],
-      \"checkpoint_required\": true,
-      \"test_scope\": \"unit\",
-      \"estimated_changes\": 5
+      "dependencies": [],
+      "checkpoint_required": true,
+      "test_scope": "unit",
+      "estimated_changes": 5
     },
     {
-      \"id\": \"batch-002\",
-      \"name\": \"Service layer\",
-      \"files\": [
-        \"src/services/user-service.ts\",
-        \"src/services/auth-service.ts\"
+      "id": "batch-002",
+      "name": "Service layer",
+      "files": [
+        "src/services/user-service.ts",
+        "src/services/auth-service.ts"
       ],
-      \"dependencies\": [\"batch-001\"],
-      \"checkpoint_required\": true,
-      \"test_scope\": \"unit,integration\",
-      \"estimated_changes\": 12
+      "dependencies": ["batch-001"],
+      "checkpoint_required": true,
+      "test_scope": "unit,integration",
+      "estimated_changes": 12
     },
     {
-      \"id\": \"batch-003\",
-      \"name\": \"Handler layer\",
-      \"files\": [
-        \"src/handlers/user-handler.ts\",
-        \"src/handlers/api-handler.ts\"
+      "id": "batch-003",
+      "name": "Handler layer",
+      "files": [
+        "src/handlers/user-handler.ts",
+        "src/handlers/api-handler.ts"
       ],
-      \"dependencies\": [\"batch-002\"],
-      \"checkpoint_required\": true,
-      \"test_scope\": \"all\",
-      \"estimated_changes\": 8
+      "dependencies": ["batch-002"],
+      "checkpoint_required": true,
+      "test_scope": "all",
+      "estimated_changes": 8
     }
   ],
-  \"quality_gates\": {
-    \"after_each_batch\": [\"lint\", \"type\"],
-    \"after_all_batches\": [\"test\", \"build\"]
+  "quality_gates": {
+    "after_each_batch": ["lint", "type"],
+    "after_all_batches": ["test", "build"]
   },
-  \"rollback_strategy\": \"checkpoint-per-batch\"
+  "rollback_strategy": "checkpoint-per-batch"
 }
 ```
 
