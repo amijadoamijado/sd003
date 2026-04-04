@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 52
-- **Latest Session**: 2026-04-03
+- **Total Sessions**: 54
+- **Latest Session**: 2026-04-04
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,8 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 04-04 | 開発哲学文書化 + 分岐ルール + git hooks強化 + 全13PJ再デプロイ | a702684 | [Details](session-20260404-142713.md) |
+| 04-04 | Multi-CLI 共通正本化 + Gemini/Codex 自動生成 + Codex home 配布 | 3539c86 | [Details](session-20260404-132402.md) |
 | 04-03 | at001 .kiro完全廃止 + SD003再デプロイ（.sd統一） | 1e681c67 | [Details](session-20260403-125244.md) |
 | 04-02 | Codex Custom Prompts廃止整理 + 用語混同修正（Slash Commands≠Custom Prompts） | f0d3f91 | [Details](session-20260402-155050.md) |
 | 04-02 | .codex/prompts/廃止対応（全PJ削除+sd-deploy修正+sync撤去） | dbde941 | [Details](session-20260402-154054.md) |
@@ -71,4 +73,3 @@
 | 02-15 | パスルール一貫性修正（RULES.md v2.0 + 全AI設定統一） | a266cd5 | [Details](session-20260215-162159.md) |
 | 02-15 | デプロイパッケージ v2.13.0 同期 | 62a5e4a | [Details](session-current.md) |
 | 02-15 | Skills.sh統合 + gas-fakes 2層ゲート | dd1e485 | [Details](session-20260215-154240.md) |
-
