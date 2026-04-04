@@ -64,6 +64,8 @@ Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstd
 
 ## Conditional Context
 
+IMPORTANT: When starting any task, determine which project branch applies: GAS (Google Apps Script app), Cowork (SD003 framework/AI coordination), or Sukima Digital (IT coordination/business design). If the task can be accomplished by AI direct execution without building anything, don't build. Details: `.claude/rules/global/project-branching.md`, `docs/development-philosophy.md`
+
 IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. Known constraints (iframe, CORS, @HEAD vs fixed deployment) must be reflected in code immediately. Details: `.claude/rules/gas/env-interface.md`, `.claude/rules/gas/gas-constraints.md`
 
 IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
