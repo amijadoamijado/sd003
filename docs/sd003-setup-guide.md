@@ -1,6 +1,6 @@
-# SD002フレームワーク導入ガイド v2.5.2
+# SD003フレームワーク導入ガイド v2.5.2
 
-新規プロジェクトにSD002フレームワークを導入する際の手順。
+新規プロジェクトにSD003フレームワークを導入する際の手順。
 
 ---
 
@@ -31,16 +31,16 @@
 ### 1. コア設定コピー
 
 ```bash
-# SD002リポジトリからコピー
-cp -r {sd002}/.claude ./
-cp -r {sd002}/.sd ./
-cp -r {sd002}/docs ./
+# SD003リポジトリからコピー
+cp -r {sd003}/.claude ./
+cp -r {sd003}/.sd ./
+cp -r {sd003}/docs ./
 
 # Gemini CLI使用時（オプション）
-cp -r {sd002}/.gemini ./
+cp -r {sd003}/.gemini ./
 
 # Antigravity使用時（オプション）
-cp -r {sd002}/.antigravity ./
+cp -r {sd003}/.antigravity ./
 ```
 
 ### 2. CLAUDE.md生成
@@ -225,7 +225,7 @@ ls -la .claude/commands/session*.md
 | `/sessionread` | `sessionread.md` | セッション読込 |
 | `/sessionwrite` | `sessionwrite.md` | セッション保存 |
 
-**不足している場合**: sd002の`.claude/commands/`からコピーすること。
+**不足している場合**: sd003の`.claude/commands/`からコピーすること。
 
 ### ルール確認
 ```bash

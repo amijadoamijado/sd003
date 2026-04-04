@@ -10,15 +10,15 @@ Ralph Wiggum is a night-mode autonomous execution system that enables 24-hour de
 
 - Node.js 18+
 - Claude Code CLI installed
-- SD002 Framework (or compatible project structure)
-- ESLint configured (for `/sd002:loop-lint`)
+- SD003 Framework (or compatible project structure)
+- ESLint configured (for `/sd003:loop-lint`)
 
 ## Quick Start
 
-### Option A: Deploy to Existing SD002 Project
+### Option A: Deploy to Existing SD003 Project
 
 ```bash
-# Already included in SD002 Framework
+# Already included in SD003 Framework
 # Just start using the commands
 /ralph-wiggum:plan    # Create weekly plan
 /ralph-wiggum:run     # Execute nightly queue
@@ -101,11 +101,11 @@ config:
 
 Ralph Wiggum operates alongside the daytime Ralph Loop system:
 
-| Aspect | Daytime (sd002-loop-*) | Nighttime (Ralph Wiggum) |
+| Aspect | Daytime (sd003-loop-*) | Nighttime (Ralph Wiggum) |
 |--------|------------------------|--------------------------|
-| Commands | `/sd002:loop-*` | `/ralph-wiggum:*` |
+| Commands | `/sd003:loop-*` | `/ralph-wiggum:*` |
 | max-iterations | 15-20 | 60 |
-| Environment | `SD002_*` | `RALPH_*` |
+| Environment | `SD003_*` | `RALPH_*` |
 | Completion | `ALL_TESTS_PASS` | `RALPH_NIGHTLY_COMPLETE` |
 | Recovery | dialogue-resolution | 7 auto patterns |
 | Human | Available anytime | Only when blocked |
@@ -212,4 +212,4 @@ circuit-breaker:
 ---
 
 **Ralph Wiggum** - Night Mode Autonomous Execution System
-Part of SD002 Framework
+Part of SD003 Framework

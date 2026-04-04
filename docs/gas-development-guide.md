@@ -1,6 +1,6 @@
 # GAS開発ガイド
 
-SD002フレームワークにおけるGoogle Apps Script (GAS)開発の原則と制約。
+SD003フレームワークにおけるGoogle Apps Script (GAS)開発の原則と制約。
 
 ## 基本原則
 
