@@ -1,0 +1,339 @@
+{
+  "version": 1,
+  "source": ".claude/commands/**/*.md",
+  "generated": {
+    "canonical_specs": ".sd/commands/specs/*.md",
+    "gemini_commands": ".gemini/commands/*.toml",
+    "codex_skills": ".agents/skills/*/SKILL.md"
+  },
+  "commands": [
+    {
+      "slug": "blueprint-gate",
+      "source": ".claude/commands/blueprint-gate.md",
+      "description": "要件定義 - ゴールと検証観点を対話で整理し要件定義書を生成",
+      "claude_command": "/blueprint-gate",
+      "gemini_file": "blueprint-gate.toml",
+      "codex_skill": "blueprint-gate",
+      "aliases": []
+    },
+    {
+      "slug": "bug-quick",
+      "source": ".claude/commands/bug-quick.md",
+      "description": "Bug QUICK - Processing flow comparison debugging (5-15 min first pass)",
+      "claude_command": "/bug-quick",
+      "gemini_file": "bug-quick.toml",
+      "codex_skill": "bug-quick",
+      "aliases": []
+    },
+    {
+      "slug": "bug-trace",
+      "source": ".claude/commands/bug-trace.md",
+      "description": "Bug Trace - 3-Agent parallel investigation for complex bugs",
+      "claude_command": "/bug-trace",
+      "gemini_file": "bug-trace.toml",
+      "codex_skill": "bug-trace",
+      "aliases": []
+    },
+    {
+      "slug": "CLAUDE",
+      "source": ".claude/commands/CLAUDE.md",
+      "description": "Recent Activity",
+      "claude_command": "/CLAUDE",
+      "gemini_file": "CLAUDE.toml",
+      "codex_skill": "CLAUDE",
+      "aliases": []
+    },
+    {
+      "slug": "cleanup-history",
+      "source": ".claude/commands/cleanup-history.md",
+      "description": "Show cleanup session history",
+      "claude_command": "/cleanup:history",
+      "gemini_file": "cleanup-history.toml",
+      "codex_skill": "cleanup-history",
+      "aliases": []
+    },
+    {
+      "slug": "cleanup-restore",
+      "source": ".claude/commands/cleanup-restore.md",
+      "description": "Restore files from cleanup archive",
+      "claude_command": "/cleanup:restore",
+      "gemini_file": "cleanup-restore.toml",
+      "codex_skill": "cleanup-restore",
+      "aliases": []
+    },
+    {
+      "slug": "cleanup",
+      "source": ".claude/commands/cleanup.md",
+      "description": "AI judgment-based project cleanup (materials organization + temp file archive)",
+      "claude_command": "/src/**,",
+      "gemini_file": "cleanup.toml",
+      "codex_skill": "cleanup",
+      "aliases": []
+    },
+    {
+      "slug": "dialogue-resolution",
+      "source": ".claude/commands/dialogue-resolution.md",
+      "description": "対話型解決法 - AIの迷走時に仕様・実装との差異を段階的に検出",
+      "claude_command": "/dialogue-resolution",
+      "gemini_file": "dialogue-resolution.toml",
+      "codex_skill": "dialogue-resolution",
+      "aliases": []
+    },
+    {
+      "slug": "ralph-wiggum-plan",
+      "source": ".claude/commands/ralph-wiggum-plan.md",
+      "description": "/ralph-wiggum:plan - Weekly Planning",
+      "claude_command": "/ralph-wiggum:plan",
+      "gemini_file": "ralph-wiggum-plan.toml",
+      "codex_skill": "ralph-wiggum-plan",
+      "aliases": []
+    },
+    {
+      "slug": "ralph-wiggum-run",
+      "source": ".claude/commands/ralph-wiggum-run.md",
+      "description": "/ralph-wiggum:run - Night Mode Execution",
+      "claude_command": "/ralph-wiggum:run",
+      "gemini_file": "ralph-wiggum-run.toml",
+      "codex_skill": "ralph-wiggum-run",
+      "aliases": []
+    },
+    {
+      "slug": "ralph-wiggum-status",
+      "source": ".claude/commands/ralph-wiggum-status.md",
+      "description": "/ralph-wiggum:status - Execution Status",
+      "claude_command": "/ralph-wiggum:status",
+      "gemini_file": "ralph-wiggum-status.toml",
+      "codex_skill": "ralph-wiggum-status",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-batch",
+      "source": ".claude/commands/refactor-batch.md",
+      "description": "Execute refactoring in batched files with auto-checkpoint",
+      "claude_command": "/refactor:batch",
+      "gemini_file": "refactor-batch.toml",
+      "codex_skill": "refactor-batch",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-complete",
+      "source": ".claude/commands/refactor-complete.md",
+      "description": "Complete refactoring session and record final state",
+      "claude_command": "/refactor:complete",
+      "gemini_file": "refactor-complete.toml",
+      "codex_skill": "refactor-complete",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-init",
+      "source": ".claude/commands/refactor-init.md",
+      "description": "Initialize refactoring session with parallel impact analysis",
+      "claude_command": "/refactor:init",
+      "gemini_file": "refactor-init.toml",
+      "codex_skill": "refactor-init",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-plan",
+      "source": ".claude/commands/refactor-plan.md",
+      "description": "Generate detailed execution plan from analysis",
+      "claude_command": "/refactor:plan",
+      "gemini_file": "refactor-plan.toml",
+      "codex_skill": "refactor-plan",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-rollback",
+      "source": ".claude/commands/refactor-rollback.md",
+      "description": "Rollback refactoring to a checkpoint",
+      "claude_command": "/refactor:rollback",
+      "gemini_file": "refactor-rollback.toml",
+      "codex_skill": "refactor-rollback",
+      "aliases": []
+    },
+    {
+      "slug": "skills-add",
+      "source": ".claude/commands/sd/skills-add.md",
+      "description": "スキルインストール: /skills:add",
+      "claude_command": "/skills:add",
+      "gemini_file": "skills-add.toml",
+      "codex_skill": "skills-add",
+      "aliases": []
+    },
+    {
+      "slug": "skills-find",
+      "source": ".claude/commands/sd/skills-find.md",
+      "description": "スキル検索: /skills:find",
+      "claude_command": "/skills:find",
+      "gemini_file": "skills-find.toml",
+      "codex_skill": "skills-find",
+      "aliases": []
+    },
+    {
+      "slug": "skills-list",
+      "source": ".claude/commands/sd/skills-list.md",
+      "description": "スキル一覧: /skills:list",
+      "claude_command": "/skills:list",
+      "gemini_file": "skills-list.toml",
+      "codex_skill": "skills-list",
+      "aliases": []
+    },
+    {
+      "slug": "sd-deploy",
+      "source": ".claude/commands/sd-deploy.md",
+      "description": "SD003フレームワークを新規プロジェクトに展開",
+      "claude_command": "/sd:deploy",
+      "gemini_file": "sd-deploy.toml",
+      "codex_skill": "sd-deploy",
+      "aliases": []
+    },
+    {
+      "slug": "sd003-loop-lint",
+      "source": ".claude/commands/sd003-loop-lint.md",
+      "description": "/sd003:loop-lint - ESLint Completion Loop",
+      "claude_command": "/sd003:loop-lint",
+      "gemini_file": "sd003-loop-lint.toml",
+      "codex_skill": "sd003-loop-lint",
+      "aliases": []
+    },
+    {
+      "slug": "sd003-loop-test",
+      "source": ".claude/commands/sd003-loop-test.md",
+      "description": "/sd003:loop-test - Test Completion Loop",
+      "claude_command": "/sd003:loop-test",
+      "gemini_file": "sd003-loop-test.toml",
+      "codex_skill": "sd003-loop-test",
+      "aliases": []
+    },
+    {
+      "slug": "sd003-loop-type",
+      "source": ".claude/commands/sd003-loop-type.md",
+      "description": "/sd003:loop-type - TypeScript Type-Check Loop",
+      "claude_command": "/sd003:loop-type",
+      "gemini_file": "sd003-loop-type.toml",
+      "codex_skill": "sd003-loop-type",
+      "aliases": []
+    },
+    {
+      "slug": "session-search",
+      "source": ".claude/commands/session-search.md",
+      "description": "セッション横断検索（過去セッションからキーワード検索）",
+      "claude_command": "/session-search",
+      "gemini_file": "session-search.toml",
+      "codex_skill": "session-search",
+      "aliases": []
+    },
+    {
+      "slug": "sessionhistory",
+      "source": ".claude/commands/sessionhistory.md",
+      "description": "Show project timeline (long-term session history)",
+      "claude_command": "/sessionhistory",
+      "gemini_file": "sessionhistory.toml",
+      "codex_skill": "sessionhistory",
+      "aliases": []
+    },
+    {
+      "slug": "sessionread",
+      "source": ".claude/commands/sessionread.md",
+      "description": "最新のセッション継続記録を読み込み表示",
+      "claude_command": "/sessionread",
+      "gemini_file": "sessionread.toml",
+      "codex_skill": "sessionread",
+      "aliases": [
+        "session-read"
+      ]
+    },
+    {
+      "slug": "sessionwrite",
+      "source": ".claude/commands/sessionwrite.md",
+      "description": "Save session handoff and update timeline",
+      "claude_command": "/sessionwrite",
+      "gemini_file": "sessionwrite.toml",
+      "codex_skill": "sessionwrite",
+      "aliases": [
+        "session-write"
+      ]
+    },
+    {
+      "slug": "spec-archive",
+      "source": ".claude/commands/spec-archive.md",
+      "description": "Archive spec files to history folder",
+      "claude_command": "/spec:archive",
+      "gemini_file": "spec-archive.toml",
+      "codex_skill": "spec-archive",
+      "aliases": []
+    },
+    {
+      "slug": "spec-history",
+      "source": ".claude/commands/spec-history.md",
+      "description": "Show spec version history",
+      "claude_command": "/spec:history",
+      "gemini_file": "spec-history.toml",
+      "codex_skill": "spec-history",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-impl",
+      "source": ".claude/commands/workflow-impl.md",
+      "description": "AI協調ワークフロー - Gemini/Codex実装実行（指示書→実行→復元を一括）",
+      "claude_command": "/workflow:impl",
+      "gemini_file": "workflow-impl.toml",
+      "codex_skill": "workflow-impl",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-init",
+      "source": ".claude/commands/workflow-init.md",
+      "description": "AI協調ワークフロー - 新規案件の初期化",
+      "claude_command": "/workflow:init",
+      "gemini_file": "workflow-init.toml",
+      "codex_skill": "workflow-init",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-order",
+      "source": ".claude/commands/workflow-order.md",
+      "description": "AI協調ワークフロー - 発注書（WORK_ORDER）作成",
+      "claude_command": "/workflow:order",
+      "gemini_file": "workflow-order.toml",
+      "codex_skill": "workflow-order",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-request",
+      "source": ".claude/commands/workflow-request.md",
+      "description": "AI協調ワークフロー - 実装指示（IMPLEMENT_REQUEST）作成",
+      "claude_command": "/workflow:request",
+      "gemini_file": "workflow-request.toml",
+      "codex_skill": "workflow-request",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-review",
+      "source": ".claude/commands/workflow-review.md",
+      "description": "AI協調ワークフロー - Codexレビュー依頼作成・実行",
+      "claude_command": "/workflow:review",
+      "gemini_file": "workflow-review.toml",
+      "codex_skill": "workflow-review",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-status",
+      "source": ".claude/commands/workflow-status.md",
+      "description": "AI協調ワークフロー - 工程状況の確認・更新",
+      "claude_command": "/workflow:status",
+      "gemini_file": "workflow-status.toml",
+      "codex_skill": "workflow-status",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-test",
+      "source": ".claude/commands/workflow-test.md",
+      "description": "AI協調ワークフロー - Antigravity E2Eテスト依頼作成",
+      "claude_command": "/workflow:test",
+      "gemini_file": "workflow-test.toml",
+      "codex_skill": "workflow-test",
+      "aliases": []
+    }
+  ]
+}

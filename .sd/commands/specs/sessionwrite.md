@@ -1,8 +1,21 @@
 ---
+slug: sessionwrite
+source: .claude/commands/sessionwrite.md
 description: Save session handoff and update timeline
-allowed-tools: Bash, Write, Read
+claude_command: /sessionwrite
+codex_skill: sessionwrite
+gemini_file: sessionwrite.toml
+aliases: session-write
+allowed_tools: Bash, Write, Read
 ---
 
+# セッション保存
+
+## Canonical Intent
+Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
+Gemini CLI の TOML と Codex の skill はこのファイルから生成します。
+
+## Original Body
 # セッション保存
 
 セッション引き継ぎ記録を保存し、プロジェクトタイムラインを更新する。

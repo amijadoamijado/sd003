@@ -1,0 +1,838 @@
+---
+slug: bug-trace
+source: .claude/commands/bug-trace.md
+description: Bug Trace - 3-Agent parallel investigation for complex bugs
+claude_command: /bug-trace
+codex_skill: bug-trace
+gemini_file: bug-trace.toml
+allowed_tools: Read, Glob, Grep, Task, AskUserQuestion, TodoWrite
+---
+
+# Bug Trace - 3-Agent Parallel Investigation v2.4
+
+## Canonical Intent
+Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
+Gemini CLI の TOML と Codex の skill はこのファイルから生成します。
+
+## Original Body
+# Bug Trace - 3-Agent Parallel Investigation v2.4
+
+## Persona
+
+You are a **Bug Investigation Specialist** with expertise in:
+- Root cause analysis through systematic tracing
+- Specification-to-implementation gap detection
+- Multi-perspective problem solving
+- **Visual flow diagram generation**
+
+---
+
+## Overview
+
+This command orchestrates **3 specialized agents** to investigate complex bugs in parallel, followed by **Ultrathink synthesis** and **visual flow diagrams**:
+
+### Investigation Pipeline
+```
+Step 1: Error Collection + Past Bug Search
+    ↓
+Step 2: 3-Agent Parallel Investigation
+    ↓
+Step 2.5: Ultrathink Synthesis + Divergence Classification  ← NEW in v2.4
+    ↓
+    ├─ Code Defect → Step 3: Visual Flow Diagrams
+    │                    ↓
+    │               Steps 4-7: Hypothesis → Solution → Fix
+    │                    ↓
+    │               Step 8: Bug Report Generation
+    │
+    └─ Spec Defect → Step 2.6: Spec Update Proposal  ← NEW in v2.4
+                         ↓
+                    Spec Updated → End
+```
+
+### Agent Roles
+
+| Agent | Role | Focus |
+|-------|------|-------|
+| **Spec Agent** | Specification Investigator | Requirements, design docs, expected behavior |
+| **Code Agent** | Code Investigator | Implementation, data flow, state transitions |
+| **Solution Agent** | Solution Architect | Hypothesis formation, resolution strategies |
+
+### New in v2.0
+- **Ultrathink Synthesis**: Deep analysis of 3-agent findings with cross-referencing
+- **ASCII Flow Diagrams**: Visual representation of error flow (Input → Process → Error)
+- **Reverse Trace Diagrams**: Error backtracking visualization
+- **Divergence Analysis Box**: Side-by-side Expected vs Actual comparison
+
+### New in v2.1
+- **Japanese Explanations**: Each diagram now includes mandatory Japanese explanations below the ASCII art
+
+### New in v2.2
+- **Ultrathink Synthesis Japanese Explanation**: Root Cause section now includes detailed Japanese explanation
+
+### New in v2.3
+- **Mandatory Output Requirements**: Japanese explanations are now mandatory (skip = step incomplete)
+- **Bug Report Management**: Numbered reports saved for future reference
+- **Past Bug Search**: Check for similar past bugs before investigation
+
+### New in v2.4
+- **Divergence Classification**: Categorize issues as Code Defect, Spec Defect, Both, or Ambiguous
+- **Step 2.6 Spec Update Proposal**: New flow for handling Spec Defects
+- **Smart Next Action**: Classification determines whether to fix code or update specs
+
+---
+
+## Prohibited Actions
+
+1. **Skip user confirmation** at any step
+2. **Proceed automatically** without AskUserQuestion
+3. **Start fixing** before Step 7 approval
+4. **Ignore agent findings** - all 3 must be synthesized
+
+---
+
+## MANDATORY OUTPUT REQUIREMENTS
+
+**The following outputs are REQUIRED. DO NOT skip or omit them.**
+
+### Japanese Explanations (4 locations)
+
+| Step | Section | Required Output |
+|------|---------|-----------------|
+| Step 2.5 | Ultrathink Synthesis | `📝 **統合分析解説**` |
+| Step 3 | Error Flow Diagram | `📝 **フロー解説**` |
+| Step 3 | Reverse Trace | `📝 **逆追跡解説**` |
+| Step 3 | Divergence Analysis | `📝 **乖離分析解説**` |
+
+**RULE: A Step is NOT complete until its Japanese explanation is output.**
+
+Before proceeding to the next step, verify:
+- [ ] ASCII diagram generated
+- [ ] Japanese explanation output below the diagram
+- [ ] All template fields filled (no placeholders like `[xxx]`)
+
+---
+
+## User Input
+
+$ARGUMENTS
+
+---
+
+## Step 1: Error Information Collection + Past Bug Search
+
+### 1.1 Past Bug Check (Recommended)
+
+**Before starting investigation, check for similar past bugs:**
+
+1. Read `docs/troubleshooting/bug-reports/BUG_INDEX.md`
+2. Search for related keywords in the index
+3. If related bugs found, reference their solutions
+
+**When related bugs are found, output:**
+
+```markdown
+📚 **過去の関連バグ**
+
+| Bug ID | タイトル | 関連度 |
+|--------|---------|--------|
+| [BUG-XXX-NNN-XXXXXXXXXXXX] | [タイトル] | 高/中/低 |
+
+**参考情報**: [過去の根本原因や解決策のサマリー]
+```
+
+### 1.2 Error Information Collection
+
+**Ask the user for:**
+
+1. Error log or stack trace (copy-paste)
+2. Reproduction steps
+3. User's hypothesis about the cause
+
+**Use AskUserQuestion:**
+
+```
+Question: Please provide the error details
+Options:
+- I will paste the error log/stack trace
+- I will describe the symptoms
+- Both error log and description
+```
+
+**After receiving input, confirm understanding and ask:**
+
+```
+Question: Is my understanding of the error correct? Ready to proceed to Step 2?
+Options:
+- Yes, proceed to 3-Agent investigation
+- No, let me clarify further
+```
+
+---
+
+## Step 2: 3-Agent Parallel Investigation
+
+**Launch 3 agents in parallel using Task tool:**
+
+### Agent 1: Spec Agent (Specification Investigator)
+```
+Prompt:
+You are investigating a bug. Read all relevant specification files in .sd/specs/.
+Focus on:
+- Expected behavior for this feature
+- Input/output specifications
+- Edge cases and error handling requirements
+- Data flow requirements
+
+Report findings in this format:
+| Aspect | Specification Says | Relevance to Bug |
+|--------|-------------------|------------------|
+```
+
+### Agent 2: Code Agent (Code Investigator)
+```
+Prompt:
+You are investigating a bug. Trace the code path related to [error location].
+Focus on:
+- Entry point to error location
+- All function calls in between
+- State/data transformations
+- Error handling code
+
+Report the trace as:
+Entry Point -> Step 1 -> Step 2 -> ... -> Error Location
+```
+
+### Agent 3: Solution Agent (Solution Architect)
+```
+Prompt:
+Based on [error description], brainstorm potential causes.
+For each hypothesis:
+- Root cause theory
+- Evidence that would confirm/deny
+- Potential fix approach
+- Risk level (High/Medium/Low)
+```
+
+**Wait for all 3 agents to complete.**
+
+---
+
+## Step 2.5: Ultrathink Synthesis (MANDATORY)
+
+**After all 3 agents complete, perform deep synthesis analysis:**
+
+### Synthesis Protocol
+
+1. **Receive all 3 agent reports**
+2. **Use extended thinking (ultrathink)** to:
+   - Cross-reference findings between agents
+   - Identify contradictions or gaps
+   - Synthesize a unified understanding
+   - Form preliminary hypothesis ranking
+
+### Synthesis Output Format
+
+```markdown
+## Ultrathink Synthesis Report
+
+### Agent Findings Summary
+| Agent | Key Finding | Confidence |
+|-------|-------------|------------|
+| Spec  | [main finding] | High/Medium/Low |
+| Code  | [main finding] | High/Medium/Low |
+| Solution | [main finding] | High/Medium/Low |
+
+### Cross-Reference Analysis
+- **Alignment**: [where agents agree]
+- **Divergence**: [where agents disagree]
+- **Gaps**: [what was not covered]
+
+### Preliminary Hypothesis (Pre-ranked)
+1. [Most likely based on synthesis]
+2. [Second candidate]
+3. [Third candidate]
+
+### Investigation Confidence: [High/Medium/Low]
+```
+
+#### 日本語解説（Ultrathink Synthesis）
+
+**必ず統合分析の後に以下の形式で日本語解説を追加すること：**
+
+```markdown
+📝 **統合分析解説**
+
+**3エージェントの調査結果:**
+
+| エージェント | 発見内容 | 信頼度 |
+|-------------|---------|--------|
+| 仕様調査 | [仕様書から判明したこと] | 高/中/低 |
+| コード調査 | [実装から判明したこと] | 高/中/低 |
+| 解決策立案 | [提案された仮説] | 高/中/低 |
+
+**エージェント間の整合性:**
+- **一致点**: [全エージェントが合意した内容]
+- **相違点**: [エージェント間で見解が異なる点]
+- **未調査領域**: [調査が不足している領域]
+
+**🔍 根本原因（確定/推定）:**
+[1-2文で根本原因を平易な日本語で説明]
+
+**なぜこの問題が発生したか:**
+[技術的な原因を非エンジニアにもわかるように説明]
+
+**推奨される修正方針:**
+[どのような方向で修正すべきか]
+```
+
+### Divergence Classification (MANDATORY)
+
+**After synthesis, classify the divergence type:**
+
+| Classification | Condition | Next Action |
+|----------------|-----------|-------------|
+| **Code Defect** | Spec is current and clear, Code deviates | Step 4 → Fix Plan |
+| **Spec Defect** | Code behavior is reasonable, Spec is outdated/ambiguous | Step 2.6 → Spec Update Proposal |
+| **Both Defect** | Issues in both Spec and Code | Prioritize and address both |
+| **Ambiguous** | Cannot determine | User confirmation required |
+
+**Classification Criteria:**
+
+```markdown
+### 乖離分類 (Divergence Classification)
+
+**判定結果**: [Code Defect / Spec Defect / Both Defect / Ambiguous]
+
+**判定根拠:**
+
+| 基準 | 評価 |
+|------|------|
+| 仕様書の最終更新日 | [YYYY-MM-DD] |
+| コードの最終変更日 | [YYYY-MM-DD] |
+| コードの動作は「意図的改善」か「バグ」か | [改善 / バグ / 不明] |
+| 他コードとの整合性 | [高 / 低] |
+| ビジネスロジックの妥当性 | [コードが妥当 / 仕様が妥当 / 不明] |
+
+**分類の理由:**
+[1-2文で分類理由を説明]
+
+**推奨アクション:**
+- Code Defect → Step 4に進んでコード修正計画
+- Spec Defect → Step 2.6に進んで仕様書更新提案
+- Both Defect → 優先順位をつけて両方対応
+- Ambiguous → ユーザーに確認
+```
+
+**Use AskUserQuestion:**
+
+```
+Question: Ultrathink synthesis complete. Divergence classified as: [Classification Result]
+Options:
+- Proceed with [Code Fix / Spec Update] (based on classification)
+- Override: This is actually a [Code/Spec] defect
+- Need more investigation
+- Cancel and re-analyze
+```
+
+---
+
+## Step 2.6: Spec Update Proposal (Spec Defect Only)
+
+**This step is executed only when Divergence Classification = Spec Defect or Both Defect (Spec portion)**
+
+### Spec Update Proposal Format
+
+```markdown
+## 仕様書更新提案 (Spec Update Proposal)
+
+### 更新対象
+- **ファイル**: [.sd/specs/{feature}/requirements.md or design.md]
+- **セクション**: [Section name]
+
+### 現在の記述
+```
+[Current spec text]
+```
+
+### 提案する記述
+```
+[Proposed new text]
+```
+
+### 変更理由
+[Why the spec should be updated]
+
+### 影響範囲
+- 関連する要件: [REQ-XXX-NNN]
+- 影響を受けるコード: [file:line]
+- 関連テスト: [test file]
+```
+
+**Use AskUserQuestion:**
+
+```
+Question: Spec update proposal ready. How to proceed?
+Options:
+- Approve spec update and apply
+- Modify the proposal
+- Actually this is a Code Defect, go to Step 4
+- Cancel
+```
+
+**If approved:**
+1. Update the spec file(s)
+2. Record in change log
+3. End session (no code fix needed)
+
+**If rejected (Code Defect):**
+- Proceed to Step 3 (Process Flow Trace)
+
+---
+
+## Step 3: Process Flow Trace (Visualization Required)
+
+**Based on agent findings, create visual flow diagrams:**
+
+### MANDATORY: Error Flow Diagram (ASCII Art)
+
+**Generate a visual diagram showing the error trace:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        ERROR FLOW DIAGRAM                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  ┌──────────────────┐                                                   │
+│  │   INPUT SOURCE   │ ← [file/user input/API/data]                      │
+│  └────────┬─────────┘                                                   │
+│           │                                                             │
+│           ▼                                                             │
+│  ┌──────────────────┐                                                   │
+│  │   Process A      │ [function/module name]                            │
+│  │   ────────────   │                                                   │
+│  │   [description]  │                                                   │
+│  └────────┬─────────┘                                                   │
+│           │                                                             │
+│           ▼                                                             │
+│  ┌──────────────────┐                                                   │
+│  │   Process B      │ [function/module name]                            │
+│  │   ────────────   │                                                   │
+│  │   [description]  │                                                   │
+│  └────────┬─────────┘                                                   │
+│           │                                                             │
+│           ▼                                                             │
+│  ╔══════════════════╗                                                   │
+│  ║   ⚠ DIVERGENCE   ║ ← [Expected vs Actual]                            │
+│  ║   Process X      ║                                                   │
+│  ╚════════┬═════════╝                                                   │
+│           │                                                             │
+│           ▼                                                             │
+│  ┌──────────────────┐                                                   │
+│  │   Process Y      │                                                   │
+│  └────────┬─────────┘                                                   │
+│           │                                                             │
+│           ▼                                                             │
+│  ╔══════════════════╗                                                   │
+│  ║   ❌ ERROR       ║                                                   │
+│  ║   [error msg]    ║                                                   │
+│  ╚══════════════════╝                                                   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 日本語解説（Error Flow）
+
+**必ず図の下に以下の形式で日本語解説を追加すること：**
+
+```markdown
+📝 **フロー解説**
+
+1. **入力元**: [データの発生源を説明]
+2. **処理A**: [この処理が何をするか、正常動作時の挙動]
+3. **処理B**: [この処理が何をするか、正常動作時の挙動]
+4. **⚠️ 分岐点**: [ここで期待と実際が乖離した理由]
+5. **❌ エラー**: [最終的にどのようなエラーが発生したか]
+
+**なぜこのフローで問題が起きたか:**
+[1-2文で根本原因を平易な日本語で説明]
+```
+
+### Detailed Flow Table
+
+| Step | Component | File:Line | Input | Output | Status |
+|------|-----------|-----------|-------|--------|--------|
+| 1 | [name] | [file:line] | [input data] | [output data] | ✅ OK |
+| 2 | [name] | [file:line] | [input data] | [output data] | ✅ OK |
+| 3 | [name] | [file:line] | [input data] | [output data] | ⚠️ DIVERGE |
+| 4 | [name] | [file:line] | [input data] | [output data] | ❌ ERROR |
+
+### Reverse Trace (Error Backtrack Diagram)
+
+```
+╔══════════════════════════════════════════════════════════════════════════╗
+║                      REVERSE TRACE (Error → Root)                        ║
+╠══════════════════════════════════════════════════════════════════════════╣
+║                                                                          ║
+║  ❌ ERROR: [full error message]                                          ║
+║     │                                                                    ║
+║     │ caused by                                                          ║
+║     ▼                                                                    ║
+║  ┌─────────────────────────────────────────────────────────────────────┐ ║
+║  │ Process X: [function name]                                          │ ║
+║  │ File: [file:line]                                                   │ ║
+║  │ Issue: [what went wrong here]                                       │ ║
+║  └─────────────────────────────────────────────────────────────────────┘ ║
+║     │                                                                    ║
+║     │ received bad input from                                            ║
+║     ▼                                                                    ║
+║  ┌─────────────────────────────────────────────────────────────────────┐ ║
+║  │ Process X-1: [function name]                                        │ ║
+║  │ File: [file:line]                                                   │ ║
+║  │ Issue: [what propagated the problem]                                │ ║
+║  └─────────────────────────────────────────────────────────────────────┘ ║
+║     │                                                                    ║
+║     │ originated from                                                    ║
+║     ▼                                                                    ║
+║  ╔═════════════════════════════════════════════════════════════════════╗ ║
+║  ║ 🔍 ROOT CAUSE                                                       ║ ║
+║  ║ Location: [file:line]                                               ║ ║
+║  ║ Description: [root cause description]                               ║ ║
+║  ╚═════════════════════════════════════════════════════════════════════╝ ║
+║                                                                          ║
+╚══════════════════════════════════════════════════════════════════════════╝
+```
+
+#### 日本語解説（Reverse Trace）
+
+**必ず図の下に以下の形式で日本語解説を追加すること：**
+
+```markdown
+📝 **逆追跡解説**
+
+**エラーから根本原因への道筋:**
+
+1. **❌ 発生したエラー**: [エラーメッセージの意味を日本語で説明]
+2. **直接の原因**: [エラーを引き起こした直接の処理とその問題点]
+3. **間接の原因**: [なぜその処理が問題を起こしたか、上流の問題]
+4. **🔍 根本原因**: [最終的な原因を1-2文で説明]
+
+**修正すべき箇所:**
+- ファイル: [ファイルパス]
+- 内容: [何を修正すべきか]
+```
+
+### Divergence Point Summary
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      DIVERGENCE ANALYSIS                                │
+├─────────────────────────────────────────────────────────────────────────┤
+│                                                                         │
+│  📍 Location: [file:line - function name]                               │
+│                                                                         │
+│  ┌─────────────────────────┐    ┌─────────────────────────┐             │
+│  │      EXPECTED           │    │       ACTUAL            │             │
+│  ├─────────────────────────┤    ├─────────────────────────┤             │
+│  │ [expected behavior]     │ ≠  │ [actual behavior]       │             │
+│  │ [expected output]       │    │ [actual output/error]   │             │
+│  └─────────────────────────┘    └─────────────────────────┘             │
+│                                                                         │
+│  🔑 Key Difference: [concise explanation]                               │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+#### 日本語解説（Divergence Analysis）
+
+**必ず図の下に以下の形式で日本語解説を追加すること：**
+
+```markdown
+📝 **乖離分析解説**
+
+**期待と実際の違い:**
+
+| 観点 | 期待していた動作 | 実際の動作 |
+|------|-----------------|-----------|
+| [観点1] | [期待] | [実際] |
+| [観点2] | [期待] | [実際] |
+
+**なぜ乖離が発生したか:**
+[技術的な原因を平易な日本語で説明。専門用語には括弧で補足を入れる]
+
+**この乖離が引き起こした問題:**
+[ユーザーにとって何が起きたか、システムにどう影響したか]
+```
+
+**Use AskUserQuestion:**
+
+```
+Question: Process flow trace complete. Does this match your understanding?
+Options:
+- Yes, proceed to hypothesis formation
+- No, the trace is incorrect at [specify step]
+- Need more detail on specific process
+```
+
+---
+
+## Step 4: Hypothesis Formation
+
+**Present hypotheses ranked by likelihood:**
+
+| Rank | Hypothesis | Evidence | Confidence |
+|------|-----------|----------|------------|
+| 1 | [Most likely cause] | [Supporting evidence] | High/Medium/Low |
+| 2 | [Second candidate] | [Supporting evidence] | High/Medium/Low |
+| 3 | [Third candidate] | [Supporting evidence] | High/Medium/Low |
+
+**For each hypothesis, explain:**
+- Why this could be the cause
+- How to verify
+- What would disprove it
+
+**Use AskUserQuestion:**
+
+```
+Question: Which hypothesis should we pursue?
+Options:
+- Hypothesis 1: [summary]
+- Hypothesis 2: [summary]
+- Investigate multiple hypotheses
+- None of these - I have a different theory
+```
+
+---
+
+## Step 5: Solution Proposal
+
+**Based on selected hypothesis, present:**
+
+### Proposed Solution
+- **Root Cause**: [confirmed/suspected cause]
+- **Fix Approach**: [what to change]
+- **Files Affected**: [list of files]
+- **Risk Assessment**:
+  - Breaking changes: [yes/no]
+  - Side effects: [list if any]
+  - Test coverage needed: [what tests]
+
+### Alternative Solutions
+If applicable, present alternatives with trade-offs.
+
+**Use AskUserQuestion:**
+
+```
+Question: Do you approve this solution approach?
+Options:
+- Yes, proceed to detailed planning
+- Modify the approach (I'll specify)
+- Consider alternative solution
+- Need more analysis before deciding
+```
+
+---
+
+## Step 6: Fix Plan Creation
+
+**Present detailed fix plan:**
+
+### Fix Steps
+
+| Step | File | Change | Verification |
+|------|------|--------|--------------|
+| 1 | [file] | [what to change] | [how to verify] |
+| 2 | [file] | [what to change] | [how to verify] |
+| ... | ... | ... | ... |
+
+### Test Plan
+- [ ] Unit tests for [affected functions]
+- [ ] Integration test for [affected flow]
+- [ ] Regression test for [related features]
+
+### Rollback Plan
+If the fix fails: [rollback steps]
+
+**Use AskUserQuestion:**
+
+```
+Question: Fix plan ready. Approve to start implementation?
+Options:
+- Yes, start fixing
+- Modify plan (I'll specify changes)
+- Add more test coverage
+- Not ready - need more preparation
+```
+
+---
+
+## Step 7: Fix Execution
+
+**Only after explicit approval in Step 6:**
+
+1. Create backup/checkpoint (if applicable)
+2. Execute fixes in order
+3. Run verification for each step
+4. Run full test suite
+5. Report results
+
+**After each significant change, inform user of progress.**
+
+**Upon completion:**
+
+```
+Question: Fix applied and tests passed. How to proceed?
+Options:
+- Commit the changes
+- Review the changes first
+- Run additional tests
+- Rollback the changes
+```
+
+---
+
+## Step 8: Bug Report Generation
+
+**After fix is complete, generate a numbered bug report for future reference.**
+
+### 8.1 Bug Number Assignment
+
+**Format:** `BUG-{PROJECT}-{SEQ}-{TIMESTAMP}`
+
+| Element | Description | Example |
+|---------|-------------|---------|
+| PROJECT | Project ID (uppercase) | NM001, SD003 |
+| SEQ | Sequential number per project (3 digits) | 001, 002, 003 |
+| TIMESTAMP | DateTime (yyyymmddhhmm) | 202601011530 |
+
+**Example:** `BUG-NM001-001-202601011530`
+
+**Numbering process:**
+1. Read `docs/troubleshooting/bug-reports/BUG_INDEX.md`
+2. Find the current SEQ for this project
+3. Increment SEQ by 1
+4. Generate timestamp from current time
+
+### 8.2 Report Creation
+
+**Save to:** `docs/troubleshooting/bug-reports/BUG-{PROJECT}-{SEQ}-{TIMESTAMP}.md`
+
+**Report Template:**
+
+```markdown
+# BUG-{PROJECT}-{SEQ}-{TIMESTAMP}: [Bug Title]
+
+## Meta Information
+- **Date**: YYYY-MM-DD HH:MM
+- **Project**: [Project Name]
+- **Reporter**: [User/AI]
+- **Status**: Resolved / Unresolved / Investigating
+
+## Error Summary
+[1-line error summary]
+
+## 3-Agent Investigation Results
+
+| Agent | Findings | Confidence |
+|-------|----------|------------|
+| Spec Agent | [content] | High/Medium/Low |
+| Code Agent | [content] | High/Medium/Low |
+| Solution Agent | [content] | High/Medium/Low |
+
+## Ultrathink Synthesis
+[📝 統合分析解説 content]
+
+## Error Flow Diagram
+[ASCII diagram + 📝 フロー解説]
+
+## Reverse Trace
+[ASCII diagram + 📝 逆追跡解説]
+
+## Divergence Analysis
+[ASCII diagram + 📝 乖離分析解説]
+
+## Root Cause
+[Confirmed root cause]
+
+## Applied Fix
+[What was fixed, which files, which commits]
+
+## Prevention Measures
+[How to prevent recurrence]
+
+## Related Bugs
+- [BUG-XXX-NNN-XXXXXXXXXXXX](./BUG-XXX-NNN-XXXXXXXXXXXX.md) - [relation]
+```
+
+### 8.3 Index Update
+
+**Update `docs/troubleshooting/bug-reports/BUG_INDEX.md`:**
+
+1. Increment the project SEQ counter
+2. Add new entry to the search index
+3. Add to category section if applicable
+
+### 8.4 Completion Confirmation
+
+**Use AskUserQuestion:**
+
+```
+Question: Bug report saved. Please verify.
+Options:
+- Confirmed, close session
+- Edit the report
+- Add additional information
+```
+
+---
+
+## Investigation Log Template
+
+Record in `docs/troubleshooting/BUG_TRACE_LOG.md`:
+
+```markdown
+## YYYY-MM-DD [Bug Title]
+
+### Error Summary
+[Original error]
+
+### 3-Agent Findings
+| Agent | Key Finding | Confidence |
+|-------|-------------|------------|
+| Spec  | [finding] | High/Medium/Low |
+| Code  | [finding] | High/Medium/Low |
+| Solution | [finding] | High/Medium/Low |
+
+### Ultrathink Synthesis
+- **Alignment**: [where agents agreed]
+- **Key Insight**: [synthesis conclusion]
+
+### Error Flow Diagram
+[Paste the ASCII diagram generated in Step 3]
+
+### Root Cause
+[Confirmed cause]
+
+### Process Flow Divergence
+```
+EXPECTED                    ACTUAL
+─────────                   ──────
+[flow step 1]               [flow step 1]
+    ↓                           ↓
+[flow step 2]          ≠    [flow step 2 - DIVERGED]
+    ↓                           ↓
+[expected output]           [error/wrong output]
+```
+
+### Solution Applied
+[What was fixed]
+
+### Prevention Measures
+[How to prevent recurrence]
+```
+
+---
+
+## Execution Start
+
+Begin with Step 1: Ask the user for error details using AskUserQuestion.

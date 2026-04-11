@@ -1,8 +1,20 @@
 ---
+slug: session-search
+source: .claude/commands/session-search.md
 description: セッション横断検索（過去セッションからキーワード検索）
-allowed-tools: Grep, Read, Glob
+claude_command: /session-search
+codex_skill: session-search
+gemini_file: session-search.toml
+allowed_tools: Grep, Read, Glob
 ---
 
+# セッション横断検索
+
+## Canonical Intent
+Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
+Gemini CLI の TOML と Codex の skill はこのファイルから生成します。
+
+## Original Body
 # セッション横断検索
 
 過去のセッション記録とTIMELINEからキーワードで横断検索する。

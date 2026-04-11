@@ -80,10 +80,11 @@ description: Codex equivalent of the SD003 custom command `/sessionwrite`. Use w
 [引き継ぎ事項・日本語]
 
 ### 学習ナッジ（修正が2回以上ある場合のみ記載）
-- セッション中にN回の修正あり
-  - [修正1の要約]
-  - [修正2の要約]
-  - 提案: ルール追加 / auto-memory更新 / スキル作成
+- 修正N回検出
+- 修正内容:
+  1. [修正の要約: 何を→何に修正したか]
+  2. [修正の要約: 何を→何に修正したか]
+- 永続化提案: [ルール追加 / auto-memory feedback記録 / スキル作成] を検討
 ```
 
 ## TIMELINE.md 更新
