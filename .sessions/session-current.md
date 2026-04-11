@@ -1,36 +1,28 @@
 # セッション記録
 
 ## セッション情報
-- **日時**: 2026-04-11 10:09:19
+- **日時**: 2026-04-11 11:25:00
 - **プロジェクト**: D:\claudecode\sd003
 - **ブランチ**: master
-- **最新コミット**: ad9d49a fix: restore .sd/ files + add notebooklm-config.json
+- **最新コミット**: ad9d49a (前回セッション開始時)
 
 ## 作業サマリー
 
 ### 完了
-1. NotebookLM + SD003統合設計（プラン策定→承認→実装）
-2. `notebooklm-research` スキル新規作成（ゼロトークンリサーチ、Workflow A対応）
-3. `notebooklm-memory` スキル新規作成（永続メモリ、Workflow C対応）
-4. chrome-devtools MCPフォールバックガイド作成
-5. `.sd/notebooklm-config.json` 設定ファイル作成（`memory.enabled: false` で初期配備）
-6. `sessionwrite.md` にStep 8（NotebookLM知見蓄積オプション）追加
-7. `sessionread.md` にStep 6（NotebookLM知見取得バックグラウンド）追加
-8. .sd/ディレクトリ消失→復元対応（ランタイムバグ再発）
+1. **Gemini CLI 環境の競合解消と最適化**
+   - `.geminiignore` を作成し、Codex 用の `.agents/skills/` を除外。これにより同一コマンド名（`/workflow-test` 等）の重複読み込みによる競合エラーを解消。
+   - `.agents/skills/` にのみ存在した独自のスキル（`beautiful-mermaid`, `d3-viz`, `drawio`, `excalidraw-diagram`, `implement-design`, `playwright-e2e-testing`, `skill-creator`, `webapp-testing`, `find-skills`）を `.gemini/skills/` にコピーし、Gemini CLI での利用を継続。
+   - `.gemini/skills/` 内で、自動生成された `.gemini/commands/` と機能・名前が重複していた `sd-deploy` と `dialogue-resolution` を削除し、最新の TOML 指示に統一。
 
 ### 進行中
 なし
 
 ### 未解決
-- Skills 24/27 FAIL（前回から継続、実運用上の問題なし）
+- Skills 24/27 FAIL（継続、実運用上の問題なし）
 
 ### 作成・変更ファイル
-- `D:\claudecode\sd003\.claude\skills\notebooklm-research\SKILL.md`（新規）
-- `D:\claudecode\sd003\.claude\skills\notebooklm-research\references\fallback-guide.md`（新規）
-- `D:\claudecode\sd003\.claude\skills\notebooklm-memory\SKILL.md`（新規）
-- `D:\claudecode\sd003\.sd\notebooklm-config.json`（新規）
-- `D:\claudecode\sd003\.claude\commands\sessionwrite.md`（更新）— Step 8追加
-- `D:\claudecode\sd003\.claude\commands\sessionread.md`（更新）— Step 6追加
+- `D:\claudecode\sd003\.geminiignore`（新規）
+- `D:\claudecode\sd003\.gemini\skills/` (複数ディレクトリのコピーと削除)
 
 ### 次回タスク
 
@@ -48,7 +40,6 @@
 - オプショナルスキル3個のデプロイ判断（git-worktrees, parallel-subagents, find-duplicates）
 
 ### 備考
-- notebooklm-pyは非公式リバースエンジニアリングツール。GoogleのRPC変更で即壊れるリスクあり。フォールバックとしてchrome-devtools MCP手動操作ガイドを用意済み
-- er001に既存のnotebooklm-slide-pipelineスキル（グローバル）があり、認証手順・トラブルシューティングはそこから転用
-- .sd/ディレクトリ消失が再発（Write toolでの.sd/操作→ランタイムリフレッシュで消失）。今回もHEAD~1から復元で対応
-- notebooklm-memoryは完全オプショナル設計。configが存在しない/enabled=falseならsessionwrite/sessionreadに一切影響しない
+- Gemini CLI の起動時に発生していた「Conflicts detected for command ...」という大量の警告を根本から解消。
+- スラッシュコマンドは `.gemini/commands/`（TOML形式）を正本とし、補助的な機能や独自のスキル定義を `.gemini/skills/` に配置する構成を確立。
+- 競合解消により、`/workflow-test` などのコマンドが意図しない名前（`/workflow-test1` 等）にリネームされる問題が修正された。

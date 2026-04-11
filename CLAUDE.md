@@ -90,6 +90,10 @@ IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAM
 
 IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before identifying root cause. Follow: 1) describe symptom, 2) list own recent actions, 3) hypothesize own actions as cause FIRST (external factors LAST), 4) verify hypothesis, 5) THEN implement fix + register + commit + package. "Being careful" is not a fix. Details: `.claude/rules/troubleshooting/root-cause-first.md`
 
+IMPORTANT: After completing a major task (tests pass, implementation done, bug fixed), self-evaluate whether any discoveries or corrections from this session should be persisted to auto-memory or session notes. Non-blocking, non-interactive. Details: `.claude/rules/session/memory-nudge.md`
+
+IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the session record: review user corrections during the session, record them in the notes section, and suggest rule/skill/memory creation if 2+ corrections detected. Non-blocking. Details: `.claude/rules/skills/learning-nudge.md`
+
 ---
 
 ## Quick Command Reference
@@ -101,10 +105,10 @@ IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before ident
 | Loop | `/sd003:loop-test`, `loop-lint`, `loop-type` |
 | Night | `/ralph-wiggum:run`, `status`, `plan` |
 | Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution` |
-| Session | `/sessionread`, `/sessionwrite`, `/sessionhistory` |
+| Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
 | Skills | `/sd:skills-find`, `skills-add`, `skills-list` |
 | Refactor | `/refactor:init`, `plan`, `batch`, `complete`, `rollback` |
 | Cleanup | `/cleanup`, `restore`, `history` |
 
 ---
-SD003 v3.0.0 | Updated: 2026-03-29 | Style: `.claude/rules/global/claude-md-style.md`
+SD003 v3.1.0 | Updated: 2026-04-11 | Style: `.claude/rules/global/claude-md-style.md`
