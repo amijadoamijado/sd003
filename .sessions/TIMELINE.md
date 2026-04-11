@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 56
+- **Total Sessions**: 57
 - **Latest Session**: 2026-04-11
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 04-11 | Hermes Agent学習システム統合（session-search + memory-nudge + learning-nudge）+ cr001デプロイ | 3082bee | [Details](session-20260411-204411.md) |
 | 04-11 | NotebookLM統合設計（research + memoryスキル新規作成 + sessionフック追加） | ad9d49a | [Details](session-20260411-100919.md) |
 | 04-07 | RTKファクトチェック（10件検証→見送り判定）+ メモリ記録 | 822442f | [Details](session-20260407-075630.md) |
 | 04-04 | 開発哲学文書化 + 分岐ルール + git hooks強化 + 全13PJ再デプロイ | a702684 | [Details](session-20260404-142713.md) |

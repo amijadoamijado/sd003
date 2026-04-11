@@ -1,27 +1,28 @@
-# 完了報告 - 2026-04-11 10:09
+# 完了報告 - 2026-04-11 20:44
 
 ## 完了
 
-1. NotebookLM + SD003統合設計（プラン策定→承認→実装）
-2. notebooklm-researchスキル新規作成（ゼロトークンリサーチ）
-3. notebooklm-memoryスキル新規作成（永続メモリ）
-4. .sd/notebooklm-config.json作成（enabled=false初期配備）
-5. sessionwrite/sessionreadにNotebookLMフック追加
+1. Hermes Agent学習システム統合（3機能: session-search, memory-nudge, learning-nudge）
+2. Codexレビュー2回実施・全指摘対応済み
+3. デプロイテンプレート更新（CLAUDE.md.template v3.1.0）
+4. sync-cli-commands.py実行（36 specs同期）
+5. cr001へSD003展開完了
 
 ## 未完了
 
-- NotebookLM知見ストアノートブック作成 + memory有効化
-- 実資料でのnotebooklm-research動作検証
+- 他プロジェクト（oc001, at001等）への再デプロイ
+- 学習ナッジ・メモリナッジの実運用テスト
 
 ## 次のステップ
 
-- notebooklm-config.jsonのnotebook_id設定 + memory.enabled=true
-- 税務講本PDF 1件でresearchスキルの動作検証
+- 実運用で3機能の動作確認（session-search, memory-nudge, learning-nudge）
+- 必要に応じて他PJへ再デプロイ
 
 ## 関連ファイル
 
-- `.claude/skills/notebooklm-research/SKILL.md`
-- `.claude/skills/notebooklm-memory/SKILL.md`
-- `.sd/notebooklm-config.json`
-- `.claude/commands/sessionwrite.md` (Step 8追加)
-- `.claude/commands/sessionread.md` (Step 6追加)
+- `.claude/commands/session-search.md`
+- `.claude/rules/session/memory-nudge.md`
+- `.claude/rules/skills/learning-nudge.md`
+- `.claude/commands/sessionwrite.md` (学習評価統合)
+- `CLAUDE.md` (v3.1.0)
+- `.claude/skills/sd-deploy/templates/CLAUDE.md.template`
