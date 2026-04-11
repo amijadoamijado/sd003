@@ -121,6 +121,15 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 
 post-commit hookが非同期pushを自動実行。
 
+## Step 8: NotebookLM知見蓄積（オプション）
+
+`.sd/notebooklm-config.json` が存在し `memory.enabled: true` の場合のみ実行。
+
+1. `session-current.md` の内容をテキストソースとしてNotebookLMノートブックに追加
+2. 失敗してもセッション保存自体はブロックしない（warn and continue）
+
+詳細: `.claude/skills/notebooklm-memory/SKILL.md`
+
 ---
 
 **実行**: Write/Edit で .sessions/ ファイルを更新し、git add .sessions/ .handoff/DONE.md && git commit する。
