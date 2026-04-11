@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 55
-- **Latest Session**: 2026-04-07
+- **Total Sessions**: 56
+- **Latest Session**: 2026-04-11
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 04-11 | NotebookLM統合設計（research + memoryスキル新規作成 + sessionフック追加） | ad9d49a | [Details](session-20260411-100919.md) |
 | 04-07 | RTKファクトチェック（10件検証→見送り判定）+ メモリ記録 | 822442f | [Details](session-20260407-075630.md) |
 | 04-04 | 開発哲学文書化 + 分岐ルール + git hooks強化 + 全13PJ再デプロイ | a702684 | [Details](session-20260404-142713.md) |
 | 04-04 | Multi-CLI 共通正本化 + Gemini/Codex 自動生成 + Codex home 配布 | 3539c86 | [Details](session-20260404-132402.md) |
