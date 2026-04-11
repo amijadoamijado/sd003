@@ -1,0 +1,15 @@
+{
+  "memory": {
+    "enabled": false,
+    "notebook_id": "",
+    "notebook_name": "SD003-知見ストア"
+  },
+  "research": {
+    "default_output": "materials",
+    "obsidian_vault_path": ""
+  },
+  "auth": {
+    "profile_dir": "~/.notebooklm-profile",
+    "storage_state": "~/.notebooklm/storage_state.json"
+  }
+}
