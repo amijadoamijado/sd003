@@ -131,4 +131,25 @@ Agent(run_in_background=true):
 
 ---
 
-**実行開始**: 上記4ファイルを順番に読み込み（Step 1-4）、同時にStep 5のAgentをバックグラウンドで起動し、要約を表示してください。
+## Step 6: NotebookLM知見取得（バックグラウンド、オプション）
+
+`.sd/notebooklm-config.json` が存在し `memory.enabled: true` の場合のみ、
+Step 5と並行してバックグラウンドAgentを起動する:
+
+```
+Agent(run_in_background=true):
+  description: "fetch relevant knowledge from NotebookLM"
+  prompt: |
+    .sd/notebooklm-config.json を読み、memory.enabled が true なら:
+    1. python -m notebooklm auth check で認証確認
+    2. session-current.md の次回タスクを読む
+    3. python -m notebooklm chat "前回のセッションで未解決だった課題と関連する過去の知見" -n <notebook_id>
+    4. 結果があれば「関連する過去の知見」として報告
+    configが存在しない or enabled=false なら「NLMメモリ無効」と報告して終了
+```
+
+詳細: `.claude/skills/notebooklm-memory/SKILL.md`
+
+---
+
+**実行開始**: 上記4ファイルを順番に読み込み（Step 1-4）、同時にStep 5-6のAgentをバックグラウンドで起動し、要約を表示してください。
