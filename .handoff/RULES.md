@@ -111,6 +111,7 @@ npm run build && npm test && npm run lint
 - [ ] **`.claude/settings.json`をgit追跡する**（.gitignoreに入れること。追跡するとランタイムが.sd/を消す）
 - [ ] **ユーザー提供ファイル・成果物の上書き**（元ファイル保持、修正版は別名で新規作成）
 - [ ] **skills/フォルダ未確認でのファイル操作**（該当スキルがあればその手順に厳密に従うこと）
+- [ ] **Playwright ブラウザキャッシュのローカル化**（必ず `D:\playwright-browsers` を使う。`PLAYWRIGHT_BROWSERS_PATH` をプロジェクトローカルパスに上書き禁止。詳細: `.claude/rules/global/playwright-cache.md`）
 
 > テストの唯一の目的は「本番環境のエラーを発見し修正すること」。
 > 詳細: `.claude/rules/testing/testing-standards.md`

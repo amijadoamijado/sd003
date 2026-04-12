@@ -84,6 +84,8 @@ IMPORTANT: When in a loop session (`/sd003:loop-*`), follow Ralph Loop rules. Mi
 
 IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design principles, apply design tokens, and check visual quality score (50/70 minimum). Details: `.claude/rules/ui/web-design-principles.md`, `.claude/rules/ui/visual-review-checklist.md`
 
+IMPORTANT: When running Playwright or any tool that downloads Chromium, use the shared cache at `D:\playwright-browsers`. Never set `PLAYWRIGHT_BROWSERS_PATH` to a project-local path. Details: `.claude/rules/global/playwright-cache.md`
+
 IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
 
 IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .sd/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
