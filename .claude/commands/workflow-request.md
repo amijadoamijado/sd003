@@ -40,15 +40,46 @@ allowed-tools: Bash, Write, Read, Glob, Grep
 WORK_ORDER.md のタスク一覧から依存タスクを特定し、
 PROJECT_STATUS.md で完了状態を確認。
 
-### 4. 実装指示の詳細生成
-テンプレートを使用して実装指示を作成:
-- テンプレート: `.sd/ai-coordination/workflow/templates/IMPLEMENT_REQUEST.md`
+### 4. 実装指示の詳細生成（テンプレート駆動・必須欄検証）
+
+テンプレートを**そのままコピー**して具体化:
+- **テンプレート実体（正本・tracked）**: `.claude/templates/workflow/IMPLEMENT_REQUEST.md`
+- **コピー先（案件ごとの実体）**: `.sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{NNN}.md`
+
+> 注: 以前は `.sd/ai-coordination/workflow/templates/` を正本パスとしていたが、`.sd/` は gitignore 対象（post-commit hook で wipe される）のため、正本を `.claude/templates/workflow/` に移行済み。
+
+**⛔ 重要ルール（柱1〜4 の入口ガードレール）**:
+- **Section 0（Quality Prerequisites）は改変・削除禁止**。全 IMPLEMENT_REQUEST に自動挿入される
+- **Section 2（ユーザーが見る画面・受け取るもの）は必須**。空の場合は**作成を中止**してユーザーに確認すること
+- **Section 7（段取り）のUI-First順序は削除禁止**
+
+#### 4a. stack 検出（必須・自動）
+
+package.json を読み取り以下を判定:
+- `dependencies.react` / `next` / `vue` → Web Frontend
+- `.claspignore` 存在 or `@types/google-apps-script` → GAS
+- `bin` フィールド or entry-point のみ → CLI
+- それ以外 → Vanilla or library
+
+検出結果を Section 1 の `stack` 欄に記入。該当時は Section 0.6（GAS 追加項目）をチェック対象として残す。
+
+#### 4b. 必須欄バリデーション（空なら拒否）
+
+以下が空の場合、IMPLEMENT_REQUEST を作成せず、ユーザーに必要情報を確認する:
+
+| Section | 必須内容 | 空の場合の対処 |
+|---------|---------|---------------|
+| 2. ゴール（ユーザーが見る画面・受け取るもの） | 画面URL、ファイルパス、または stdout 例 | 作成停止、ユーザーに「ユーザーが最終的に見るものは？」と質問 |
+| 2. 成果物の種類 | 最低1つチェック | 同上 |
+| 3.1 変更可能ファイル | 最低1件 | WORK_ORDER を再確認 |
+
+#### 4c. 項目具体化
 
 以下を具体化:
 - **ブランチ名**: `feature/{案件ID}/{タスク番号}-{slug}`
 - **変更可能ファイル**: 発注書から特定
 - **禁止領域**: フレームワークファイル、仕様書等
-- **テストケース**: 発注書のテスト要件から展開
+- **テストケース**: 発注書のテスト要件から展開（ただし「テストのためのテスト」は書かない）
 - **コミット方針**: 標準形式を適用
 
 ### 5. IMPLEMENT_REQUEST_{タスク番号}.md 作成

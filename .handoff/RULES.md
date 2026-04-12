@@ -13,6 +13,17 @@
 | `tests/` | テストコード |
 | `dist/` | ビルド出力（.gitignore） |
 
+## Core Doctrine - 4本柱（最上位）
+
+SD003 の全判断の根拠。詳細: `docs/core-doctrine.md`
+
+| 柱 | 要点 | 根拠 |
+|----|------|------|
+| 1. Output Primacy | 「完了」=ユーザーが見るものが存在。画面ゼロ=未着手 | `.claude/rules/global/output-primacy.md` |
+| 2. Silent Interior | 内部は黙って動け。設計の優雅さを議論しない | `.claude/rules/global/silent-interior.md` |
+| 3. Real Data First | 実データで動かす。テストのためのテスト禁止 | `.claude/rules/global/real-data-first.md` |
+| 4. Segmented Sequencing | 非ブロッキング連続 → 末端に1回確認。省略禁止 | `.claude/rules/global/segmented-sequencing.md` |
+
 ## Work First - まず動かす原則（最上位）
 
 > 動かないソフトウェアに対するテスト・レビュー・文書は無価値。
@@ -112,6 +123,10 @@ npm run build && npm test && npm run lint
 - [ ] **ユーザー提供ファイル・成果物の上書き**（元ファイル保持、修正版は別名で新規作成）
 - [ ] **skills/フォルダ未確認でのファイル操作**（該当スキルがあればその手順に厳密に従うこと）
 - [ ] **Playwright ブラウザキャッシュのローカル化**（必ず `D:\playwright-browsers` を使う。`PLAYWRIGHT_BROWSERS_PATH` をプロジェクトローカルパスに上書き禁止。詳細: `.claude/rules/global/playwright-cache.md`）
+- [ ] **画面なし状態で「完了」と報告する**（柱1 Output Primacy 違反。ユーザーが見るものが存在するまで未着手扱い）
+- [ ] **動く前の内部パターン導入**（柱2 Silent Interior 違反。Adapter-Core、Env Interface等は動いた後）
+- [ ] **テストのためのテスト・カバレッジ目標のテスト**（柱3 Real Data First 違反。実データで動かす方が優先）
+- [ ] **ユーザー確認をスキップする・毎ステップでブロックする**（柱4 Segmented Sequencing 違反。非ブロッキング連続→末端1回集約）
 
 > テストの唯一の目的は「本番環境のエラーを発見し修正すること」。
 > 詳細: `.claude/rules/testing/testing-standards.md`

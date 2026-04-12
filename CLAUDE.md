@@ -62,7 +62,24 @@ Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstd
 
 ---
 
+## Core Doctrine（4本柱）
+
+SD003 の全判断の根拠。詳細: `docs/core-doctrine.md`
+
+- **柱1: Output Primacy** — 「完了」=ユーザーが見る画面・受け取る成果物が存在し検証済み。内部ファイル数は完了指標ではない
+- **柱2: Silent Interior** — 内部は黙って動け。設計の優雅さより動くことが先
+- **柱3: Real Data First** — 実データで動かす。テストのためのテスト禁止。バグ再現時のみ最小テスト
+- **柱4: Segmented Sequencing** — 非ブロッキングを連続実行、ユーザー確認は末端に1回集約
+
 ## Conditional Context
+
+IMPORTANT: When judging "completion" of any task, apply Output Primacy (柱1): completion requires a user-visible artifact (screen/output/deliverable) that exists and is verified. File count, test count, type count do NOT constitute completion. A state with zero screens equals "not started" regardless of other progress. Details: `.claude/rules/global/output-primacy.md`
+
+IMPORTANT: When designing internal architecture (adapter, core, interface, types), apply Silent Interior (柱2): build working output first, then integrate internal patterns only when output is stable. Do not start with types → interface → adapter → core. Do not spend time on internal elegance while output is unmet. Details: `.claude/rules/global/silent-interior.md`
+
+IMPORTANT: When writing or evaluating tests, apply Real Data First (柱3): never write tests for the sake of tests or coverage targets. Test only to reproduce/fix production bugs. Work with real data (or its copy), not mocks. Forbidden patterns (VTD-001〜005) are auto-detected. Details: `.claude/rules/global/real-data-first.md`
+
+IMPORTANT: When sequencing work (especially in workflow-impl), apply Segmented Sequencing (柱4): run non-blocking steps (tsc, lint, test, dev server, screenshot) continuously, then gate ONCE with user confirmation (AskUserQuestion) at the end. Never skip user confirmation. Never block every step. Details: `.claude/rules/global/segmented-sequencing.md`
 
 IMPORTANT: When starting any task, determine which project branch applies: GAS (Google Apps Script app), Cowork (SD003 framework/AI coordination), or Sukima Digital (IT coordination/business design). If the task can be accomplished by AI direct execution without building anything, don't build. Details: `.claude/rules/global/project-branching.md`, `docs/development-philosophy.md`
 
