@@ -3,3 +3,6 @@
 
 # Auto code review results (runtime generated)
 # Note: .codex-review-result.md is in project root, listed in root .gitignore
+
+# Workflow pipeline state (runtime generated)
+.workflow-state.json
