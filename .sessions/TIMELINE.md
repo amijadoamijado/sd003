@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 61
-- **Latest Session**: 2026-04-12
+- **Total Sessions**: 62
+- **Latest Session**: 2026-04-17
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 04-17 | Gemini CLI TOMLパースエラー解消 + 同期スクリプト統合 + 競合解消 | - | [Details](session-20260417-125152.md) |
 | 04-12 | SD003 Core Doctrine 4本柱制定 + ガードレール Phase A-C（思想+テンプレート+コマンド強制）+ Playwright共有キャッシュ | 16e8b60 | [Details](session-20260412-214651.md) |
 | 04-12 | AI協調ワークフロー致命的欠陥特定（impl Step 5にRun Gate欠落 / 動作確認なしで完走） | 79c2e3f | [Details](session-20260412-125516.md) |
 | 04-12 | code-review-graph調査・SD003統合判定（条件付き導入推奨: 大規模PJのみ） | 9a94e4f | [Details](session-20260412-111628.md) |
