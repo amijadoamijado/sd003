@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 63
+- **Total Sessions**: 64
 - **Latest Session**: 2026-04-20
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 04-20 | 全33PJ Gemini CLI TOML一括修復（22PJ 253件パースエラー + 16PJ 225件BOM解消、文字化け29件 sibling置換） | - | [Details](session-20260420-165616.md) |
 | 04-20 | 全33PJ .kiro退避 + 9PJ /sd-deploy + 71件レガシー駆除 + 119ファイル sed 置換 + ta001整合性復旧 | - | [Details](session-20260420-095435.md) |
 | 04-17 | Gemini CLI TOMLパースエラー解消 + 同期スクリプト統合 + 競合解消 | - | [Details](session-20260417-125152.md) |
 | 04-12 | SD003 Core Doctrine 4本柱制定 + ガードレール Phase A-C（思想+テンプレート+コマンド強制）+ Playwright共有キャッシュ | 16e8b60 | [Details](session-20260412-214651.md) |
