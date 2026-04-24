@@ -7,13 +7,13 @@
 **変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `D:\claudecode\*\.gemini\commands\*.toml` (253ファイル / 22プロジェクト) | BOM除去・`"""`→`'''`・文字化けファイルsibling置換 |
-| `.sessions/session-20260420-165616.md` | 本セッション記録 |
-| `.sessions/session-current.md` | 最新セッション反映 |
-| `.sessions/TIMELINE.md` | 04-20エントリ追加 |
+| `D:\claudecode\nl001\` 配下全体 | SD003フレームワーク新規展開（計263ファイル）|
+| `.sessions/session-20260425-084041.md` | セッション履歴追加 |
+| `.sessions/session-current.md` | 最新セッション情報更新 |
+| `.sessions/TIMELINE.md` | セッション #65 追加 |
 
 **変更内容の要約**
-全33プロジェクトのGemini CLIスラッシュコマンドTOML 1236ファイルを検証。22プロジェクト253件のパースエラー（BOM 196 + `"""`内バックスラッシュ 28 + 文字化け 29）を一括修復。修復後はエラー0件・BOM残存0件。
+nl001 プロジェクトにSD003フレームワーク v2.14.0（deploy v3.1.0）を展開。`/sd-deploy` 経由でdeploy.ps1を実行し、動的コピー256ファイル + 生成7ファイルを配置。主要検証カテゴリは全PASS。
 
 ---
 
@@ -21,31 +21,39 @@
 
 **実行したコマンド**
 ```bash
-python tomllib全件検証スクリプト（修復前後）
+powershell -ExecutionPolicy Bypass -File .claude/skills/sd-deploy/deploy.ps1 D:\claudecode\nl001
 ```
 
 **結果**
 ```
-修復前: Parse errors 253 / BOM 225
-修復後: Parse errors   0 / BOM   0
+Files copied: 256
+Files generated: 7
+Backup: D:\claudecode\nl001\.sd003-backup-20260425_082409
+[PASS] Commands 33/33, Commands/sd 3/3, Rules 37/37, Hooks 20/20
+[PASS] Gemini Commands 33/33, Antigravity 1/1, Handoff 7/7
+[FAIL] Skills 107/110 （意図的除外3件により表示上の不一致）
+[PASS] 生成ファイル: CLAUDE.md, gemini.md, session-current.md, TIMELINE.md, settings.json, registry.json, handoff-log.json
 ```
 
 **動作確認**
-- [x] sd003自身の gemini CLI起動時エラーなし（前セッションで確認済み）
-- [x] 全1236ファイル tomllib.loads() でパース成功
+- [x] nl001側のディレクトリ構造が作成されている（.claude, .gemini, .sd, .sessions, .handoff, .antigravity 等）
+- [x] CLAUDE.md と gemini.md がテンプレートから生成されている
+- [x] package.json が作成され gas-fakes が注入されている
+- [ ] `cd D:\claudecode\nl001 && npm install`（ユーザー側で実行予定）
+- [ ] `/sessionread` による最終動作確認（ユーザー側で実行予定）
 
 ---
 
 ## 残っていること
 
 **未完了タスク**
-- [ ] 22プロジェクト個別のgit commit（各プロジェクトの責任で実施）
-- [ ] `/sd-deploy` テンプレート側で`"""`→`'''`統一（再発防止・P1）
-- [ ] BOM混入経路の特定（PowerShell `Out-File`デフォルト挙動疑い・P2）
+- [ ] nl001側で `npm install` を実行
+- [ ] nl001側で `/sessionread` を実行して動作確認
+- [ ] nl001 のプロジェクト種別確定（GAS / Cowork / Sukima Digital）
 
 **次の手順**
-- 各プロジェクトで `git status` 確認後、個別に `git add .gemini/commands/ && git commit` 実施
-- deploy.ps1のTOML生成箇所を `Out-File -Encoding utf8NoBOM` と `'''` 使用で統一
+- 次のタスク: nl001 の開発開始時は `/blueprint-gate` または `/sd:spec-init {feature}` から
+- 依存関係: なし
 
 ---
 
@@ -54,21 +62,13 @@ python tomllib全件検証スクリプト（修復前後）
 **設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| 個別修正 vs 一括自動修復 | 一括自動修復 | 253件の手作業は現実的でない、パターンが3種に明確分類できた |
-| `"""`をエスケープ vs `'''`化 | `'''`化 | Windowsパス多用環境ではエスケープ地雷が再発する |
-| 文字化けファイル破棄 vs sibling置換 | sibling置換 | 同名ファイルの健全版が他プロジェクトに存在（ad001等） |
-| 自動 git commit vs 報告のみ | 報告のみ | 22プロジェクト横断のためプロジェクト別判断が必要 |
-
-**採用しなかった案と理由**
-- 文字化けファイル自力再生成: 元意図の復元困難、健全版が他プロジェクトにある以上そちらが確実
-- `"""`でバックスラッシュ1個ずつエスケープ: 修正漏れリスク、将来の再発リスクが残る
+| 手動コピー vs /sd-deploy | /sd-deploy | CLAUDE.md で `/sd-deploy` 必須、手動展開は禁止 |
+| Optional skills 除外扱い | 除外のまま | deploy.ps1 既定動作（git-worktrees, parallel-subagents, find-duplicates） |
 
 ---
 
 ## 追加情報
 
-- 修正スクリプト `/tmp/fix_toml_apply.py` は一時ファイル（コミット対象外）
-- sd003は前回セッション（コミット 1b1d288）で既に修復済み。今回は他22プロジェクトが対象
-- 検出したパース失敗ファイル名の偏り: `sd-spec-status/tasks/validate-gap` `workflow-impl/init/review` の6種に集中
-
----
+- Skills 107/110 [FAIL] は意図的除外による検証ロジック上の表示不一致のみ。実害なし
+- WARN として出た Source not found（`.sd\settings`, `.sd\design`, `.sd\ralph`, `.sd\steering`）はsd003側の当該ディレクトリが空のため発生。nl001側では正常に作成され、中身が空になるだけで問題なし
+- Backup: `D:\claudecode\nl001\.sd003-backup-20260425_082409`（ロールバック用）
