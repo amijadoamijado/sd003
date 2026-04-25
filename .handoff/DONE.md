@@ -1,74 +1,78 @@
 # DONE.md - 完了報告
 
----
-
 ## やったこと
 
 **変更したファイル**
+
 | ファイル | 変更内容 |
 |---------|----------|
-| `D:\claudecode\nl001\` 配下全体 | SD003フレームワーク新規展開（計263ファイル）|
-| `.sessions/session-20260425-084041.md` | セッション履歴追加 |
-| `.sessions/session-current.md` | 最新セッション情報更新 |
-| `.sessions/TIMELINE.md` | セッション #65 追加 |
+| `C:\Users\a-odajima\.codex\skills\sessionread\SKILL.md` | Step 0 PROJECT_ROOT 固定追加、絶対パス化、cwd リセット警告、広域探索禁止節、5行表示、Step 5 アーカイブ Agent 削除 |
+| `C:\Users\a-odajima\.codex\skills\sessionwrite\SKILL.md` | Step 0 PROJECT_ROOT 固定追加、`<PROJECT_ROOT>\.sessions\...` 絶対パス化、`git -C` 限定コマンドのみ、TIMELINE 更新を Edit ツールに、git add+commit 同一 Bash 内 `&&` 連結、3行表示 |
+| `C:\Users\a-odajima\.claude\plans\polymorphic-herding-bumblebee.md` | 設計プラン（Plan モードで承認済み） |
+| `D:\claudecode\sd003\.sessions\session-20260425-235120.md` | 本セッション履歴 |
+| `D:\claudecode\sd003\.sessions\session-current.md` | 最新版上書き |
+| `D:\claudecode\sd003\.sessions\TIMELINE.md` | エントリ追加 + Total Sessions 65→66 |
+| `D:\claudecode\sd003\.handoff\DONE.md` | 本ファイル |
 
 **変更内容の要約**
-nl001 プロジェクトにSD003フレームワーク v2.14.0（deploy v3.1.0）を展開。`/sd-deploy` 経由でdeploy.ps1を実行し、動的コピー256ファイル + 生成7ファイルを配置。主要検証カテゴリは全PASS。
+
+Codex の `/sessionread` `/sessionwrite` が nl001 で誤動作（グローバル+sd003 を見ていた）した原因を特定し、両 skill に PROJECT_ROOT 絶対パス固定を導入。広域探索コマンドとバックグラウンド Agent を削除し、報告を結論優先で短縮した。
 
 ---
 
 ## 確認結果
 
 **実行したコマンド**
+
 ```bash
-powershell -ExecutionPolicy Bypass -File .claude/skills/sd-deploy/deploy.ps1 D:\claudecode\nl001
+git -C "D:/claudecode/sd003" branch --show-current
+git -C "D:/claudecode/sd003" log -1 --pretty=format:'%h %s'
 ```
 
 **結果**
-```
-Files copied: 256
-Files generated: 7
-Backup: D:\claudecode\nl001\.sd003-backup-20260425_082409
-[PASS] Commands 33/33, Commands/sd 3/3, Rules 37/37, Hooks 20/20
-[PASS] Gemini Commands 33/33, Antigravity 1/1, Handoff 7/7
-[FAIL] Skills 107/110 （意図的除外3件により表示上の不一致）
-[PASS] 生成ファイル: CLAUDE.md, gemini.md, session-current.md, TIMELINE.md, settings.json, registry.json, handoff-log.json
-```
 
-**動作確認**
-- [x] nl001側のディレクトリ構造が作成されている（.claude, .gemini, .sd, .sessions, .handoff, .antigravity 等）
-- [x] CLAUDE.md と gemini.md がテンプレートから生成されている
-- [x] package.json が作成され gas-fakes が注入されている
-- [ ] `cd D:\claudecode\nl001 && npm install`（ユーザー側で実行予定）
-- [ ] `/sessionread` による最終動作確認（ユーザー側で実行予定）
+- 修正後の skill ファイルを Read で読み返し、Plan の方針通りに整合していることを確認。
+- 実環境（Codex セッション）での動作確認は未実施（次回 Codex 起動時に検証）。
 
 ---
 
 ## 残っていること
 
 **未完了タスク**
-- [ ] nl001側で `npm install` を実行
-- [ ] nl001側で `/sessionread` を実行して動作確認
-- [ ] nl001 のプロジェクト種別確定（GAS / Cowork / Sukima Digital）
+
+- [ ] 次回 Codex セッションで `/sessionread` の動作検証（P0）
+- [ ] 次回 Codex セッションで `/sessionwrite` の動作検証（P0）
+- [ ] nl001 を独立 git リポジトリに分離するかの判断（P1）
+- [ ] Codex skill 重複（ハイフン版 / 非ハイフン版）の整合（P1）
+- [ ] 他 37 skill への PROJECT_ROOT 固定パターン横展開検討（P1）
 
 **次の手順**
-- 次のタスク: nl001 の開発開始時は `/blueprint-gate` または `/sd:spec-init {feature}` から
-- 依存関係: なし
+
+- nl001 で Codex を起動 → `/sessionread` 実行 → 5行サマリーが出るか確認
+- Claude Code 側の同等コマンド（`.claude/commands/sessionread.md` 等）にも同様の絶対パス化を反映するか別途検討
 
 ---
 
 ## 判断したこと
 
 **設計上の選択**
+
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| 手動コピー vs /sd-deploy | /sd-deploy | CLAUDE.md で `/sd-deploy` 必須、手動展開は禁止 |
-| Optional skills 除外扱い | 除外のまま | deploy.ps1 既定動作（git-worktrees, parallel-subagents, find-duplicates） |
+| 全 39 skill 一括修正 vs sessionread/sessionwrite のみ | 後者 | 「広域探索しない」原則に整合。実害が出ているスキルから順次対応 |
+| ハイフン版 skill も同時整合 vs 後回し | 後回し | 実害発生時に対応する方針 |
+| nl001 を独立 git リポにする vs 親リポのまま | 保留 | ユーザー判断要。本セッションのスコープ外 |
+| Bash sed で TIMELINE 更新 vs Edit ツール | Edit ツール | Windows 互換性とコマンド誤動作回避 |
+| `git add` と `git commit` を別 Bash vs 同一 Bash 内 `&&` | 後者 | SD003 の `.sd/` 消失バグ回避ルールと整合 |
+
+**採用しなかった案と理由**
+
+- skill 共通ルール ファイル新規作成: スコープ拡大を招くため見送り。各 skill 内に直接記述する方針。
 
 ---
 
 ## 追加情報
 
-- Skills 107/110 [FAIL] は意図的除外による検証ロジック上の表示不一致のみ。実害なし
-- WARN として出た Source not found（`.sd\settings`, `.sd\design`, `.sd\ralph`, `.sd\steering`）はsd003側の当該ディレクトリが空のため発生。nl001側では正常に作成され、中身が空になるだけで問題なし
-- Backup: `D:\claudecode\nl001\.sd003-backup-20260425_082409`（ロールバック用）
+- 本セッションは Plan モードを経由した（プラン: `polymorphic-herding-bumblebee.md`）
+- ユーザー修正 5 回検出（学習ナッジ対象）。詳細は session-current.md の備考を参照
+- 「Codex は余計な動きが多い」というユーザー指摘を skill レベルでルール化した。`git status --short`（広域）/ バックグラウンド Agent / 並列 Read / 装飾フォーマットを skill 内で禁止
