@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 66
-- **Latest Session**: 2026-04-25
+- **Total Sessions**: 67
+- **Latest Session**: 2026-04-26
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 04-26 | sessionwrite改善（「使用した外部ファイル」セクション追加）+ 全12PJ配付 | e5ed2d3 | [Details](session-20260426-152843.md) |
 | 04-25 | Codex skill 改訂（sessionread/sessionwrite に PROJECT_ROOT 固定 + 絶対パス化 + 広域探索禁止 + 5行報告） | - | [Details](session-20260425-235120.md) |
 | 04-25 | nl001 プロジェクトへSD003フレームワーク展開（v2.14.0 / deploy v3.1.0、256ファイル コピー + 7ファイル 生成） | - | [Details](session-20260425-084041.md) |
 | 04-20 | 全33PJ Gemini CLI TOML一括修復（22PJ 253件パースエラー + 16PJ 225件BOM解消、文字化け29件 sibling置換） | - | [Details](session-20260420-165616.md) |
