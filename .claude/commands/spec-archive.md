@@ -23,7 +23,7 @@ Archive specification files to history folder with timestamp.
 ```bash
 /spec:archive bug-trace              # Archive all files
 /spec:archive bug-trace requirements # Archive requirements.md only
-/spec:archive ralph-wiggum design    # Archive design.md only
+/spec:archive ralph-wiggum spec      # Archive spec.md only
 ```
 
 ## Execution Steps

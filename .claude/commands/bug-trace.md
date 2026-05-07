@@ -335,7 +335,7 @@ Options:
 ## 仕様書更新提案 (Spec Update Proposal)
 
 ### 更新対象
-- **ファイル**: [.sd/specs/{feature}/requirements.md or design.md]
+- **ファイル**: [.sd/specs/{feature}/requirements.md or spec.md]
 - **セクション**: [Section name]
 
 ### 現在の記述

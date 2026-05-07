@@ -127,7 +127,7 @@
 ## Specification
 
 - `.sd/specs/ralph-wiggum/requirements.md`
-- `.sd/specs/ralph-wiggum/design.md`
+- `.sd/specs/ralph-wiggum/spec.md`
 
 ---
 

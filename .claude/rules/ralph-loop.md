@@ -115,4 +115,4 @@ RALPH_BLOCKED_PROMISE="RALPH_NIGHTLY_BLOCKED"
 ### Specification
 
 - Requirements: `.sd/specs/ralph-wiggum/requirements.md`
-- Design: `.sd/specs/ralph-wiggum/design.md`
+- Spec: `.sd/specs/ralph-wiggum/spec.md`
