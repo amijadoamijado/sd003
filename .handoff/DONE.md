@@ -2,19 +2,29 @@
 
 ## やったこと
 
-**変更内容**
-D:\claudecode 親.git の解体作業。配下56プロジェクト（[a-zA-Z]{2}\d{3}パターン）を全て独立git管理に移行。at001 から `git status` を打つと隣接 SB001 の差分4183行が出る巻き込み問題を根本解決。
+**変更したファイル（sd003本体）**
+| ファイル | 変更内容 |
+|---------|----------|
+| `docs/troubleshooting/RESOLUTION_LOG.md` | at001-v1事故エントリ追加 |
+| `.claude/rules/specs/spec-driven.md` | 全面書換: paths制約撤廃、spec.md規約 |
+| `.claude/rules/specs/spec-versioning.md` | paths制約撤廃 + design→spec |
+| `.claude/hooks/enforce-spec-location.sh` | 新規（PreToolUse物理ガードレール） |
+| `.claude/settings.json` | 新hook登録（gitignoreのためローカルのみ） |
+| `.claude/skills/sd-deploy/templates/settings.json.template` | 新hook登録 |
+| `.claude/skills/sd-deploy/templates/AGENTS.md.template` | spec.md規約反映 |
+| `.claude/skills/sd-deploy/templates/gemini.md.template` | spec.md規約反映 |
+| `CLAUDE.md` | Conditional Context追加（spec配置） |
+| `.claude/commands/{bug-trace,ralph-wiggum-run,spec-archive}.md` | design→spec参照 |
+| `.claude/rules/ralph-loop.md` | 同上 |
 
-**変更したファイル**
-| パス | 変更内容 |
-|------|---------|
-| `D:\claudecode\.git\` | リネーム → `.archive/parent-git-backup-20260507-082130/parent-git-disabled/`（無効化） |
-| `D:\claudecode\.archive\parent-git-backup-20260507-082130\` | 新規作成。bundle (247MB) + log + config + WT diff を保全 |
-| `D:\claudecode\at001\` 他16PJ | `.git` を新規 init + 初期commit（main ブランチ） |
-| `D:\claudecode\ss001\nul` / `D:\claudecode\ta001\nul` | 削除（過去シェルエラーの残骸、Windows予約語） |
-| `D:\claudecode\sd003\.sessions\session-20260507-093444.md` | 新規作成（セッション記録） |
-| `D:\claudecode\sd003\.sessions\session-current.md` | 上記をコピー |
-| `D:\claudecode\sd003\.sessions\TIMELINE.md` | 2026-05セクション追加、Total Sessions 68 |
+**変更したファイル（at001 + 17PJ）**
+- at001: 16ファイル `docs/specs/at001-v1/` → `.sd/specs/at001-v1/` git mv
+- 17PJ計63ファイル: design.md → spec.md git mv（全PJ独立コミット）
+
+**変更内容の要約**
+at001-v1事故（仕様書配置ルール違反）の根本原因分析と再発防止対策を実施。
+鶏卵問題の構造的欠陥を解消し、物理ガードレール（PreToolUse hook）を導入。
+Google Antigravity衝突回避のためdesign.md→spec.mdに統一し、全20PJで一括リネーム。
 
 ---
 
@@ -22,55 +32,29 @@ D:\claudecode 親.git の解体作業。配下56プロジェクト（[a-zA-Z]{2}
 
 **実行したコマンド**
 ```bash
-git rev-parse --show-toplevel  # 各PJで独立gitルートを確認
-git log --oneline -1            # 各PJで初期commitが立っていることを確認
-git status                      # 巻き込み差分が消えていることを確認
+git log --oneline -3
+# → 94bf8e7 docs: spec.md規約反映
+# → f2cf00b feat: spec配置物理ガードレール+spec.md採用
+# → 4ae9c50 docs: at001-v1事故根本原因分析
+
+find D:/claudecode -path '*/.sd/specs/*/design.md' | wc -l
+# → 1（nm002のみ残存：client-names guard ブロックのため手動対応必要）
 ```
 
-**結果**
-- 全56プロジェクト中 55個 が独立 .git + commit成立（no001のみ空ディレクトリでcommitなし）
-- sd003 (master, fa78b49)・oc001 (main)・SB001 (main) など既存独立リポジトリは無傷
-- D:\claudecode 直下で git コマンドを打つと "not a git repository"（仕様、想定通り）
-
-**保全資産（破壊なし保証）**
-- `parent-git-all-refs.bundle` 247MB（全1237コミット・26ブランチ）
-- `parent-git-disabled/` 無効化された親.git本体
-- `wt-unstaged-diff.patch` 8.7MB（消した未コミット差分）
+**実環境動作確認**
+- enforce-spec-location.sh: 実行可能化済み（chmod +x）
+- post-commit hook: .sd/ auto-restore 3回発動（4ae9c50/f2cf00b/94bf8e7コミット時）→ 設計通り機能
+- pre-commit hook (nm002): client-names guard が「小池電機」検出してブロック → 設計通り機能
 
 ---
 
-## 残っていること
+## 次にやること
 
-**未完了タスク**
-- [ ] サクセス22期 勘定奉行→弥生変換スクリプト作成・実行（前セッションからのP0継続）
-- [ ] 山一38期の同様変換
-- [ ] GitHub同期（必要時に個別対応、元remoteは config.txt に保全済）
-- [ ] at001 のブランチ名（必要なら main → feature/20260209-001-table-ocr/001-project-foundation にリネーム）
+**P0（緊急）**
+1. サクセス22期 全520件 勘定奉行→弥生変換スクリプト作成・実行（前セッション継続）
+2. 変換後CSVを弥生にインポート動作確認
 
-**次の手順**
-- 次のタスク: P0のサクセス22期変換スクリプト作成に戻る
-- 関連ファイル: `C:\Users\a-odajima\Desktop\サクセス\22sakusesusiwakebugyou.csv`
-
----
-
-## 判断したこと
-
-**設計上の選択**
-| 選択肢 | 採用 | 理由 |
-|--------|------|------|
-| 親.git 削除 vs リネーム保全 | リネーム保全 | 取り返しがつかない操作を避ける。bundleもセットで二重保全 |
-| 履歴付き復元 vs 新規 init | 新規 init | ユーザーが「ローカル最新でOK、GitHub履歴消えてOK」と明言 |
-| 全PJ一括処理 vs 段階的 | 段階的（Phase A/B/C） | 各段階で検証を挟む。Phase B 後に sd003/oc001/SB001 の独立動作を確認してから Phase C へ |
-| 全PJ ブランチ名 main で統一 vs 元のまま | main で統一 | git init -b main の挙動。元ブランチは bundle 内に保全、必要なら個別リネーム可 |
-
-**採用しなかった案と理由**
-- 親.git を at001/.git に移植する案: 親.gitの履歴に他PJのファイルも含まれており、移植後の `git ls-files` が混乱する可能性
-- bundle から各PJ履歴を git filter-repo で抽出: 工数大、ユーザーが履歴消去OKと明言したため不要
-
----
-
-## 追加情報
-
-- ユーザー指摘で対象範囲を拡大（壊れた12PJ → `[a-zA-Z]{2}\d{3}` パターン全56PJ）。最初から全件点検すべきだった
-- `nul` ファイルは Windows 予約語のため git で扱えない。発見次第 rm が必要（再発したら検出ルール化検討）
-- 親.gitに残された `bl001` の履歴は、実体ディレクトリが既に存在しないため宙に浮いた状態。bundle 内にのみ保全
+**P1（重要）**
+1. nm002 design.md→spec.md リネーム手動完了（小池電機の匿名化前提）
+2. 12デプロイPJへ /sd-deploy 再実行 → enforce-spec-location.sh + CLAUDE.md spec規約 反映
+3. 山一38期の同様変換スクリプト作成

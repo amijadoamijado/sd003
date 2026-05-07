@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 68
+- **Total Sessions**: 69
 - **Latest Session**: 2026-05-07
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-07 | at001-v1事故対策: spec配置物理ガードレール+spec.md採用+全20PJ design→spec一括リネーム | 94bf8e7 | [Details](session-20260507-115551.md) |
 | 05-07 | D:\claudecode 親.git解体 + 全56PJ独立git管理化（保全bundle 247MB） | (sd003変更なし) | [Details](session-20260507-093444.md) |
 
 ---
