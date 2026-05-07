@@ -44,7 +44,7 @@
 | カテゴリ | ファイル | 保存先 |
 |---------|---------|--------|
 | 仕様書 | requirements.md | `.sd/specs/{feature}/` |
-| 仕様書 | design.md | `.sd/specs/{feature}/` |
+| 仕様書 | spec.md (旧 design.md) | `.sd/specs/{feature}/` |
 | 仕様書 | tasks.md | `.sd/specs/{feature}/` |
 | ワークフロー | WORK_ORDER.md | `.sd/ai-coordination/workflow/spec/{projectID}/` |
 | ワークフロー | IMPLEMENT_REQUEST | `.sd/ai-coordination/workflow/spec/{projectID}/` |

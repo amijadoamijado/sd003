@@ -1,7 +1,5 @@
 ---
-description: 仕様書バージョン管理（.sd/specs/配下適用）
-paths:
-  - ".sd/specs/**/*"
+description: 仕様書バージョン管理（常時適用）
 ---
 
 # 仕様書バージョン管理
@@ -16,7 +14,7 @@ paths:
 .sd/specs/{feature}/
 ├── spec.json               # メタデータ（バージョン管理）
 ├── requirements.md         # 最新版（常に現在の要件）
-├── design.md               # 最新版（常に現在の設計）
+├── spec.md               # 最新版（常に現在の設計）
 ├── tasks.md                # 最新版（常に現在のタスク）
 └── history/                # 履歴アーカイブ
     ├── requirements-20251026-100000.md
@@ -33,7 +31,7 @@ paths:
 
 | 要素 | 説明 | 例 |
 |------|------|-----|
-| type | ファイル種別 | requirements, design, tasks |
+| type | ファイル種別 | requirements, spec, tasks |
 | YYYYMMDD | 保存日 | 20251226 |
 | HHMMSS | 保存時刻 | 143000 |
 

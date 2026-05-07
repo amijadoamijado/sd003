@@ -91,6 +91,8 @@ IMPORTANT: When coordinating with other AIs (Codex, Gemini, Antigravity), all do
 
 IMPORTANT: When deploying SD003 to another project, use `/sd-deploy` command only. Manual deploy is prohibited. Details: `.claude/skills/sd-deploy/SKILL.md`
 
+IMPORTANT: When creating or modifying spec files (requirements/design/spec/tasks), the canonical location is `.sd/specs/{feature}/`. Never place under `docs/specs/` or any other path. Main spec file is `spec.md` (NOT `design.md` — Google Antigravity reserves `design.md` for UI). Physical guardrail: `.claude/hooks/enforce-spec-location.sh` denies writes outside `.sd/specs/`. Details: `.claude/rules/specs/spec-driven.md`
+
 IMPORTANT: When refactoring, use checkpoint-based batches with `/refactor:init`. Context auto-compact at 70%, auto-clear at 85%. Rollback requires user confirmation. Details: `.claude/rules/refactoring/refactoring-system.md`
 
 IMPORTANT: If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Skipping this check has caused data corruption (cf001 incident). Details: `.claude/rules/skills/skill-check-before-action.md`
