@@ -82,6 +82,7 @@ $directories = @(
     "docs/troubleshooting/bug-reports",
     "materials/csv",
     "materials/excel",
+    "materials/html",
     "materials/pdf",
     "materials/images",
     "materials/text"
