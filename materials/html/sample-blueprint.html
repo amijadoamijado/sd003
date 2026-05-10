@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Report Skill 検証</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --accent: #2563eb;
+      --accent-light: #dbeafe;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --warning: #ca8a04;
+      --warning-light: #fef9c3;
+      --error: #dc2626;
+      --error-light: #fee2e2;
+      --info: #2563eb;
+      --info-light: #dbeafe;
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-supplementary: #94a3b8;
+      --bg: #ffffff;
+      --bg-section: #f8fafc;
+      --bg-sidebar: #f1f5f9;
+      --bg-code: #f8fafc;
+      --border: #e2e8f0;
+      --border-focus: #2563eb;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px;
+      --space-4: 16px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
+      --font-body: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+      --font-heading: 'Noto Sans JP', 'Hiragino Sans', sans-serif;
+      --font-mono: 'Consolas', 'Courier New', monospace;
+      --text-xs: 12px; --text-sm: 14px; --text-base: 16px;
+      --text-lg: 20px; --text-xl: 24px; --text-2xl: 30px;
+      --weight-normal: 400; --weight-medium: 500; --weight-bold: 700;
+      --leading-tight: 1.25; --leading-normal: 1.6; --leading-relaxed: 1.8;
+      --sidebar-width: 240px;
+      --max-content: 960px;
+      --radius: 6px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: var(--leading-normal);
+      color: var(--text-primary);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+    .header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg);
+      border-bottom: 2px solid var(--accent);
+      padding: var(--space-4) var(--space-8);
+      display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+    }
+    .header-left { display: flex; align-items: baseline; gap: var(--space-4); }
+    .header-title { font-family: var(--font-heading); font-size: var(--text-xl); font-weight: var(--weight-bold); }
+    .header-type {
+      font-size: var(--text-sm); font-weight: var(--weight-medium);
+      color: var(--bg); background: var(--accent);
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius);
+    }
+    .header-date { font-size: var(--text-sm); color: var(--text-secondary); }
+    .header-actions { display: flex; gap: var(--space-2); }
+    .btn {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: var(--bg); color: var(--text-secondary);
+      font-family: var(--font-body); font-size: var(--text-sm); font-weight: var(--weight-medium);
+      cursor: pointer; transition: all 0.15s ease; white-space: nowrap;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .btn-primary:hover { background: #1d4ed8; }
+    .layout { display: flex; min-height: calc(100vh - 56px); }
+    .sidebar {
+      position: sticky; top: 56px;
+      width: var(--sidebar-width); min-width: var(--sidebar-width);
+      height: calc(100vh - 56px); overflow-y: auto;
+      background: var(--bg-sidebar); border-right: 1px solid var(--border);
+      padding: var(--space-6) 0;
+    }
+    .sidebar-title {
+      font-size: var(--text-xs); font-weight: var(--weight-bold);
+      color: var(--text-supplementary); text-transform: uppercase; letter-spacing: 0.05em;
+      padding: 0 var(--space-4); margin-bottom: var(--space-3);
+    }
+    .nav-list { list-style: none; }
+    .nav-item {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-4) var(--space-2) var(--space-6);
+      color: var(--text-secondary); text-decoration: none;
+      font-size: var(--text-sm); font-weight: var(--weight-medium);
+      transition: all 0.15s ease; border-left: 3px solid transparent;
+    }
+    .nav-item:hover { color: var(--accent); background: var(--accent-light); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-light); }
+    .nav-indicator { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .nav-indicator.filled { background: var(--success); }
+    .content { flex: 1; max-width: var(--max-content); padding: var(--space-8) var(--space-8) var(--space-12); }
+    .section { margin-bottom: var(--space-12); scroll-margin-top: 72px; }
+    .section-header {
+      display: flex; align-items: center; gap: var(--space-3);
+      margin-bottom: var(--space-6); padding-bottom: var(--space-3);
+      border-bottom: 2px solid var(--border);
+    }
+    .section-number {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--accent); color: white;
+      font-size: var(--text-sm); font-weight: var(--weight-bold); flex-shrink: 0;
+    }
+    .section-title { font-family: var(--font-heading); font-size: var(--text-xl); font-weight: var(--weight-bold); }
+    .subsection { margin-bottom: var(--space-6); }
+    .subsection-title { font-size: var(--text-lg); font-weight: var(--weight-bold); margin-bottom: var(--space-3); }
+    .editable {
+      padding: var(--space-4); border: 1px solid transparent; border-radius: var(--radius);
+      min-height: 40px; line-height: var(--leading-relaxed); transition: border-color 0.15s ease;
+    }
+    .editable:hover { border-color: var(--border); }
+    .editable:focus { outline: none; border-color: var(--border-focus); box-shadow: 0 0 0 3px var(--accent-light); }
+    .checklist { list-style: none; }
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-2) var(--space-4); border-radius: var(--radius);
+      transition: background 0.15s ease;
+    }
+    .checklist-item:hover { background: var(--bg-section); }
+    .checklist-checkbox {
+      width: 18px; height: 18px; border: 2px solid var(--border);
+      border-radius: 4px; flex-shrink: 0; cursor: pointer; margin-top: 2px;
+      transition: all 0.15s ease;
+    }
+    .checklist-checkbox.checked { background: var(--success); border-color: var(--success); }
+    .checklist-checkbox.checked::after {
+      content: ''; display: block; width: 10px; height: 6px;
+      border-left: 2px solid white; border-bottom: 2px solid white;
+      transform: rotate(-45deg) translate(2px, -1px);
+    }
+    .checklist-text { flex: 1; }
+    .callout {
+      padding: var(--space-4); border-left: 4px solid;
+      border-radius: 0 var(--radius) var(--radius) 0; margin: var(--space-4) 0;
+    }
+    .callout-info { border-left-color: var(--info); background: var(--info-light); }
+    .toast {
+      position: fixed; bottom: var(--space-8); right: var(--space-8);
+      padding: var(--space-3) var(--space-6);
+      background: var(--text-primary); color: white; border-radius: var(--radius);
+      font-size: var(--text-sm); font-weight: var(--weight-medium);
+      opacity: 0; transform: translateY(8px); transition: all 0.2s ease;
+      z-index: 1000; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    @media print {
+      .sidebar, .header-actions, .btn, .toast { display: none !important; }
+      .header { border-bottom: 2px solid var(--text-primary); padding: var(--space-4) 0; }
+      .layout { min-height: auto; }
+      .content { padding: 0; max-width: 100%; }
+      .section { break-inside: avoid; }
+      .editable { border: none; }
+      .editable:focus { box-shadow: none; }
+      body { font-size: 11pt; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content { padding: var(--space-4); }
+      .header { padding: var(--space-3) var(--space-4); flex-wrap: wrap; }
+      .header-title { font-size: var(--text-lg); }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-left">
+      <span class="header-title">HTML Report Skill 検証</span>
+      <span class="header-type">要件定義書</span>
+      <span class="header-date">2026-05-10</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="window.print()">Print</button>
+      <button class="btn btn-primary" onclick="copyAsMarkdown()">Copy as Markdown</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-title">目次</div>
+      <ul class="nav-list">
+        <li><a href="#section-1" class="nav-item"><span class="nav-indicator filled"></span>背景</a></li>
+        <li><a href="#section-2" class="nav-item"><span class="nav-indicator filled"></span>現状と前提</a></li>
+        <li><a href="#section-3" class="nav-item"><span class="nav-indicator filled"></span>ゴール</a></li>
+        <li><a href="#section-4" class="nav-item"><span class="nav-indicator filled"></span>アウトプット定義</a></li>
+        <li><a href="#section-5" class="nav-item"><span class="nav-indicator filled"></span>要件</a></li>
+        <li><a href="#section-6" class="nav-item"><span class="nav-indicator filled"></span>検証観点</a></li>
+      </ul>
+    </nav>
+
+    <main class="content">
+
+      <section id="section-1" class="section">
+        <div class="section-header">
+          <span class="section-number">1</span>
+          <h2 class="section-title">背景</h2>
+        </div>
+        <div class="editable" contenteditable="true">Claude Codeが生成する要件定義書や仕様書は、これまでmarkdown形式のみだった。markdownはAIにとって読みやすいが、人間が確認する際に「目が滑る」問題がある。特に要件定義書は、ステークホルダーとの合意形成に使われるため、視覚的な階層・図解・軽い操作が求められる。</div>
+      </section>
+
+      <section id="section-2" class="section">
+        <div class="section-header">
+          <span class="section-number">2</span>
+          <h2 class="section-title">現状と前提</h2>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">2.1 現状</h3>
+          <div class="editable" contenteditable="true">Blueprint Gate（要件定義スキル）は5段階の対話で要件を引き出し、markdownファイルを出力する。人間が読む際はテキストエディタまたはGitHub上でプレビューする必要がある。</div>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">2.2 技術環境と制約</h3>
+          <div class="editable" contenteditable="true">SD003フレームワーク上で動作。Claude CodeがHTMLファイルを直接生成。外部サーバーは不要（file:// プロトコルで閲覧可能）。Google Fonts CDNのみ外部依存。</div>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">2.3 スコープ</h3>
+          <div class="editable" contenteditable="true"><strong>やること:</strong> 自己完結HTML生成スキルの作成、Blueprint GateへのHTML出力モード追加、materials/html/ 保存先の定義<br><strong>やらないこと:</strong> Webアプリ・サーバーの構築、AI向け文書（CLAUDE.md等）のHTML化、カスタム編集UI（ドラッグ・スライダー）</div>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">2.4 AIへの注意事項</h3>
+          <div class="editable" contenteditable="true">AI向け文書（SKILL.md、CLAUDE.md、AGENTS.md）は素テキストのまま維持すること。HTML化は人間向け出力のみに適用する。</div>
+        </div>
+      </section>
+
+      <section id="section-3" class="section">
+        <div class="section-header">
+          <span class="section-number">3</span>
+          <h2 class="section-title">ゴール</h2>
+        </div>
+        <div class="callout callout-info">
+          <div class="editable" contenteditable="true">要件定義書をブラウザで開いて一覧性高く確認・編集でき、Copy as MarkdownでAIに戻せる自己完結HTML生成スキルをSD003に導入する。</div>
+        </div>
+      </section>
+
+      <section id="section-4" class="section">
+        <div class="section-header">
+          <span class="section-number">4</span>
+          <h2 class="section-title">アウトプット定義</h2>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">4.1 成果物</h3>
+          <div class="editable" contenteditable="true">
+            <ul style="list-style:disc;padding-left:1.5em;margin-top:4px">
+              <li>html-report スキル（SKILL.md + report-template.html + design-tokens.md）</li>
+              <li>Blueprint Gate SKILL.md の拡張（HTML出力モード追加）</li>
+              <li>file-organization.md の更新（html/ ディレクトリ追加）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">4.2 完成条件</h3>
+          <div class="editable" contenteditable="true">
+            <ul style="list-style:disc;padding-left:1.5em;margin-top:4px">
+              <li>/blueprint-gate 実行後に materials/html/ にHTMLが生成される</li>
+              <li>HTMLが file:// プロトコルで正しく表示される</li>
+              <li>Copy as Markdown ボタンが機能する</li>
+              <li>Print stylesheet でPDF出力が可能</li>
+              <li>visual-review-checklist で 50/70 以上</li>
+            </ul>
+          </div>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">4.3 利用者と利用場面</h3>
+          <div class="editable" contenteditable="true">あみおさんがBlueprint Gateで要件定義を行った後、生成されたHTMLをブラウザで確認・編集する。ステークホルダーに共有する際もURLまたはファイルで渡す。</div>
+        </div>
+      </section>
+
+      <section id="section-5" class="section">
+        <div class="section-header">
+          <span class="section-number">5</span>
+          <h2 class="section-title">要件</h2>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">5.1 機能要件</h3>
+          <div class="editable" contenteditable="true">
+            <ul style="list-style:disc;padding-left:1.5em;margin-top:4px">
+              <li>サイドバー付きナビゲーション（セクション間ジャンプ）</li>
+              <li>contenteditable によるインライン編集</li>
+              <li>Copy as Markdown ボタン（clipboard API）</li>
+              <li>Print stylesheet（PDF出力対応）</li>
+              <li>レスポンシブ（768px以下でサイドバー非表示）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="subsection">
+          <h3 class="subsection-title">5.2 非機能要件</h3>
+          <div class="editable" contenteditable="true">
+            <ul style="list-style:disc;padding-left:1.5em;margin-top:4px">
+              <li>自己完結（外部依存はGoogle Fonts CDNのみ）</li>
+              <li>file:// プロトコルで動作</li>
+              <li>HTMLファイルサイズ 50KB以下</li>
+              <li>visual-review-checklist 50/70 以上の品質</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-6" class="section">
+        <div class="section-header">
+          <span class="section-number">6</span>
+          <h2 class="section-title">検証観点</h2>
+        </div>
+        <ul class="checklist">
+          <li class="checklist-item" onclick="toggleCheck(this)">
+            <span class="checklist-checkbox"></span>
+            <span class="checklist-text editable" contenteditable="true">HTMLが file:// で正しく表示される（フォント読み込み、レイアウト崩れなし）</span>
+          </li>
+          <li class="checklist-item" onclick="toggleCheck(this)">
+            <span class="checklist-checkbox"></span>
+            <span class="checklist-text editable" contenteditable="true">Copy as Markdown ボタンでクリップボードにMarkdownがコピーされる</span>
+          </li>
+          <li class="checklist-item" onclick="toggleCheck(this)">
+            <span class="checklist-checkbox"></span>
+            <span class="checklist-text editable" contenteditable="true">サイドバーのアクティブセクション追跡が動作する</span>
+          </li>
+          <li class="checklist-item" onclick="toggleCheck(this)">
+            <span class="checklist-checkbox"></span>
+            <span class="checklist-text editable" contenteditable="true">contenteditable 領域をクリックして編集できる</span>
+          </li>
+          <li class="checklist-item" onclick="toggleCheck(this)">
+            <span class="checklist-checkbox"></span>
+            <span class="checklist-text editable" contenteditable="true">Print stylesheet でPDF出力が読みやすい</span>
+          </li>
+        </ul>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          document.querySelectorAll('.nav-item').forEach(el => {
+            el.classList.toggle('active', el.getAttribute('href') === '#' + id);
+          });
+        }
+      });
+    }, { rootMargin: '-80px 0px -60% 0px' });
+    document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+    function toggleCheck(item) {
+      item.querySelector('.checklist-checkbox').classList.toggle('checked');
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function copyAsMarkdown() {
+      const sections = [];
+      const title = document.querySelector('.header-title').textContent;
+      const date = document.querySelector('.header-date').textContent;
+      sections.push('# ' + title + '\n\n' + date + '\n');
+
+      const sectionMap = [
+        { id: 'section-1', num: '1', title: '背景', subs: [] },
+        { id: 'section-2', num: '2', title: '現状と前提', subs: ['2.1 現状', '2.2 技術環境と制約', '2.3 スコープ', '2.4 AIへの注意事項'] },
+        { id: 'section-3', num: '3', title: 'ゴール', subs: [] },
+        { id: 'section-4', num: '4', title: 'アウトプット定義', subs: ['4.1 成果物', '4.2 完成条件', '4.3 利用者と利用場面'] },
+        { id: 'section-5', num: '5', title: '要件', subs: ['5.1 機能要件', '5.2 非機能要件'] },
+        { id: 'section-6', num: '6', title: '検証観点', subs: [] },
+      ];
+
+      sectionMap.forEach(sec => {
+        const el = document.getElementById(sec.id);
+        if (!el) return;
+        sections.push('## ' + sec.num + '. ' + sec.title + '\n');
+        if (sec.subs.length === 0) {
+          el.querySelectorAll('.editable').forEach(e => sections.push(e.textContent.trim() + '\n'));
+        } else {
+          sec.subs.forEach((subTitle, i) => {
+            const subEls = el.querySelectorAll('.subsection');
+            if (subEls[i]) {
+              sections.push('### ' + subTitle);
+              const editable = subEls[i].querySelector('.editable');
+              if (editable) sections.push(editable.textContent.trim() + '\n');
+            }
+          });
+        }
+      });
+
+      const checkItems = document.querySelectorAll('.checklist-item');
+      if (checkItems.length > 0) {
+        sections.push('## 6. 検証観点\n');
+        checkItems.forEach(item => {
+          const checked = item.querySelector('.checklist-checkbox').classList.contains('checked');
+          const text = item.querySelector('.checklist-text').textContent.trim();
+          sections.push('- [' + (checked ? 'x' : ' ') + '] ' + text);
+        });
+      }
+
+      const md = sections.join('\n');
+      navigator.clipboard.writeText(md).then(() => {
+        showToast('Markdown copied to clipboard');
+      }).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = md;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('Markdown copied to clipboard');
+      });
+    }
+  </script>
+</body>
+</html>

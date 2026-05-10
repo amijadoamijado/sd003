@@ -10,8 +10,9 @@
 materials/
 ├── csv/      # CSVファイル
 ├── excel/    # Excel（.xlsx, .xls）
-├── pdf/      # PDFファイル
+├── html/     # HTML成果物（要件定義書、レポート等）
 ├── images/   # 画像（.png, .jpg, .jpeg, .gif, .webp, .svg）
+├── pdf/      # PDFファイル
 └── text/     # テキスト（.txt, 一般.md）
 ```
 
@@ -22,6 +23,7 @@ materials/
 | ファイル種別 | 保存先 | 例 |
 |-------------|--------|-----|
 | CSV/Excel成果物 | `materials/csv/`, `materials/excel/` | `materials/csv/report.csv` |
+| HTML成果物 | `materials/html/` | `materials/html/{feature}-blueprint.html` |
 | 画像・PDF | `materials/images/`, `materials/pdf/` | `materials/pdf/spec.pdf` |
 | テスト用一時ファイル | `tests/fixtures/` | `tests/fixtures/sample.json` |
 | ログ・デバッグ出力 | `logs/` または `.sd/` | `logs/debug.log` |

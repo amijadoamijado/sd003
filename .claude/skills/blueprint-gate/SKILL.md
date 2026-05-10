@@ -107,6 +107,35 @@ AIはこの変換を担う。あみおの入力順序を尊重し、出力時に
 
 ---
 
+## HTML出力モード
+
+5フェーズ完了後、要件定義書を**markdown + HTML**の2形式で出力する。
+
+### 生成手順
+
+1. markdown要件定義書を `.sd/specs/{feature}/requirements.md` に保存（AI向け、既存通り）
+2. HTML版を `materials/html/{feature}-blueprint.html` に生成（人間向け）
+3. AskUserQuestion でHTML版のフルパスを案内し、ブラウザで確認を促す
+
+### HTML生成方法
+
+`html-report` スキル（`.claude/skills/html-report/`）を使用:
+- `assets/report-template.html` のテンプレートを読み込む
+- `references/design-tokens.md` のCSS変数をインライン展開
+- 5フェーズの回答をテンプレートのプレースホルダに注入
+- `materials/html/` に保存
+
+### HTML版の用途
+
+- ユーザーがブラウザで一覧性高く確認・編集（contenteditable）
+- Copy as Markdown ボタンでmarkdown化してAIに戻す
+- ステークホルダーにURLまたはファイルで共有
+- Print stylesheet でPDF出力
+
+**重要**: markdown（AI向け）とHTML（人間向け）は併存する。HTMLがmarkdownを代替するものではない。
+
+---
+
 ## 出力テンプレート（要件定義書）
 
 5フェーズ完了後、以下の構成でマークダウンファイルを生成する。
@@ -181,6 +210,7 @@ AIが提案する変更や追加機能が、ゴールに直結するかを確認
 
 | 状況 | 接続先 |
 |------|--------|
+| HTML版の要件定義書生成 | `html-report` スキル（`/blueprint-gate` 完了後に自動） |
 | 対話が堂々巡りになったら | `/dialogue-resolution` |
 | バグが発生したら | 要件定義書の検証観点と突き合わせて `/bug-quick` or `/bug-trace` |
 | セッション終了時 | `/sessionwrite` で要件定義書の存在を記録 |
