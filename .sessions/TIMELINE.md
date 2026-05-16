@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 72
+- **Total Sessions**: 74
 - **Latest Session**: 2026-05-16
 - **Project Start**: 2026-02-15
 
@@ -11,7 +11,9 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
-| 05-16 | Claude Code diff不可視問題を診断・theme=dark-ansi追加で修正 / archive-sessions Google Drive mv失敗で見送り | (pending) | [Details](session-20260516-142534.md) |
+| 05-16 | Codex/uvキャッシュ削除 + codex-cache-cleanupスキル作成・Codex.app日本語呼び出し対応 | (pending) | [Details](session-20260516-150213.md) |
+| 05-16 | diff不可視修正の反映確認 + 「スキル無視は起こり得るか」概念整理（ルール+物理ガードレール必須の再確認） | (pending) | [Details](session-20260516-143601.md) |
+| 05-16 | Claude Code diff不可視問題を診断・theme=dark-ansi追加で修正 / archive-sessions Google Drive mv失敗で見送り | 7a35cdb | [Details](session-20260516-142534.md) |
 | 05-11 | er001へSD003最新版デプロイ（266ファイル+7生成、12/13 PASS） | 2b79b26 | [Details](session-20260511-074514.md) |
 | 05-10 | html-reportスキル新規作成 + Blueprint Gate HTML出力モード追加（Thariq HTML effectiveness pattern） | 13dd2e8 | [Details](session-20260510-110118.md) |
 | 05-07 | at001-v1事故対策: spec配置物理ガードレール+spec.md採用+全20PJ design→spec一括リネーム | 94bf8e7 | [Details](session-20260507-115551.md) |

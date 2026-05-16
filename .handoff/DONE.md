@@ -5,30 +5,64 @@
 **変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `C:\Users\a-odajima\.claude\settings.json` | `"theme": "dark-ansi"` を追加（sd003 リポジトリ外） |
-| `.sessions/session-20260516-142534.md` | 新規: セッション履歴 |
-| `.sessions/session-current.md` | 更新: 最新セッション記録 |
-| `.sessions/TIMELINE.md` | 更新: エントリ追加（Total 72、Latest 2026-05-16） |
+| `C:\Users\a-odajima\.codex\skills\codex-cache-cleanup\SKILL.md` | Codex/uvキャッシュ削除スキルを作成し、日本語トリガーを追加 |
+| `C:\Users\a-odajima\.codex\skills\codex-cache-cleanup\scripts\cleanup-codex-caches.ps1` | dry-runと安全削除に対応したPowerShellスクリプトを追加 |
+| `C:\Users\a-odajima\.codex\skills\codex-cache-cleanup\agents\openai.yaml` | Codex.app向けメタデータと暗黙呼び出し設定を追加 |
+| `D:\claudecode\sd003\.sessions\session-20260516-150213.md` | セッション履歴を追加 |
+| `D:\claudecode\sd003\.sessions\session-current.md` | 最新セッション記録を更新 |
+| `D:\claudecode\sd003\.sessions\TIMELINE.md` | タイムラインを更新 |
 
 **変更内容の要約**
-Claude Code の diff 表示で追加行（+）の文字が黒背景に埋もれて読めなかった問題を、`theme: dark-ansi` 設定追加で対処した。`/archive-sessions --execute` は Google Drive 仮想FS の `mv` 非互換で失敗、ユーザー判断で見送り。
+Cドライブを圧迫していたCodex/uv関連キャッシュを削除し、その手順を `codex-cache-cleanup` スキルとして再利用可能にした。Codex.appから日本語指示で動きやすいよう、スキルの説明とUIメタデータも調整した。
 
 ## 確認結果
 
+**実行したコマンド**
+```powershell
+Get-PSDrive -PSProvider FileSystem
+python C:\Users\a-odajima\.codex\skills\.system\skill-creator\scripts\quick_validate.py C:\Users\a-odajima\.codex\skills\codex-cache-cleanup
+& C:\Users\a-odajima\.codex\skills\codex-cache-cleanup\scripts\cleanup-codex-caches.ps1
+```
+
+**結果**
+```text
+Cドライブ空き容量: 約4.15GB -> 約6.77GB
+Skill is valid!
+dry-run 正常動作
+```
+
 **動作確認**
-- [ ] theme=dark-ansi の効果は Claude Code 再起動後に確認必要
-- [x] 症状（diff不可視）の根本原因をユーザー提供スクショ2枚で確認
-- [x] archive 試行: 2件中 0件移動成功（mv jsonl failed × 2）→ 見送り
+- [x] `uv\cache` を削除した
+- [x] `codex-runtimes` を削除した
+- [x] `codex-tui.log` を空化した
+- [x] スキル検証が成功した
 
 ## 残っていること
 
-- [ ] `archive-sessions.sh` を `cp + rm` フォールバック方式に恒久修正（Google Drive for Desktop 仮想FS対応）
-- [ ] Claude Code 再起動後に `/theme` で **Dark (ANSI)** 反映を確認、ダメなら **Dark (Daltonized)** へ
-- [ ] それでも読みにくければ Windows Terminal の Campbell Modified スキーム `green: #13A10E` を明るめへ
+**未完了タスク**
+- [ ] Codex.app再起動後、日本語自然文で `codex-cache-cleanup` が呼び出されるか確認する
+- [ ] `claudevm.bundle` 約12.2GBを削除する場合は、Claude/Codex終了後に明示承認付きで実行する
+
+**次の手順**
+- 次のタスク: Codex.appで `Codexのキャッシュを消して` を試す
+- 依存関係: Codex.appの再起動
 
 ## 判断したこと
 
+**設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| archive 続行（A: cp+rm 迂回） vs スクリプト修正（B） vs 見送り（C） | C | ユーザー判断 |
-| Claude Code 側 theme 変更 vs Windows Terminal スキーム変更 | Claude Code側 theme=dark-ansi | 最小変更でWTパレットを尊重させる方針 |
+| 既定で削除 vs 既定dry-run | 既定dry-run | 誤削除を避けるため |
+| ログ削除 vs ログ空化 | ログ空化 | Codex実行中でも安全に扱うため |
+| Claude VM bundle標準削除 vs 明示承認 | 明示承認 | 12GB超だが実行環境の可能性があるため |
+
+**採用しなかった案と理由**
+- Chrome/Edgeプロファイルの手動削除: ユーザー設定やログイン状態を壊すリスクが高いため対象外。
+- プロジェクト配下の広域削除: `.git` や作業ファイルを巻き込む危険があるため対象外。
+
+## 追加情報
+
+関連ファイル:
+- `C:\Users\a-odajima\.codex\skills\codex-cache-cleanup\SKILL.md`
+- `C:\Users\a-odajima\.codex\skills\codex-cache-cleanup\scripts\cleanup-codex-caches.ps1`
+- `C:\Users\a-odajima\.codex\skills\codex-cache-cleanup\agents\openai.yaml`
