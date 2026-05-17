@@ -1,61 +1,64 @@
-# DONE.md - 完了報告
+# DONE.md - 作業完了報告
 
 ## やったこと
 
-**変更したファイル / 操作**
-| 対象 | 変更内容 |
-|------|---------|
-| `~/.claude/projects/` セッション7件 | 7日以上前のセッションをGoogle Driveへアーカイブ（at001×2, sd003×2, sd5yp×2, claudecode×1、計15MB） |
-| `D:\claudecode\at002\` | SD003 v2.14.0 (deploy v3.1.0) を新規展開（266コピー + 7生成 + package.json + .gitignore + git hooks） |
-| `~/.claude/session-index.{json,md}` | 全プロジェクト横断インデックス再生成（29セッション） |
-| `D:\claudecode\sd003\.sessions\session-20260518-073605.md` | 本セッション記録 |
-| `D:\claudecode\sd003\.sessions\session-current.md` | 最新セッションへ更新 |
-| `D:\claudecode\sd003\.sessions\TIMELINE.md` | 2026-05-18エントリ追加、Total Sessions 74→75 |
+**変更したファイル**
+| ファイル | 変更内容 |
+|---------|----------|
+| `.codex/CODEX_SPEC.md` | Codex固有仕様を追加 |
+| `.codex/skills/*/SKILL.md` | Codex Runtime Rules付きで36コマンド + aliasを生成 |
+| `scripts/sync-cli-commands.py` | `.codex/skills` 正式化、`--codex-only` 追加、`--check` 修正 |
+| `README.md` | Codex説明を `.codex` 基準へ更新 |
+| `AGENTS.md` | Codex仕様参照とAI Coordinationトリガー条件を明記 |
+| `package.json` | `sync:cli` と `.codex/` 配布対象を追加 |
+| `.claude/skills/sd-deploy/deploy.ps1` | `.codex` のバックアップ・コピー・検証を追加 |
+| `.claude/skills/sd-deploy/deploy.sh` | `.codex` のバックアップ・コピー・検証を追加 |
 
 **変更内容の要約**
-古いセッションのGoogle Driveアーカイブと at002 プロジェクトへのSD003展開を実施した。
+Claude Codeの正本仕様を壊さず、Codex用の追加仕様とSkill生成・配布経路を追加した。`.codex/` はコミット対象としてステージ済み。
 
 ---
 
 ## 確認結果
 
 **実行したコマンド**
-```bash
-bash ~/.claude/scripts/archive-sessions.sh 7 execute
-powershell -ExecutionPolicy Bypass -File D:/claudecode/sd003/.claude/skills/sd-deploy/deploy.ps1 D:/claudecode/at002
+```powershell
+python scripts\sync-cli-commands.py --codex-only
+python scripts\sync-cli-commands.py --check
+python -m py_compile scripts\sync-cli-commands.py
+node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json OK')"
+npm run build
+git diff --check -- README.md AGENTS.md package.json scripts\sync-cli-commands.py .claude\skills\sd-deploy\deploy.ps1 .claude\skills\sd-deploy\deploy.sh .codex\CODEX_SPEC.md
+git add .codex
 ```
 
 **結果**
-```
-Archive: 7件移動完了、Google Drive保存OK
-Deploy : Files copied 266 / Generated 7
-Verify : Commands 33/33, Rules 37/37, Hooks 24/24 ほか全PASS
-         Skills 113/116（Optional 3件除外による意図的差分）
+```text
+SYNC CHECK OK (36 commands)
+package.json OK
+npm run build 成功
+git diff --check 成功
+.codex/ 39ファイルをステージ済み
 ```
 
-**動作確認**
-- [x] アーカイブ後にローカルセッションが消えていることを確認
-- [x] Google Drive側にファイルが存在することを確認
-- [x] at002 に CLAUDE.md / gemini.md / settings.json が生成されている
-- [x] at002 の package.json に @mcpher/gas-fakes が注入されている
-- [ ] at002 で `npm install` 実行（次回セッション）
-- [ ] at002 で `/sessionread` 動作検証（次回セッション）
+**失敗した確認**
+- `npm run lint`: ESLint設定ファイルが見つからない既存構成エラー。
+- `npm test -- --runInBand`: `@mcpher/gas-fakes` ESM parse error と `LocalEnv.ts` / `src/mocks/index.ts` moduleエラー。
+- `deploy.sh` の `bash -n`: このWindows環境のbashがWSL未導入状態のため未確認。
 
 ---
 
 ## 残っていること
 
 **未完了タスク**
-- [ ] at002 で `npm install` 実行
-- [ ] at002 で `/sessionread` での動作確認
-- [ ] at002 の初期スペック起こし（`/blueprint-gate` または `/workflow:init {slug}`）
-- [ ] sd003 の `deploy.ps1` Next Steps 文言で古いコマンド `/sd:spec-init` 参照を削除
-- [ ] `/sessionread` Step 6 を「メイン側で `.sd/notebooklm-config.json` 事前チェック」に修正
-- [ ] deploy.ps1 Skills 検証「Optional除外考慮」修正
+- [ ] Codex仕様追加の本体変更をレビューし、通常コミットとして保存する。
+- [ ] ESLint設定なしの既存問題を修正する。
+- [ ] Jest/gas-fakes/LocalEnv moduleの既存問題を修正する。
+- [ ] Bash版deployはWSLまたはGit Bash環境で構文確認する。
 
 **次の手順**
-- 次のタスク: at002 側で `npm install` → `/sessionread` 確認
-- 依存関係: なし
+- 次のタスク: Codex仕様追加コミットの作成。
+- 依存関係: `.codex/` はステージ済み。その他の変更は未ステージ。
 
 ---
 
@@ -64,14 +67,17 @@ Verify : Commands 33/33, Rules 37/37, Hooks 24/24 ほか全PASS
 **設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| at002 デプロイ方法 | `/sd-deploy` skill経由 | CLAUDE.md規定「Manual deploy is prohibited」遵守 |
-| アーカイブ閾値 | 7日（デフォルト） | バックグラウンドAgentの提示通り |
-| Skills 113/116 のFAIL扱い | 受容 | Optional 3件除外（git-worktrees, parallel-subagents, find-duplicates）は仕様通り |
+| `.codex/skills` vs `.agents/skills` | `.codex/skills` | 現在のCodexセッションで実際に参照されるパスに合わせるため |
+| Claude正本変更 vs Codex adapter追加 | Codex adapter追加 | Claude Code仕様を破壊しないため |
+| 全同期 vs Codexだけ同期 | `--codex-only` 追加 | `.sd/` やGemini生成物を巻き込まずCodexだけ更新できるため |
+
+**採用しなかった案と理由**
+- `.claude/commands` の直接修正: Claude Code正本に影響するため見送り。
+- `.agents/skills` の復旧・移行コミット: 既存の大量削除状態があり、今回のスコープ外。
 
 ---
 
 ## 追加情報
 
-- `/sessionread` Step 6 で NotebookLM Agent をメイン側事前チェック無しで起動し、空振り（config不在）で76,749トークンを浪費した。仕様としてはメイン側で `.sd/notebooklm-config.json` 存在を確認してから起動すべき。
-- deploy.ps1 のNext Steps文言に古いコマンド `/sd:spec-init` が残っていた（Unknown command）。正しくは `/blueprint-gate` または `/workflow:init {slug}`。
-- at002 デプロイ時の `Source not found` 警告4件（`.sd/settings`, `.sd/design`, `.sd/ralph`, `.sd/steering`）は sd003 側にディレクトリ未作成のため。
+- sessionwriteコミットでは `.sessions/` と `.handoff/DONE.md` のみを対象にする。
+- 作業ツリーには今回作業前からの大量の削除・変更・未追跡ファイルが残っているため、次回も `git status --short` を最初に確認すること。
