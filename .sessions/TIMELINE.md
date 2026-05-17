@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 74
-- **Latest Session**: 2026-05-16
+- **Total Sessions**: 75
+- **Latest Session**: 2026-05-18
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-18 | セッションアーカイブ7件Google Drive移動 + at002へSD003展開（266コピー+7生成、Skills 113/116はOptional除外）+ deploy.ps1のNext Stepsに古い`/sd:spec-init`参照を発見 | (pending) | [Details](session-20260518-073605.md) |
 | 05-16 | Codex/uvキャッシュ削除 + codex-cache-cleanupスキル作成・Codex.app日本語呼び出し対応 | (pending) | [Details](session-20260516-150213.md) |
 | 05-16 | diff不可視修正の反映確認 + 「スキル無視は起こり得るか」概念整理（ルール+物理ガードレール必須の再確認） | (pending) | [Details](session-20260516-143601.md) |
 | 05-16 | Claude Code diff不可視問題を診断・theme=dark-ansi追加で修正 / archive-sessions Google Drive mv失敗で見送り | 7a35cdb | [Details](session-20260516-142534.md) |
