@@ -1,83 +1,59 @@
-# DONE.md - 作業完了報告
+# DONE.md - セッション引き継ぎ
 
 ## やったこと
 
-**変更したファイル**
-| ファイル | 変更内容 |
-|---------|----------|
-| `.codex/CODEX_SPEC.md` | Codex固有仕様を追加 |
-| `.codex/skills/*/SKILL.md` | Codex Runtime Rules付きで36コマンド + aliasを生成 |
-| `scripts/sync-cli-commands.py` | `.codex/skills` 正式化、`--codex-only` 追加、`--check` 修正 |
-| `README.md` | Codex説明を `.codex` 基準へ更新 |
-| `AGENTS.md` | Codex仕様参照とAI Coordinationトリガー条件を明記 |
-| `package.json` | `sync:cli` と `.codex/` 配布対象を追加 |
-| `.claude/skills/sd-deploy/deploy.ps1` | `.codex` のバックアップ・コピー・検証を追加 |
-| `.claude/skills/sd-deploy/deploy.sh` | `.codex` のバックアップ・コピー・検証を追加 |
+**調査・分析セッション**（ファイル変更なし）
+
+- Zenn記事「Claude CodeとCodexの連携をMCPからSkillに変えたら体験が劇的に改善した」を読解
+- ローカルのCodex関連スキル/プラグインの搭載状況を全数調査
+- at002 で「不発」になる真因を3点に分解
+- OpenAI公式プラグイン `openai/codex-plugin-cc` を調査（2026-03-30 リリース、7コマンド提供、Review Gate機能あり）
 
 **変更内容の要約**
-Claude Codeの正本仕様を壊さず、Codex用の追加仕様とSkill生成・配布経路を追加した。`.codex/` はコミット対象としてステージ済み。
+何も変更していない。次セッションのアクション候補を P1 に列挙した状態で停止。
 
 ---
 
 ## 確認結果
 
-**実行したコマンド**
-```powershell
-python scripts\sync-cli-commands.py --codex-only
-python scripts\sync-cli-commands.py --check
-python -m py_compile scripts\sync-cli-commands.py
-node -e "JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('package.json OK')"
-npm run build
-git diff --check -- README.md AGENTS.md package.json scripts\sync-cli-commands.py .claude\skills\sd-deploy\deploy.ps1 .claude\skills\sd-deploy\deploy.sh .codex\CODEX_SPEC.md
-git add .codex
-```
+**確認したこと**
+- `~/.claude/skills/codex-dispatch/SKILL.md` 存在（並列ディスパッチ用、トリガー語弱い）
+- `~/.claude/plugins/cache/openai-codex/codex/1.0.1/` 存在（公式プラグイン、user scope、2026-03-31インストール）
+- 公式プラグインのcommands7種（review/adversarial-review/rescue/status/result/cancel/setup）が揃っていることを確認
+- `where codex` → `D:\npm-global\codex.cmd`（v0.130.0）
 
-**結果**
-```text
-SYNC CHECK OK (36 commands)
-package.json OK
-npm run build 成功
-git diff --check 成功
-.codex/ 39ファイルをステージ済み
-```
-
-**失敗した確認**
-- `npm run lint`: ESLint設定ファイルが見つからない既存構成エラー。
-- `npm test -- --runInBand`: `@mcpher/gas-fakes` ESM parse error と `LocalEnv.ts` / `src/mocks/index.ts` moduleエラー。
-- `deploy.sh` の `bash -n`: このWindows環境のbashがWSL未導入状態のため未確認。
+**動作確認**
+- [ ] at002 で `/codex:setup` 実行（未実施）
+- [ ] at002 で `/codex:review` 動作確認（未実施）
 
 ---
 
 ## 残っていること
 
 **未完了タスク**
-- [ ] Codex仕様追加の本体変更をレビューし、通常コミットとして保存する。
-- [ ] ESLint設定なしの既存問題を修正する。
-- [ ] Jest/gas-fakes/LocalEnv moduleの既存問題を修正する。
-- [ ] Bash版deployはWSLまたはGit Bash環境で構文確認する。
+- [ ] at002 で公式 Codex プラグインの疎通確認（`/codex:setup` → `/codex:review`）
+- [ ] 動かない場合は project scope へ追加インストール検討
+- [ ] `.claude/rules/workflow/ai-coordination.md` と CLAUDE.md 本文の整合性確認（軽量相談 `/codex:review` vs 重量パイプライン `/workflow:review` の住み分け明文化）
 
 **次の手順**
-- 次のタスク: Codex仕様追加コミットの作成。
-- 依存関係: `.codex/` はステージ済み。その他の変更は未ステージ。
+- ユーザー判断: 公式プラグインで運用するか、記事の独自 `/codex` スキルを別途作るか
+- 推奨: 既にインストール済みの公式プラグインを使う（独自 `/codex` の追加は不要）
 
 ---
 
 ## 判断したこと
 
-**設計上の選択**
-| 選択肢 | 採用 | 理由 |
-|--------|------|------|
-| `.codex/skills` vs `.agents/skills` | `.codex/skills` | 現在のCodexセッションで実際に参照されるパスに合わせるため |
-| Claude正本変更 vs Codex adapter追加 | Codex adapter追加 | Claude Code仕様を破壊しないため |
-| 全同期 vs Codexだけ同期 | `--codex-only` 追加 | `.sd/` やGemini生成物を巻き込まずCodexだけ更新できるため |
+**設計上の選択（未確定・提案レベル）**
 
-**採用しなかった案と理由**
-- `.claude/commands` の直接修正: Claude Code正本に影響するため見送り。
-- `.agents/skills` の復旧・移行コミット: 既存の大量削除状態があり、今回のスコープ外。
+| 選択肢 | 採用候補 | 理由 |
+|--------|---------|------|
+| 独自 `/codex` skill 追加 vs 公式 `/codex:review` 活用 | 公式 | 既にインストール済み、機能上位互換 |
+| `codex-dispatch` の description にトリガー語追加 | 保留 | 公式プラグインで十分なら不要 |
+| Review Gate 導入 | 検討推奨 | SD003品質ゲート思想と整合 |
 
 ---
 
 ## 追加情報
 
-- sessionwriteコミットでは `.sessions/` と `.handoff/DONE.md` のみを対象にする。
-- 作業ツリーには今回作業前からの大量の削除・変更・未追跡ファイルが残っているため、次回も `git status --short` を最初に確認すること。
+- 本セッション中のユーザー修正は0回 → 学習ナッジ対象外
+- 公式プラグインは2026-03-31インストール済み（参照: `session-20260331-194236.md`）。at002 での「不発」は設定or誘導の問題で、プラグイン自体の問題ではない可能性が高い

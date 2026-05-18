@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 76
+- **Total Sessions**: 77
 - **Latest Session**: 2026-05-18
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-18 | Zenn記事Codex Skill移行受領 + 公式プラグインopenai/codex-plugin-cc調査（既にuser scopeでインストール済み確認）+ at002「不発」3要因分析 | (pending) | [Details](session-20260518-095119.md) |
 | 05-18 | Claude Code正本を壊さずCodex仕様を追加（.codex/CODEX_SPEC + .codex/skills正式化 + sync --codex-only + deploy配布対応） | (pending) | [Details](session-20260518-075636.md) |
 | 05-18 | セッションアーカイブ7件Google Drive移動 + at002へSD003展開（266コピー+7生成、Skills 113/116はOptional除外）+ deploy.ps1のNext Stepsに古い`/sd:spec-init`参照を発見 | (pending) | [Details](session-20260518-073605.md) |
 | 05-16 | Codex/uvキャッシュ削除 + codex-cache-cleanupスキル作成・Codex.app日本語呼び出し対応 | (pending) | [Details](session-20260516-150213.md) |

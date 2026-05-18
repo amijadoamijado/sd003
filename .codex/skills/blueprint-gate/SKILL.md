@@ -1,0 +1,24 @@
+---
+name: blueprint-gate
+description: Codex equivalent of the SD003 custom command `/blueprint-gate`. Use when the user invokes `/blueprint-gate`, `blueprint-gate`.
+---
+
+# Blueprint Gate
+
+この skill は Claude Code の `/blueprint-gate` を Codex で再現するためのものです。
+本文に Claude 固有の記法やツール名が含まれる場合も、Codex では同等の手順に置き換えて実行してください。
+
+## Codex Runtime Rules
+- `.claude/commands/**/*.md` はClaude Code側のauthoring sourceです。直接変更せず、CodexではこのSkillを実行仕様として扱います。
+- Claude Codeのスラッシュコマンド、`Agent(...)`、`AskUserQuestion`、hook前提の記述は文字通り実行せず、Codexの通常手順に翻訳します。
+- Codex内で `/codex:review`、`/codex:rescue` などのCodexプラグインコマンドを再帰的に呼ばないでください。必要な読取・差分確認・編集・検証・報告をCodex自身で実施します。
+- 人間向け出力、レビュー報告、質問、完了報告は日本語で書きます。
+- `.sd/ai-coordination/` に依頼書・報告書を書く場合は、既存の案件ID配下に限定し、プロジェクトルートへ散らさないでください。
+- Windows環境ではPowerShellで実行できるコマンドを優先し、bash専用の例はWSLやGit Bashが使える場合だけ採用します。
+
+## Original Command Body
+# Blueprint Gate
+
+Read and follow `.claude/skills/blueprint-gate/SKILL.md`.
+
+$ARGUMENTS
