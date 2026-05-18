@@ -89,6 +89,8 @@ IMPORTANT: When running tests or writing test code, enforce production data TDD.
 
 IMPORTANT: When coordinating with other AIs (Codex, Gemini, Antigravity), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
 
+IMPORTANT: When the user asks for a quick Codex consultation or one-off review (e.g. "codexにレビューさせて", "codexに見せて", "codexに相談", "codexに調査させて") WITHOUT a project ID or workflow context, use the official plugin commands `/codex:review` (read-only review), `/codex:adversarial-review` (critical review), or `/codex:rescue` (delegate investigation/fix). Do NOT route to the heavyweight `/workflow:review` chain (which requires WORK_ORDER/IMPLEMENT_REQUEST and a project ID). The `/workflow:*` chain is for formal project deliverables; `/codex:*` is for ad-hoc consultation. Plugin: `openai/codex-plugin-cc` (already installed user-scope). If `/codex:setup` has not been run yet in this project, run it once first.
+
 IMPORTANT: When deploying SD003 to another project, use `/sd-deploy` command only. Manual deploy is prohibited. Details: `.claude/skills/sd-deploy/SKILL.md`
 
 IMPORTANT: When creating or modifying spec files (requirements/design/spec/tasks), the canonical location is `.sd/specs/{feature}/`. Never place under `docs/specs/` or any other path. Main spec file is `spec.md` (NOT `design.md` — Google Antigravity reserves `design.md` for UI). Physical guardrail: `.claude/hooks/enforce-spec-location.sh` denies writes outside `.sd/specs/`. Details: `.claude/rules/specs/spec-driven.md`
