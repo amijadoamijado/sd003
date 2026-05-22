@@ -45,7 +45,7 @@ foreach ($f in $backupTargets) {
     }
 }
 
-$backupDirs = @(".claude", ".gemini", ".sd", ".antigravity")
+$backupDirs = @(".claude", ".codex", ".gemini", ".sd", ".antigravity")
 foreach ($d in $backupDirs) {
     $path = Join-Path $TargetProject $d
     if (Test-Path $path -PathType Container) {
@@ -62,6 +62,7 @@ $directories = @(
     ".claude/rules",
     ".claude/skills",
     ".claude/hooks",
+    ".codex/skills",
     ".gemini/commands",
     ".sd/specs",
     ".sd/steering",
@@ -201,13 +202,16 @@ Copy-DirTree -RelPath ".claude\hooks" -Label "Hooks"
 # 4-6: .gemini/commands/ (flat, .toml)
 Copy-FlatDir -RelPath ".gemini\commands" -Label "Gemini Commands" -Extension ".toml"
 
-# 4-7: .antigravity/ (tree)
+# 4-7: .codex/ (tree)
+Copy-DirTree -RelPath ".codex" -Label "Codex"
+
+# 4-8: .antigravity/ (tree)
 Copy-DirTree -RelPath ".antigravity" -Label "Antigravity"
 
-# 4-8: .sd/settings/ (tree)
+# 4-9: .sd/settings/ (tree)
 Copy-DirTree -RelPath ".sd\settings" -Label "SD Settings"
 
-# 4-9: .sessions/templates/ (template files for new projects)
+# 4-10: .sessions/templates/ (template files for new projects)
 $sessionTemplatesSrc = Join-Path $SOURCE_DIR ".sessions\templates"
 if (Test-Path $sessionTemplatesSrc) {
     $targetTemplatesDir = Join-Path $TargetProject ".sessions\templates"
@@ -220,10 +224,10 @@ if (Test-Path $sessionTemplatesSrc) {
     $copyStats["Session Templates"] = 0
 }
 
-# 4-10a: .sd/design/ (tree)
+# 4-11a: .sd/design/ (tree)
 Copy-DirTree -RelPath ".sd\design" -Label "Design Tokens"
 
-# 4-10b: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
+# 4-11b: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
 $workflowSrc = Join-Path $SOURCE_DIR ".sd\ai-coordination\workflow"
 $workflowDst = Join-Path $TargetProject ".sd\ai-coordination\workflow"
 $wfCount = 0
@@ -595,6 +599,7 @@ $verifyResults += Verify-Category -Label "Rules" -SourceRelPath ".claude\rules" 
 $verifyResults += Verify-Category -Label "Skills" -SourceRelPath ".claude\skills" -Recurse
 $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" -Recurse
 $verifyResults += Verify-Category -Label "Gemini Commands" -SourceRelPath ".gemini\commands" -Filter "*.toml"
+$verifyResults += Verify-Category -Label "Codex" -SourceRelPath ".codex" -Recurse
 $verifyResults += Verify-Category -Label "Antigravity" -SourceRelPath ".antigravity" -Recurse
 $verifyResults += Verify-Category -Label "SD Settings" -SourceRelPath ".sd\settings" -Recurse
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse

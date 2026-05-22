@@ -37,7 +37,7 @@ for f in CLAUDE.md gemini.md; do
     [ -f "$TARGET_PROJECT/$f" ] && cp "$TARGET_PROJECT/$f" "$BACKUP_DIR/" 2>/dev/null || true
 done
 
-for d in .claude .gemini .sd .antigravity; do
+for d in .claude .codex .gemini .sd .antigravity; do
     [ -d "$TARGET_PROJECT/$d" ] && cp -r "$TARGET_PROJECT/$d" "$BACKUP_DIR/" 2>/dev/null || true
 done
 echo "[Phase 2/7] Backup created: $BACKUP_DIR"
@@ -50,6 +50,7 @@ DIRS=(
     ".claude/rules"
     ".claude/skills"
     ".claude/hooks"
+    ".codex/skills"
     ".gemini/commands"
     ".sd/specs"
     ".sd/steering"
@@ -153,13 +154,16 @@ copy_dir_tree ".claude/hooks" "Hooks" "*"
 # 4-6: .gemini/commands/ (flat, .toml)
 copy_flat_dir ".gemini/commands" "Gemini Commands" ".toml"
 
-# 4-7: .antigravity/ (tree)
+# 4-7: .codex/ (tree)
+copy_dir_tree ".codex" "Codex" "*"
+
+# 4-8: .antigravity/ (tree)
 copy_dir_tree ".antigravity" "Antigravity" "*"
 
-# 4-8: .sd/settings/ (tree)
+# 4-9: .sd/settings/ (tree)
 copy_dir_tree ".sd/settings" "SD Settings" "*"
 
-# 4-9: .sessions/session-template.md
+# 4-10: .sessions/session-template.md
 if [ -f "$SOURCE_DIR/.sessions/session-template.md" ]; then
     cp "$SOURCE_DIR/.sessions/session-template.md" "$TARGET_PROJECT/.sessions/"
     COPY_STATS["Session Template"]=1
@@ -168,7 +172,7 @@ else
     COPY_STATS["Session Template"]=0
 fi
 
-# 4-10: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
+# 4-11: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
 WF_SRC="$SOURCE_DIR/.sd/ai-coordination/workflow"
 WF_DST="$TARGET_PROJECT/.sd/ai-coordination/workflow"
 wf_count=0
@@ -501,6 +505,7 @@ verify_category "Rules" ".claude/rules" ".claude/rules" "*.md" "true"
 verify_category "Skills" ".claude/skills" ".claude/skills" "*" "true"
 verify_category "Hooks" ".claude/hooks" ".claude/hooks" "*" "true"
 verify_category "Gemini Commands" ".gemini/commands" ".gemini/commands" "*.toml" "false"
+verify_category "Codex" ".codex" ".codex" "*" "true"
 verify_category "Antigravity" ".antigravity" ".antigravity" "*" "true"
 verify_category "SD Settings" ".sd/settings" ".sd/settings" "*" "true"
 verify_category "Handoff" ".handoff" ".handoff" "*" "true"

@@ -93,6 +93,12 @@ tmp/
 
 # .sd/ - git管理外（Claude Codeランタイムのrefreshで消えるため）
 .sd/
+
+# git worktrees（実体はgit管理外。worktree dir自体をコミットしない）
+.claude/worktrees/
+
+# stray deploy artifact（誤ってルート直下にデプロイされた残骸）
+cr001/
 # gitignore-verify
 # persist
 # sd-test

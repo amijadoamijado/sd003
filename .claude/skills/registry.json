@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "description": "中央レジストリ。拡張子・キーワード・パスから必読 SKILL.md を逆引きする。enforce-skill-read.sh が参照。",
+  "skills": {
+    "bugyou-yayoi-conversion": {
+      "skill_path": ".claude/skills/bugyou-yayoi-conversion/SKILL.md",
+      "extensions": ["*.csv"],
+      "keywords": [
+        "奉行",
+        "弥生",
+        "仕訳",
+        "サクセス",
+        "山一",
+        "siwakebugyou",
+        "bugyou",
+        "yayoi",
+        "shiwake"
+      ],
+      "paths": [
+        "サクセス/",
+        "山一/",
+        "siwakebugyou",
+        "yayoi"
+      ],
+      "severity": "block",
+      "reason": "勘定奉行→弥生CSV変換は複合仕訳ルール等の業務知識が必須。捏造データで進めると本番破壊"
+    },
+    "excel-com-required": {
+      "skill_path": ".claude/skills/excel-com-required/SKILL.md",
+      "extensions": ["*.xlsx", "*.xls"],
+      "keywords": [
+        "openpyxl",
+        "xlsx-utils",
+        "XLSX.utils",
+        "ExcelJS",
+        "pandas.to_excel",
+        "pandas.ExcelWriter",
+        "Excel.Application"
+      ],
+      "paths": [],
+      "severity": "block",
+      "reason": "cf001でExcel COM必須を無視しxlsxライブラリで書式破壊した過去事故。Excel書式・罫線・色・列幅を保持する操作は COM 経由必須"
+    }
+  },
+  "exclusions": {
+    "description": "false positive を避けるための除外。これらに該当するパスは検査スキップ",
+    "paths": [
+      "node_modules/",
+      ".git/",
+      ".sd/cleanup/archive/",
+      "logs/",
+      "dist/",
+      "build/",
+      "test-results/"
+    ],
+    "extensions_safe": [".md", ".txt", ".log", ".json", ".yml", ".yaml", ".lock"]
+  }
+}
