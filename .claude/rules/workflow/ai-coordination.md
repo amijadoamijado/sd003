@@ -1,24 +1,23 @@
 # AI協調体制
 
-## 対応AI（4種類）
+## 対応AI（3種類）
 | AI | 役割 | コマンド |
 |----|------|---------|
 | Claude Code | 計画・工程管理 | `/workflow:init`, `/workflow:order`, `/workflow:request`, `/workflow:status` |
 | Codex | レビュー・チェック・タスク委譲 | `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`（公式プラグイン）, `/workflow:review`（自動連鎖） |
-| Gemini CLI | 実装 | `/workflow:impl`（自動連鎖） |
-| Antigravity | E2Eテスト・探索的調査・本番確認 | `/workflow:test`（自動連鎖） |
+| Antigravity | 実装・E2Eテスト・探索的調査・本番確認 | `/workflow:impl`, `/workflow:test`（自動連鎖） |
 
-**廃止**: Cursor, Windsurf
+**廃止**: Cursor, Windsurf, Gemini CLI
 
 ## ワークフローコマンド
 | コマンド | 説明 |
 |----------|------|
 | `/workflow:init {slug}` | 案件初期化 |
 | `/workflow:order {案件ID}` | 発注書作成 |
-| `/workflow:request {案件ID} {番号}` | 実装指示作成（Gemini CLI向け） |
+| `/workflow:request {案件ID} {番号}` | 実装指示作成（Antigravity向け） |
 | `/workflow:test {案件ID} {番号}` | テスト依頼作成（Antigravity向け） |
 | `/workflow:status {案件ID}` | 工程状況確認 |
-| `/workflow:impl {案件ID} {番号}` | 実装実行（Gemini CLI）→ review自動連鎖 |
+| `/workflow:impl {案件ID} {番号}` | 実装実行（Antigravity）→ review自動連鎖 |
 | `/workflow:review {案件ID} {番号}` | レビュー依頼・実行（Codex）|
 
 ---
@@ -63,7 +62,7 @@ Phase 3: 実装指示作成 (Claude Code)
     ↓ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     ↓ ★ 自動連鎖チェーン（/workflow:request で一括実行）
     ↓ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Phase 4: 実装 (Gemini CLI)          ← /workflow:impl が自動実行
+Phase 4: 実装 (Antigravity)          ← /workflow:impl が自動実行
     ↓
 Phase 4.5: 視覚的評価 (Web UI案件のみ) ★NEW
     ↓ スクショ撮影 → visual-review-checklist で採点
@@ -72,7 +71,7 @@ Phase 4.5: 視覚的評価 (Web UI案件のみ) ★NEW
 Phase 5: 実装レビュー (Codex)       ← /workflow:review が自動実行
     ↓ REVIEW_REPORT テンプレートでスコアリング（コード+UI）
     ↓ Approve / Request Changes → Phase 6
-Phase 6: 修正対応 (Gemini CLI)
+Phase 6: 修正対応 (Antigravity)
     ↓ Approve
 Phase 7: E2Eテスト (Antigravity) ★
     ↓ Pass
@@ -85,7 +84,7 @@ Phase 8: 工程完了 (Claude Code)
 
 | トリガー | 自動実行 | 説明 |
 |---------|---------|------|
-| `/workflow:request` 完了 | → `/workflow:impl` | 指示書作成後、Gemini CLI実行は必須 |
+| `/workflow:request` 完了 | → `/workflow:impl` | 指示書作成後、Antigravity実行は必須 |
 | `/workflow:impl` 完了 | → visual-eval（Web UI案件） → `/workflow:review` | 実装後、UI評価+Codexレビューは必須 |
 | `/workflow:review` Approve | → `/workflow:test` | レビュー承認後、TEST_REQUEST自動作成＋Antigravityディスパッチ |
 
@@ -94,7 +93,7 @@ Phase 8: 工程完了 (Claude Code)
 /workflow:request {ID} {N}
   ├── Step 1-7: 実装指示書作成 + handoff記録
   └── Step 8: /workflow:impl {ID} {N} を自動実行
-        ├── Step 1-8: Gemini CLI実行 → 検証 → コミット → handoff記録
+        ├── Step 1-8: Antigravity実行（agy --prompt ... --dangerously-skip-permissions） → 検証 → コミット → handoff記録
         ├── Step 9 (Web UI案件): スクショ撮影 → visual-review-checklist採点
         │     ├── 50/70以上: 次へ
         │     └── 50/70未満: UI修正 → 再impl → 再採点
@@ -107,7 +106,7 @@ Phase 8: 工程完了 (Claude Code)
 
 **違反パターン（禁止）**:
 - 指示書を作っただけで止まる
-- Gemini実装が終わっただけで止まる
+- Antigravity実装が終わっただけで止まる
 - Web UI案件でスクショ評価をスキップする
 - レビューでスコアリングなしにApproveする
 - レビューApprove後にテスト依頼を出さずに止まる
@@ -146,6 +145,7 @@ impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
 ### 役割の詳細
 | 役割 | 説明 |
 |------|------|
+| 実装実行 | 指示書に従ったコード変更および検証 |
 | E2Eテスト | 本番/ステージング環境でのUI確認 |
 | 探索的テスト | 仕様外の動作確認、UX検証 |
 | スクリーンショット取得 | 証跡収集（テスト報告に添付） |
@@ -187,8 +187,8 @@ impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
 | type | 説明 | from | to |
 |------|------|------|-----|
 | `work_order_review` | 発注書レビュー依頼 | Claude Code | Codex |
-| `implement_request` | 実装指示発行 | Claude Code | Gemini CLI |
-| `implement_complete` | 実装完了・レビュー依頼 | Gemini CLI | Codex |
+| `implement_request` | 実装指示発行 | Claude Code | Antigravity |
+| `implement_complete` | 実装完了・レビュー依頼 | Antigravity | Codex |
 | `review_complete` | レビュー完了 | Codex | Claude Code |
 | `test_request` | テスト依頼発行 | Claude Code | Antigravity |
 | `test_report` | テスト完了報告 | Antigravity | Claude Code |
@@ -218,8 +218,7 @@ impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
 ├── sessions/                   # AI別セッション記録
 │   ├── antigravity/            # Antigravityのセッション
 │   ├── claude-code/            # Claude Codeのセッション
-│   ├── codex/                  # Codexのセッション
-│   └── gemini/                 # Gemini CLIのセッション
+│   └── codex/                  # Codexのセッション
 ├── workflow/
 │   ├── README.md               # ワークフロー説明
 │   ├── CODEX_GUIDE.md          # Codexレビュー運用ガイド
@@ -241,7 +240,6 @@ impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
 |----|-----------|-----------|-----------|
 | Claude Code | `sessions/claude-code/` | - | `workflow/spec/` |
 | Codex | `sessions/codex/` | `workflow/spec/` | `workflow/review/` |
-| Gemini CLI | `sessions/gemini/` | `workflow/spec/` | `workflow/review/` |
 | Antigravity | `sessions/antigravity/` | `workflow/spec/` | `workflow/review/` |
 
 ## 命名規則
@@ -272,7 +270,7 @@ When user mentions a task or feature, FIRST ask or determine:
 |----|-----------------|-------------|
 | Claude Code | "create work order", "create request", "assign to" | Create document using template, save to spec folder |
 | Claude Code | "check on Antigravity", "test request to Antigravity" | Create TEST_REQUEST, record handoff |
-| Gemini CLI | "implementation complete", "done implementing" | Report to Codex for review |
+| Antigravity | "implementation complete", "done implementing" | Report to Codex for review |
 | Antigravity | "test request", "execute test" | Read TEST_REQUEST, execute, create TEST_REPORT |
 | Codex | "review complete", "approved", "request changes" | Create REVIEW_REPORT |
 
@@ -284,7 +282,7 @@ When user mentions a task or feature, FIRST ask or determine:
 | "指示書を作成", "作業指示" | Claude Code | Create IMPLEMENT_REQUEST or TEST_REQUEST |
 | "テストを依頼" | Claude Code | Create TEST_REQUEST for Antigravity |
 | "アンチグラビティに依頼", "アンチグラビティに" | Claude Code | Create TEST_REQUEST for Antigravity |
-| "実装完了", "作業完了" | Gemini CLI | Report completion, request review |
+| "実装完了", "作業完了" | Antigravity | Report completion, request review |
 | "テスト結果", "報告" | Antigravity | Create TEST_REPORT |
 | "レビュー完了" | Codex | Create REVIEW_REPORT |
 

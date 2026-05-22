@@ -140,7 +140,7 @@ description: Codex equivalent of the SD003 custom command `/workflow:status`. Us
 
 | 案件ID | フェーズ | 担当 | 進捗 | 最終更新 |
 |--------|---------|------|------|---------|
-| {ID1}  | 4       | Gemini CLI | 60% | 2025-12-30 |
+| {ID1}  | 4       | Antigravity CLI | 60% | 2025-12-30 |
 | {ID2}  | 2       | Codex | 0% | 2025-12-30 |
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

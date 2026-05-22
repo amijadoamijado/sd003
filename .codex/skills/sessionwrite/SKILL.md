@@ -146,7 +146,7 @@ $ARGUMENTS
 セッション記録と同時に、Codex向けの引き継ぎファイルも更新する:
 
 ```bash
-# .handoff/DONE.md を生成（Codex/Gemini向け引き継ぎ）
+# .handoff/DONE.md を生成（Codex/Antigravity向け引き継ぎ）
 ```
 
 内容は session record の要約版:

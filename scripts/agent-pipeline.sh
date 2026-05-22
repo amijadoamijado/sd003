@@ -1,7 +1,7 @@
 #!/bin/bash
 # agent-pipeline.sh - 4-Agent パイプライン統合スクリプト
 #
-# Claude Code（指揮・判断）→ Gemini CLI（実装）→ Codex（レビュー）→ Antigravity（E2Eテスト）
+# Claude Code（指揮・判断）→ Antigravity CLI (agy)（実装）→ Codex（レビュー）→ Antigravity（E2Eテスト）
 # の4段階パイプラインを非インタラクティブに実行する。
 #
 # Usage:
@@ -16,7 +16,7 @@
 # Options:
 #   --skip-review   Codexレビューをスキップ（Antigravityもスキップ）
 #   --skip-test     Antigravity E2Eテストをスキップ
-#   --auto-apply    Gemini出力のgit add + commit を実行（要注意）
+#   --auto-apply    Antigravity出力のgit add + commit を実行（要注意）
 #   --dry-run       全ステップをプレビューのみ
 #   --help          ヘルプ表示
 
@@ -67,16 +67,16 @@ while [[ $# -gt 0 ]]; do
             echo "  $0 <案件ID> <タスク番号> [options]"
             echo ""
             echo "Pipeline:"
-            echo "  Step 1: Gemini CLI    - 実装（パイプ実行）"
-            echo "  Step 2: git commit    - 自動コミット（--auto-apply時）"
-            echo "  Step 3: Codex        - レビュー（パイプ実行）"
-            echo "  Step 4: Antigravity  - E2Eテスト（ハンドオフ実行）"
-            echo "  Step 5: 結果出力     - Claude Codeが判断"
+            echo "  Step 1: Antigravity CLI (agy) - 実装（非インタラクティブ実行）"
+            echo "  Step 2: git commit            - 自動コミット（--auto-apply時）"
+            echo "  Step 3: Codex                 - レビュー（パイプ実行）"
+            echo "  Step 4: Antigravity CLI (agy) - E2Eテスト（ハンドオフ実行）"
+            echo "  Step 5: 結果出力              - Claude Codeが判断"
             echo ""
             echo "Options:"
             echo "  --skip-review   Codexレビューをスキップ（Antigravityもスキップ）"
             echo "  --skip-test     Antigravity E2Eテストをスキップ"
-            echo "  --auto-apply    Gemini出力のgit add + commit を実行"
+            echo "  --auto-apply    Antigravity出力のgit add + commit を実行"
             echo "  --dry-run       プレビューのみ"
             echo "  --help          このヘルプを表示"
             exit 0
@@ -104,7 +104,7 @@ SPEC_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/spec/${PROJECT_ID}"
 REVIEW_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/review/${PROJECT_ID}"
 LOG_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/log/${PROJECT_ID}"
 REQUEST_FILE="${SPEC_DIR}/IMPLEMENT_REQUEST_${TASK_NUM}.md"
-GEMINI_OUTPUT="${LOG_DIR}/gemini-output-${TASK_NUM}.md"
+AGY_OUTPUT="${LOG_DIR}/agy-output-${TASK_NUM}.md"
 REVIEW_OUTPUT="${REVIEW_DIR}/REVIEW_IMPL_${TASK_NUM}.md"
 TEST_REQUEST="${SPEC_DIR}/TEST_REQUEST_${TASK_NUM}.md"
 TEST_REPORT="${REVIEW_DIR}/TEST_REPORT_${TASK_NUM}.md"
@@ -115,7 +115,7 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 echo -e "${CYAN}╔══════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║  SD003 4-Agent Pipeline                           ║${NC}"
-echo -e "${CYAN}║  Gemini(実装) → Codex(レビュー) → Antigravity(テスト)║${NC}"
+echo -e "${CYAN}║  Antigravity(実装) → Codex(レビュー) → Antigravity(テスト)║${NC}"
 echo -e "${CYAN}╚══════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "案件ID:     ${GREEN}${PROJECT_ID}${NC}"
@@ -141,22 +141,22 @@ if [ ! -f "$REQUEST_FILE" ]; then
 fi
 
 # ============================================================
-# Step 1: Gemini CLI - Implementation via pipe
+# Step 1: Antigravity CLI - Implementation
 # ============================================================
-echo -e "${BLUE}━━━ Step 1/4: Gemini CLI 実装 ━━━${NC}"
-echo "## Step 1: Gemini Implementation" >> "$PIPELINE_LOG"
+echo -e "${BLUE}━━━ Step 1/4: Antigravity CLI 実装 ━━━${NC}"
+echo "## Step 1: Antigravity Implementation" >> "$PIPELINE_LOG"
 
 if [ "$DRY_RUN" = true ]; then
     echo -e "${YELLOW}[DRY-RUN] Would execute: agent-implement.sh ${PROJECT_ID} ${TASK_NUM}${NC}"
     echo "[DRY-RUN] Skipped" >> "$PIPELINE_LOG"
 else
-    # Execute Gemini implementation
+    # Execute Antigravity implementation
     if "${SCRIPT_DIR}/agent-implement.sh" "$PROJECT_ID" "$TASK_NUM"; then
-        echo -e "${GREEN}[OK] Gemini CLI 実装完了${NC}"
+        echo -e "${GREEN}[OK] Antigravity CLI 実装完了${NC}"
         echo "Status: SUCCESS" >> "$PIPELINE_LOG"
-        echo "Output: ${GEMINI_OUTPUT}" >> "$PIPELINE_LOG"
+        echo "Output: ${AGY_OUTPUT}" >> "$PIPELINE_LOG"
     else
-        echo -e "${RED}[FAIL] Gemini CLI 実装失敗${NC}"
+        echo -e "${RED}[FAIL] Antigravity CLI 実装失敗${NC}"
         echo "Status: FAILED" >> "$PIPELINE_LOG"
         echo -e "パイプラインを中断します。ログ: ${PIPELINE_LOG}"
         exit 1
@@ -173,7 +173,7 @@ if [ "$AUTO_APPLY" = true ]; then
     echo "## Step 2: Auto Apply" >> "$PIPELINE_LOG"
 
     if [ "$DRY_RUN" = true ]; then
-        echo -e "${YELLOW}[DRY-RUN] Would auto-apply and commit Gemini output${NC}"
+        echo -e "${YELLOW}[DRY-RUN] Would auto-apply and commit Antigravity output${NC}"
         echo "[DRY-RUN] Skipped" >> "$PIPELINE_LOG"
     else
         HAS_CHANGES=false
@@ -186,7 +186,7 @@ if [ "$AUTO_APPLY" = true ]; then
         if [ "$HAS_CHANGES" = true ]; then
             echo -e "${BLUE}Staging and committing changes...${NC}"
             git add -A
-            if git commit -m "feat(${PROJECT_ID}): auto-apply Gemini output #${TASK_NUM}"; then
+            if git commit -m "feat(${PROJECT_ID}): auto-apply Antigravity output #${TASK_NUM}"; then
                 echo -e "${GREEN}[OK] Auto-apply commit 完了${NC}"
                 echo "Status: COMMITTED" >> "$PIPELINE_LOG"
             else
@@ -213,11 +213,11 @@ if [ "$SKIP_REVIEW" = false ]; then
     echo -e "${BLUE}━━━ Step 3/4: Codex レビュー ━━━${NC}"
     echo "## Step 3: Codex Review" >> "$PIPELINE_LOG"
 
-    if [ ! -f "$GEMINI_OUTPUT" ]; then
-        echo -e "${YELLOW}[SKIP] Gemini出力なし（dry-run or 未実行）${NC}"
-        echo "Status: SKIPPED (no Gemini output)" >> "$PIPELINE_LOG"
+    if [ ! -f "$AGY_OUTPUT" ]; then
+        echo -e "${YELLOW}[SKIP] Antigravity出力なし（dry-run or 未実行）${NC}"
+        echo "Status: SKIPPED (no Antigravity output)" >> "$PIPELINE_LOG"
     elif [ "$DRY_RUN" = true ]; then
-        echo -e "${YELLOW}[DRY-RUN] Would execute: codex review on ${GEMINI_OUTPUT}${NC}"
+        echo -e "${YELLOW}[DRY-RUN] Would execute: codex review on ${AGY_OUTPUT}${NC}"
         echo "[DRY-RUN] Skipped" >> "$PIPELINE_LOG"
     else
         # Build review prompt
@@ -233,7 +233,7 @@ if [ "$SKIP_REVIEW" = false ]; then
 7. JSDocコメント（公開API）
 
 ## レビュー対象コード
-$(cat "$GEMINI_OUTPUT")
+$(cat "$AGY_OUTPUT")
 
 ## 出力形式
 以下の形式でレビュー結果を出力:
@@ -337,13 +337,13 @@ echo ""
 echo -e "完了時刻: ${END_TIMESTAMP}"
 echo ""
 echo "Output files:"
-[ -f "$GEMINI_OUTPUT" ] && echo -e "  Gemini:  ${GREEN}${GEMINI_OUTPUT}${NC}"
-[ -f "$REVIEW_OUTPUT" ] && echo -e "  Review:  ${GREEN}${REVIEW_OUTPUT}${NC}"
-[ -f "$TEST_REPORT" ] && echo -e "  Test:    ${GREEN}${TEST_REPORT}${NC}"
-echo -e "  Log:     ${GREEN}${PIPELINE_LOG}${NC}"
+[ -f "$AGY_OUTPUT" ] && echo -e "  Antigravity (Impl): ${GREEN}${AGY_OUTPUT}${NC}"
+[ -f "$REVIEW_OUTPUT" ] && echo -e "  Review:             ${GREEN}${REVIEW_OUTPUT}${NC}"
+[ -f "$TEST_REPORT" ] && echo -e "  Test:               ${GREEN}${TEST_REPORT}${NC}"
+echo -e "  Log:                ${GREEN}${PIPELINE_LOG}${NC}"
 echo ""
 echo "Next steps (Claude Code判断):"
-echo "  1. Gemini出力を確認:  cat ${GEMINI_OUTPUT}"
+echo "  1. Antigravity出力を確認:  cat ${AGY_OUTPUT}"
 [ "$SKIP_REVIEW" = false ] && echo "  2. レビュー結果を確認: cat ${REVIEW_OUTPUT}"
 [ "$SKIP_TEST" = false ] && [ "$SKIP_REVIEW" = false ] && echo "  3. テスト結果を確認:   cat ${TEST_REPORT}"
 echo "  4. 必要に応じて修正"

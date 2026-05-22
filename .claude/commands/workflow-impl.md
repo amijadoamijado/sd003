@@ -1,32 +1,32 @@
 ---
-description: AI協調ワークフロー - Gemini/Codex実装実行（指示書→実行→復元を一括）
+description: AI協調ワークフロー - Antigravity(agy)/Codex実装実行（指示書→実行→復元を一括）
 allowed-tools: Bash, Write, Read, Glob, Grep, Edit
 ---
 
 # 実装実行: /workflow:impl
 
 ## 概要
-IMPLEMENT_REQUESTに基づきGemini CLIまたはCodex CLIを実行し、結果を検証してコミットする。
+IMPLEMENT_REQUESTに基づきAntigravity CLI(agy)またはCodex CLIを実行し、結果を検証してコミットする。
 **指示書作成だけで止まることを防ぐための仕組み。**
 
 ## 使用方法
 ```
-/workflow:impl {案件ID} {タスク番号}              # デフォルト: Gemini CLI
+/workflow:impl {案件ID} {タスク番号}              # デフォルト: Antigravity CLI (agy)
 /workflow:impl {案件ID} {タスク番号} --codex      # Codex CLIで実行
 ```
 
 ## 引数
 - `案件ID`: 対象案件のID（例: `20260207-002-coverage-fix`）
 - `タスク番号`: 実装指示番号（3桁: 001, 002, ...）
-- `--codex`: Codex CLIで実行する（省略時はGemini CLI）
+- `--codex`: Codex CLIで実行する（省略時はAntigravity CLI (agy)）
 
 ## AI選択基準
 
 | 条件 | 推奨AI | 理由 |
 |------|--------|------|
 | 明確なゴール・局所的な実装 | **Codex** | 一発で高品質な出力 |
-| 広範な変更・対話的な調整が必要 | **Gemini** | 既存の実績 |
-| Gemini CLIが使えない・制限到達 | **Codex** | フォールバック |
+| 広範な変更・E2E・本番確認が必要 | **Antigravity (agy)** | 実装＋E2Eテストを担当 |
+| Antigravity CLIが使えない・制限到達 | **Codex** | フォールバック |
 
 ## 前提条件
 - IMPLEMENT_REQUEST_{タスク番号}.md が存在すること
@@ -42,8 +42,8 @@ cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番
 # CLI存在確認（--codex指定時）
 command -v codex >/dev/null 2>&1 || { echo "ERROR: codex CLI not found"; exit 1; }
 
-# CLI存在確認（デフォルト=Gemini時）
-command -v gemini >/dev/null 2>&1 || { echo "ERROR: gemini CLI not found"; exit 1; }
+# CLI存在確認（デフォルト=Antigravity時）
+command -v agy >/dev/null 2>&1 || { echo "ERROR: agy (Antigravity CLI) not found"; exit 1; }
 ```
 指示書またはCLIが存在しない場合はエラー終了。
 
@@ -58,13 +58,23 @@ git log --oneline -1
 
 引数に `--codex` が含まれるかどうかで分岐する。
 
-#### 3a: Gemini CLI（デフォルト）
+#### 3a: Antigravity CLI / agy（デフォルト）
+
+移行済みの実行スクリプトに委譲する（agy 起動の唯一の正本。重複定義を避ける）:
 
 ```bash
-cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md | gemini --yolo -p "上記の実装指示書に従って、全タスクを実装してください。完了後は検証手順に従ってビルド・テスト・ESLintを実行してください。"
+bash scripts/agent-implement.sh {案件ID} {タスク番号}
 ```
 
-⚠️ **コマンド順序注意**: `--yolo -p "..."` の順（`-p --yolo`だと`--yolo`がプロンプト値になる）
+スクリプト内部で以下が呼ばれる（非対話・ヘッドレス実行）:
+
+```bash
+agy --prompt "$(cat .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md)
+
+上記の実装指示書に従って、全タスクを実装してください。完了後は検証手順に従ってビルド・テスト・ESLintを実行してください。" --dangerously-skip-permissions
+```
+
+⚠️ **オプション注意**: agy はプロンプトを `--prompt` で渡し、`--dangerously-skip-permissions` で確認をスキップする（旧 `gemini --yolo -p` 相当の非対話実行）
 
 #### 3b: Codex CLI（--codex指定時）
 
@@ -196,7 +206,7 @@ git status --short
 git diff --stat
 ```
 
-Geminiが変更したファイルを確認し、対象ファイルのみをステージング。
+Antigravity(agy)が変更したファイルを確認し、対象ファイルのみをステージング。
 
 ### Step 8: コミット
 ```bash
@@ -215,7 +225,7 @@ Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>"
   "timestamp": "{現在日時ISO形式}",
   "type": "implement_complete",
   "project_id": "{案件ID}",
-  "from": "{Gemini CLI または Codex CLI}",
+  "from": "{Antigravity CLI または Codex CLI}",
   "to": "Claude Code",
   "file": "workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md",
   "note": "{実行結果サマリー}",
@@ -230,7 +240,7 @@ NG/Escalate の場合は Step 5 に戻るか、ユーザーと対話を継続。
 
 ### Step 11: 完了報告
 ```
-## Gemini実装 → 画面確認 → Codexレビュー完了
+## Antigravity実装 → 画面確認 → Codexレビュー完了
 
 - **案件ID**: {案件ID}
 - **タスク番号**: {タスク番号}
@@ -246,8 +256,8 @@ NG/Escalate の場合は Step 5 に戻るか、ユーザーと対話を継続。
 
 | エラー | 対応 |
 |--------|------|
-| Gemini CLI実行失敗 | コマンド引数順序を確認。`--yolo -p "..."` の順 |
-| テスト失敗 | Geminiの変更を`git diff`で確認し、手動修正またはリトライ |
+| Antigravity CLI実行失敗 | `agy --prompt "..." --dangerously-skip-permissions` の引数を確認 |
+| テスト失敗 | Antigravity(agy)の変更を`git diff`で確認し、手動修正またはリトライ |
 | .sd/ 削除 | `git checkout -- .sd/` で復元 |
 | ビルドエラー | `npx tsc --noEmit` のエラーを確認し修正 |
 
@@ -256,4 +266,4 @@ $ARGUMENTS
 
 ---
 
-**実行開始**: 上記手順に従ってGemini CLIを実行してください。Step 1からStep 9まで全て実行すること。途中で止まることは禁止。
+**実行開始**: 上記手順に従ってAntigravity CLI (agy)を実行してください。Step 1からStep 9まで全て実行すること。途中で止まることは禁止。

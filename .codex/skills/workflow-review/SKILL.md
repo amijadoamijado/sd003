@@ -20,7 +20,7 @@ description: Codex equivalent of the SD003 custom command `/workflow:review`. Us
 # レビュー依頼: /workflow:review
 
 ## 概要
-Gemini CLI実装完了後、Codexにレビューを依頼する。
+Antigravity CLI(agy)実装完了後、Codexにレビューを依頼する。
 **impl完了後に自動で呼ばれる。手動実行も可能。**
 
 ## 使用方法
@@ -34,7 +34,7 @@ Gemini CLI実装完了後、Codexにレビューを依頼する。
 
 ## 前提条件
 - IMPLEMENT_REQUEST_{タスク番号}.md が存在すること
-- Gemini CLIによる実装コミットが完了していること
+- Antigravity CLI(agy)による実装コミットが完了していること
 
 ## 実行手順（全自動・省略禁止）
 
@@ -50,7 +50,7 @@ git log --oneline -3
 git diff HEAD~1 --stat
 git diff HEAD~1
 ```
-Geminiが実装した変更内容を取得する。
+Antigravity(agy)が実装した変更内容を取得する。
 
 ### Step 3: REVIEW_REQUEST_{タスク番号}.md 作成
 保存先: `.sd/ai-coordination/workflow/spec/{案件ID}/REVIEW_REQUEST_{タスク番号}.md`
@@ -62,7 +62,7 @@ Geminiが実装した変更内容を取得する。
 ## 基本情報
 - **案件ID**: {案件ID}
 - **タスク番号**: {タスク番号}
-- **実装者**: Gemini CLI
+- **実装者**: Antigravity CLI (agy)
 - **レビュアー**: Codex
 - **日時**: {現在日時}
 

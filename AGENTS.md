@@ -9,6 +9,7 @@
 | ファイル | 役割 |
 |---------|------|
 | `AGENTS.md`（このファイル） | Codex全体の設定・AI Coordination・Work Order Review |
+| `.codex/CODEX_SPEC.md` | Codex固有の実行仕様・Claude Code非破壊ルール |
 | `.handoff/AGENTS.md` | コードレビュー専用の4段階手順 |
 
 ---
@@ -55,6 +56,9 @@
 | Quality Gate Check | Verify all gates pass |
 
 ### Trigger Keywords (AUTO-EXECUTE)
+
+以下はAI Coordination文脈で依頼書・レビュー対象が明示されている場合に適用する。
+一般的な相談や改善提案では、ユーザーが成果物作成を求めていない限りREVIEW_REPORTを作成しない。
 
 | Keyword | Action |
 |---------|--------|
@@ -110,6 +114,7 @@ npm test && npm run lint
 - TypeScript strict mode
 - **.sd/ safe commit**: .sd/ファイルの変更は同一bashコマンド内でgit add+commitまで完了すること。分割するとClaude Codeランタイムが.sd/を消す。詳細: `.claude/rules/git/sd-safe-commit.md`
 - **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること
+- **Codex追加仕様**: `.codex/CODEX_SPEC.md` を参照すること。Claude Codeの正本仕様を置き換えず、Codex側の実行変換だけを追加する。
 
 ### GASデプロイルール（厳守）
 - **`clasp push` のみ許可。`clasp deploy` / `clasp undeploy` はユーザー明示指示なしに実行禁止**
@@ -126,10 +131,11 @@ npm test && npm run lint
 SD003 では `.claude/commands/**/*.md` を authoring source とし、`python scripts/sync-cli-commands.py` で以下を生成する。
 
 - `.sd/commands/specs/*.md`（共通正本）
-- `.agents/skills/*/SKILL.md`（Codex）
-- `.gemini/commands/*.toml`（Gemini CLI）
+- `.codex/skills/*/SKILL.md`（Codex）
+- `.antigravity/commands/*.toml`（Antigravity CLI）
 
 Claude 以外の生成物は直接手編集せず、`.claude/commands/` を修正して再同期すること。
+`.agents/skills/` は旧Codex互換パスであり、新規のCodex仕様は `.codex/` 配下に置く。
 
 ### Specification
 ```
@@ -163,6 +169,7 @@ $sd-deploy
 
 ## Reference
 - **AI Coordination**: `.claude/rules/workflow/ai-coordination.md`
+- **Codex Spec**: `.codex/CODEX_SPEC.md`
 - **Quality Gates**: `docs/quality-gates.md`
 - **Templates**: `.sd/ai-coordination/workflow/templates/`
 

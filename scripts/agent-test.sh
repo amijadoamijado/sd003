@@ -158,24 +158,36 @@ elif [ "$MANUAL_MODE" = true ]; then
     echo ""
     echo "Status: MANUAL_DISPATCH" >> "$TEST_LOG"
 else
-    # Antigravity CLIが利用可能か確認（検出されたバイナリを使用）
+    # Antigravity CLI (agy) が利用可能か確認
     ANTIGRAVITY_BIN=""
-    if command -v antigravity &> /dev/null; then
+    if command -v agy &> /dev/null; then
+        ANTIGRAVITY_BIN="agy"
+    elif command -v antigravity &> /dev/null; then
         ANTIGRAVITY_BIN="antigravity"
-    elif command -v gemini &> /dev/null; then
-        ANTIGRAVITY_BIN="gemini"
     fi
 
     if [ -n "$ANTIGRAVITY_BIN" ]; then
         echo -e "${BLUE}Antigravityへテスト依頼中... (using: ${ANTIGRAVITY_BIN})${NC}"
 
-        # Antigravityにパイプで送信
+        # テストプロンプトの作成
         TEST_CONTENT=$(cat "$TEST_REQUEST")
         TEST_PROMPT="以下のテスト依頼に従って、E2Eテストを実行してください。結果はTEST_REPORT形式で出力してください。
 
 ${TEST_CONTENT}"
 
-        if echo "$TEST_PROMPT" | "$ANTIGRAVITY_BIN" 2>&1 > "${TEST_REPORT}" ; then
+        # 実行処理（agyと従来CLIで分岐）
+        local TEST_SUCCESS=false
+        if [ "$ANTIGRAVITY_BIN" = "agy" ]; then
+            if agy --prompt "$TEST_PROMPT" --dangerously-skip-permissions 2>&1 > "${TEST_REPORT}" ; then
+                TEST_SUCCESS=true
+            fi
+        else
+            if echo "$TEST_PROMPT" | "$ANTIGRAVITY_BIN" 2>&1 > "${TEST_REPORT}" ; then
+                TEST_SUCCESS=true
+            fi
+        fi
+
+        if [ "$TEST_SUCCESS" = true ]; then
             echo -e "${GREEN}[OK] Antigravity テスト完了${NC}"
             echo "Status: COMPLETED" >> "$TEST_LOG"
         else
@@ -184,7 +196,7 @@ ${TEST_CONTENT}"
             MANUAL_MODE=true
         fi
     else
-        echo -e "${YELLOW}[INFO] Antigravity CLI未検出。手動テストモードに切り替え。${NC}"
+        echo -e "${YELLOW}[INFO] Antigravity CLI (agy) 未検出。手動テストモードに切り替え。${NC}"
         echo ""
         echo "  TEST_REQUEST: ${TEST_REQUEST}"
         echo "  TEST_REPORT保存先: ${TEST_REPORT}"

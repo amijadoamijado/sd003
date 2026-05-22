@@ -1,0 +1,64 @@
+# {{PROJECT_NAME}} - Antigravity Rules
+
+## Overview
+{{PROJECT_DESCRIPTION}}
+
+**Tech Stack**: {{TECH_STACK}}
+
+## Project Structure
+| Folder | Purpose |
+|--------|---------|
+| `src/` | Business logic |
+| `tests/` | Tests |
+| `docs/` | Documentation |
+| `materials/` | Reference materials & deliverables |
+| `.sd/` | Specs, sessions, settings |
+
+## Design Principles
+1. **Spec-First** - Requirements -> Design -> Implementation -> Test
+2. **Environment Independence** - Env Interface Pattern
+3. **Pre-Deploy Bug Elimination** - Quality gates
+
+## Critical Rules
+
+### Required
+- Test coverage 80%+
+- ESLint errors: 0
+- TypeScript strict mode
+
+### Forbidden
+- Unauthorized spec changes
+- Skipping tests
+
+## Protected Files (Do NOT move/delete)
+
+These files must remain at project root:
+- `agents.md` - Agent configuration
+- `CLAUDE.md` - Claude Code command center
+- `gemini.md` - Gemini CLI settings
+- `GEMINI.md` - Antigravity global rules
+
+## Code Style
+
+### Naming Conventions
+| Type | Convention | Example |
+|------|------------|---------|
+| Class | PascalCase | `DataProcessor` |
+| Function | camelCase | `processData` |
+| Constant | UPPER_SNAKE | `MAX_RETRIES` |
+
+## Build & Test Commands
+```bash
+npm run build    # Build
+npm test         # Test
+npm run lint     # Lint
+```
+
+## Reference Documents
+| Topic | Location |
+|-------|----------|
+| Setup Guide | `docs/sd003-setup-guide.md` |
+| Session Management | `docs/session-management.md` |
+
+---
+SD003 v2.11.0 | Updated: {{DATE}}

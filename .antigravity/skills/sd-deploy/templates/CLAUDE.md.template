@@ -1,0 +1,84 @@
+# {{PROJECT_NAME}} - AI Development Command Center
+
+## Session Start
+
+`/sessionread` → 4ファイル自動読込 | Crash Recovery: `claude --continue` + `/sessionread`
+
+## Overview
+
+{{PROJECT_NAME}}: SD003 Spec-Driven Development. TypeScript (strict) + Google Apps Script + Env Interface Pattern.
+
+Common rules for all AI models: `.handoff/RULES.md`
+Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
+
+## Work First（最上位・全ルールに優先）
+
+開発順序: 動かす → 実環境で確認 → テスト → 抽象化 → 文書
+
+- コード変更後、必ず実環境（ブラウザ）で動作確認する
+- 「動くはず」は禁止。「動いた」のみが確認
+- 変更前に3点固定: 運用ルール、反映方法、確認対象URL
+- 変更前に仮説明文化: 症状、仮説、確認方法、失敗時の次手
+- 詳細: `.claude/rules/global/work-first.md`
+
+## Build & Test
+
+```bash
+npm run build && npm test && npm run lint
+npm run test:gas-fakes   # Tier-2 gas-fakes tests only
+```
+
+## Required Settings
+
+`.claude/settings.local.json`: `"ENABLE_TOOL_SEARCH": "true"`
+
+## File Safety
+
+- rm禁止（アーカイブ移動）、ユーザー提供ファイル上書き禁止（別名で新規作成）
+- ルート直下への新規ファイル作成禁止
+- 詳細: `.claude/rules/cleanup/file-organization.md`
+
+---
+
+## Conditional Context
+
+IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. Known constraints (iframe, CORS, @HEAD vs fixed deployment) must be reflected in code immediately. Details: `.claude/rules/gas/env-interface.md`, `.claude/rules/gas/gas-constraints.md`
+
+IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
+
+IMPORTANT: When coordinating with other AIs (Codex, Gemini, Antigravity), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
+
+IMPORTANT: When refactoring, use checkpoint-based batches with `/refactor:init`. Context auto-compact at 70%, auto-clear at 85%. Rollback requires user confirmation. Details: `.claude/rules/refactoring/refactoring-system.md`
+
+IMPORTANT: If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Details: `.claude/rules/skills/skill-check-before-action.md`
+
+IMPORTANT: When debugging, use the 3-tier system: `/bug-quick` (5-15min, flow comparison) → `/bug-trace` (30-60min, 3-agent parallel) → `/dialogue-resolution` (AI reasoning check). Escalate on 2nd same error. Details: `.claude/rules/troubleshooting/`
+
+IMPORTANT: When in a loop session (`/sd003:loop-*`), follow Ralph Loop rules. Midpoint: loop freely. Endgame: same error 2x → stop and escalate. Details: `.claude/rules/ralph-loop.md`
+
+IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design principles, apply design tokens, and check visual quality score (50/70 minimum). Details: `.claude/rules/ui/web-design-principles.md`, `.claude/rules/ui/visual-review-checklist.md`
+
+IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
+
+IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .sd/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
+
+IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before identifying root cause. Follow: 1) describe symptom, 2) list own recent actions, 3) hypothesize own actions as cause FIRST (external factors LAST), 4) verify hypothesis, 5) THEN implement fix + register + commit + package. "Being careful" is not a fix. Details: `.claude/rules/troubleshooting/root-cause-first.md`
+
+IMPORTANT: After completing a major task (tests pass, implementation done, bug fixed), self-evaluate whether any discoveries or corrections from this session should be persisted to auto-memory or session notes. Non-blocking, non-interactive. Details: `.claude/rules/session/memory-nudge.md`
+
+IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the session record: review user corrections during the session, record them in the notes section, and suggest rule/skill/memory creation if 2+ corrections detected. Non-blocking. Details: `.claude/rules/skills/learning-nudge.md`
+
+---
+
+## Quick Command Reference
+
+| Category | Commands |
+|----------|----------|
+| Blueprint | `/blueprint-gate` |
+| AI Workflow | `/workflow:init`, `order`, `request`, `impl`, `review`, `test`, `status` |
+| Loop | `/sd003:loop-test`, `loop-lint`, `loop-type` |
+| Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution` |
+| Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
+
+---
+SD003 v3.1.0 | Deployed: {{DATE}} | Style: `.claude/rules/global/claude-md-style.md`

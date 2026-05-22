@@ -14,7 +14,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "sync:gemini": "node scripts/sync-gemini-features.js",
+    "sync:cli": "python scripts/sync-cli-commands.py",
+    "sync:gemini": "python scripts/sync-cli-commands.py",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -115,7 +116,7 @@
     "scripts/",
     "templates/",
     ".claude/",
-    ".gemini/",
+    ".codex/",
     ".handoff/",
     ".sd/settings/",
     ".sessions/session-template.md",

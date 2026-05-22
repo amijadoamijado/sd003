@@ -8,7 +8,7 @@
 
 SD003: Work First + 痛みから生まれた仕組みの集合体。
 TypeScript (strict) + Google Apps Script + Env Interface Pattern.
-AI協調: Claude Code(司令塔) + Codex(レビュー) + Gemini(実装) + Antigravity(E2E)
+AI協調: Claude Code(司令塔) + Codex(レビュー) + Antigravity(実装 & E2E)
 
 Common rules for all AI models: `.handoff/RULES.md`
 Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
@@ -87,7 +87,7 @@ IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.j
 
 IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
 
-IMPORTANT: When coordinating with other AIs (Codex, Gemini, Antigravity), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
+IMPORTANT: When coordinating with other AIs (Codex, Antigravity), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
 
 IMPORTANT: When the user asks for a quick Codex consultation or one-off review (e.g. "codexにレビューさせて", "codexに見せて", "codexに相談", "codexに調査させて") WITHOUT a project ID or workflow context, use the official plugin commands `/codex:review` (read-only review), `/codex:adversarial-review` (critical review), or `/codex:rescue` (delegate investigation/fix). Do NOT route to the heavyweight `/workflow:review` chain (which requires WORK_ORDER/IMPLEMENT_REQUEST and a project ID). The `/workflow:*` chain is for formal project deliverables; `/codex:*` is for ad-hoc consultation. Plugin: `openai/codex-plugin-cc` (already installed user-scope). If `/codex:setup` has not been run yet in this project, run it once first.
 

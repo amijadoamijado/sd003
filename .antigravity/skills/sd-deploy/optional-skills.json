@@ -1,0 +1,4 @@
+{
+  "optional_skills": ["git-worktrees", "parallel-subagents", "find-duplicates"],
+  "description": "Deploy時にデフォルト除外。-IncludeOptional で含める"
+}

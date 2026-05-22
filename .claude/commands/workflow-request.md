@@ -98,7 +98,7 @@ package.json を読み取り以下を判定:
       "id": "HO-{連番}",
       "project_id": "{案件ID}",
       "from": "Claude Code",
-      "to": "Gemini CLI",
+      "to": "Antigravity CLI",
       "type": "implement_request",
       "artifact": ".sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md",
       "timestamp": "{現在日時ISO形式}",
@@ -109,18 +109,18 @@ package.json を読み取り以下を判定:
 }
 ```
 
-### 8. Gemini CLI 自動実行（省略禁止）
+### 8. Antigravity CLI 自動実行（省略禁止）
 **指示書作成後、必ず `/workflow:impl {案件ID} {タスク番号}` を実行する。**
 指示書を作っただけで止まることは禁止。実装実行まで含めて1つのワークフロー。
 
 ### 9. 完了報告
 ```
-## 実装指示作成 → Gemini実行完了
+## 実装指示作成 → Antigravity実行完了
 
 - **案件ID**: {案件ID}
 - **タスク番号**: {タスク番号}
 - **実装指示**: .sd/ai-coordination/workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{タスク番号}.md
-- **Gemini実行結果**: {パス/失敗}
+- **Antigravity実行結果**: {パス/失敗}
 - **コミット**: {ハッシュ}
 ```
 
@@ -129,4 +129,4 @@ $ARGUMENTS
 
 ---
 
-**実行開始**: 上記手順に従って実装指示を作成してください。発注書の該当タスクを詳細に展開し、Gemini CLIが迷わず実装できる具体的な指示を作成すること。
+**実行開始**: 上記手順に従って実装指示を作成してください。発注書の該当タスクを詳細に展開し、Antigravity CLI (agy)が迷わず実装できる具体的な指示を作成すること。

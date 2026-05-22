@@ -1,8 +1,8 @@
 #!/bin/bash
-# agent-implement.sh - Gemini CLIへの実装依頼（非インタラクティブ・パイプ実行）
+# agent-implement.sh - Antigravity CLI (agy)への実装依頼（非インタラクティブ実行）
 #
-# SD003 AI協調ワークフローにおいて、IMPLEMENT_REQUESTをGemini CLIに
-# パイプで渡し、非インタラクティブに実装を実行するスクリプト。
+# SD003 AI協調ワークフローにおいて、IMPLEMENT_REQUESTをAntigravity CLIに
+# 渡し、非インタラクティブに実装を実行するスクリプト。
 #
 # Usage:
 #   ./scripts/agent-implement.sh <案件ID> <タスク番号> [既存ファイルパス]
@@ -12,7 +12,7 @@
 #   ./scripts/agent-implement.sh 20260101-001-auth 001 src/core/auth.ts
 #
 # Options:
-#   --dry-run    プロンプトを表示するのみ（Gemini実行なし）
+#   --dry-run    プロンプトを表示するのみ（Antigravity実行なし）
 #   --help       ヘルプ表示
 
 set -euo pipefail
@@ -41,7 +41,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --help|-h)
-            echo "agent-implement.sh - Gemini CLIへの実装依頼（パイプ実行）"
+            echo "agent-implement.sh - Antigravity CLIへの実装依頼（非インタラクティブ実行）"
             echo ""
             echo "Usage:"
             echo "  $0 <案件ID> <タスク番号> [既存ファイルパス]"
@@ -52,7 +52,7 @@ while [[ $# -gt 0 ]]; do
             echo "  既存ファイル  変更対象の既存ファイルパス (optional)"
             echo ""
             echo "Options:"
-            echo "  --dry-run    プロンプト表示のみ（Gemini実行なし）"
+            echo "  --dry-run    プロンプト表示のみ（Antigravity実行なし）"
             echo "  --help       このヘルプを表示"
             echo ""
             echo "Examples:"
@@ -85,10 +85,10 @@ SPEC_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/spec/${PROJECT_ID}"
 REQUEST_FILE="${SPEC_DIR}/IMPLEMENT_REQUEST_${TASK_NUM}.md"
 WORK_ORDER_FILE="${SPEC_DIR}/WORK_ORDER.md"
 OUTPUT_DIR="${PROJECT_ROOT}/.sd/ai-coordination/workflow/log/${PROJECT_ID}"
-OUTPUT_FILE="${OUTPUT_DIR}/gemini-output-${TASK_NUM}.md"
+OUTPUT_FILE="${OUTPUT_DIR}/agy-output-${TASK_NUM}.md"
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}Gemini CLI Agent - Implementation${NC}"
+echo -e "${BLUE}Antigravity CLI Agent - Implementation${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 echo -e "案件ID:     ${GREEN}${PROJECT_ID}${NC}"
@@ -167,7 +167,7 @@ ${EXISTING_CODE}
 if [ "$DRY_RUN" = true ]; then
     echo ""
     echo -e "${YELLOW}========================================${NC}"
-    echo -e "${YELLOW}[DRY-RUN] Geminiへ送信されるプロンプト:${NC}"
+    echo -e "${YELLOW}[DRY-RUN] Antigravityへ送信されるプロンプト:${NC}"
     echo -e "${YELLOW}========================================${NC}"
     echo ""
     echo "$PROMPT"
@@ -176,23 +176,23 @@ if [ "$DRY_RUN" = true ]; then
     exit 0
 fi
 
-# Execute via Gemini CLI headless + yolo mode
+# Execute via Antigravity CLI (agy) headless + permission skip mode
 echo ""
-echo -e "${BLUE}Step 4: Gemini CLI実行（headless + yolo）...${NC}"
+echo -e "${BLUE}Step 4: Antigravity CLI実行（agy --prompt）...${NC}"
 
-# Check if gemini is available
-if ! command -v gemini &>/dev/null; then
-    echo -e "${RED}Error: gemini CLI が見つかりません${NC}"
-    echo -e "Install: see https://github.com/google-gemini/gemini-cli"
+# Check if agy is available
+if ! command -v agy &>/dev/null; then
+    echo -e "${RED}Error: Antigravity CLI (agy) が見つかりません${NC}"
+    echo -e "Install: see Antigravity CLI documentation"
     exit 1
 fi
 
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
 
-# Execute Gemini in headless mode with auto-approval
-RESULT=$(gemini -p "$PROMPT" --yolo 2>&1) || {
-    echo -e "${RED}Error: Gemini CLI実行に失敗しました${NC}"
+# Execute Antigravity in print mode with auto-approval
+RESULT=$(agy --prompt "$PROMPT" --dangerously-skip-permissions 2>&1) || {
+    echo -e "${RED}Error: Antigravity CLI実行に失敗しました${NC}"
     echo "$RESULT" > "${OUTPUT_FILE%.md}-error.md"
     echo -e "エラーログ: ${OUTPUT_FILE%.md}-error.md"
     exit 1
@@ -201,14 +201,14 @@ RESULT=$(gemini -p "$PROMPT" --yolo 2>&1) || {
 # Save output
 echo "$RESULT" > "$OUTPUT_FILE"
 
-# Check for files written by Gemini
-GEMINI_CHANGES=$(git status --porcelain 2>/dev/null | grep -v "^??" | head -20)
-if [ -n "$GEMINI_CHANGES" ]; then
-    echo -e "${GREEN}[OK] Gemini CLI実行完了（ファイル直接書き込み）${NC}"
-    echo -e "${BLUE}Geminiが変更したファイル:${NC}"
-    echo "$GEMINI_CHANGES"
+# Check for files written by Antigravity
+AGY_CHANGES=$(git status --porcelain 2>/dev/null | grep -v "^??" | head -20)
+if [ -n "$AGY_CHANGES" ]; then
+    echo -e "${GREEN}[OK] Antigravity CLI実行完了（ファイル直接書き込み）${NC}"
+    echo -e "${BLUE}Antigravityが変更したファイル:${NC}"
+    echo "$AGY_CHANGES"
 else
-    echo -e "${GREEN}[OK] Gemini CLI実行完了${NC}"
+    echo -e "${GREEN}[OK] Antigravity CLI実行完了${NC}"
 fi
 echo -e "出力ログ: ${GREEN}${OUTPUT_FILE}${NC}"
 echo ""
@@ -217,7 +217,7 @@ echo -e "${GREEN}IMPLEMENTATION COMPLETE${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 echo "Next steps:"
-echo "  1. Gemini変更を確認: git diff"
+echo "  1. Antigravity変更を確認: git diff"
 echo "  2. 出力ログ確認: cat ${OUTPUT_FILE}"
 echo "  3. テスト実行: npm test && npm run lint && npm run build"
 echo "  4. コミット: git add . && git commit"
