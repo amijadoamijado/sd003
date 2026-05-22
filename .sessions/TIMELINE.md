@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 77
-- **Latest Session**: 2026-05-18
+- **Total Sessions**: 78
+- **Latest Session**: 2026-05-22
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-22 | gemini-cli→agy(Antigravity CLI)移行をsd003正本に確定（agy報告9件 vs 実態465件の乖離を検証→4論理コミットに分割：.sd untrack / 移行本体 / 廃止CLI削除 / framework更新）。dry-run+sync --check全通過 | 223c188 | [Details](session-20260522-215124.md) |
 | 05-18 | Zenn記事Codex Skill移行受領 + 公式プラグインopenai/codex-plugin-cc調査（既にuser scopeでインストール済み確認）+ at002「不発」3要因分析 | (pending) | [Details](session-20260518-095119.md) |
 | 05-18 | Claude Code正本を壊さずCodex仕様を追加（.codex/CODEX_SPEC + .codex/skills正式化 + sync --codex-only + deploy配布対応） | (pending) | [Details](session-20260518-075636.md) |
 | 05-18 | セッションアーカイブ7件Google Drive移動 + at002へSD003展開（266コピー+7生成、Skills 113/116はOptional除外）+ deploy.ps1のNext Stepsに古い`/sd:spec-init`参照を発見 | (pending) | [Details](session-20260518-073605.md) |
