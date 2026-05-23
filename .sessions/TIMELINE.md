@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 80
+- **Total Sessions**: 81
 - **Latest Session**: 2026-05-23
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,8 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-23 | at002へSD003フレームワークアップグレード（/sd-upgradeスキル: dry-run→確認→execute。412コピー+7生成、廃止物.gemini/claude-memスタブ削除・全バックアップ退避。Skills114/115 FAILはoptional除外の誤報。UPGRADE OK） | (at002側) | [Details](session-20260523-131933.md) |
+| 05-23 | agyの/ドロップダウン問題を実機検証で根本解決（workspace .agents/skillsは/skills止まり→global ~/.gemini/skillsで接頭語なし表示）。deploy-agy-skills.py新規+メモリ訂正。クラッシュ2回復旧 | a46c7ab | [Details](session-20260523-131933.md) |
 | 05-23 | agysync-cli-commands.pyのミラー処理バグ修正（`allowed-tools:`→`disable-model-invocation:true`変換で全60スキルをスラッシュコマンドとして表示）| aa05ee7 | [Details](session-20260523-104820.md) |
 | 05-23 | agyスラッシュコマンド不具合の根本解決（TOML誤用→`.agents/skills`のSKILL.md機構を実機確定。/skills 0→60）+ 総合監査による不備一掃（deploy/hook/doctrine/docs/cosmetics）+ 新規`/sd-upgrade`スキル（throwawayテスト合格）+ claude-mem完全アンインストール（非公式）。10コミット | a7ce92e | [Details](session-20260523-102712.md) |
 | 05-22 | gemini-cli→agy(Antigravity CLI)移行をsd003正本に確定（agy報告9件 vs 実態465件の乖離を検証→4論理コミットに分割：.sd untrack / 移行本体 / 廃止CLI削除 / framework更新）。dry-run+sync --check全通過 | 223c188 | [Details](session-20260522-215124.md) |

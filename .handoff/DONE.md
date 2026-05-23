@@ -2,35 +2,31 @@
 
 ## 完了したこと
 
-1. **agy スラッシュコマンド不具合の根本解決**
-   - agy（Antigravity CLI）は `.gemini/commands/*.toml` を読まない。**コマンド = Agent Skills（`.agents/skills/{name}/SKILL.md`）**。実機で `/skills` 0→60 確認
-   - `sync-cli-commands.py` を SKILL.md/`.agents` 生成に改修。誤った `.antigravity/commands` `.antigravity/skills` 撤去
-   - description のコロンで YAML が壊れる件をクォートで修正
+1. **at002 への SD003 アップグレード**（`/sd-upgrade` スキル）
+   - UPGRADE OK。412ファイルコピー + 7生成（v2.14.0 / deploy v3.1.0）、.agents/skills 60件
+   - 廃止物削除（.gemini/GEMINI.md/claude-memスタブ約60件）→ 全てバックアップ退避
+   - 検証「Skills 114/115」FAIL は optional-skills デフォルト除外の誤報（実害なし）
+   - バックアップ: at002 の `.sd003-upgrade-backup-20260523_131557` / `.sd003-backup-20260523_131558`
 
-2. **総合監査による不備一掃**（deploy/hook/doctrine/docs/cosmetics）
-   - deploy.ps1/sh を agy 化（`.agents/skills` 伝播、gemini/.antigravity 撤去）
-   - impl完了hook を `gemini→agy` 修正、coverage80% → VTD+実データ
-   - README/AGENTS/antigravity/sd-deploy docs を agy 化（Gemini/Cursor/Windsurf 撤去）
-   - `.antigravity/rules.md` 削除、`/CLAUDE` ジャンク撲滅
+2. **agy `/` ドロップダウン問題の根本解決**（前段）
+   - workspace `.agents/skills` は `/skills` のみ。**global `~/.gemini/skills/{name}/SKILL.md` で接頭語なし `/name` 表示**が正解
+   - `scripts/deploy-agy-skills.py` 新規（コミット a46c7ab）、sd003の60スキルを global 配備済み
+   - メモリ `reference_agy_command_mechanism` を訂正（旧版は誤記）
 
-3. **新規 `/sd-upgrade` スキル**: 古いSD003を安全に最新へ置換（detect→dry-run→backup→deploy→verify）。throwawayテスト合格
+## 未完了
 
-4. **claude-mem 完全アンインストール**（非公式third-party）: npm + plugin + marketplace + cache 除去
+- at002 の `npm install` 未実行（@mcpher/gas-fakes 等の依存導入）
+- at002 で agy 再起動 → `/skills` 動作確認 未
+- sd003: sync後の `deploy-agy-skills.py` 2ステップを CLAUDE.md/ルールに明文化（恒久化）
 
-## 未完了 / 次のステップ
+## 次のステップ
 
-- Claude Code 再起動 → claude-mem 無効化反映（スタブ再生成停止）
-- agy 再起動 → `/skills` に `/sd-upgrade` 表示・警告0件 を確認
-- 下流PJ展開: `/sd-upgrade <path>`（1PJずつ dry-run→確認→execute）
+1. `cd D:\claudecode\at002 && npm install`
+2. at002 で agy 再起動・`/skills` 確認
+3. 他PJ（oc001/at001等）への同様アップグレード展開
 
 ## 関連ファイル
 
-- `scripts/sync-cli-commands.py`（agy/codex skill 生成器・正本）
-- `.claude/skills/sd-upgrade/`（新規スキル: SKILL.md + upgrade.ps1/sh）
-- `.claude/skills/sd-deploy/`（deploy 一式・agy化済み）
-- `.sessions/session-20260523-102712.md`（詳細セッション記録）
-
-## 全AIモデル共通の重要知見
-
-- **agy のコマンドは `.agents/skills/{name}/SKILL.md`（SKILL.md形式のみ。`.toml`不可）**。生成は `python scripts/sync-cli-commands.py`、`.claude/commands` を直して再sync
-- agy の自己完了報告は信用せず、ディスク副作用で実検証すること
+- `scripts/deploy-agy-skills.py`、`scripts/sync-cli-commands.py`
+- `.claude/skills/sd-upgrade/`（upgrade.ps1/sh）
+- メモリ: `~/.claude/projects/D--claudecode-sd003/memory/reference_agy_command_mechanism.md`
