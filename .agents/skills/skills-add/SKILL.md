@@ -1,6 +1,6 @@
 ---
 name: skills-add
-description: スキルインストール: /skills:add
+description: "スキルインストール: /skills:add"
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: sessionwrite
-description: Save session handoff and update timeline
+description: "Save session handoff and update timeline"
 disable-model-invocation: true
 ---
 

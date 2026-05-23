@@ -1,6 +1,6 @@
 ---
 name: refactor-batch
-description: Execute refactoring in batched files with auto-checkpoint
+description: "Execute refactoring in batched files with auto-checkpoint"
 disable-model-invocation: true
 ---
 

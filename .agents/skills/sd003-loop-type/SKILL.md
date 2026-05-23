@@ -1,6 +1,6 @@
 ---
 name: sd003-loop-type
-description: /sd003:loop-type - TypeScript Type-Check Loop
+description: "/sd003:loop-type - TypeScript Type-Check Loop"
 disable-model-invocation: true
 ---
 

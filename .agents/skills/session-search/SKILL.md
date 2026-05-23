@@ -1,6 +1,6 @@
 ---
 name: session-search
-description: セッション横断検索（過去セッションからキーワード検索）
+description: "セッション横断検索（過去セッションからキーワード検索）"
 disable-model-invocation: true
 ---
 

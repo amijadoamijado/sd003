@@ -1,6 +1,6 @@
 ---
 name: spec-history
-description: Show spec version history
+description: "Show spec version history"
 disable-model-invocation: true
 ---
 

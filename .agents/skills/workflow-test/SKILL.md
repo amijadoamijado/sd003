@@ -1,6 +1,6 @@
 ---
 name: workflow-test
-description: AI協調ワークフロー - Antigravity E2Eテスト依頼作成
+description: "AI協調ワークフロー - Antigravity E2Eテスト依頼作成"
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: workflow-init
-description: AI協調ワークフロー - 新規案件の初期化
+description: "AI協調ワークフロー - 新規案件の初期化"
 disable-model-invocation: true
 ---
 

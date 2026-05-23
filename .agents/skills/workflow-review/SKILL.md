@@ -1,6 +1,6 @@
 ---
 name: workflow-review
-description: AI協調ワークフロー - Codexレビュー依頼作成・実行
+description: "AI協調ワークフロー - Codexレビュー依頼作成・実行"
 disable-model-invocation: true
 ---
 

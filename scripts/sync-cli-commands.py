@@ -162,6 +162,17 @@ def canonical_markdown(spec: CommandSpec) -> str:
     )
 
 
+def yaml_quote(value: str) -> str:
+    """Double-quote a scalar so colons (`: `), `#`, etc. stay valid in YAML.
+
+    Frontmatter descriptions are real command descriptions (e.g.
+    "スキルインストール: /skills:add") and routinely contain `: `, which an
+    unquoted YAML value parses as a nested mapping. Quoting avoids that.
+    """
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
 def antigravity_skill_markdown(spec: CommandSpec, alias_target: str | None = None) -> str:
     """Generate an Agent Skill (SKILL.md) for the Antigravity CLI (agy).
 
@@ -171,10 +182,11 @@ def antigravity_skill_markdown(spec: CommandSpec, alias_target: str | None = Non
     typed after the command.
     """
     if alias_target:
+        alias_desc = f"Legacy alias for {alias_target} (SD003 command {spec.claude_command})."
         return (
             "---\n"
             f"name: {spec.slug}\n"
-            f"description: Legacy alias for `{alias_target}` (SD003 command {spec.claude_command}).\n"
+            f"description: {yaml_quote(alias_desc)}\n"
             "disable-model-invocation: true\n"
             "---\n\n"
             f"# {spec.slug} (alias)\n\n"
@@ -186,7 +198,7 @@ def antigravity_skill_markdown(spec: CommandSpec, alias_target: str | None = Non
     return (
         "---\n"
         f"name: {spec.slug}\n"
-        f"description: {spec.description}\n"
+        f"description: {yaml_quote(spec.description)}\n"
         "disable-model-invocation: true\n"
         "---\n\n"
         f"# {spec.title}\n\n"

@@ -1,6 +1,6 @@
 ---
 name: refactor-complete
-description: Complete refactoring session and record final state
+description: "Complete refactoring session and record final state"
 disable-model-invocation: true
 ---
 

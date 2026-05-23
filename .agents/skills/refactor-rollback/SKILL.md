@@ -1,6 +1,6 @@
 ---
 name: refactor-rollback
-description: Rollback refactoring to a checkpoint
+description: "Rollback refactoring to a checkpoint"
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: workflow-status
-description: AI協調ワークフロー - 工程状況の確認・更新
+description: "AI協調ワークフロー - 工程状況の確認・更新"
 disable-model-invocation: true
 ---
 

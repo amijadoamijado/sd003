@@ -1,6 +1,6 @@
 ---
 name: refactor-plan
-description: Generate detailed execution plan from analysis
+description: "Generate detailed execution plan from analysis"
 disable-model-invocation: true
 ---
 

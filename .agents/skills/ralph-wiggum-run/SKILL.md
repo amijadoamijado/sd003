@@ -1,6 +1,6 @@
 ---
 name: ralph-wiggum-run
-description: /ralph-wiggum:run - Night Mode Execution
+description: "/ralph-wiggum:run - Night Mode Execution"
 disable-model-invocation: true
 ---
 

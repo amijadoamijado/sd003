@@ -1,6 +1,6 @@
 ---
 name: cleanup-restore
-description: Restore files from cleanup archive
+description: "Restore files from cleanup archive"
 disable-model-invocation: true
 ---
 

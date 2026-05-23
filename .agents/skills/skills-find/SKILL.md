@@ -1,6 +1,6 @@
 ---
 name: skills-find
-description: スキル検索: /skills:find
+description: "スキル検索: /skills:find"
 disable-model-invocation: true
 ---
 

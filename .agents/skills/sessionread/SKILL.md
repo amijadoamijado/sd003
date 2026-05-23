@@ -1,6 +1,6 @@
 ---
 name: sessionread
-description: 最新のセッション継続記録を読み込み表示
+description: "最新のセッション継続記録を読み込み表示"
 disable-model-invocation: true
 ---
 

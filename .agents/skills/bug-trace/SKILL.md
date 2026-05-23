@@ -1,6 +1,6 @@
 ---
 name: bug-trace
-description: Bug Trace - 3-Agent parallel investigation for complex bugs
+description: "Bug Trace - 3-Agent parallel investigation for complex bugs"
 disable-model-invocation: true
 ---
 

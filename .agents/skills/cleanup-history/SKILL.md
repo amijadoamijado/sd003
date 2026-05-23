@@ -1,6 +1,6 @@
 ---
 name: cleanup-history
-description: Show cleanup session history
+description: "Show cleanup session history"
 disable-model-invocation: true
 ---
 

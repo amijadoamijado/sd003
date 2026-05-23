@@ -1,6 +1,6 @@
 ---
 name: sd003-loop-lint
-description: /sd003:loop-lint - ESLint Completion Loop
+description: "/sd003:loop-lint - ESLint Completion Loop"
 disable-model-invocation: true
 ---
 

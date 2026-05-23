@@ -1,6 +1,6 @@
 ---
 name: session-read
-description: Legacy alias for `sessionread` (SD003 command /sessionread).
+description: "Legacy alias for sessionread (SD003 command /sessionread)."
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: sessionhistory
-description: Show project timeline (long-term session history)
+description: "Show project timeline (long-term session history)"
 disable-model-invocation: true
 ---
 

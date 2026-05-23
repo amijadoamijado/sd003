@@ -1,6 +1,6 @@
 ---
 name: CLAUDE
-description: Recent Activity
+description: "Recent Activity"
 disable-model-invocation: true
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: ralph-wiggum-plan
-description: /ralph-wiggum:plan - Weekly Planning
+description: "/ralph-wiggum:plan - Weekly Planning"
 disable-model-invocation: true
 ---
 

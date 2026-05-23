@@ -1,6 +1,6 @@
 ---
 name: sd003-loop-test
-description: /sd003:loop-test - Test Completion Loop
+description: "/sd003:loop-test - Test Completion Loop"
 disable-model-invocation: true
 ---
 

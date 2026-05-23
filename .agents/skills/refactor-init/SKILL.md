@@ -1,6 +1,6 @@
 ---
 name: refactor-init
-description: Initialize refactoring session with parallel impact analysis
+description: "Initialize refactoring session with parallel impact analysis"
 disable-model-invocation: true
 ---
 

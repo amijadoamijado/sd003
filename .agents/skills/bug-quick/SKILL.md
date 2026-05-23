@@ -1,6 +1,6 @@
 ---
 name: bug-quick
-description: Bug QUICK - Processing flow comparison debugging (5-15 min first pass)
+description: "Bug QUICK - Processing flow comparison debugging (5-15 min first pass)"
 disable-model-invocation: true
 ---
 

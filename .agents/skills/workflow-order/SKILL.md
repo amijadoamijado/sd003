@@ -1,6 +1,6 @@
 ---
 name: workflow-order
-description: AI協調ワークフロー - 発注書（WORK_ORDER）作成
+description: "AI協調ワークフロー - 発注書（WORK_ORDER）作成"
 disable-model-invocation: true
 ---
 

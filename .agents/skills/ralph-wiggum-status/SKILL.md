@@ -1,6 +1,6 @@
 ---
 name: ralph-wiggum-status
-description: /ralph-wiggum:status - Execution Status
+description: "/ralph-wiggum:status - Execution Status"
 disable-model-invocation: true
 ---
 

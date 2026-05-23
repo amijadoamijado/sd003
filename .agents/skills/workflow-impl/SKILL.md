@@ -1,6 +1,6 @@
 ---
 name: workflow-impl
-description: AI協調ワークフロー - Antigravity(agy)/Codex実装実行（指示書→実行→復元を一括）
+description: "AI協調ワークフロー - Antigravity(agy)/Codex実装実行（指示書→実行→復元を一括）"
 disable-model-invocation: true
 ---
 

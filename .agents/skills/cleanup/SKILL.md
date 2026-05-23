@@ -1,6 +1,6 @@
 ---
 name: cleanup
-description: AI judgment-based project cleanup (materials organization + temp file archive)
+description: "AI judgment-based project cleanup (materials organization + temp file archive)"
 disable-model-invocation: true
 ---
 

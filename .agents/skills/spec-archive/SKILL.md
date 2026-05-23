@@ -1,6 +1,6 @@
 ---
 name: spec-archive
-description: Archive spec files to history folder
+description: "Archive spec files to history folder"
 disable-model-invocation: true
 ---
 

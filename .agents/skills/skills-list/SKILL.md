@@ -1,6 +1,6 @@
 ---
 name: skills-list
-description: スキル一覧: /skills:list
+description: "スキル一覧: /skills:list"
 disable-model-invocation: true
 ---
 

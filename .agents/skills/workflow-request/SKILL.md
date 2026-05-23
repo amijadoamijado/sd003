@@ -1,6 +1,6 @@
 ---
 name: workflow-request
-description: AI協調ワークフロー - 実装指示（IMPLEMENT_REQUEST）作成
+description: "AI協調ワークフロー - 実装指示（IMPLEMENT_REQUEST）作成"
 disable-model-invocation: true
 ---
 

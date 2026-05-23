@@ -1,6 +1,6 @@
 ---
 name: session-write
-description: Legacy alias for `sessionwrite` (SD003 command /sessionwrite).
+description: "Legacy alias for sessionwrite (SD003 command /sessionwrite)."
 disable-model-invocation: true
 ---
 
