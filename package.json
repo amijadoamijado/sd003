@@ -23,7 +23,7 @@
     "test:e2e": "playwright test",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "clean": "rm -rf dist coverage .nyc_output",
+    "clean": "node -e \"for (const d of ['dist','coverage','.nyc_output']) require('fs').rmSync(d,{recursive:true,force:true})\"",
     "prepublish": "npm run build",
     "postinstall": "node scripts/postinstall.js",
     "dev:server": "ts-node src/dev-server/index.ts",

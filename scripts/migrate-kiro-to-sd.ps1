@@ -1,8 +1,11 @@
 <#
 .SYNOPSIS
-    .kiro -> .sd 一括マイグレーションスクリプト
+    [DEPRECATED] .kiro -> .sd 一括マイグレーションスクリプト
 
 .DESCRIPTION
+    [DEPRECATED] 一回限りの旧 .kiro→.sd 移行専用。Gemini前提の処理を含み現行(agy)フレームワークでは不要。
+    既存の古いSD003 installを最新へ安全に置き換えるには /sd-upgrade スキルを使うこと。
+
     既存プロジェクトの .kiro 参照を .sd に一括変更し、
     .kiro/sessions/ -> .sessions/ へのSession移動を行う
 
