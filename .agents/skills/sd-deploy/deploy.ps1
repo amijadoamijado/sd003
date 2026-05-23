@@ -37,7 +37,7 @@ Write-Host "[Phase 1/7] Target validated" -ForegroundColor Green
 $BackupDir = Join-Path $TargetProject ".sd003-backup-$TIMESTAMP"
 New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
 
-$backupTargets = @("CLAUDE.md", "gemini.md")
+$backupTargets = @("CLAUDE.md", "AGENTS.md", "antigravity.md")
 foreach ($f in $backupTargets) {
     $path = Join-Path $TargetProject $f
     if (Test-Path $path) {
@@ -45,7 +45,7 @@ foreach ($f in $backupTargets) {
     }
 }
 
-$backupDirs = @(".claude", ".codex", ".gemini", ".sd", ".antigravity")
+$backupDirs = @(".claude", ".codex", ".agents", ".sd")
 foreach ($d in $backupDirs) {
     $path = Join-Path $TargetProject $d
     if (Test-Path $path -PathType Container) {
@@ -63,7 +63,7 @@ $directories = @(
     ".claude/skills",
     ".claude/hooks",
     ".codex/skills",
-    ".gemini/commands",
+    ".agents/skills",
     ".sd/specs",
     ".sd/steering",
     ".sessions",
@@ -75,7 +75,6 @@ $directories = @(
     ".sd/ai-coordination/workflow/review",
     ".sd/ai-coordination/workflow/log",
     ".sd/ai-coordination/handoff",
-    ".antigravity",
     ".handoff",
     ".sd\design",
     ".sd/ralph",
@@ -199,14 +198,11 @@ Copy-DirTree -RelPath ".claude\skills" -Label "Skills" -Exclude $optionalSkills
 # 4-5: .claude/hooks/ (tree)
 Copy-DirTree -RelPath ".claude\hooks" -Label "Hooks"
 
-# 4-6: .gemini/commands/ (flat, .toml)
-Copy-FlatDir -RelPath ".gemini\commands" -Label "Gemini Commands" -Extension ".toml"
+# 4-6: .agents/skills/ (tree) - Antigravity CLI (agy) reads slash commands here as SKILL.md
+Copy-DirTree -RelPath ".agents\skills" -Label "Agents Skills (agy)"
 
 # 4-7: .codex/ (tree)
 Copy-DirTree -RelPath ".codex" -Label "Codex"
-
-# 4-8: .antigravity/ (tree)
-Copy-DirTree -RelPath ".antigravity" -Label "Antigravity"
 
 # 4-9: .sd/settings/ (tree)
 Copy-DirTree -RelPath ".sd\settings" -Label "SD Settings"
@@ -290,15 +286,15 @@ if (Test-Path $vtdShSrc) {
     $copyStats["Validate Test Data (sh)"] = 0
 }
 
-# 4-16: scripts/sync-gemini-features.js (single file)
-$syncGeminiSrc = Join-Path $SOURCE_DIR "scripts\sync-gemini-features.js"
-if (Test-Path $syncGeminiSrc) {
+# 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator)
+$syncCliSrc = Join-Path $SOURCE_DIR "scripts\sync-cli-commands.py"
+if (Test-Path $syncCliSrc) {
     $scriptsDst = Join-Path $TargetProject "scripts"
     if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
-    Copy-Item $syncGeminiSrc (Join-Path $scriptsDst "sync-gemini-features.js") -Force
-    $copyStats["Sync Gemini"] = 1
+    Copy-Item $syncCliSrc (Join-Path $scriptsDst "sync-cli-commands.py") -Force
+    $copyStats["Sync CLI"] = 1
 } else {
-    $copyStats["Sync Gemini"] = 0
+    $copyStats["Sync CLI"] = 0
 }
 
 # 4-16: AGENTS.md (single file)
@@ -382,18 +378,14 @@ if (Test-Path $claudeTemplate) {
     Write-Host "  WARN: CLAUDE.md.template not found, skipping" -ForegroundColor Yellow
 }
 
-# 5-2: gemini.md from template (ALWAYS overwrite - rules must be latest)
-$geminiMdPath = Join-Path $TargetProject "gemini.md"
-$geminiTemplate = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\gemini.md.template"
-if (Test-Path $geminiTemplate) {
-    $content = Get-Content $geminiTemplate -Raw -Encoding UTF8
-    $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
-    $content = $content -replace '\{\{DATE\}\}', $DATE
-    $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
-    Set-Content -Path $geminiMdPath -Value $content -Encoding UTF8
-    if (Test-Path $geminiMdPath) { Write-Host "  UPDATE: gemini.md (latest rules applied)" -ForegroundColor Green }
+# 5-2: antigravity.md (agy root config - ALWAYS overwrite, rules must be latest)
+$antigravitySrc = Join-Path $SOURCE_DIR "antigravity.md"
+$antigravityDst = Join-Path $TargetProject "antigravity.md"
+if (Test-Path $antigravitySrc) {
+    Copy-Item $antigravitySrc $antigravityDst -Force
+    Write-Host "  UPDATE: antigravity.md (latest agy rules applied)" -ForegroundColor Green
 } else {
-    Write-Host "  WARN: gemini.md.template not found, skipping" -ForegroundColor Yellow
+    Write-Host "  WARN: antigravity.md not found in source, skipping" -ForegroundColor Yellow
 }
 
 # 5-3: session-current.md (skip if exists, use template from .sessions/templates/)
@@ -598,9 +590,8 @@ $verifyResults += Verify-Category -Label "Commands/sd" -SourceRelPath ".claude\c
 $verifyResults += Verify-Category -Label "Rules" -SourceRelPath ".claude\rules" -Filter "*.md" -Recurse
 $verifyResults += Verify-Category -Label "Skills" -SourceRelPath ".claude\skills" -Recurse
 $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" -Recurse
-$verifyResults += Verify-Category -Label "Gemini Commands" -SourceRelPath ".gemini\commands" -Filter "*.toml"
+$verifyResults += Verify-Category -Label "Agents Skills (agy)" -SourceRelPath ".agents\skills" -Recurse
 $verifyResults += Verify-Category -Label "Codex" -SourceRelPath ".codex" -Recurse
-$verifyResults += Verify-Category -Label "Antigravity" -SourceRelPath ".antigravity" -Recurse
 $verifyResults += Verify-Category -Label "SD Settings" -SourceRelPath ".sd\settings" -Recurse
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
 $verifyResults += Verify-Category -Label "Design" -SourceRelPath ".sd\design" -Recurse
@@ -622,7 +613,7 @@ foreach ($r in $verifyResults) {
 # Verify generated files
 $generatedFiles = @(
     "CLAUDE.md",
-    "gemini.md",
+    "antigravity.md",
     ".sessions\session-current.md",
     ".sessions\TIMELINE.md",
     ".claude\settings.json",

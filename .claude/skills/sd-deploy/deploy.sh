@@ -6,7 +6,7 @@ set -e
 
 # Configuration
 SD003_VERSION="3.1.0"
-FRAMEWORK_VERSION="2.13.0"
+FRAMEWORK_VERSION="2.14.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
@@ -33,11 +33,11 @@ echo "[Phase 1/7] Target validated"
 BACKUP_DIR="$TARGET_PROJECT/.sd003-backup-$TIMESTAMP"
 mkdir -p "$BACKUP_DIR"
 
-for f in CLAUDE.md gemini.md; do
+for f in CLAUDE.md AGENTS.md antigravity.md; do
     [ -f "$TARGET_PROJECT/$f" ] && cp "$TARGET_PROJECT/$f" "$BACKUP_DIR/" 2>/dev/null || true
 done
 
-for d in .claude .codex .gemini .sd .antigravity; do
+for d in .claude .codex .agents .sd; do
     [ -d "$TARGET_PROJECT/$d" ] && cp -r "$TARGET_PROJECT/$d" "$BACKUP_DIR/" 2>/dev/null || true
 done
 echo "[Phase 2/7] Backup created: $BACKUP_DIR"
@@ -51,7 +51,7 @@ DIRS=(
     ".claude/skills"
     ".claude/hooks"
     ".codex/skills"
-    ".gemini/commands"
+    ".agents/skills"
     ".sd/specs"
     ".sd/steering"
     ".sessions"
@@ -63,7 +63,6 @@ DIRS=(
     ".sd/ai-coordination/workflow/review"
     ".sd/ai-coordination/workflow/log"
     ".sd/ai-coordination/handoff"
-    ".antigravity"
     ".handoff"
     ".sd/ralph"
     ".sd/refactor"
@@ -151,14 +150,11 @@ copy_dir_tree ".claude/skills" "Skills" "*"
 # 4-5: .claude/hooks/ (tree)
 copy_dir_tree ".claude/hooks" "Hooks" "*"
 
-# 4-6: .gemini/commands/ (flat, .toml)
-copy_flat_dir ".gemini/commands" "Gemini Commands" ".toml"
+# 4-6: .agents/skills/ (tree) - Antigravity CLI (agy) reads slash commands here as SKILL.md
+copy_dir_tree ".agents/skills" "Agents Skills (agy)" "*"
 
 # 4-7: .codex/ (tree)
 copy_dir_tree ".codex" "Codex" "*"
-
-# 4-8: .antigravity/ (tree)
-copy_dir_tree ".antigravity" "Antigravity" "*"
 
 # 4-9: .sd/settings/ (tree)
 copy_dir_tree ".sd/settings" "SD Settings" "*"
@@ -227,13 +223,13 @@ else
     COPY_STATS["Validate Test Data (sh)"]=0
 fi
 
-# 4-16: scripts/sync-gemini-features.js (single file)
-if [ -f "$SOURCE_DIR/scripts/sync-gemini-features.js" ]; then
+# 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator)
+if [ -f "$SOURCE_DIR/scripts/sync-cli-commands.py" ]; then
     mkdir -p "$TARGET_PROJECT/scripts"
-    cp "$SOURCE_DIR/scripts/sync-gemini-features.js" "$TARGET_PROJECT/scripts/"
-    COPY_STATS["Sync Gemini"]=1
+    cp "$SOURCE_DIR/scripts/sync-cli-commands.py" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Sync CLI"]=1
 else
-    COPY_STATS["Sync Gemini"]=0
+    COPY_STATS["Sync CLI"]=0
 fi
 
 # 4-16: AGENTS.md (single file)
@@ -293,17 +289,12 @@ else
     echo "  WARN: CLAUDE.md.template not found, skipping"
 fi
 
-# 5-2: gemini.md from template (skip if exists)
-GEMINI_TEMPLATE="$SOURCE_DIR/.claude/skills/sd-deploy/templates/gemini.md.template"
-if [ -f "$TARGET_PROJECT/gemini.md" ]; then
-    echo "  SKIP: gemini.md already exists (preserving project customizations)"
-elif [ -f "$GEMINI_TEMPLATE" ]; then
-    sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-        -e "s/{{DATE}}/$DATE/g" \
-        -e "s/v2\.3\.0/v$FRAMEWORK_VERSION/g" \
-        "$GEMINI_TEMPLATE" > "$TARGET_PROJECT/gemini.md"
+# 5-2: antigravity.md (agy root config - ALWAYS overwrite, rules must be latest)
+if [ -f "$SOURCE_DIR/antigravity.md" ]; then
+    cp "$SOURCE_DIR/antigravity.md" "$TARGET_PROJECT/antigravity.md"
+    echo "  UPDATE: antigravity.md (latest agy rules applied)"
 else
-    echo "  WARN: gemini.md.template not found, skipping"
+    echo "  WARN: antigravity.md not found in source, skipping"
 fi
 
 # 5-3: session-current.md (skip if exists)
@@ -504,9 +495,8 @@ verify_category "Commands/sd" ".claude/commands/sd" ".claude/commands/sd" "*.md"
 verify_category "Rules" ".claude/rules" ".claude/rules" "*.md" "true"
 verify_category "Skills" ".claude/skills" ".claude/skills" "*" "true"
 verify_category "Hooks" ".claude/hooks" ".claude/hooks" "*" "true"
-verify_category "Gemini Commands" ".gemini/commands" ".gemini/commands" "*.toml" "false"
+verify_category "Agents Skills (agy)" ".agents/skills" ".agents/skills" "*" "true"
 verify_category "Codex" ".codex" ".codex" "*" "true"
-verify_category "Antigravity" ".antigravity" ".antigravity" "*" "true"
 verify_category "SD Settings" ".sd/settings" ".sd/settings" "*" "true"
 verify_category "Handoff" ".handoff" ".handoff" "*" "true"
 verify_category "Ralph" ".sd/ralph" ".sd/ralph" "*" "true"
@@ -524,7 +514,7 @@ echo ""
 echo "  Generated files:"
 GENERATED_FILES=(
     "CLAUDE.md"
-    "gemini.md"
+    "antigravity.md"
     ".sessions/session-current.md"
     ".sessions/TIMELINE.md"
     ".claude/settings.json"
