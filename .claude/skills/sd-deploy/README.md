@@ -1,5 +1,11 @@
 # SD003フレームワーク展開スキル v2.4.0
 
+> **⚠️ 正本は `deploy.ps1` / `deploy.sh`（Phase 4の動的コピー）と `SKILL.md`。**
+> 本READMEは旧版の手動手順を含む参考資料。以下は現行仕様と異なる点に注意:
+> - Gemini CLI は廃止。Antigravity CLI(agy) のコマンドは `.agents/skills/{name}/SKILL.md`（Agent Skills形式）。`.gemini/commands/*.toml` は使わない
+> - `.antigravity/` および `gemini.md` 生成は廃止。agy のルートルールは `antigravity.md` / `AGENTS.md`
+> - コマンド/スキルの正本は `.claude/`、生成は `python scripts/sync-cli-commands.py`
+
 ## 使用方法
 
 ```
@@ -470,6 +476,8 @@ REQUIRED_FILES=(
 1. `.claude/skills/` 配下に `SKILL.md` が存在するか確認
 2. YAML frontmatterの形式を確認
 
-### Geminiコマンドが動作しない
-1. `.gemini/commands/` 配下に `.toml` ファイルが存在するか確認
-2. Gemini CLIを再起動
+### agy（Antigravity CLI）コマンドが動作しない
+1. `.agents/skills/{name}/SKILL.md` が存在するか確認（agyはSKILL.md形式のみ読む。`.toml`不可）
+2. プロジェクトルートから agy を起動（`.agents/skills/` はCWD直下を見る）
+3. agy 再起動後 `/skills` で一覧確認（スキルは起動時スキャン）
+4. 生成は `.claude/commands` を直して `python scripts/sync-cli-commands.py`

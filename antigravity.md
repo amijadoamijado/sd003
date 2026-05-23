@@ -102,7 +102,7 @@ Available skills: `sd-deploy`, `session-autosave`, `rollback-guard`, etc.
 ### Critical Rules
 - No Node.js APIs (`fs`, `path`, `process`)
 - GAS API via Env Interface only
-- Test coverage >=80%
+- Tests only to reproduce production bugs (coverage target abolished; VTD-001〜005 + real-data verification)
 - ESLint errors = 0
 - **.sd/ safe commit**: .sd/ファイルの変更は同一コマンド内でgit add+commitまで完了すること。分割するとランタイムが.sd/を消す。詳細: `.claude/rules/git/sd-safe-commit.md`
 - **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること

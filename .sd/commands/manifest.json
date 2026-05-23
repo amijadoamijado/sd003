@@ -1,0 +1,331 @@
+{
+  "version": 1,
+  "source": ".claude/commands/**/*.md",
+  "generated": {
+    "canonical_specs": ".sd/commands/specs/*.md",
+    "antigravity_skills": ".agents/skills/*/SKILL.md",
+    "codex_skills": ".codex/skills/*/SKILL.md",
+    "codex_spec": ".codex/CODEX_SPEC.md"
+  },
+  "commands": [
+    {
+      "slug": "blueprint-gate",
+      "source": ".claude/commands/blueprint-gate.md",
+      "description": "要件定義 - ゴールと検証観点を対話で整理し要件定義書を生成",
+      "claude_command": "/blueprint-gate",
+      "antigravity_skill": "blueprint-gate/SKILL.md",
+      "codex_skill": "blueprint-gate",
+      "aliases": []
+    },
+    {
+      "slug": "bug-quick",
+      "source": ".claude/commands/bug-quick.md",
+      "description": "Bug QUICK - Processing flow comparison debugging (5-15 min first pass)",
+      "claude_command": "/bug-quick",
+      "antigravity_skill": "bug-quick/SKILL.md",
+      "codex_skill": "bug-quick",
+      "aliases": []
+    },
+    {
+      "slug": "bug-trace",
+      "source": ".claude/commands/bug-trace.md",
+      "description": "Bug Trace - 3-Agent parallel investigation for complex bugs",
+      "claude_command": "/bug-trace",
+      "antigravity_skill": "bug-trace/SKILL.md",
+      "codex_skill": "bug-trace",
+      "aliases": []
+    },
+    {
+      "slug": "cleanup-history",
+      "source": ".claude/commands/cleanup-history.md",
+      "description": "Show cleanup session history",
+      "claude_command": "/cleanup:history",
+      "antigravity_skill": "cleanup-history/SKILL.md",
+      "codex_skill": "cleanup-history",
+      "aliases": []
+    },
+    {
+      "slug": "cleanup-restore",
+      "source": ".claude/commands/cleanup-restore.md",
+      "description": "Restore files from cleanup archive",
+      "claude_command": "/cleanup:restore",
+      "antigravity_skill": "cleanup-restore/SKILL.md",
+      "codex_skill": "cleanup-restore",
+      "aliases": []
+    },
+    {
+      "slug": "cleanup",
+      "source": ".claude/commands/cleanup.md",
+      "description": "AI judgment-based project cleanup (materials organization + temp file archive)",
+      "claude_command": "/src/**,",
+      "antigravity_skill": "cleanup/SKILL.md",
+      "codex_skill": "cleanup",
+      "aliases": []
+    },
+    {
+      "slug": "dialogue-resolution",
+      "source": ".claude/commands/dialogue-resolution.md",
+      "description": "対話型解決法 - AIの迷走時に仕様・実装との差異を段階的に検出",
+      "claude_command": "/dialogue-resolution",
+      "antigravity_skill": "dialogue-resolution/SKILL.md",
+      "codex_skill": "dialogue-resolution",
+      "aliases": []
+    },
+    {
+      "slug": "ralph-wiggum-plan",
+      "source": ".claude/commands/ralph-wiggum-plan.md",
+      "description": "/ralph-wiggum:plan - Weekly Planning",
+      "claude_command": "/ralph-wiggum:plan",
+      "antigravity_skill": "ralph-wiggum-plan/SKILL.md",
+      "codex_skill": "ralph-wiggum-plan",
+      "aliases": []
+    },
+    {
+      "slug": "ralph-wiggum-run",
+      "source": ".claude/commands/ralph-wiggum-run.md",
+      "description": "/ralph-wiggum:run - Night Mode Execution",
+      "claude_command": "/ralph-wiggum:run",
+      "antigravity_skill": "ralph-wiggum-run/SKILL.md",
+      "codex_skill": "ralph-wiggum-run",
+      "aliases": []
+    },
+    {
+      "slug": "ralph-wiggum-status",
+      "source": ".claude/commands/ralph-wiggum-status.md",
+      "description": "/ralph-wiggum:status - Execution Status",
+      "claude_command": "/ralph-wiggum:status",
+      "antigravity_skill": "ralph-wiggum-status/SKILL.md",
+      "codex_skill": "ralph-wiggum-status",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-batch",
+      "source": ".claude/commands/refactor-batch.md",
+      "description": "Execute refactoring in batched files with auto-checkpoint",
+      "claude_command": "/refactor:batch",
+      "antigravity_skill": "refactor-batch/SKILL.md",
+      "codex_skill": "refactor-batch",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-complete",
+      "source": ".claude/commands/refactor-complete.md",
+      "description": "Complete refactoring session and record final state",
+      "claude_command": "/refactor:complete",
+      "antigravity_skill": "refactor-complete/SKILL.md",
+      "codex_skill": "refactor-complete",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-init",
+      "source": ".claude/commands/refactor-init.md",
+      "description": "Initialize refactoring session with parallel impact analysis",
+      "claude_command": "/refactor:init",
+      "antigravity_skill": "refactor-init/SKILL.md",
+      "codex_skill": "refactor-init",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-plan",
+      "source": ".claude/commands/refactor-plan.md",
+      "description": "Generate detailed execution plan from analysis",
+      "claude_command": "/refactor:plan",
+      "antigravity_skill": "refactor-plan/SKILL.md",
+      "codex_skill": "refactor-plan",
+      "aliases": []
+    },
+    {
+      "slug": "refactor-rollback",
+      "source": ".claude/commands/refactor-rollback.md",
+      "description": "Rollback refactoring to a checkpoint",
+      "claude_command": "/refactor:rollback",
+      "antigravity_skill": "refactor-rollback/SKILL.md",
+      "codex_skill": "refactor-rollback",
+      "aliases": []
+    },
+    {
+      "slug": "skills-add",
+      "source": ".claude/commands/sd/skills-add.md",
+      "description": "スキルインストール: /skills:add",
+      "claude_command": "/skills:add",
+      "antigravity_skill": "skills-add/SKILL.md",
+      "codex_skill": "skills-add",
+      "aliases": []
+    },
+    {
+      "slug": "skills-find",
+      "source": ".claude/commands/sd/skills-find.md",
+      "description": "スキル検索: /skills:find",
+      "claude_command": "/skills:find",
+      "antigravity_skill": "skills-find/SKILL.md",
+      "codex_skill": "skills-find",
+      "aliases": []
+    },
+    {
+      "slug": "skills-list",
+      "source": ".claude/commands/sd/skills-list.md",
+      "description": "スキル一覧: /skills:list",
+      "claude_command": "/skills:list",
+      "antigravity_skill": "skills-list/SKILL.md",
+      "codex_skill": "skills-list",
+      "aliases": []
+    },
+    {
+      "slug": "sd-deploy",
+      "source": ".claude/commands/sd-deploy.md",
+      "description": "SD003フレームワークを新規プロジェクトに展開",
+      "claude_command": "/sd:deploy",
+      "antigravity_skill": "sd-deploy/SKILL.md",
+      "codex_skill": "sd-deploy",
+      "aliases": []
+    },
+    {
+      "slug": "sd003-loop-lint",
+      "source": ".claude/commands/sd003-loop-lint.md",
+      "description": "/sd003:loop-lint - ESLint Completion Loop",
+      "claude_command": "/sd003:loop-lint",
+      "antigravity_skill": "sd003-loop-lint/SKILL.md",
+      "codex_skill": "sd003-loop-lint",
+      "aliases": []
+    },
+    {
+      "slug": "sd003-loop-test",
+      "source": ".claude/commands/sd003-loop-test.md",
+      "description": "/sd003:loop-test - Test Completion Loop",
+      "claude_command": "/sd003:loop-test",
+      "antigravity_skill": "sd003-loop-test/SKILL.md",
+      "codex_skill": "sd003-loop-test",
+      "aliases": []
+    },
+    {
+      "slug": "sd003-loop-type",
+      "source": ".claude/commands/sd003-loop-type.md",
+      "description": "/sd003:loop-type - TypeScript Type-Check Loop",
+      "claude_command": "/sd003:loop-type",
+      "antigravity_skill": "sd003-loop-type/SKILL.md",
+      "codex_skill": "sd003-loop-type",
+      "aliases": []
+    },
+    {
+      "slug": "session-search",
+      "source": ".claude/commands/session-search.md",
+      "description": "セッション横断検索（過去セッションからキーワード検索）",
+      "claude_command": "/session-search",
+      "antigravity_skill": "session-search/SKILL.md",
+      "codex_skill": "session-search",
+      "aliases": []
+    },
+    {
+      "slug": "sessionhistory",
+      "source": ".claude/commands/sessionhistory.md",
+      "description": "Show project timeline (long-term session history)",
+      "claude_command": "/sessionhistory",
+      "antigravity_skill": "sessionhistory/SKILL.md",
+      "codex_skill": "sessionhistory",
+      "aliases": []
+    },
+    {
+      "slug": "sessionread",
+      "source": ".claude/commands/sessionread.md",
+      "description": "最新のセッション継続記録を読み込み表示",
+      "claude_command": "/sessionread",
+      "antigravity_skill": "sessionread/SKILL.md",
+      "codex_skill": "sessionread",
+      "aliases": [
+        "session-read"
+      ]
+    },
+    {
+      "slug": "sessionwrite",
+      "source": ".claude/commands/sessionwrite.md",
+      "description": "Save session handoff and update timeline",
+      "claude_command": "/sessionwrite",
+      "antigravity_skill": "sessionwrite/SKILL.md",
+      "codex_skill": "sessionwrite",
+      "aliases": [
+        "session-write"
+      ]
+    },
+    {
+      "slug": "spec-archive",
+      "source": ".claude/commands/spec-archive.md",
+      "description": "Archive spec files to history folder",
+      "claude_command": "/spec:archive",
+      "antigravity_skill": "spec-archive/SKILL.md",
+      "codex_skill": "spec-archive",
+      "aliases": []
+    },
+    {
+      "slug": "spec-history",
+      "source": ".claude/commands/spec-history.md",
+      "description": "Show spec version history",
+      "claude_command": "/spec:history",
+      "antigravity_skill": "spec-history/SKILL.md",
+      "codex_skill": "spec-history",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-impl",
+      "source": ".claude/commands/workflow-impl.md",
+      "description": "AI協調ワークフロー - Antigravity(agy)/Codex実装実行（指示書→実行→復元を一括）",
+      "claude_command": "/workflow:impl",
+      "antigravity_skill": "workflow-impl/SKILL.md",
+      "codex_skill": "workflow-impl",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-init",
+      "source": ".claude/commands/workflow-init.md",
+      "description": "AI協調ワークフロー - 新規案件の初期化",
+      "claude_command": "/workflow:init",
+      "antigravity_skill": "workflow-init/SKILL.md",
+      "codex_skill": "workflow-init",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-order",
+      "source": ".claude/commands/workflow-order.md",
+      "description": "AI協調ワークフロー - 発注書（WORK_ORDER）作成",
+      "claude_command": "/workflow:order",
+      "antigravity_skill": "workflow-order/SKILL.md",
+      "codex_skill": "workflow-order",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-request",
+      "source": ".claude/commands/workflow-request.md",
+      "description": "AI協調ワークフロー - 実装指示（IMPLEMENT_REQUEST）作成",
+      "claude_command": "/workflow:request",
+      "antigravity_skill": "workflow-request/SKILL.md",
+      "codex_skill": "workflow-request",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-review",
+      "source": ".claude/commands/workflow-review.md",
+      "description": "AI協調ワークフロー - Codexレビュー依頼作成・実行",
+      "claude_command": "/workflow:review",
+      "antigravity_skill": "workflow-review/SKILL.md",
+      "codex_skill": "workflow-review",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-status",
+      "source": ".claude/commands/workflow-status.md",
+      "description": "AI協調ワークフロー - 工程状況の確認・更新",
+      "claude_command": "/workflow:status",
+      "antigravity_skill": "workflow-status/SKILL.md",
+      "codex_skill": "workflow-status",
+      "aliases": []
+    },
+    {
+      "slug": "workflow-test",
+      "source": ".claude/commands/workflow-test.md",
+      "description": "AI協調ワークフロー - Antigravity E2Eテスト依頼作成",
+      "claude_command": "/workflow:test",
+      "antigravity_skill": "workflow-test/SKILL.md",
+      "codex_skill": "workflow-test",
+      "aliases": []
+    }
+  ]
+}

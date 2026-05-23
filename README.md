@@ -16,7 +16,7 @@ SD003 integrates **SD001 (Spec-Driven Development Framework)** with **GA001 (GAS
 - **GAS Local Development**: Test Google Apps Script locally
 - **Env Interface Pattern**: Complete separation of business logic and infrastructure
 - **8-Stage Quality Gates**: Automated quality assurance
-- **Multi-IDE Support**: Claude Code, Codex CLI, Gemini CLI, Cursor, Windsurf, Antigravity
+- **Multi-CLI Support**: Claude Code (司令塔), Codex CLI (レビュー), Antigravity CLI/agy (実装・E2E)
 - **Ralph Wiggum**: Night-mode autonomous execution (24-hour development cycle)
 - **3-Tier Bug Resolution**: Systematic debugging framework
 
@@ -48,24 +48,21 @@ See: [Ralph Wiggum Deployment Guide](docs/ralph-wiggum-deployment.md)
 
 ## Multi-IDE Support
 
-| IDE/CLI | Config Files | Commands |
+| CLI | Config Files | Commands / Skills |
 |---------|-------------|----------|
 | Claude Code | CLAUDE.md, .claude/rules/ | .claude/commands/ |
 | Codex CLI | AGENTS.md, `.codex/CODEX_SPEC.md`, `.codex/skills/`, `~/.codex/skills/` | `$skill-name` |
-| Gemini CLI | GEMINI.md, `.gemini/commands/` | TOML |
-| Cursor | .cursor/rules/ | - |
-| Windsurf | AGENTS.md, .windsurf/workflows/ | - |
-| Antigravity | GEMINI.md, .antigravity/rules.md | `/workflow:test` (ANTIGRAVITY_GUIDE.md) |
+| Antigravity CLI (agy) | antigravity.md, AGENTS.md | `.agents/skills/*/SKILL.md`（`/skills` で確認） |
 
 ### Multi-CLI コマンド同期
 
-SD003 のカスタムコマンドは、以下の流れで Claude / Codex / Gemini に同期します。
+SD003 のカスタムコマンドは、以下の流れで Claude / Codex / Antigravity(agy) に同期します。
 
 - authoring source: `.claude/commands/**/*.md`
 - canonical spec: `.sd/commands/specs/*.md`
 - generated targets:
-  - `.gemini/commands/*.toml`
-  - `.codex/skills/*/SKILL.md`
+  - `.agents/skills/*/SKILL.md`（Antigravity CLI/agy。agyはAgent Skills=SKILL.md形式のみ読む。`.toml`不可）
+  - `.codex/skills/*/SKILL.md`（Codex）
 
 同期コマンド:
 
@@ -84,7 +81,7 @@ Codex CLI v0.117以降、Claude Code の `.claude/commands/*.md` 型 slash comma
 - **Codex追加仕様**: `.codex/CODEX_SPEC.md`
 - **スキル**: `.codex/skills/` または `~/.codex/skills/`（共通正本から自動生成）
 - SD003 のコマンド群は `.codex/skills/` に生成されます。
-- `.agents/skills/` は旧Codex互換パスです。新規生成・参照は `.codex/skills/` を使います。
+- `.agents/skills/` は Antigravity CLI(agy) が起動時にスキャンする正規スキルパスです（コマンド+実スキル）。Codex は `.codex/skills/` を使います。
 - セッション系の canonical 名は `sessionread` / `sessionwrite` / `sessionhistory` です。
 - 互換 alias として `session-read` / `session-write` も残します。
 - `python scripts/sync-cli-commands.py --deploy-codex-home` で生成済み skill を `~/.codex/skills/` に配布できます。
@@ -120,7 +117,7 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 | 2 | 既存設定のバックアップ（`.sd003-backup-YYYYMMDD_HHMMSS/`） |
 | 3 | ディレクトリ構造作成 |
 | 4 | 動的コピー（Codex仕様を含む複数カテゴリ、ディレクトリ単位） |
-| 5 | 生成ファイル作成（CLAUDE.md, gemini.md, session等 7ファイル + ユーザーCLAUDE.md初期配置） |
+| 5 | 生成ファイル作成（CLAUDE.md, antigravity.md, session等 + ユーザーCLAUDE.md初期配置） |
 | 6 | 検証（ソースvsターゲットのファイル数比較） |
 | 7 | レポート出力 |
 
@@ -134,8 +131,7 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 | 4 | `.claude/skills/` | ツリーコピー |
 | 5 | `.claude/hooks/` | ツリーコピー |
 | 6 | `.codex/` | ツリーコピー |
-| 7 | `.gemini/commands/*.toml` | フラットコピー |
-| 8 | `.antigravity/` | ツリーコピー |
+| 7 | `.agents/skills/`（agy） | ツリーコピー |
 | 9 | `.sd/settings/` | ツリーコピー |
 | 10 | `.sessions/session-template.md` | 単体コピー |
 | 11 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
@@ -189,16 +185,16 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 
 ### Codex での同等操作
 
-| Purpose | Claude Code | Codex CLI | Gemini CLI |
+| Purpose | Claude Code | Codex CLI | Antigravity (agy) |
 |---------|-------------|-----------|------------|
-| Session read | `/sessionread` | `$sessionread` または `$session-read` | `sessionread.toml` |
-| Session write | `/sessionwrite` | `$sessionwrite` または `$session-write` | `sessionwrite.toml` |
-| Session history | `/sessionhistory` | `$sessionhistory` | `sessionhistory.toml` |
-| Workflow init | `/workflow:init` | `$workflow-init` | `workflow-init.toml` |
-| Skills find | `/skills:find` | `$skills-find` | `skills-find.toml` |
-| SD deploy | `/sd:deploy` | `$sd-deploy` | `sd-deploy.toml` |
+| Session read | `/sessionread` | `$sessionread` / `$session-read` | `/sessionread` |
+| Session write | `/sessionwrite` | `$sessionwrite` / `$session-write` | `/sessionwrite` |
+| Session history | `/sessionhistory` | `$sessionhistory` | `/sessionhistory` |
+| Workflow init | `/workflow:init` | `$workflow-init` | `/workflow-init` |
+| Skills find | `/skills:find` | `$skills-find` | `/skills-find` |
+| SD deploy | `/sd:deploy` | `$sd-deploy` | `/sd-deploy` |
 
-> Codex では `.claude/commands` を直接読まず、`.codex/CODEX_SPEC.md` と同期生成された `.codex/skills/` または `~/.codex/skills/` を使います。Gemini では同期生成された `.gemini/commands/*.toml` を使います。
+> Codex では `.codex/skills/` または `~/.codex/skills/` を使います。Antigravity(agy) では `.agents/skills/*/SKILL.md` を起動時に読み込みます（`/skills` で確認）。
 
 ---
 
@@ -248,12 +244,12 @@ npm run test:gas-fakes      # Tier-2 only
 ## 4-Agent Pipeline
 
 ```
-/workflow:request → /workflow:impl(Gemini) → /workflow:review(Codex) → /workflow:test(Antigravity)
+/workflow:request → /workflow:impl(Antigravity) → /workflow:review(Codex) → /workflow:test(Antigravity)
 ```
 
 | Script | Purpose | Agents |
 |--------|---------|--------|
-| `scripts/agent-implement.sh` | Gemini implementation only | 1 |
+| `scripts/agent-implement.sh` | Antigravity (agy) implementation only | 1 |
 | `scripts/agent-test.sh` | Antigravity test only | 1 |
 | `scripts/agent-pipeline.sh` | Full 4-Agent pipeline | 4 |
 
@@ -351,6 +347,6 @@ MIT License
 
 ---
 
-**SD003 Framework v2.13.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem
+**SD003 Framework v2.14.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline (agy/Codex) + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem
 # clean state test
 # verify
