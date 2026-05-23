@@ -6,6 +6,7 @@ applies_to:
   keywords: ["奉行", "弥生", "仕訳", "サクセス", "山一", "siwakebugyou", "yayoi"]
   paths: ["サクセス/", "山一/"]
 severity: block
+disable-model-invocation: true
 ---
 
 # bugyou-yayoi-conversion

@@ -413,6 +413,23 @@ def write_codex_skills(specs: List[CommandSpec], previous_skill_dirs: set[str] |
             write_text(alias_dir / "SKILL.md", codex_skill_markdown(alias_spec, alias_target=spec.slug))
 
 
+def _rewrite_skill_md_for_agy(path: Path) -> None:
+    """Replace 'allowed-tools:' with 'disable-model-invocation: true' in frontmatter.
+
+    .claude/skills use allowed-tools (Claude Code syntax). agy requires
+    disable-model-invocation: true for skills to appear as slash commands.
+    """
+    text = path.read_text(encoding="utf-8")
+    if "disable-model-invocation" in text or not text.startswith("---"):
+        return
+    close = text.index("---", 3)
+    fm = text[3:close].strip()
+    rest = text[close + 3:]
+    lines = [l for l in fm.splitlines() if not l.startswith("allowed-tools")]
+    lines.append("disable-model-invocation: true")
+    path.write_text("---\n" + "\n".join(lines) + "\n---" + rest, encoding="utf-8", newline="\n")
+
+
 def real_skill_names() -> set[str]:
     if not CLAUDE_SKILLS_DIR.exists():
         return set()
@@ -453,6 +470,9 @@ def sync_agents_skills(specs: List[CommandSpec]) -> None:
                 shutil.rmtree(target_dir)
             # Never mirror CLAUDE.md (claude-mem third-party context stubs) into .agents
             shutil.copytree(skill_dir, target_dir, ignore=shutil.ignore_patterns("CLAUDE.md"))
+            target_skill_md = target_dir / "SKILL.md"
+            if target_skill_md.exists():
+                _rewrite_skill_md_for_agy(target_skill_md)
             print(f"  Mirrored skill: {skill_dir.name}")
 
     # Generate command skills (skip slugs already provided as real skills)

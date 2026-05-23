@@ -4,7 +4,7 @@ description: |
   Proposal-based rollback system for refactoring safety.
   Triggers: Test failure after batch, same error 2nd occurrence.
   Actions: Propose rollback options via AskUserQuestion (NOT auto-execute).
-allowed-tools: Bash, Read, Write, AskUserQuestion, Skill
+disable-model-invocation: true
 ---
 
 # Rollback Guard Skill

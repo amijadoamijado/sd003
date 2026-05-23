@@ -1,6 +1,7 @@
 ---
 name: notebooklm-research
 description: NotebookLMのRAGでゼロトークンリサーチ。大量ドキュメント分析をNotebookLMに委ね、Claude Codeはオーケストレーションのみ担当。
+disable-model-invocation: true
 ---
 
 # NotebookLM Research（ゼロトークンリサーチ）

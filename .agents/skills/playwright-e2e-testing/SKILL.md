@@ -6,6 +6,7 @@ progressive_disclosure:
     summary: "Playwright modern end-to-end testing framework with cross-browser automation, auto-wait, and built-in test runner"
     when_to_use: "When writing tests, implementing playwright-e2e-testing, or ensuring code quality."
     quick_start: "1. Review the core concepts below. 2. Apply patterns to your use case. 3. Follow best practices for implementation."
+disable-model-invocation: true
 ---
 # Playwright E2E Testing Skill
 

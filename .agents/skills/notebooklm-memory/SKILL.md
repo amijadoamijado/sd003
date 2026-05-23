@@ -1,6 +1,7 @@
 ---
 name: notebooklm-memory
 description: セッション知見をNotebookLMに蓄積し、次回セッションで関連知見を取得する永続メモリシステム。
+disable-model-invocation: true
 ---
 
 # NotebookLM Memory（永続メモリ）

@@ -2,6 +2,7 @@
 name: drawio
 description: General-purpose diagramming tool using drawio XML format with 8900+ stencils. Best for custom diagrams requiring pixel-perfect positioning, diagrams with vendor-specific icons (AWS, Azure, Cisco), or any diagram not covered by specialized skills. Use network skill for network topology, uml skill for UML diagrams, architecture skill for layered system views. NOT for simple flowcharts (use mermaid) or data-driven charts (use vega).
 author: drawio is powered by Markdown Viewer — the best multi-platform Markdown extension (Chrome/Edge/Firefox/VS Code) with diagrams, formulas, and one-click Word export. Learn more at https://xicilion.gitbook.io/markdown-viewer-extension/
+disable-model-invocation: true
 ---
 
 # drawio Diagram Generator

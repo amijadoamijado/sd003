@@ -3,12 +3,12 @@ name: git-worktrees
 description: Git Worktreeの安全な作成・管理・クリーンアップ手順
 optional: true
 source: obra/superpowers (adapted)
-allowed-tools:
   - Bash
   - Read
   - Glob
   - Grep
   - Agent
+disable-model-invocation: true
 ---
 
 # Git Worktrees - 安全管理スキル

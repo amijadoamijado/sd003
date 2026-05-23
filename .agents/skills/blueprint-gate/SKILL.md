@@ -5,7 +5,7 @@ description: |
   Use when: ユーザーが /blueprint-gate を実行した時、
   「要件定義」「設計」「何を作るか整理したい」「開発の前に整理」「Blueprint Gate」と言及した時、
   または1時間以上かかりそうなタスクの着手前。
-allowed-tools: Read, Glob, Grep, AskUserQuestion, Write
+disable-model-invocation: true
 ---
 
 # Blueprint Gate v1.0

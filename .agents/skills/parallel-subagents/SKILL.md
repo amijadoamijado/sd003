@@ -3,12 +3,12 @@ name: parallel-subagents
 description: Claude内部サブエージェント並列実行のパターンとガイドライン
 optional: true
 source: obra/superpowers (adapted)
-allowed-tools:
   - Bash
   - Read
   - Glob
   - Grep
   - Agent
+disable-model-invocation: true
 ---
 
 # Parallel Subagents - Claude内部並列実行ガイド

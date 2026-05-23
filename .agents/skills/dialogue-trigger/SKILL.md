@@ -4,7 +4,7 @@ description: |
   エラー修正が収束しない場合に対話型解決法を提案する。
   Use when: 同じエラーが2回以上発生、修正が収束しない、
   ユーザーが「迷走」「収束しない」「同じエラー」と言及した場合。
-allowed-tools: AskUserQuestion
+disable-model-invocation: true
 ---
 
 # 対話型解決法トリガー（提案専用）

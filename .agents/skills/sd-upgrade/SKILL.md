@@ -5,7 +5,7 @@ description: |
   プロジェクトのコード・データ（src/, .sd/specs/, .sessions/履歴, materials/ 等）は壊さない。
   Use when: ユーザーが「SD003アップグレード」「フレームワーク置き換え」「古いsd003を最新に」
   「廃止物を削除して最新化」「sd-upgrade」と言及した場合。
-allowed-tools: Read, Write, Bash, Glob
+disable-model-invocation: true
 ---
 
 # SD003 安全アップグレードスキル v1.0.0

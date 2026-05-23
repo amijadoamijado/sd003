@@ -3,12 +3,12 @@ name: find-duplicates
 description: セマンティック重複検出（コピペ検出では捕捉できない同意図の異実装を発見）
 optional: true
 source: obra/superpowers-lab
-allowed-tools:
   - Bash
   - Read
   - Glob
   - Grep
   - Agent
+disable-model-invocation: true
 ---
 
 # Find Duplicates - セマンティック重複検出

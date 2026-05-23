@@ -4,7 +4,7 @@ description: |
   Automatic session persistence for refactoring workflows.
   Triggers: Batch completion, test pass, quality gate pass, checkpoint creation.
   Actions: Execute /sessionwrite, update checkpoint registry.
-allowed-tools: Bash, Write, Read, Skill
+disable-model-invocation: true
 ---
 
 # Session Autosave Skill

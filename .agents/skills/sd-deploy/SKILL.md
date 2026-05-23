@@ -3,7 +3,7 @@ name: sd-deploy
 description: |
   SD003フレームワークを新規プロジェクトに展開。
   Use when: ユーザーが「SD003導入」「フレームワーク展開」「deploy」と言及した場合。
-allowed-tools: Read, Write, Bash, Glob
+disable-model-invocation: true
 ---
 
 # SD003フレームワーク展開スキル v3.2.0

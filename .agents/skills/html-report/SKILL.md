@@ -5,7 +5,7 @@ description: |
   リッチなHTML + インラインCSS + 軽いインタラクションで出力する。
   Use when: 人間が読む文書をリッチに提示したい時。
   特に Blueprint Gate の要件定義書出力で使用。
-allowed-tools: Read, Write, Edit
+disable-model-invocation: true
 ---
 
 # HTML Report Skill

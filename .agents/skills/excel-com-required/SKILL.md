@@ -5,6 +5,7 @@ applies_to:
   extensions: ["*.xlsx", "*.xls"]
   keywords: ["openpyxl", "XLSX.utils", "ExcelJS", "pandas.to_excel"]
 severity: block
+disable-model-invocation: true
 ---
 
 # excel-com-required

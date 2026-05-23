@@ -4,7 +4,7 @@ description: |
   Autonomous context window management for refactoring sessions.
   Triggers: After batch operations, on completion markers, periodically.
   Actions: Auto-compact at 70%, auto-clear at 85%, always preserves session first.
-allowed-tools: Bash, Write, Read, Skill
+disable-model-invocation: true
 ---
 
 # Context Autonomy Skill

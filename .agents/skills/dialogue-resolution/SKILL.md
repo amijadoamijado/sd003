@@ -4,7 +4,7 @@ description: |
   AIの迷走時に仕様・実装との差異を段階的に検出する対話型解決法。
   Use when: ユーザーが /dialogue-resolution を実行した時、
   または dialogue-trigger スキルで提案が承認された場合。
-allowed-tools: Read, Glob, Grep, AskUserQuestion
+disable-model-invocation: true
 ---
 
 # 対話型解決法スキル（Dialogue Resolution Skill）
