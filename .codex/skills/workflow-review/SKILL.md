@@ -16,6 +16,24 @@ description: Codex equivalent of the SD003 custom command `/workflow:review`. Us
 - `.sd/ai-coordination/` に依頼書・報告書を書く場合は、既存の案件ID配下に限定し、プロジェクトルートへ散らさないでください。
 - Windows環境ではPowerShellで実行できるコマンドを優先し、bash専用の例はWSLやGit Bashが使える場合だけ採用します。
 
+## Codex Native Execution Contract
+このセクションはCodex実行時に `Original Command Body` より優先します。
+
+- Claude Codeのスラッシュコマンド、`/workflow:*`、`/codex:*`、`Agent(...)`、`AskUserQuestion` は文字通り実行しない。
+- Codex自身がファイル読取、差分確認、編集、検証、報告を直接行う。
+- `.claude/commands/**/*.md` はauthoring sourceとして読むだけにし、Codex改善のために直接編集しない。
+- 案件IDがない相談・レビューでは `.sd/ai-coordination/` に報告書を作らず、会話内で完結する。
+- `.sd/ai-coordination/` に書くのは、案件IDが明示された正式Workflowの場合だけにする。
+- WindowsではPowerShellで実行できるコマンドを優先し、bash例はWSL/Git Bashが使える場合だけ採用する。
+- `.sd/` が存在しない場合は、その事実を報告し、可能なら軽量レビューまたは直接実装へ縮退する。
+
+### Native workflow-review
+1. `IMPLEMENT_REQUEST_{番号}.md` が存在すれば読み、レビュー範囲を確定する。
+2. `git status --short`、`git diff --stat`、必要な `git diff` / `git show` を読む。
+3. 実行可能な範囲で build/test/lint を実行し、未実行や失敗は結果に明記する。
+4. `/codex:review` や `/codex:adversarial-review` は呼ばず、Codex自身が重大度順にレビューする。
+5. 案件IDがある場合のみ `.sd/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{番号}.md` に保存する。
+
 ## Original Command Body
 # レビュー依頼: /workflow:review
 

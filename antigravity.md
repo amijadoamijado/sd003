@@ -5,7 +5,7 @@
 SD003 now supports Antigravity CLI custom slash commands and skills.
 
 ### Slash Commands
-Custom commands are authored in `.claude/commands/**/*.md`, normalized into `.sd/commands/specs/*.md`, and then generated into `.antigravity/commands/*.toml`.
+Custom commands are authored in `.claude/commands/**/*.md`, normalized into `.sd/commands/specs/*.md`, and then generated as Agent Skills into `.agents/skills/{name}/SKILL.md` — the directory agy actually scans (verified against agy 1.0.1). agy does NOT read `.toml` command files.
 
 Sync command:
 ```bash
@@ -14,10 +14,10 @@ python scripts/sync-cli-commands.py --check
 python scripts/sync-cli-commands.py --deploy-codex-home
 ```
 
-Antigravity CLI should consume the generated `.antigravity/commands/*.toml` files, not hand-maintained copies.
+Antigravity CLI auto-discovers the generated `.agents/skills/*/SKILL.md` files at startup (`/skills` to verify). Do not hand-maintain copies.
 
 ### Skills
-Project-local skills are available in `.antigravity/skills/`.
+Project-local skills are available in `.agents/skills/` (workspace path agy scans: `<repo>/.agents/skills/{name}/SKILL.md`; global `~/.gemini/antigravity-cli/skills/`; shared `~/.gemini/skills/`).
 You can activate them using the `activate_skill` tool (if supported by your environment) or they will be automatically included in the system instructions.
 Available skills: `sd-deploy`, `session-autosave`, `rollback-guard`, etc.
 

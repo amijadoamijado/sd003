@@ -5,7 +5,15 @@ Sync SD003 custom commands across Claude Code, Codex, and Antigravity CLI (agy).
 Canonical source strategy:
 - Claude Code `.claude/commands/**/*.md` remains the authoring input
 - `.sd/commands/` stores normalized specs and a manifest
-- Antigravity TOML and Codex skills are generated from the normalized specs
+- Antigravity (agy) skills and Codex skills are generated from the normalized specs
+
+Antigravity CLI (agy) discovers slash commands as Agent Skills (SKILL.md), NOT as
+`.toml` command files. agy scans (verified empirically against agy 1.0.1):
+  Workspace: <repo>/.agents/skills/{name}/SKILL.md
+  Global:    ~/.gemini/antigravity-cli/skills/{name}/SKILL.md
+  Shared:    ~/.gemini/skills/{name}/SKILL.md
+So SD003 commands are emitted as `.agents/skills/{slug}/SKILL.md`, and the real
+`.claude/skills/*` are mirrored into `.agents/skills/` as well.
 """
 
 from __future__ import annotations
@@ -22,8 +30,7 @@ from typing import Dict, List, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CLAUDE_COMMANDS_DIR = REPO_ROOT / ".claude" / "commands"
-ANTIGRAVITY_COMMANDS_DIR = REPO_ROOT / ".antigravity" / "commands"
-ANTIGRAVITY_SKILLS_DIR = REPO_ROOT / ".antigravity" / "skills"
+AGENTS_SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
 CODEX_SKILLS_DIR = REPO_ROOT / ".codex" / "skills"
 CLAUDE_SKILLS_DIR = REPO_ROOT / ".claude" / "skills"
 CANONICAL_DIR = REPO_ROOT / ".sd" / "commands"
@@ -131,7 +138,7 @@ def canonical_markdown(spec: CommandSpec) -> str:
         "description": spec.description,
         "claude_command": spec.claude_command,
         "codex_skill": spec.slug,
-        "antigravity_file": f"{spec.slug}.toml",
+        "antigravity_skill": f"{spec.slug}/SKILL.md",
     }
     if spec.aliases:
         frontmatter["aliases"] = ", ".join(spec.aliases)
@@ -149,22 +156,98 @@ def canonical_markdown(spec: CommandSpec) -> str:
         f"# {spec.title}\n\n"
         "## Canonical Intent\n"
         "Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。\n"
-        "Antigravity CLI の TOML と Codex の skill はこのファイルから生成します。\n\n"
+        "Antigravity(agy) skill と Codex skill はこのファイルから生成します。\n\n"
         "## Original Body\n"
         f"{spec.body}"
     )
 
 
-def antigravity_toml(spec: CommandSpec) -> str:
-    escaped_description = spec.description.replace('"', '\\"')
-    # Use literal triple quotes (''') to avoid issues with backslashes in the body.
-    # TOML literal strings do not support escape sequences.
+def antigravity_skill_markdown(spec: CommandSpec, alias_target: str | None = None) -> str:
+    """Generate an Agent Skill (SKILL.md) for the Antigravity CLI (agy).
+
+    agy treats the frontmatter `name` as the slash command (`name: foo` -> `/foo`).
+    `disable-model-invocation: true` keeps these from auto-firing; they run only
+    when the user explicitly types the command. `$ARGUMENTS` receives anything
+    typed after the command.
+    """
+    if alias_target:
+        return (
+            "---\n"
+            f"name: {spec.slug}\n"
+            f"description: Legacy alias for `{alias_target}` (SD003 command {spec.claude_command}).\n"
+            "disable-model-invocation: true\n"
+            "---\n\n"
+            f"# {spec.slug} (alias)\n\n"
+            f"This skill is an alias of `{alias_target}`. Follow the same steps as "
+            f"`{alias_target}` to reproduce `{spec.claude_command}`.\n\n"
+            "User-provided arguments (if any): $ARGUMENTS\n"
+        )
+
     return (
-        f'description = "{escaped_description}"\n'
-        "prompt = '''\n"
+        "---\n"
+        f"name: {spec.slug}\n"
+        f"description: {spec.description}\n"
+        "disable-model-invocation: true\n"
+        "---\n\n"
+        f"# {spec.title}\n\n"
+        f"SD003 custom command `{spec.claude_command}` を Antigravity (agy) skill として再現します。\n\n"
+        "User-provided arguments (if any): $ARGUMENTS\n\n"
+        "## Antigravity Runtime Rules\n"
+        "- `.claude/commands/**/*.md` はauthoring source。直接編集せず、本Skillを実行仕様として扱う。\n"
+        "- Claude Code固有の `Agent(...)`、`AskUserQuestion`、hook前提の記述は文字通り実行せず、"
+        "agy(Gemini)の通常手順（ファイル読取・編集・コマンド実行・必要時のユーザー確認）に翻訳する。\n"
+        "- `/workflow:*` や `/codex:*` など他CLIのスラッシュコマンドは呼ばない。必要な作業はagy自身が直接行う。\n"
+        "- 人間向け出力・報告・質問は日本語で書く。\n"
+        "- `.sd/ai-coordination/` に書くのは案件IDが明示された正式Workflowの場合のみ。\n"
+        "- WindowsではPowerShellで実行できるコマンドを優先する。\n\n"
+        "## Original Command Body\n"
         f"{spec.body}"
-        "'''\n"
     )
+
+
+def codex_native_contract(spec: CommandSpec) -> str:
+    common = (
+        "## Codex Native Execution Contract\n"
+        "このセクションはCodex実行時に `Original Command Body` より優先します。\n\n"
+        "- Claude Codeのスラッシュコマンド、`/workflow:*`、`/codex:*`、`Agent(...)`、`AskUserQuestion` は文字通り実行しない。\n"
+        "- Codex自身がファイル読取、差分確認、編集、検証、報告を直接行う。\n"
+        "- `.claude/commands/**/*.md` はauthoring sourceとして読むだけにし、Codex改善のために直接編集しない。\n"
+        "- 案件IDがない相談・レビューでは `.sd/ai-coordination/` に報告書を作らず、会話内で完結する。\n"
+        "- `.sd/ai-coordination/` に書くのは、案件IDが明示された正式Workflowの場合だけにする。\n"
+        "- WindowsではPowerShellで実行できるコマンドを優先し、bash例はWSL/Git Bashが使える場合だけ採用する。\n"
+        "- `.sd/` が存在しない場合は、その事実を報告し、可能なら軽量レビューまたは直接実装へ縮退する。\n\n"
+    )
+
+    if spec.slug == "workflow-review":
+        return common + (
+            "### Native workflow-review\n"
+            "1. `IMPLEMENT_REQUEST_{番号}.md` が存在すれば読み、レビュー範囲を確定する。\n"
+            "2. `git status --short`、`git diff --stat`、必要な `git diff` / `git show` を読む。\n"
+            "3. 実行可能な範囲で build/test/lint を実行し、未実行や失敗は結果に明記する。\n"
+            "4. `/codex:review` や `/codex:adversarial-review` は呼ばず、Codex自身が重大度順にレビューする。\n"
+            "5. 案件IDがある場合のみ `.sd/ai-coordination/workflow/review/{案件ID}/REVIEW_IMPL_{番号}.md` に保存する。\n\n"
+        )
+
+    if spec.slug == "workflow-impl":
+        return common + (
+            "### Native workflow-impl\n"
+            "1. `IMPLEMENT_REQUEST_{番号}.md` またはユーザー依頼を読み、変更可能範囲を確認する。\n"
+            "2. `--codex` 相当の場合でも `/codex:rescue` は呼ばず、Codex自身が実装する。\n"
+            "3. 既存の未コミット変更を保持し、対象スコープ外を戻さない。\n"
+            "4. `apply_patch` を優先して編集し、不要なリファクタを避ける。\n"
+            "5. 実行可能な検証を行い、失敗時は原因と残作業を明記する。\n\n"
+        )
+
+    if spec.slug == "sessionread":
+        return common + (
+            "### Native sessionread\n"
+            "1. 指定4ファイルを読む。存在しないファイルは警告して続行する。\n"
+            "2. `git status --short` と直近コミットを確認する。\n"
+            "3. bash/WSL前提のバックグラウンド処理が使えない場合は、未実行理由を報告して続行する。\n"
+            "4. 前回状況、未解決事項、次回優先タスクを簡潔に要約する。\n\n"
+        )
+
+    return common
 
 
 def codex_skill_markdown(spec: CommandSpec, alias_target: str | None = None) -> str:
@@ -179,6 +262,7 @@ def codex_skill_markdown(spec: CommandSpec, alias_target: str | None = None) -> 
             f"`{alias_target}` と同じ手順で `{spec.claude_command}` を再現してください。\n"
             "Codex内ではClaude Codeのスラッシュコマンドや `/codex:*` を文字通り実行せず、"
             "ファイル読取・編集・検証・報告をCodexの通常手順に置き換えてください。\n"
+            "詳細は `.codex/CODEX_NATIVE.md` を優先してください。\n"
         )
 
     triggers = [f"`{spec.claude_command}`", f"`{spec.slug}`"]
@@ -201,6 +285,7 @@ def codex_skill_markdown(spec: CommandSpec, alias_target: str | None = None) -> 
         "- 人間向け出力、レビュー報告、質問、完了報告は日本語で書きます。\n"
         "- `.sd/ai-coordination/` に依頼書・報告書を書く場合は、既存の案件ID配下に限定し、プロジェクトルートへ散らさないでください。\n"
         "- Windows環境ではPowerShellで実行できるコマンドを優先し、bash専用の例はWSLやGit Bashが使える場合だけ採用します。\n\n"
+        f"{codex_native_contract(spec)}"
         "## Original Command Body\n"
         f"{body}"
     )
@@ -212,10 +297,9 @@ def render_manifest(specs: List[CommandSpec]) -> str:
         "source": ".claude/commands/**/*.md",
         "generated": {
             "canonical_specs": ".sd/commands/specs/*.md",
-            "antigravity_commands": ".antigravity/commands/*.toml",
+            "antigravity_skills": ".agents/skills/*/SKILL.md",
             "codex_skills": ".codex/skills/*/SKILL.md",
             "codex_spec": ".codex/CODEX_SPEC.md",
-            "legacy_codex_skills": ".agents/skills/*/SKILL.md",
         },
         "commands": [
             {
@@ -223,7 +307,7 @@ def render_manifest(specs: List[CommandSpec]) -> str:
                 "source": spec.source,
                 "description": spec.description,
                 "claude_command": spec.claude_command,
-                "antigravity_file": f"{spec.slug}.toml",
+                "antigravity_skill": f"{spec.slug}/SKILL.md",
                 "codex_skill": spec.slug,
                 "aliases": spec.aliases,
             }
@@ -313,45 +397,82 @@ def write_codex_skills(specs: List[CommandSpec], previous_skill_dirs: set[str] |
             write_text(alias_dir / "SKILL.md", codex_skill_markdown(alias_spec, alias_target=spec.slug))
 
 
-def sync_skills() -> None:
+def real_skill_names() -> set[str]:
     if not CLAUDE_SKILLS_DIR.exists():
-        return
+        return set()
+    return {p.name for p in CLAUDE_SKILLS_DIR.iterdir() if p.is_dir()}
 
-    ANTIGRAVITY_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Get desired skill names from .claude/skills/
-    desired_skills = {p.name for p in CLAUDE_SKILLS_DIR.iterdir() if p.is_dir()}
+def sync_agents_skills(specs: List[CommandSpec]) -> None:
+    """Populate .agents/skills/ — the directory agy actually scans.
 
-    # Remove stale skills from .antigravity/skills/
-    for p in ANTIGRAVITY_SKILLS_DIR.iterdir():
-        if p.is_dir() and p.name not in desired_skills:
+    Two kinds of entries land here:
+    - Real skills mirrored from .claude/skills/* (they ship their own SKILL.md).
+    - Command skills generated from .claude/commands/* (one per command slug that
+      is not already a real skill), so each becomes an agy slash command.
+    """
+    AGENTS_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
+
+    skills = real_skill_names()
+    command_specs = [s for s in specs if s.slug not in skills]
+    command_slugs = {s.slug for s in command_specs}
+    alias_slugs: set[str] = set()
+    for s in command_specs:
+        alias_slugs.update(s.aliases)
+
+    desired = skills | command_slugs | alias_slugs
+
+    # Prune stale entries (anything not currently desired)
+    for p in AGENTS_SKILLS_DIR.iterdir():
+        if p.is_dir() and p.name not in desired:
             shutil.rmtree(p)
 
-    # Sync skills
-    for skill_dir in CLAUDE_SKILLS_DIR.iterdir():
-        if not skill_dir.is_dir():
-            continue
+    # Mirror real skills
+    if CLAUDE_SKILLS_DIR.exists():
+        for skill_dir in sorted(CLAUDE_SKILLS_DIR.iterdir()):
+            if not skill_dir.is_dir():
+                continue
+            target_dir = AGENTS_SKILLS_DIR / skill_dir.name
+            if target_dir.exists():
+                shutil.rmtree(target_dir)
+            shutil.copytree(skill_dir, target_dir)
+            print(f"  Mirrored skill: {skill_dir.name}")
 
-        skill_name = skill_dir.name
-        target_dir = ANTIGRAVITY_SKILLS_DIR / skill_name
+    # Generate command skills (skip slugs already provided as real skills)
+    for spec in command_specs:
+        write_text(AGENTS_SKILLS_DIR / spec.slug / "SKILL.md", antigravity_skill_markdown(spec))
+        print(f"  Generated command skill: {spec.slug}")
+        for alias in spec.aliases:
+            alias_spec = CommandSpec(
+                slug=alias,
+                source=spec.source,
+                description=spec.description,
+                allowed_tools=spec.allowed_tools,
+                claude_command=spec.claude_command,
+                title=spec.title,
+                body=spec.body,
+                aliases=[],
+            )
+            write_text(
+                AGENTS_SKILLS_DIR / alias / "SKILL.md",
+                antigravity_skill_markdown(alias_spec, alias_target=spec.slug),
+            )
 
-        # Simple copytree with overwrite
-        if target_dir.exists():
-            shutil.rmtree(target_dir)
-        shutil.copytree(skill_dir, target_dir)
-        print(f"  Synced skill: {skill_name}")
+    for spec in specs:
+        if spec.slug in skills:
+            print(f"  Skipping command skill for {spec.slug} (exists as real skill)")
 
 
 def sync() -> List[CommandSpec]:
     specs = load_claude_specs()
     CANONICAL_SPECS_DIR.mkdir(parents=True, exist_ok=True)
-    ANTIGRAVITY_COMMANDS_DIR.mkdir(parents=True, exist_ok=True)
+    AGENTS_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
     CODEX_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
 
-    print("Syncing skills...")
-    sync_skills()
+    print("Syncing Antigravity (agy) skills + command skills...")
+    sync_agents_skills(specs)
 
-    print("Syncing commands...")
+    print("Syncing canonical specs + Codex skills...")
     previous_skill_dirs = previous_codex_skill_dirs()
 
     desired_spec_files = {f"{spec.slug}.md" for spec in specs}
@@ -359,24 +480,8 @@ def sync() -> List[CommandSpec]:
         if path.name not in desired_spec_files:
             path.unlink()
 
-    desired_antigravity_files = {
-        f"{spec.slug}.toml"
-        for spec in specs
-        if not (CLAUDE_SKILLS_DIR / spec.slug).is_dir()
-    }
-    for path in ANTIGRAVITY_COMMANDS_DIR.glob("*.toml"):
-        if path.name not in desired_antigravity_files:
-            path.unlink()
-
     for spec in specs:
         write_text(CANONICAL_SPECS_DIR / f"{spec.slug}.md", canonical_markdown(spec))
-
-        # Skip generating Antigravity TOML if a skill with the same name exists in .claude/skills/
-        # This avoids conflicts where both a command and a skill provide the same slash command.
-        if (CLAUDE_SKILLS_DIR / spec.slug).is_dir():
-            print(f"  Skipping Antigravity command TOML for {spec.slug} (exists as skill)")
-        else:
-            write_text(ANTIGRAVITY_COMMANDS_DIR / f"{spec.slug}.toml", antigravity_toml(spec))
 
     write_codex_skills(specs, previous_skill_dirs)
 
@@ -389,12 +494,13 @@ def check() -> int:
     failures: List[str] = []
     if not (REPO_ROOT / ".codex" / "CODEX_SPEC.md").exists():
         failures.append("missing codex spec: .codex/CODEX_SPEC.md")
+    skills = real_skill_names()
     for spec in specs:
         if not (CANONICAL_SPECS_DIR / f"{spec.slug}.md").exists():
             failures.append(f"missing canonical spec: {spec.slug}")
-        antigravity_command_expected = not (CLAUDE_SKILLS_DIR / spec.slug).is_dir()
-        if antigravity_command_expected and not (ANTIGRAVITY_COMMANDS_DIR / f"{spec.slug}.toml").exists():
-            failures.append(f"missing antigravity command: {spec.slug}")
+        agy_skill_expected = spec.slug not in skills
+        if agy_skill_expected and not (AGENTS_SKILLS_DIR / spec.slug / "SKILL.md").exists():
+            failures.append(f"missing antigravity skill: {spec.slug}")
         if not (CODEX_SKILLS_DIR / spec.slug / "SKILL.md").exists():
             failures.append(f"missing codex skill: {spec.slug}")
         for alias in spec.aliases:

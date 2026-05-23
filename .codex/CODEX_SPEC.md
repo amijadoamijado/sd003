@@ -26,6 +26,29 @@ Codex向けの生成物は `python scripts/sync-cli-commands.py` で作成しま
 6. GASデプロイでは `clasp push` のみ許可する。`clasp deploy` と `clasp undeploy` はユーザーの明示指示なしに実行しない。
 7. `.sd/ai-coordination/` へ依頼書・報告書を書く場合は案件ID配下に限定し、プロジェクトルートへ作成しない。
 
+## Codex Native Modes
+
+CodexはClaude Codeの代替実行者ではなく、以下の3つのモードで最大効率を出す。
+Claude Code正本は変更せず、Codex側で実行時にモードを選ぶ。
+
+| Mode | Trigger | Codexの動き |
+|------|---------|-------------|
+| Fast Review | `review`, `check`, `差分確認`, 案件IDなしの相談 | `git status` と差分を直接読み、重大度順にレビューする。正式なREVIEW_REPORTは作らない |
+| Workflow Review | 案件IDとタスク番号がある正式レビュー | `IMPLEMENT_REQUEST` と差分を読み、Codex自身がレビューし、`.sd/ai-coordination/workflow/review/{案件ID}/` に保存する |
+| Handoff Recovery | Claude Code制限時、`sessionread`, 引継ぎ, 続き | セッション・git状態・未解決タスクを読み、Codexが安全に次の小単位を進める |
+| Direct Implementation | `--codex`, Codexで実装, Claude制限時の修正 | 指示書またはユーザー依頼をCodex自身が読み、対象ファイルを編集し、検証する |
+
+### Native Mode優先規則
+
+生成Skill内の `Original Command Body` はClaude Code向けの意図の正本である。
+ただしCodex実行時は次を優先する。
+
+1. `/workflow:*`、`/codex:*`、`Agent(...)`、`AskUserQuestion` は文字通り実行しない。
+2. `bash` 前提の例は、WindowsではPowerShellまたはCodexのツール操作に置き換える。
+3. `.sd/` が存在しない場合は、存在しないことを報告し、可能ならFast ReviewまたはDirect Implementationへ縮退する。
+4. 正式Workflow文書の作成は、案件IDが明示されている場合だけ行う。
+5. 案件IDがない相談・レビューでは、プロジェクトルートへ報告書を作らず、会話内で完結する。
+
 ## Codexレビュー仕様
 
 Codexがレビュー担当として呼ばれた場合は、次を最小セットとして実施します。

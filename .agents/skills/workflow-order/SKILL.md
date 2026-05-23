@@ -1,0 +1,115 @@
+---
+name: workflow-order
+description: AI協調ワークフロー - 発注書（WORK_ORDER）作成
+disable-model-invocation: true
+---
+
+# 発注書作成: /workflow:order
+
+SD003 custom command `/workflow:order` を Antigravity (agy) skill として再現します。
+
+User-provided arguments (if any): $ARGUMENTS
+
+## Antigravity Runtime Rules
+- `.claude/commands/**/*.md` はauthoring source。直接編集せず、本Skillを実行仕様として扱う。
+- Claude Code固有の `Agent(...)`、`AskUserQuestion`、hook前提の記述は文字通り実行せず、agy(Gemini)の通常手順（ファイル読取・編集・コマンド実行・必要時のユーザー確認）に翻訳する。
+- `/workflow:*` や `/codex:*` など他CLIのスラッシュコマンドは呼ばない。必要な作業はagy自身が直接行う。
+- 人間向け出力・報告・質問は日本語で書く。
+- `.sd/ai-coordination/` に書くのは案件IDが明示された正式Workflowの場合のみ。
+- WindowsではPowerShellで実行できるコマンドを優先する。
+
+## Original Command Body
+# 発注書作成: /workflow:order
+
+## 概要
+案件の発注書（WORK_ORDER.md）を作成します。
+
+## 使用方法
+```
+/workflow:order {案件ID}
+```
+
+## 引数
+- `案件ID`: `/workflow:init` で生成した案件ID
+
+## 前提条件
+- 案件ディレクトリが存在すること（`/workflow:init` 済み）
+- `.sd/ai-coordination/workflow/spec/{案件ID}/` が存在すること
+
+## 実行手順
+
+### 1. 案件ディレクトリ確認
+```bash
+ls .sd/ai-coordination/workflow/spec/{案件ID}/
+```
+存在しない場合は `/workflow:init` を先に実行するよう案内。
+
+### 2. 関連仕様書の確認
+`.sd/specs/` 配下に関連する仕様書があれば確認し、発注書に反映。
+
+### 3. ユーザーとの対話
+以下の情報を収集:
+
+#### 必須項目
+- **目的**: この案件で達成すべきビジネス目的
+- **背景**: なぜこの案件が必要なのか
+- **成功条件**: 数値で測定可能な指標
+- **スコープ**: やること/やらないこと
+
+#### 業務ルール（業務ツール向けに特に重要）
+- **業務ルール**: 守るべきビジネスルール
+- **データ定義**: 入出力データの型、バリデーション
+- **例外条件**: エラーケースとその対応
+
+#### テスト・品質
+- **テスト要件**: 必要なテストケース
+- **完了条件**: 何をもって完了とするか
+
+### 4. WORK_ORDER.md 作成
+テンプレートを使用して発注書を作成:
+- テンプレート: `.sd/ai-coordination/workflow/templates/WORK_ORDER.md`
+- 保存先: `.sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md`
+
+### 5. PROJECT_STATUS.md 更新
+`.sd/ai-coordination/workflow/log/{案件ID}/PROJECT_STATUS.md` を更新:
+- フェーズ1完了、フェーズ2（発注書レビュー）へ
+- タイムラインに記録追加
+
+### 6. handoff-log.json 更新
+```json
+{
+  "handoff_history": [
+    {
+      "id": "HO-{連番}",
+      "project_id": "{案件ID}",
+      "from": "Claude Code",
+      "to": "Codex",
+      "type": "work_order_review",
+      "artifact": ".sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md",
+      "timestamp": "{現在日時ISO形式}",
+      "status": "pending",
+      "result": null
+    }
+  ]
+}
+```
+
+### 7. 完了報告
+```
+## 発注書作成完了
+
+- **案件ID**: {案件ID}
+- **発注書**: .sd/ai-coordination/workflow/spec/{案件ID}/WORK_ORDER.md
+
+## 次のステップ
+1. Codexに発注書レビューを依頼してください
+   - 手順: `.sd/ai-coordination/workflow/CODEX_GUIDE.md` 参照
+2. レビューApprove後、`/workflow:request {案件ID} 001` で実装指示を作成
+```
+
+## ユーザー入力
+$ARGUMENTS
+
+---
+
+**実行開始**: 上記手順に従って発注書を作成してください。ユーザーから必要な情報を収集し、詳細な発注書を作成すること。

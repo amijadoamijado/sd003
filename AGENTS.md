@@ -10,6 +10,7 @@
 |---------|------|
 | `AGENTS.md`（このファイル） | Codex全体の設定・AI Coordination・Work Order Review |
 | `.codex/CODEX_SPEC.md` | Codex固有の実行仕様・Claude Code非破壊ルール |
+| `.codex/CODEX_NATIVE.md` | Codex nativeの軽量レビュー・引継ぎ・直接実装ルール |
 | `.handoff/AGENTS.md` | コードレビュー専用の4段階手順 |
 
 ---
@@ -59,6 +60,9 @@
 
 以下はAI Coordination文脈で依頼書・レビュー対象が明示されている場合に適用する。
 一般的な相談や改善提案では、ユーザーが成果物作成を求めていない限りREVIEW_REPORTを作成しない。
+
+案件IDや正式な依頼書がない `review` / `check` / `見て` は `.codex/CODEX_NATIVE.md` の Fast Review として扱う。
+この場合、`.sd/ai-coordination/` へ報告書を作らず、会話内で重大度順に報告する。
 
 | Keyword | Action |
 |---------|--------|
@@ -115,6 +119,7 @@ npm test && npm run lint
 - **.sd/ safe commit**: .sd/ファイルの変更は同一bashコマンド内でgit add+commitまで完了すること。分割するとClaude Codeランタイムが.sd/を消す。詳細: `.claude/rules/git/sd-safe-commit.md`
 - **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること
 - **Codex追加仕様**: `.codex/CODEX_SPEC.md` を参照すること。Claude Codeの正本仕様を置き換えず、Codex側の実行変換だけを追加する。
+- **Codex native運用**: `.codex/CODEX_NATIVE.md` を参照すること。Codex内で `/codex:*` や `/workflow:*` を再帰実行せず、Codex自身の読取・編集・検証に置き換える。
 
 ### GASデプロイルール（厳守）
 - **`clasp push` のみ許可。`clasp deploy` / `clasp undeploy` はユーザー明示指示なしに実行禁止**
@@ -132,10 +137,10 @@ SD003 では `.claude/commands/**/*.md` を authoring source とし、`python sc
 
 - `.sd/commands/specs/*.md`（共通正本）
 - `.codex/skills/*/SKILL.md`（Codex）
-- `.antigravity/commands/*.toml`（Antigravity CLI）
+- `.agents/skills/*/SKILL.md`（Antigravity CLI / agy。agyはSKILL.md形式のみ読み込む。`.toml`は不可）
 
 Claude 以外の生成物は直接手編集せず、`.claude/commands/` を修正して再同期すること。
-`.agents/skills/` は旧Codex互換パスであり、新規のCodex仕様は `.codex/` 配下に置く。
+`.agents/skills/` は agy（Antigravity CLI）が起動時にスキャンする正規スキルパス（コマンド・実スキル両方を配置）。Codex仕様は `.codex/` 配下に置く。
 
 ### Specification
 ```
@@ -170,6 +175,7 @@ $sd-deploy
 ## Reference
 - **AI Coordination**: `.claude/rules/workflow/ai-coordination.md`
 - **Codex Spec**: `.codex/CODEX_SPEC.md`
+- **Codex Native**: `.codex/CODEX_NATIVE.md`
 - **Quality Gates**: `docs/quality-gates.md`
 - **Templates**: `.sd/ai-coordination/workflow/templates/`
 

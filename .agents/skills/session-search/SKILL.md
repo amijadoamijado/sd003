@@ -1,0 +1,66 @@
+---
+name: session-search
+description: セッション横断検索（過去セッションからキーワード検索）
+disable-model-invocation: true
+---
+
+# セッション横断検索
+
+SD003 custom command `/session-search` を Antigravity (agy) skill として再現します。
+
+User-provided arguments (if any): $ARGUMENTS
+
+## Antigravity Runtime Rules
+- `.claude/commands/**/*.md` はauthoring source。直接編集せず、本Skillを実行仕様として扱う。
+- Claude Code固有の `Agent(...)`、`AskUserQuestion`、hook前提の記述は文字通り実行せず、agy(Gemini)の通常手順（ファイル読取・編集・コマンド実行・必要時のユーザー確認）に翻訳する。
+- `/workflow:*` や `/codex:*` など他CLIのスラッシュコマンドは呼ばない。必要な作業はagy自身が直接行う。
+- 人間向け出力・報告・質問は日本語で書く。
+- `.sd/ai-coordination/` に書くのは案件IDが明示された正式Workflowの場合のみ。
+- WindowsではPowerShellで実行できるコマンドを優先する。
+
+## Original Command Body
+# セッション横断検索
+
+過去のセッション記録とTIMELINEからキーワードで横断検索する。
+
+## 引数
+
+$ARGUMENTS — 検索キーワード（必須）
+
+## 実行手順
+
+1. **TIMELINE検索**: Grep tool で `.sessions/TIMELINE.md` を検索（output_mode: content, -C: 1）
+2. **セッション全文検索**: Grep tool で `.sessions/` 配下の `session-*.md` を検索（glob: "session-*.md", output_mode: content, -C: 1）
+3. **結果ソート**: ファイル名の日付部分（YYYYMMDD）でソートし、新しい順に表示
+4. **件数制限**: マッチが10件以上ある場合、新しい方から上位10件に絞る（head_limit: 50）
+5. **結果整形**: 下記フォーマットに整形して表示
+
+## 出力フォーマット
+
+```
+## TIMELINE ヒット
+| 日付 | 内容 | セッションファイル |
+|------|------|-------------------|
+| ... | ... | ... |
+
+## セッション詳細ヒット
+### [session-YYYYMMDD-HHMMSS.md]
+> マッチ行（前後1行コンテキスト付き）
+
+（N件中 上位10件を表示）
+```
+
+## ルール
+
+- 検索対象: `.sessions/` 配下の `.md` ファイルのみ
+- マッチが多い場合は上位10件に絞る（ファイル更新日が新しい順）
+- キーワードが日本語・英語どちらでも検索可能
+- ヒットなしの場合は「該当なし」と表示
+
+## 関連コマンド
+
+| コマンド | 用途 |
+|---------|------|
+| `/sessionhistory` | TIMELINE全体を俯瞰 |
+| `/sessionread` | 最新セッションを読み込み |
+| `/session-search` | **キーワードで横断検索（本コマンド）** |
