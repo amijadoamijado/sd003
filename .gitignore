@@ -38,6 +38,10 @@ temp/
 tmp/
 *.tmp
 
+# Python (sync scripts)
+__pycache__/
+*.pyc
+
 # SD001 specific
 .sd/backups/
 .sd/sync-reports/

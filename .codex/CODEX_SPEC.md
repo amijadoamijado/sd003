@@ -78,4 +78,4 @@ Codexが実装担当として呼ばれた場合は、次を最小セットとし
 python scripts/sync-cli-commands.py --check
 ```
 
-`--check` は、Claude commandから生成される `.sd/commands/specs`、`.gemini/commands`、`.codex/skills`、およびこの `CODEX_SPEC.md` の存在を確認する。
+`--check` は、Claude commandから生成される `.sd/commands/specs`、`.agents/skills`（Antigravity/agy）、`.codex/skills`、およびこの `CODEX_SPEC.md` の存在を確認する。

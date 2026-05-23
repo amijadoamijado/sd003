@@ -15,7 +15,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "sync:cli": "python scripts/sync-cli-commands.py",
-    "sync:gemini": "python scripts/sync-cli-commands.py",
+    "sync:agy": "python scripts/sync-cli-commands.py",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

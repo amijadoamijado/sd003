@@ -20,8 +20,8 @@ fi
 
 STATE_FILE="$CLAUDE_PROJECT_DIR/.claude/hooks/.workflow-state.json"
 
-# Detect impl completion: gemini execution with IMPLEMENT_REQUEST
-if echo "$COMMAND" | grep -qiE 'gemini.*IMPLEMENT_REQUEST|IMPLEMENT_REQUEST.*gemini'; then
+# Detect impl completion: agy (Antigravity CLI) execution with IMPLEMENT_REQUEST
+if echo "$COMMAND" | grep -qiE 'agy.*IMPLEMENT_REQUEST|IMPLEMENT_REQUEST.*agy'; then
   # Extract project/task ID from command if possible
   IMPL_ID=$(echo "$COMMAND" | grep -oE '[0-9]{8}-[0-9]{3}-[a-zA-Z0-9_-]+' | head -1)
   if [ -z "$IMPL_ID" ]; then

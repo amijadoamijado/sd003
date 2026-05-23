@@ -228,7 +228,7 @@ if [ "$SKIP_REVIEW" = false ]; then
 2. Node.js API使用禁止（fs, path, process）
 3. GAS API直接参照禁止（Env Interface経由のみ）
 4. ESLintルール準拠
-5. テストカバレッジ80%以上
+5. テスト方針: 本番バグ再現時のみ最小テスト（カバレッジ目標は廃止・VTD準拠・実データ確認）
 6. エラーハンドリング
 7. JSDocコメント（公開API）
 
