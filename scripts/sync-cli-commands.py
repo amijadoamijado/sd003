@@ -451,7 +451,8 @@ def sync_agents_skills(specs: List[CommandSpec]) -> None:
             target_dir = AGENTS_SKILLS_DIR / skill_dir.name
             if target_dir.exists():
                 shutil.rmtree(target_dir)
-            shutil.copytree(skill_dir, target_dir)
+            # Never mirror CLAUDE.md (claude-mem third-party context stubs) into .agents
+            shutil.copytree(skill_dir, target_dir, ignore=shutil.ignore_patterns("CLAUDE.md"))
             print(f"  Mirrored skill: {skill_dir.name}")
 
     # Generate command skills (skip slugs already provided as real skills)

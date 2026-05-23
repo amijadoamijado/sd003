@@ -42,6 +42,11 @@ tmp/
 __pycache__/
 *.pyc
 
+# claude-mem auto-generated context stubs (third-party plugin @thedotmack, unofficial)
+# Ignore all nested CLAUDE.md stubs but keep the real project root CLAUDE.md.
+**/CLAUDE.md
+!/CLAUDE.md
+
 # SD001 specific
 .sd/backups/
 .sd/sync-reports/
