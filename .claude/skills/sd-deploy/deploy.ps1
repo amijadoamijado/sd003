@@ -4,7 +4,8 @@
 param(
     [Parameter(Mandatory=$true)]
     [string]$TargetProject,
-    [switch]$IncludeOptional
+    [switch]$IncludeOptional,
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -30,6 +31,136 @@ if (-not (Test-Path $TargetProject -PathType Container)) {
     exit 1
 }
 Write-Host "[Phase 1/7] Target validated" -ForegroundColor Green
+
+# ============================================================
+# Opt-out manifest (.sd003-keep): framework files this project has
+# INTENTIONALLY customized. deploy/upgrade must NOT overwrite them.
+# Format: one relative path per line. Supports exact paths, directory
+# prefixes (skip everything beneath), and * / ? globs. '#' starts a comment.
+# When no .sd003-keep exists, every guard below is a no-op (zero behavior change).
+# ============================================================
+$KeepPatterns = @()
+$keepFile = Join-Path $TargetProject ".sd003-keep"
+if (Test-Path $keepFile) {
+    $KeepPatterns = @(Get-Content $keepFile -Encoding UTF8 |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -and -not $_.StartsWith('#') } |
+        ForEach-Object { ($_ -replace '\\', '/').TrimEnd('/') })
+    if ($KeepPatterns.Count -gt 0) {
+        Write-Host "[.sd003-keep] $($KeepPatterns.Count) protected pattern(s) loaded - these framework files are preserved" -ForegroundColor Magenta
+    }
+}
+
+function Test-Kept {
+    param([string]$RelPath)
+    if ($KeepPatterns.Count -eq 0) { return $false }
+    $rel = ($RelPath -replace '\\', '/').TrimStart('/')
+    foreach ($pat in $KeepPatterns) {
+        if ($rel -eq $pat) { return $true }                              # exact file
+        if ($rel -like "$pat/*") { return $true }                        # directory prefix
+        if (($pat -match '[\*\?]') -and ($rel -like $pat)) { return $true } # glob
+    }
+    return $false
+}
+
+# Honest-reporting trackers (populated by the real copy path below)
+$script:keptFiles = @()
+$script:divergedOverwrites = @()
+
+# Optional skills are excluded from deployment (and from the dry-run scan)
+$optionalSkills = @()
+$optCfg = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\optional-skills.json"
+if ((Test-Path $optCfg) -and (-not $IncludeOptional)) {
+    $optionalSkills = (Get-Content $optCfg | ConvertFrom-Json).optional_skills
+}
+function Test-OptionalExcluded {
+    param([string]$RelPath)
+    foreach ($ex in $optionalSkills) {
+        if (($RelPath -replace '\\', '/') -like "*/$ex/*") { return $true }
+    }
+    return $false
+}
+
+# ============================================================
+# DRY-RUN: report what a real deploy WOULD overwrite, then exit (no changes).
+# Honesty fix: surfaces framework files whose local content diverges (= bespoke
+# customization that would be silently lost), plus files preserved by .sd003-keep.
+# ============================================================
+function Invoke-DeployDryRun {
+    Write-Host ""
+    Write-Host "=== DRY-RUN: what a real deploy would write (no changes made) ===" -ForegroundColor Cyan
+    Write-Host ""
+
+    $diverged = @(); $kept = @(); $newCount = 0; $sameCount = 0
+
+    $scanDirs = @(
+        ".claude\commands", ".claude\rules", ".claude\skills", ".claude\hooks",
+        ".agents\skills", ".codex", ".sd\settings", ".sd\design", ".sd\ralph",
+        ".sd\steering", ".handoff", "docs\troubleshooting"
+    )
+    foreach ($d in $scanDirs) {
+        $srcRoot = Join-Path $SOURCE_DIR $d
+        if (-not (Test-Path $srcRoot -PathType Container)) { continue }
+        Get-ChildItem -Path $srcRoot -Recurse -File -ErrorAction SilentlyContinue | ForEach-Object {
+            $projRel = $_.FullName.Substring($SOURCE_DIR.Length).TrimStart('\')
+            if (Test-OptionalExcluded $projRel) { return }
+            if (Test-Kept $projRel) { $kept += ($projRel -replace '\\', '/'); return }
+            $tgt = Join-Path $TargetProject $projRel
+            if (-not (Test-Path $tgt)) { $newCount++; return }
+            if ((Get-FileHash $_.FullName).Hash -ne (Get-FileHash $tgt).Hash) {
+                $diverged += ($projRel -replace '\\', '/')
+            } else { $sameCount++ }
+        }
+    }
+
+    # Direct-copy framework files (hash-comparable)
+    $scanFiles = @(
+        "antigravity.md", "AGENTS.md", ".claude\settings.json",
+        "docs\quality-gates.md", "scripts\validate-test-data.ps1",
+        "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
+        "tests\gas-fakes\setup.ts"
+    )
+    foreach ($f in $scanFiles) {
+        if (Test-Kept $f) { $kept += ($f -replace '\\', '/'); continue }
+        $src = Join-Path $SOURCE_DIR $f; $tgt = Join-Path $TargetProject $f
+        if (-not (Test-Path $src)) { continue }
+        if (-not (Test-Path $tgt)) { $newCount++; continue }
+        if ((Get-FileHash $src).Hash -ne (Get-FileHash $tgt).Hash) { $diverged += ($f -replace '\\', '/') } else { $sameCount++ }
+    }
+
+    $claudeKept = Test-Kept "CLAUDE.md"
+    if ($claudeKept) { $kept += "CLAUDE.md" }
+
+    if ($diverged.Count -gt 0) {
+        Write-Host "WILL OVERWRITE - LOCAL CUSTOMIZATION WILL BE LOST ($($diverged.Count)):" -ForegroundColor Red
+        Write-Host "  (target content differs from framework source. Add to .sd003-keep to preserve.)" -ForegroundColor DarkYellow
+        foreach ($p in ($diverged | Sort-Object -Unique)) { Write-Host "  ! $p" -ForegroundColor Red }
+        Write-Host ""
+    }
+    if (-not $claudeKept) {
+        Write-Host "WILL OVERWRITE - regenerated from template:" -ForegroundColor Yellow
+        Write-Host "  ~ CLAUDE.md  (add 'CLAUDE.md' to .sd003-keep to preserve a bespoke version)" -ForegroundColor Yellow
+        Write-Host ""
+    }
+    if ($kept.Count -gt 0) {
+        Write-Host "KEPT via .sd003-keep ($($kept.Count)) - preserved, not overwritten:" -ForegroundColor Green
+        foreach ($p in ($kept | Sort-Object -Unique)) { Write-Host "  = $p" -ForegroundColor Green }
+        Write-Host ""
+    }
+    Write-Host "Summary: $($diverged.Count) diverged, $(($kept | Sort-Object -Unique).Count) kept, $newCount new, $sameCount unchanged" -ForegroundColor Cyan
+    if ($diverged.Count -gt 0) {
+        Write-Host ""
+        Write-Host "WARNING: $($diverged.Count) file(s) with local changes will be overwritten on a real run." -ForegroundColor Red
+        Write-Host "         A backup is taken, but to KEEP them, list them in <target>/.sd003-keep first." -ForegroundColor Red
+    }
+}
+
+if ($DryRun) {
+    Invoke-DeployDryRun
+    Write-Host ""
+    Write-Host "[DRY-RUN] No changes made. Re-run without -DryRun to apply." -ForegroundColor Yellow
+    exit 0
+}
 
 # ============================================================
 # Phase 2: Backup
@@ -135,7 +266,12 @@ function Copy-DirTree {
         if ($skip) { continue }
 
         $relativePath = $item.FullName.Substring($src.Length)
+        $projRel = (Join-Path $RelPath $relativePath.TrimStart('\'))
+        if (Test-Kept $projRel) { $script:keptFiles += ($projRel -replace '\\', '/'); continue }
         $destPath = Join-Path $dst $relativePath
+        if ((Test-Path $destPath) -and ((Get-FileHash $item.FullName).Hash -ne (Get-FileHash $destPath).Hash)) {
+            $script:divergedOverwrites += ($projRel -replace '\\', '/')
+        }
         $destDir = Split-Path $destPath -Parent
         if (-not (Test-Path $destDir)) {
             New-Item -ItemType Directory -Path $destDir -Force | Out-Null
@@ -170,7 +306,13 @@ function Copy-FlatDir {
 
     $items = Get-ChildItem -Path $src -File -Filter "*$Extension"
     foreach ($item in $items) {
-        Copy-Item $item.FullName (Join-Path $dst $item.Name) -Force
+        $projRel = (Join-Path $RelPath $item.Name)
+        if (Test-Kept $projRel) { $script:keptFiles += ($projRel -replace '\\', '/'); continue }
+        $destPath = Join-Path $dst $item.Name
+        if ((Test-Path $destPath) -and ((Get-FileHash $item.FullName).Hash -ne (Get-FileHash $destPath).Hash)) {
+            $script:divergedOverwrites += ($projRel -replace '\\', '/')
+        }
+        Copy-Item $item.FullName $destPath -Force
         $count++
     }
 
@@ -186,11 +328,8 @@ Copy-FlatDir -RelPath ".claude\commands\sd" -Label "Commands/sd" -Extension ".md
 # 4-3: .claude/rules/ (tree)
 Copy-DirTree -RelPath ".claude\rules" -Label "Rules" -Filter "*.md"
 
-# 4-4: .claude/skills/ (tree) - optional skills excluded by default
-$optionalSkills = @()
-$optCfg = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\optional-skills.json"
-if ((Test-Path $optCfg) -and (-not $IncludeOptional)) {
-    $optionalSkills = (Get-Content $optCfg | ConvertFrom-Json).optional_skills
+# 4-4: .claude/skills/ (tree) - optional skills excluded by default (loaded in Phase 1)
+if ($optionalSkills.Count -gt 0) {
     Write-Host "  Optional skills excluded: $($optionalSkills -join ', ')" -ForegroundColor DarkGray
 }
 Copy-DirTree -RelPath ".claude\skills" -Label "Skills" -Exclude $optionalSkills
@@ -297,10 +436,16 @@ if (Test-Path $syncCliSrc) {
     $copyStats["Sync CLI"] = 0
 }
 
-# 4-16: AGENTS.md (single file)
+# 4-16: AGENTS.md (single file - overwrite unless protected by .sd003-keep)
 $agentsSrc = Join-Path $SOURCE_DIR "AGENTS.md"
-if (Test-Path $agentsSrc) {
-    Copy-Item $agentsSrc (Join-Path $TargetProject "AGENTS.md") -Force
+if (Test-Kept "AGENTS.md") {
+    Write-Host "  KEEP: AGENTS.md preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "AGENTS.md"
+    $copyStats["AGENTS.md"] = 0
+} elseif (Test-Path $agentsSrc) {
+    $agentsDst2 = Join-Path $TargetProject "AGENTS.md"
+    if ((Test-Path $agentsDst2) -and ((Get-FileHash $agentsSrc).Hash -ne (Get-FileHash $agentsDst2).Hash)) { $script:divergedOverwrites += "AGENTS.md" }
+    Copy-Item $agentsSrc $agentsDst2 -Force
     $copyStats["AGENTS.md"] = 1
 } else {
     $copyStats["AGENTS.md"] = 0
@@ -364,10 +509,13 @@ foreach ($key in $copyStats.Keys | Sort-Object) {
 # ============================================================
 $ProjectName = Split-Path $TargetProject -Leaf
 
-# 5-1: CLAUDE.md from template (ALWAYS overwrite - rules must be latest)
+# 5-1: CLAUDE.md from template (overwrite unless protected by .sd003-keep)
 $claudeMdPath = Join-Path $TargetProject "CLAUDE.md"
 $claudeTemplate = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\CLAUDE.md.template"
-if (Test-Path $claudeTemplate) {
+if (Test-Kept "CLAUDE.md") {
+    Write-Host "  KEEP: CLAUDE.md preserved via .sd003-keep (bespoke version kept)" -ForegroundColor Magenta
+    $script:keptFiles += "CLAUDE.md"
+} elseif (Test-Path $claudeTemplate) {
     $content = Get-Content $claudeTemplate -Raw -Encoding UTF8
     $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
     $content = $content -replace '\{\{DATE\}\}', $DATE
@@ -378,10 +526,14 @@ if (Test-Path $claudeTemplate) {
     Write-Host "  WARN: CLAUDE.md.template not found, skipping" -ForegroundColor Yellow
 }
 
-# 5-2: antigravity.md (agy root config - ALWAYS overwrite, rules must be latest)
+# 5-2: antigravity.md (agy root config - overwrite unless protected by .sd003-keep)
 $antigravitySrc = Join-Path $SOURCE_DIR "antigravity.md"
 $antigravityDst = Join-Path $TargetProject "antigravity.md"
-if (Test-Path $antigravitySrc) {
+if (Test-Kept "antigravity.md") {
+    Write-Host "  KEEP: antigravity.md preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "antigravity.md"
+} elseif (Test-Path $antigravitySrc) {
+    if ((Test-Path $antigravityDst) -and ((Get-FileHash $antigravitySrc).Hash -ne (Get-FileHash $antigravityDst).Hash)) { $script:divergedOverwrites += "antigravity.md" }
     Copy-Item $antigravitySrc $antigravityDst -Force
     Write-Host "  UPDATE: antigravity.md (latest agy rules applied)" -ForegroundColor Green
 } else {
@@ -422,10 +574,14 @@ if (Test-Path $timelinePath) {
     }
 }
 
-# 5-5: .claude/settings.json (ALWAYS overwrite - hooks must be latest)
+# 5-5: .claude/settings.json (overwrite unless protected by .sd003-keep)
 $settingsPath = Join-Path $TargetProject ".claude\settings.json"
 $templatePath = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\settings.json.template"
-if (Test-Path $templatePath) {
+if (Test-Kept ".claude/settings.json") {
+    Write-Host "  KEEP: .claude/settings.json preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += ".claude/settings.json"
+} elseif (Test-Path $templatePath) {
+    if ((Test-Path $settingsPath) -and ((Get-FileHash $templatePath).Hash -ne (Get-FileHash $settingsPath).Hash)) { $script:divergedOverwrites += ".claude/settings.json" }
     Copy-Item $templatePath $settingsPath -Force
     Write-Host "  UPDATE: .claude/settings.json (latest hooks applied)" -ForegroundColor Green
 } else {
@@ -477,8 +633,14 @@ if (Test-Path $handoffPath) {
     }
 }
 
-# 5b: Inject gas-fakes into target package.json (create if not exists)
+# 5b: Inject gas-fakes into target package.json (skip if protected by .sd003-keep)
+# NOTE: ConvertTo-Json reformats the whole file; a hand-formatted package.json
+# should be listed in .sd003-keep to avoid reformatting.
 $targetPkg = Join-Path $TargetProject "package.json"
+if (Test-Kept "package.json") {
+    Write-Host "  KEEP: package.json preserved via .sd003-keep (gas-fakes injection skipped)" -ForegroundColor Magenta
+    $script:keptFiles += "package.json"
+} else {
 if (-not (Test-Path $targetPkg)) {
     # Auto-create minimal package.json
     $newPkgContent = @"
@@ -526,6 +688,7 @@ if ($needsUpdate) {
 } else {
     Write-Host "  [Phase 5b] gas-fakes already present in package.json, skipping" -ForegroundColor Yellow
 }
+}  # end .sd003-keep guard for package.json
 
 # 5-8: User-level CLAUDE.md (initial setup for ~/.claude/CLAUDE.md)
 $userClaudeTemplate = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\user-claude.md.template"
@@ -647,6 +810,21 @@ Write-Host "  Files copied: $totalCopied"
 Write-Host "  Files generated: $($generatedFiles.Count)"
 Write-Host "  Backup: $BackupDir"
 Write-Host ""
+
+# Honest reporting: kept (opt-out) and overwritten-divergence (potential data loss)
+$kf = @($script:keptFiles | Sort-Object -Unique)
+$df = @($script:divergedOverwrites | Sort-Object -Unique)
+if ($kf.Count -gt 0) {
+    Write-Host "  Kept via .sd003-keep (not overwritten): $($kf.Count)" -ForegroundColor Magenta
+    foreach ($p in $kf) { Write-Host "    = $p" -ForegroundColor Magenta }
+    Write-Host ""
+}
+if ($df.Count -gt 0) {
+    Write-Host "  OVERWROTE local divergence (backed up in $BackupDir): $($df.Count)" -ForegroundColor Yellow
+    foreach ($p in $df) { Write-Host "    ! $p" -ForegroundColor Yellow }
+    Write-Host "  -> If any were intentional customizations, restore from backup and add them to .sd003-keep." -ForegroundColor Yellow
+    Write-Host ""
+}
 
 if ($allPassed) {
     Write-Host "  Result: ALL PASSED" -ForegroundColor Green

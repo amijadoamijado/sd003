@@ -12,6 +12,10 @@ TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
+# --dry-run reports what would be overwritten (incl. local customizations) without changing anything
+DRY_RUN=false
+for a in "$@"; do case "$a" in --dry-run) DRY_RUN=true ;; esac; done
+
 echo "=== SD003 Framework Deployment v${SD003_VERSION} ==="
 echo "Framework: v${FRAMEWORK_VERSION}"
 echo "Source: $SOURCE_DIR"
@@ -26,6 +30,96 @@ if [ ! -d "$TARGET_PROJECT" ]; then
     exit 1
 fi
 echo "[Phase 1/7] Target validated"
+
+# ============================================================
+# Opt-out manifest (.sd003-keep): framework files this project has
+# INTENTIONALLY customized. deploy must NOT overwrite them.
+# One relative path per line; supports exact paths, directory prefixes, and globs.
+# '#' starts a comment. No file => every guard is a no-op (zero behavior change).
+# ============================================================
+KEEP_PATTERNS=()
+KEEP_FILE="$TARGET_PROJECT/.sd003-keep"
+if [ -f "$KEEP_FILE" ]; then
+    while IFS= read -r line; do
+        line="$(echo "$line" | sed 's/[[:space:]]*$//;s/^[[:space:]]*//')"
+        [ -z "$line" ] && continue
+        case "$line" in \#*) continue ;; esac
+        KEEP_PATTERNS+=("${line%/}")
+    done < "$KEEP_FILE"
+    [ ${#KEEP_PATTERNS[@]} -gt 0 ] && echo "[.sd003-keep] ${#KEEP_PATTERNS[@]} protected pattern(s) loaded - these framework files are preserved"
+fi
+
+is_kept() {
+    local rel="${1#/}" pat
+    for pat in "${KEEP_PATTERNS[@]}"; do
+        [ "$rel" = "$pat" ] && return 0
+        case "$rel" in "$pat"/*) return 0 ;; esac
+        case "$pat" in *[\*\?]*) case "$rel" in $pat) return 0 ;; esac ;; esac
+    done
+    return 1
+}
+
+KEPT_LOG="$(mktemp)"; DIVERGED_LOG="$(mktemp)"
+
+# ============================================================
+# DRY-RUN: report what a real deploy WOULD overwrite, then exit (no changes).
+# ============================================================
+deploy_dry_run() {
+    echo ""
+    echo "=== DRY-RUN: what a real deploy would write (no changes made) ==="
+    echo ""
+    local diverged=0 kept=0 newc=0 same=0 d f sf projrel tgt
+    local DIV=() KEP=()
+    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".sd/settings" ".sd/design" ".sd/ralph" ".sd/steering" ".handoff" "docs/troubleshooting")
+    for d in "${scan_dirs[@]}"; do
+        [ -d "$SOURCE_DIR/$d" ] || continue
+        while IFS= read -r f; do
+            projrel="${f#"$SOURCE_DIR"/}"
+            if is_kept "$projrel"; then KEP+=("$projrel"); kept=$((kept+1)); continue; fi
+            tgt="$TARGET_PROJECT/$projrel"
+            if [ ! -f "$tgt" ]; then newc=$((newc+1)); continue; fi
+            if ! cmp -s "$f" "$tgt"; then DIV+=("$projrel"); diverged=$((diverged+1)); else same=$((same+1)); fi
+        done < <(find "$SOURCE_DIR/$d" -type f)
+    done
+    local scan_files=("antigravity.md" "AGENTS.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "tests/gas-fakes/setup.ts")
+    for sf in "${scan_files[@]}"; do
+        if is_kept "$sf"; then KEP+=("$sf"); kept=$((kept+1)); continue; fi
+        [ -f "$SOURCE_DIR/$sf" ] || continue
+        if [ ! -f "$TARGET_PROJECT/$sf" ]; then newc=$((newc+1)); continue; fi
+        if ! cmp -s "$SOURCE_DIR/$sf" "$TARGET_PROJECT/$sf"; then DIV+=("$sf"); diverged=$((diverged+1)); else same=$((same+1)); fi
+    done
+    if is_kept "CLAUDE.md"; then KEP+=("CLAUDE.md"); kept=$((kept+1)); fi
+
+    if [ ${#DIV[@]} -gt 0 ]; then
+        echo "WILL OVERWRITE - LOCAL CUSTOMIZATION WILL BE LOST (${#DIV[@]}):"
+        printf '%s\n' "${DIV[@]}" | sort -u | sed 's/^/  ! /'
+        echo ""
+    fi
+    if ! is_kept "CLAUDE.md"; then
+        echo "WILL OVERWRITE - regenerated from template:"
+        echo "  ~ CLAUDE.md  (add 'CLAUDE.md' to .sd003-keep to preserve a bespoke version)"
+        echo ""
+    fi
+    if [ ${#KEP[@]} -gt 0 ]; then
+        echo "KEPT via .sd003-keep (${#KEP[@]}) - preserved, not overwritten:"
+        printf '%s\n' "${KEP[@]}" | sort -u | sed 's/^/  = /'
+        echo ""
+    fi
+    echo "Summary: $diverged diverged, $kept kept, $newc new, $same unchanged"
+    if [ $diverged -gt 0 ]; then
+        echo ""
+        echo "WARNING: $diverged file(s) with local changes will be overwritten on a real run."
+        echo "         Add them to <target>/.sd003-keep to KEEP them."
+    fi
+}
+
+if [ "$DRY_RUN" = true ]; then
+    deploy_dry_run
+    echo ""
+    echo "[DRY-RUN] No changes made."
+    rm -f "$KEPT_LOG" "$DIVERGED_LOG"
+    exit 0
+fi
 
 # ============================================================
 # Phase 2: Backup
@@ -101,10 +195,15 @@ copy_dir_tree() {
         return
     fi
 
-    # Copy entire tree preserving structure
+    # Copy entire tree preserving structure (skip .sd003-keep protected files)
     cd "$src"
     find . -type f -name "$filter" | while read -r file; do
-        local dest_dir="$dst/$(dirname "$file")"
+        rel_in="${file#./}"
+        projrel="$rel_path/$rel_in"
+        if is_kept "$projrel"; then echo "$projrel" >> "$KEPT_LOG"; continue; fi
+        dest_dir="$dst/$(dirname "$file")"
+        destf="$dst/$rel_in"
+        if [ -f "$destf" ] && ! cmp -s "$file" "$destf"; then echo "$projrel" >> "$DIVERGED_LOG"; fi
         mkdir -p "$dest_dir"
         cp "$file" "$dest_dir/"
     done
@@ -130,8 +229,16 @@ copy_flat_dir() {
     fi
 
     mkdir -p "$dst"
-    count=$(ls -1 "$src"/*"$ext" 2>/dev/null | wc -l | tr -d ' ')
-    cp "$src"/*"$ext" "$dst/" 2>/dev/null || true
+    count=0
+    for f in "$src"/*"$ext"; do
+        [ -f "$f" ] || continue
+        bn="$(basename "$f")"
+        projrel="$rel_path/$bn"
+        if is_kept "$projrel"; then echo "$projrel" >> "$KEPT_LOG"; continue; fi
+        if [ -f "$dst/$bn" ] && ! cmp -s "$f" "$dst/$bn"; then echo "$projrel" >> "$DIVERGED_LOG"; fi
+        cp "$f" "$dst/"
+        count=$((count+1))
+    done
     COPY_STATS[$label]=$count
 }
 
@@ -232,8 +339,13 @@ else
     COPY_STATS["Sync CLI"]=0
 fi
 
-# 4-16: AGENTS.md (single file)
-if [ -f "$SOURCE_DIR/AGENTS.md" ]; then
+# 4-16: AGENTS.md (single file - overwrite unless protected by .sd003-keep)
+if is_kept "AGENTS.md"; then
+    echo "  KEEP: AGENTS.md preserved via .sd003-keep"
+    echo "AGENTS.md" >> "$KEPT_LOG"
+    COPY_STATS["AGENTS.md"]=0
+elif [ -f "$SOURCE_DIR/AGENTS.md" ]; then
+    if [ -f "$TARGET_PROJECT/AGENTS.md" ] && ! cmp -s "$SOURCE_DIR/AGENTS.md" "$TARGET_PROJECT/AGENTS.md"; then echo "AGENTS.md" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/AGENTS.md" "$TARGET_PROJECT/"
     COPY_STATS["AGENTS.md"]=1
 else
@@ -278,7 +390,10 @@ PROJECT_NAME=$(basename "$TARGET_PROJECT")
 
 # 5-1: CLAUDE.md from template (skip if SD003-based, overwrite if legacy)
 CLAUDE_TEMPLATE="$SOURCE_DIR/.claude/skills/sd-deploy/templates/CLAUDE.md.template"
-if [ -f "$TARGET_PROJECT/CLAUDE.md" ] && grep -q "SD003" "$TARGET_PROJECT/CLAUDE.md"; then
+if is_kept "CLAUDE.md"; then
+    echo "  KEEP: CLAUDE.md preserved via .sd003-keep (bespoke version kept)"
+    echo "CLAUDE.md" >> "$KEPT_LOG"
+elif [ -f "$TARGET_PROJECT/CLAUDE.md" ] && grep -q "SD003" "$TARGET_PROJECT/CLAUDE.md"; then
     echo "  SKIP: CLAUDE.md already exists (SD003-based, preserving)"
 elif [ -f "$CLAUDE_TEMPLATE" ]; then
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
@@ -289,8 +404,12 @@ else
     echo "  WARN: CLAUDE.md.template not found, skipping"
 fi
 
-# 5-2: antigravity.md (agy root config - ALWAYS overwrite, rules must be latest)
-if [ -f "$SOURCE_DIR/antigravity.md" ]; then
+# 5-2: antigravity.md (agy root config - overwrite unless protected by .sd003-keep)
+if is_kept "antigravity.md"; then
+    echo "  KEEP: antigravity.md preserved via .sd003-keep"
+    echo "antigravity.md" >> "$KEPT_LOG"
+elif [ -f "$SOURCE_DIR/antigravity.md" ]; then
+    if [ -f "$TARGET_PROJECT/antigravity.md" ] && ! cmp -s "$SOURCE_DIR/antigravity.md" "$TARGET_PROJECT/antigravity.md"; then echo "antigravity.md" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/antigravity.md" "$TARGET_PROJECT/antigravity.md"
     echo "  UPDATE: antigravity.md (latest agy rules applied)"
 else
@@ -412,9 +531,12 @@ else
 EOF
 fi
 
-# 5b: Inject gas-fakes into target package.json (if it exists)
+# 5b: Inject gas-fakes into target package.json (skip if protected by .sd003-keep)
 TARGET_PKG="$TARGET_PROJECT/package.json"
-if [ -f "$TARGET_PKG" ]; then
+if is_kept "package.json"; then
+    echo "  KEEP: package.json preserved via .sd003-keep (gas-fakes injection skipped)"
+    echo "package.json" >> "$KEPT_LOG"
+elif [ -f "$TARGET_PKG" ]; then
     # Check if gas-fakes is already present
     if ! grep -q '"@mcpher/gas-fakes"' "$TARGET_PKG"; then
         # Add @mcpher/gas-fakes to devDependencies using node
@@ -549,6 +671,22 @@ echo "  Files copied: $total_copied"
 echo "  Files generated: ${#GENERATED_FILES[@]}"
 echo "  Backup: $BACKUP_DIR"
 echo ""
+
+# Honest reporting: kept (opt-out) and overwritten-divergence (potential data loss)
+KEPT_UNIQ=$(sort -u "$KEPT_LOG" 2>/dev/null || true)
+DIV_UNIQ=$(sort -u "$DIVERGED_LOG" 2>/dev/null || true)
+if [ -n "$KEPT_UNIQ" ]; then
+    echo "  Kept via .sd003-keep (not overwritten):"
+    echo "$KEPT_UNIQ" | sed 's/^/    = /'
+    echo ""
+fi
+if [ -n "$DIV_UNIQ" ]; then
+    echo "  OVERWROTE local divergence (backed up in $BACKUP_DIR):"
+    echo "$DIV_UNIQ" | sed 's/^/    ! /'
+    echo "  -> If any were intentional customizations, restore from backup and add them to .sd003-keep."
+    echo ""
+fi
+rm -f "$KEPT_LOG" "$DIVERGED_LOG"
 
 if [ "$ALL_PASSED" = true ]; then
     echo "  Result: ALL PASSED"

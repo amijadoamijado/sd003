@@ -40,7 +40,7 @@ bash .claude/skills/sd-upgrade/upgrade.sh <target> [--execute] [--include-option
 | Phase | 内容 |
 |-------|------|
 | 1 Detect | target の SD003 version と廃止物の有無を検出して報告 |
-| 2 Dry-run（既定） | 「削除予定（廃止物）」「配備予定（FW資産）」「保護＝不可侵」を一覧提示。**無変更** |
+| 2 Dry-run（既定） | 「削除予定（廃止物）」＋ deploy 委譲で「**上書きで失われる固有化（divergence）**」「`.sd003-keep` で保護される物」を一覧提示。**無変更** |
 | 3 Backup | `.sd003-upgrade-backup-YYYYMMDD_HHMMSS/` に削除対象を**移動退避**（archive-then-remove。hard rm しない） |
 | 4 Deploy | `sd-deploy` の deploy スクリプトを呼び最新FWを配備（上書き＝FW、skip＝データ） |
 | 5 Verify | `.agents/skills` 配備・廃止物消失を確認して報告 |
@@ -66,12 +66,50 @@ bash .claude/skills/sd-upgrade/upgrade.sh <target> [--execute] [--include-option
 
 `src/`、`tests/`（FW管理の `tests/gas-fakes/setup.ts` を除く）、`.sd/specs/`、`.sd/ai-coordination/`、
 `.sessions/session-*.md` と `TIMELINE.md`、`materials/`、`.clasp.json`、`.git/`、`node_modules/`、
-`dist/`、`.env*`、`package.json`（deployは注入のみ）、その他ユーザーファイル。
+`dist/`、`.env*`、その他ユーザーファイル。
+
+> **⚠️ フレームワークファイルは PROTECT ではない。** CLAUDE.md / antigravity.md / settings.json /
+> `.claude/rules/` / `.claude/skills/`（registry.json含む）/ `.claude/hooks/` / `package.json` 等は
+> deploy が**最新版で上書きする**。プロジェクトが**意図的に固有化**したこれらのファイルは、
+> そのままでは upgrade で消える（過去 at002 でこれが起きた）。保護するには `.sd003-keep` に列挙する（下記）。
+
+## .sd003-keep（固有化ファイルの保護・必須確認）
+
+固有化したプロジェクトを upgrade する前に、守るべきフレームワークファイルを宣言する。
+
+- 配置: `<target>/.sd003-keep`（1行1パス、`#`コメント可、`*`/`?`グロブ・ディレクトリ接頭辞対応）
+- `.sd003-keep` が無ければ全ガードは no-op（従来挙動と同一）
+
+```
+# 例: 会計事務所スキル等を固有化したプロジェクト
+CLAUDE.md
+.claude/skills/registry.json
+.claude/hooks/
+.claude/rules/
+package.json
+```
+
+### dry-run が正直になった（誤報の根絶）
+
+dry-run は deploy に委譲し、**上書きで失われる固有化ファイルを必ず一覧表示する**:
+- `WILL OVERWRITE - LOCAL CUSTOMIZATION WILL BE LOST`（内容差分あり＝消える）
+- `KEPT via .sd003-keep`（保護される）
+
+固有化プロジェクトの正しい手順:
+```
+1. /sd-upgrade <target>            # dry-run。"WILL OVERWRITE ... LOST" を確認
+2. 失いたくないものを <target>/.sd003-keep に追記
+3. /sd-upgrade <target> --execute  # 保護したものは残り、廃止物は削除、残りは最新化
+```
+execute 後は「OVERWROTE local divergence（バックアップ済み）」が報告される。
+**もはや "UPGRADE OK / 全部無傷" とは誤報しない。**
 
 ## 安全装置
 
 - **dry-run 既定**：`--execute` なしは一切変更しない
-- **全バックアップ**：削除対象は消す前に `.sd003-upgrade-backup-*/` へ移動（元のパス構造を保持＝復元可能）
+- **divergence 可視化（正直化）**：dry-run が「上書きで失われる固有化ファイル」を一覧。execute 後も上書きした divergence を報告。**"全部無傷" と誤報しない**
+- **オプトアウト保護**：`.sd003-keep` 記載の FW ファイルは上書きしない（バックアップに頼らず最初から守る）
+- **全バックアップ**：削除対象は消す前に `.sd003-upgrade-backup-*/` へ移動（元のパス構造を保持＝復元可能）。deploy 側の上書き分は `.sd003-backup-*/`
 - **明示的DELETE list**：全走査での削除はしない。既知の廃止物のみ。`.agent`≠`.agents` を厳密に区別
 - **冪等**：再実行しても廃止物が無ければ削除0件、deployは上書き
 - **非git警告**：target が git 管理下でない場合は警告（ロールバック安全性のため `git init` 推奨）

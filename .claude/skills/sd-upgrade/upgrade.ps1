@@ -101,7 +101,17 @@ foreach ($p in $protectedNote) { Write-Host "  - $p" }
 Write-Host ""
 
 if (-not $Execute) {
+    # Delegate to deploy.ps1 -DryRun so the human sees EXACTLY which framework files
+    # would be overwritten (incl. local customizations that would be LOST) and which
+    # are preserved via .sd003-keep. This is the honesty fix: never silently clobber.
+    Write-Host ""
+    Write-Host "[Deploy dry-run] Scanning framework files deploy would write ..." -ForegroundColor Cyan
+    $dryArgs = @("-ExecutionPolicy", "Bypass", "-File", $DEPLOY_PS1, $TargetProject, "-DryRun")
+    if ($IncludeOptional) { $dryArgs += "-IncludeOptional" }
+    & powershell @dryArgs
+    Write-Host ""
     Write-Host "[DRY-RUN] No changes made. Re-run with -Execute to apply." -ForegroundColor Yellow
+    Write-Host "Tip: to preserve bespoke framework files, list them in '$TargetProject\.sd003-keep' BEFORE -Execute." -ForegroundColor Cyan
     exit 0
 }
 
@@ -156,9 +166,13 @@ foreach ($d in $deprecatedDirs) {
 }
 Write-Host ""
 if ($ok) {
-    Write-Host "Result: UPGRADE OK. Backup: $BackupDir" -ForegroundColor Green
+    Write-Host "Result: UPGRADE COMPLETE. Deprecated-artifact backup: $BackupDir" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "IMPORTANT: review the deploy report above for 'OVERWROTE local divergence' warnings." -ForegroundColor Yellow
+    Write-Host "  Those framework files had LOCAL edits that were overwritten (deploy backup: .sd003-backup-*)." -ForegroundColor Yellow
+    Write-Host "  If any were intentional customizations, restore them and add to '$TargetProject\.sd003-keep'." -ForegroundColor Yellow
 } else {
-    Write-Host "Result: issues found — review above. Backup: $BackupDir" -ForegroundColor Red
+    Write-Host "Result: issues found - review above. Backup: $BackupDir" -ForegroundColor Red
 }
 Write-Host ""
 Write-Host "Next: cd $TargetProject; npm install; restart agy and run /skills to confirm commands."

@@ -73,7 +73,14 @@ echo "PROTECTED (never deleted): src/, tests/, .sd/specs/, .sd/ai-coordination/,
 echo ""
 
 if [ "$EXECUTE" != true ]; then
+    # Delegate to deploy.sh --dry-run so the human sees EXACTLY which framework files
+    # would be overwritten (incl. local customizations) and which .sd003-keep preserves.
+    echo ""
+    echo "[Deploy dry-run] Scanning framework files deploy would write ..."
+    bash "$DEPLOY_SH" "$TARGET_PROJECT" --dry-run
+    echo ""
     echo "[DRY-RUN] No changes made. Re-run with --execute to apply."
+    echo "Tip: to preserve bespoke framework files, list them in '$TARGET_PROJECT/.sd003-keep' BEFORE --execute."
     exit 0
 fi
 
@@ -125,6 +132,14 @@ for d in "${DEPRECATED_DIRS[@]}"; do
     [ -e "$TARGET_PROJECT/$d" ] && echo "  [WARN] deprecated still present: $d"
 done
 echo ""
-[ "$OK" = true ] && echo "Result: UPGRADE OK. Backup: $BACKUP_DIR" || echo "Result: issues found — review above. Backup: $BACKUP_DIR"
+if [ "$OK" = true ]; then
+    echo "Result: UPGRADE COMPLETE. Deprecated-artifact backup: $BACKUP_DIR"
+    echo ""
+    echo "IMPORTANT: review the deploy report above for 'OVERWROTE local divergence' warnings."
+    echo "  Those framework files had LOCAL edits that were overwritten (deploy backup: .sd003-backup-*)."
+    echo "  If any were intentional, restore them and add to '$TARGET_PROJECT/.sd003-keep'."
+else
+    echo "Result: issues found - review above. Backup: $BACKUP_DIR"
+fi
 echo ""
 echo "Next: cd $TARGET_PROJECT && npm install; restart agy and run /skills to confirm commands."
