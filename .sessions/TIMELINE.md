@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 81
-- **Latest Session**: 2026-05-23
+- **Total Sessions**: 82
+- **Latest Session**: 2026-05-26
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-26 | sd-upgrade/deploy固有化ファイル上書き欠陥を修正（.sd003-keepオプトアウト＋dry-run正直化で誤報「UPGRADE OK/無傷」根絶、ps1+sh検証）＋codex-dispatchをsd003 framework正準化（2>&1\|tee禁止/-oで最終回答/medium effort、決定論ラッパーcodex-run.sh）。両者guardrails over rules | 14230fd, 93a6224 | [Details](session-20260526-022745.md) |
 | 05-23 | at002へSD003フレームワークアップグレード（/sd-upgradeスキル: dry-run→確認→execute。412コピー+7生成、廃止物.gemini/claude-memスタブ削除・全バックアップ退避。Skills114/115 FAILはoptional除外の誤報。UPGRADE OK） | (at002側) | [Details](session-20260523-131933.md) |
 | 05-23 | agyの/ドロップダウン問題を実機検証で根本解決（workspace .agents/skillsは/skills止まり→global ~/.gemini/skillsで接頭語なし表示）。deploy-agy-skills.py新規+メモリ訂正。クラッシュ2回復旧 | a46c7ab | [Details](session-20260523-131933.md) |
 | 05-23 | agysync-cli-commands.pyのミラー処理バグ修正（`allowed-tools:`→`disable-model-invocation:true`変換で全60スキルをスラッシュコマンドとして表示）| aa05ee7 | [Details](session-20260523-104820.md) |
