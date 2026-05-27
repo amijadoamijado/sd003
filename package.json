@@ -96,6 +96,10 @@
       "**/__tests__/**/*.ts",
       "**/?(*.)+(spec|test).ts"
     ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/tests/gas-fakes/"
+    ],
     "collectCoverageFrom": [
       "src/**/*.ts",
       "!src/**/*.d.ts"
