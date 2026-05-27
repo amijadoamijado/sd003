@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grillme - すり合わせシート</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #2c3338;
+    --text-mute: #5a6470;
+    --accent: #2c5282;
+    --accent-soft: #f0f4f8;
+    --border: #d8dde3;
+    --hl: #fffbe6;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
+                 "Hiragino Sans", Meiryo, sans-serif;
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 20px 80px;
+  }
+  header.sheet-head {
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+  }
+  header.sheet-head .eyebrow {
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+  }
+  header.sheet-head h1 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--text);
+    font-weight: 700;
+  }
+  .origin {
+    color: var(--text-mute);
+    font-size: 13px;
+    margin: 6px 0 0;
+  }
+
+  section {
+    margin: 28px 0;
+  }
+  section h2 {
+    font-size: 13px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-left: 3px solid var(--accent);
+    padding-left: 10px;
+    margin: 0 0 12px;
+  }
+
+  .conclusion {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.5;
+    background: var(--hl);
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px;
+    border-radius: 4px;
+  }
+
+  ul.reason-tree {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+  ul.reason-tree li {
+    position: relative;
+    padding-left: 22px;
+    margin: 8px 0;
+  }
+  ul.reason-tree li::before {
+    content: "└";
+    position: absolute;
+    left: 4px;
+    top: 0;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  ul.reason-tree ul {
+    list-style: none;
+    padding-left: 16px;
+    margin: 6px 0 0;
+    border-left: 1px dashed var(--border);
+  }
+
+  .premise {
+    background: var(--accent-soft);
+    border: 1px solid #d6e0ec;
+    padding: 14px 16px;
+    border-radius: 4px;
+  }
+  .premise ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+  .premise li {
+    margin: 4px 0;
+  }
+
+  table.glossary {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  table.glossary th,
+  table.glossary td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  table.glossary th {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 700;
+    width: 28%;
+  }
+
+  .figure-slot {
+    border: 1px dashed var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    color: var(--text-mute);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  footer.actions {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  footer.actions p {
+    color: var(--text-mute);
+    font-size: 13px;
+    margin: 0 0 12px;
+  }
+  .action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .action-row .btn {
+    flex: 1 1 240px;
+    background: var(--bg);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    cursor: default;
+  }
+  .action-row .btn.primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; font-size: 11pt; }
+    main { max-width: none; padding: 0; }
+    .action-row, footer.actions { display: none; }
+    .conclusion { background: #fff; border-left: 3px solid #000; }
+    section h2 { color: #000; border-left-color: #000; }
+    a { color: #000; text-decoration: none; }
+  }
+
+  /* Mobile */
+  @media (max-width: 480px) {
+    main { padding: 16px 14px 60px; }
+    .conclusion { font-size: 17px; }
+    header.sheet-head h1 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <header class="sheet-head">
+    <p class="eyebrow">Grillme v1.0 / すり合わせシート</p>
+    <h1>{{TOPIC_TITLE}}</h1>
+    <p class="origin">元のやり取り: {{ORIGIN_SUMMARY}}</p>
+  </header>
+
+  <section>
+    <h2>結論</h2>
+    <p class="conclusion">{{CONCLUSION_ONE_LINER}}</p>
+  </section>
+
+  <section>
+    <h2>根拠（なぜそうなるか）</h2>
+    <ul class="reason-tree">
+      <li>{{REASON_1}}
+        <ul>
+          <li>{{REASON_1_SUB_1}}</li>
+          <li>{{REASON_1_SUB_2}}</li>
+        </ul>
+      </li>
+      <li>{{REASON_2}}
+        <ul>
+          <li>{{REASON_2_SUB_1}}</li>
+        </ul>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>暗黙の前提（AIが置いていた前提）</h2>
+    <div class="premise">
+      <ul>
+        <li>{{PREMISE_1}}</li>
+        <li>{{PREMISE_2}}</li>
+        <li>{{PREMISE_3}}</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>用語定義（必要時のみ表示）</h2>
+    <table class="glossary">
+      <tr>
+        <th>{{TERM_1}}</th>
+        <td>{{TERM_1_DEF}}</td>
+      </tr>
+      <tr>
+        <th>{{TERM_2}}</th>
+        <td>{{TERM_2_DEF}}</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>図解（必要時のみ）</h2>
+    <div class="figure-slot">
+      不要なら本セクションごと削除する。<br>
+      対比 → 表 / 階層 → ツリー / 時間軸 → フロー / 因果 → 矢印図 / ビフォーアフター → 2カラム
+    </div>
+  </section>
+
+  <footer class="actions">
+    <p>このシートを見てどう感じましたか？（人間判定）</p>
+    <div class="action-row">
+      <span class="btn primary">分かった / OK / 進めてよい</span>
+      <span class="btn">ここが分からない（箇所を指定）</span>
+      <span class="btn">どこが分からないか分からない</span>
+    </div>
+  </footer>
+
+</main>
+</body>
+</html>

@@ -72,6 +72,15 @@
       "aliases": []
     },
     {
+      "slug": "grillme",
+      "source": ".claude/commands/grillme.md",
+      "description": "Grillme - 改善時、AI解決提案が複雑すぎて理解できない時の認識すり合わせ",
+      "claude_command": "/grillme",
+      "antigravity_skill": "grillme/SKILL.md",
+      "codex_skill": "grillme",
+      "aliases": []
+    },
+    {
       "slug": "ralph-wiggum-plan",
       "source": ".claude/commands/ralph-wiggum-plan.md",
       "description": "/ralph-wiggum:plan - Weekly Planning",
