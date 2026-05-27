@@ -37,7 +37,17 @@
       "Bash(codex:*)",
       "Read(//d/npm-global/**)",
       "Bash(python3:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(CLAUDE_PROJECT_DIR=D:/claudecode/sd003 bash D:/claudecode/sd003/.claude/hooks/workflow-gate.sh)",
+      "Bash(echo \"Exit code: $?\")",
+      "Bash(rm -f D:/claudecode/sd003/.claude/hooks/.workflow-state.json)",
+      "Bash(git -C D:/claudecode/sd003 status)",
+      "Bash(cp D:/claudecode/sd003/.claude/hooks/workflow-gate.sh D:/claudecode/cr001/.claude/hooks/workflow-gate.sh)",
+      "Bash(cp D:/claudecode/sd003/.claude/hooks/workflow-state-tracker.sh D:/claudecode/cr001/.claude/hooks/workflow-state-tracker.sh)",
+      "Bash(mkdir -p __TRACKED_VAR__/.sessions)",
+      "Bash(mkdir -p __TRACKED_VAR__/.claude/commands)",
+      "Bash(cp D:/claudecode/sd003/.claude/commands/sessionwrite.md __TRACKED_VAR__/.claude/commands/sessionwrite.md)",
+      "Bash(cp D:/claudecode/sd003/.sessions/session-template.md __TRACKED_VAR__/.sessions/session-template.md)"
     ],
     "deny": [],
     "ask": []
