@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 82
-- **Latest Session**: 2026-05-26
+- **Total Sessions**: 84
+- **Latest Session**: 2026-05-27
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,8 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-27 | AIツール頻繁クラッシュ原因の根本診断（物理RAM 16GB/使用77%、AIツール本体は20%でSQL Server×3とOneDriveが真犯人）。3 SQLインスタンス用途特定（YAYOI=弥生販売廃用確定/OBC=今朝書込み現役/MSSQLSERVER=ユーザー指定残置）+ OneDriveプロセス停止580MB回復 + ページファイル F:移行+拡大方針合意。コード変更なし、診断と方針合意のセッション | (sd003変更なし) | [Details](session-20260527-104307.md) |
+| 05-26 | at002のStopフックから vestigial な sd003-stop-hook.ps1 を除去（毎Stop失敗の重いPowerShell製・ralph-loop退役で死に機能）。所見Aの前提をat002で実機裏取り、sd003本体はralph-loop現役のため不変更とスコープ判別。実働bash 2本は維持、JSON検証OK | (at002側) | [Details](session-20260526-095025.md) |
 | 05-26 | sd-upgrade/deploy固有化ファイル上書き欠陥を修正（.sd003-keepオプトアウト＋dry-run正直化で誤報「UPGRADE OK/無傷」根絶、ps1+sh検証）＋codex-dispatchをsd003 framework正準化（2>&1\|tee禁止/-oで最終回答/medium effort、決定論ラッパーcodex-run.sh）。両者guardrails over rules | 14230fd, 93a6224 | [Details](session-20260526-022745.md) |
 | 05-23 | at002へSD003フレームワークアップグレード（/sd-upgradeスキル: dry-run→確認→execute。412コピー+7生成、廃止物.gemini/claude-memスタブ削除・全バックアップ退避。Skills114/115 FAILはoptional除外の誤報。UPGRADE OK） | (at002側) | [Details](session-20260523-131933.md) |
 | 05-23 | agyの/ドロップダウン問題を実機検証で根本解決（workspace .agents/skillsは/skills止まり→global ~/.gemini/skillsで接頭語なし表示）。deploy-agy-skills.py新規+メモリ訂正。クラッシュ2回復旧 | a46c7ab | [Details](session-20260523-131933.md) |
