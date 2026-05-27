@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 85
+- **Total Sessions**: 87
 - **Latest Session**: 2026-05-27
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,8 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-27 | 同セッション2回目クラッシュ復旧確認（13:27 sessionwrite後すぐにクラッシュ）→ git状態確認でコード損失なし。メモリ状況の即時記録試行したがpwsh自体が10秒応答せず（システム逼迫の早期警告サイン仮説）。直前は71.7%/4.46GB空きで余裕あったため真因未特定。pre-commit hookがNode.js検出エラーで継続ブロック中、本セッションのcommit試行もブロックリスクあり | cfec129継続 | [Details](session-20260527-140549.md) |
+| 05-27 | クラッシュ復旧→再起動後P0全達成検証（ページファイルF:\16384/32768MB移行成功・C:空き15.3→18.30GB回復・メモリ使用率82→74.6%で7.4pt改善）+ P1完了（OneDrive自動起動レジストリ削除+全3プロセス停止で377MB→0MB、次回起動時500MB+効果見込み）。設定変更コマンドは全てユーザー側実行 | cfec129継続 | [Details](session-20260527-132737.md) |
 | 05-27 | 再起動後のP0タスク継続実施（前回再起動後にYAYOI停止・ページファイル設定とも未実施と判明）→ 管理者pwshでMSSQL$YAYOI+SQLTELEMETRY$YAYOIを Stopped+Manual 化（sqlservr 3→2プロセス）。前セッションの「1GB回復」見積もりが実機101MBと10倍乖離していた誤りを訂正。ページファイル F:移行GUI設定はユーザー側で進行中、本セッション終了後に再起動予定 | a70b4dd継続 | [Details](session-20260527-111508.md) |
 | 05-27 | AIツール頻繁クラッシュ原因の根本診断（物理RAM 16GB/使用77%、AIツール本体は20%でSQL Server×3とOneDriveが真犯人）。3 SQLインスタンス用途特定（YAYOI=弥生販売廃用確定/OBC=今朝書込み現役/MSSQLSERVER=ユーザー指定残置）+ OneDriveプロセス停止580MB回復 + ページファイル F:移行+拡大方針合意。コード変更なし、診断と方針合意のセッション | (sd003変更なし) | [Details](session-20260527-104307.md) |
 | 05-26 | at002のStopフックから vestigial な sd003-stop-hook.ps1 を除去（毎Stop失敗の重いPowerShell製・ralph-loop退役で死に機能）。所見Aの前提をat002で実機裏取り、sd003本体はralph-loop現役のため不変更とスコープ判別。実働bash 2本は維持、JSON検証OK | (at002側) | [Details](session-20260526-095025.md) |
