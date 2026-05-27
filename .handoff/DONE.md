@@ -1,4 +1,4 @@
-# DONE.md - 完了報告（2026-05-27）
+# DONE.md - 完了報告（2026-05-27 11:15）
 
 ---
 
@@ -7,49 +7,47 @@
 **変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `.sessions/session-20260527-104307.md` | セッション履歴新規作成 |
+| `.sessions/session-20260527-111508.md` | セッション履歴新規作成 |
 | `.sessions/session-current.md` | 最新版コピー |
-| `.sessions/TIMELINE.md` | 05-27エントリ追加、統計更新 |
+| `.sessions/TIMELINE.md` | 05-27エントリ追加、統計更新（85） |
 | `.handoff/DONE.md` | このファイル更新 |
 
 **変更内容の要約**
-SD003コード変更なし。AIツール頻繁クラッシュの根本診断と対処方針合意。OneDriveプロセス停止（580MB回復）と、SQL Server 3インスタンスの用途・現役性を実機調査。
+SD003コード変更なし。前セッションのP0タスク継続。再起動後の状態検証で「YAYOI停止+ページファイル設定」が未実施だったと判明。YAYOI停止はユーザー側で実機実行完了、ページファイルGUI設定は進行中で再起動予定。
 
 ---
 
 ## 確認結果
 
-**実行したコマンド**
+**ユーザー実行コマンド（管理者pwsh）**
 ```powershell
-# 診断
-Get-CimInstance Win32_OperatingSystem  # メモリ使用率 77%
-Get-Process | Sort WS -Desc            # SQL×3=2.3GB、OneDrive×3=580MB
-Get-CimInstance Win32_Service | Where Name -like 'MSSQL*'  # 3インスタンス特定
-Get-NetTCPConnection -State Established | Where { $sqlPids -contains $_.OwningProcess }  # SQL接続=0件
-Get-ChildItem 'C:\Program Files (x86)\OBC' -Recurse -Filter '*.mdf'  # OBC=今朝書込み
-
-# 実行（成功）
-Stop-Process -Name OneDrive,OneDrive.Sync.Service -Force
+Stop-Service -Name 'MSSQL$YAYOI' -Force
+Set-Service -Name 'MSSQL$YAYOI' -StartupType Manual
+Stop-Service -Name 'SQLTELEMETRY$YAYOI' -Force
+Set-Service -Name 'SQLTELEMETRY$YAYOI' -StartupType Manual
 ```
 
 **結果**
-- OneDrive: 全プロセス停止確認（580MB回復）
-- SQL$YAYOI: 不要確定（ユーザー証言+ESTABLISHED接続0）
-- SQL$OBCINSTANCE4X: 現役確定（今朝書込み、停止禁止）
-- SQLSERVER: ユーザー指示で残置
+- `MSSQL$YAYOI`: Stopped + Manual ✅
+- `SQLTELEMETRY$YAYOI`: Stopped + Manual ✅
+- sqlservr プロセス: 3個 → 2個 ✅
+- 即時メモリ回復: 約100MB（前回「1GB」見積もりは誤り、訂正済み）
 
 ---
 
 ## 残っていること
 
-**未完了タスク**（次セッション・ユーザー側）
-- [ ] **P0**: 管理者pwshで `Stop-Service MSSQL$YAYOI` + `Set-Service ... -StartupType Manual`（約1GB回復）
-- [ ] **P0**: ページファイルをF:に移動・拡大（初期16384/最大32768）+ Cの4GBを削除 → 再起動
-- [ ] **P1**: タスクマネージャーでOneDrive自動起動を無効化
-- [ ] **P2**: MSSQLSERVER用途確認 / メモリ32GB増設検討
+**未完了タスク**（再起動後に検証）
+- [ ] **P0**: ページファイル F:設定の反映確認（`Get-CimInstance Win32_PageFileSetting`）
+- [ ] **P0**: 再起動後のメモリ使用率測定
+- [ ] **P0**: C:ドライブ空き回復確認（15.3GB→約20GB見込み）
+- [ ] **P1**: OneDrive自動起動を無効化（タスクマネージャー）
+- [ ] **P2**: 物理メモリ16GB→32GB増設検討
 
-**次の手順**
-- 上記P0タスク2つを完了後、AIツール作業中のクラッシュが解消したか観察
+**次の手順（再起動後）**
+1. `claude --continue` + `/sessionread` でセッション再開
+2. P0タスク3件を実機検証
+3. 結果を見てOneDrive対処へ進む
 
 ---
 
@@ -58,15 +56,14 @@ Stop-Process -Name OneDrive,OneDrive.Sync.Service -Force
 **設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| AIツール軽量化 vs OS環境改善 | OS環境改善 | AIツール本体は20%しか食ってない |
-| MSSQL$YAYOI停止 vs 残置 | 停止+手動化 | 弥生販売廃用確定+接続ゼロ |
-| MSSQL$OBCINSTANCE4X停止 vs 残置 | 残置 | 今朝書込みあり、現役 |
-| ページファイルCLI vs GUI | GUI | ブート不能リスク回避 |
-| 直接実行 vs ユーザー手動 | ユーザー手動 | サービス停止は管理者権限必須 |
+| 見積もり誤りを隠す vs 訂正謝罪 | 訂正謝罪 | ユーザー信頼の維持 + 学習ナッジに記録 |
+| GUI操作 vs CLI操作（ページファイル） | GUI | ブート不能リスク回避 |
+| 再起動報告を鵜呑み vs 実機検証 | 実機検証 | 設定変更未実施が判明（重要な教訓） |
 
 ---
 
 ## 追加情報
 
-- 「弥生会計スタンドアロンはSQL不使用、弥生販売はSQL使用」はユーザー証言。auto-memoryへの記録候補。
-- DB現役性判定の手法（`.mdf` の LastWriteTime + ESTABLISHED接続数）は再現性あり、他環境でも応用可能。
+- 学習ナッジ2件検出（auto-memory feedback候補）:
+  1. ユーザー報告を鵜呑みにせず実機検証する
+  2. 数値見積もりは実機ログから直接転記する（記憶からの再現は10倍乖離リスク）
