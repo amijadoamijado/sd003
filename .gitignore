@@ -58,6 +58,7 @@ __pycache__/
 .claude/todos/
 
 # Claude Code settings (git管理外: commit時のランタイム干渉を防止)
+.claude/settings.local.json
 .claude/settings.json
 
 # Runtime generated
@@ -100,8 +101,8 @@ __pycache__/
 # trace-test
 # no-write-tool
 
-# .sd/ - git管理外（Claude Codeランタイムのrefreshで消えるため）
-.sd/
+
+
 
 # git worktrees（実体はgit管理外。worktree dir自体をコミットしない）
 .claude/worktrees/
