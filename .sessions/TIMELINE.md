@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 88
-- **Latest Session**: 2026-05-27
+- **Total Sessions**: 89
+- **Latest Session**: 2026-05-31
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 05-31 | fl006へSD003展開（CLAUDE.md固定デプロイID/URLを.sd003-keep保護・421ファイル・settings.json手動完全配線）+ P0完遂（at002 Layer3配備/sd-safe-commit改訂）+ **重大発見: L1+L2+L3はwipe未解消、毎commitで.sd/全消失しL4 post-commit auto-restoreが実防衛線と実測確定（5-27結論を訂正）** + deployツールsettings.json生成バグ根本修正（全ガードレール未配線→deploy.sh/ps1テンプレ完全配線、temp実行検証） | 9f14984 | [Details](session-20260531-004242.md) |
 | 05-27 | .sd/消失バグ根本対策3層構造（L1=.gitignoreから.sd/除外でtracked化/L2=settings.local.json untrack/L3=Edit-Write on .sd/物理ブロック新hook）実装+検証完了。npm test 7/7 PASS復旧（廃止テスト3件archive+gas-fakes ignore追加）。at002診断でL1+L2は既配備済（/sd-upgrade経由推定）発見、L3のみ未配備 | 6b3884f | [Details](session-20260527-201826.md) |
 | 05-27 | 同セッション2回目クラッシュ復旧確認（13:27 sessionwrite後すぐにクラッシュ）→ git状態確認でコード損失なし。メモリ状況の即時記録試行したがpwsh自体が10秒応答せず（システム逼迫の早期警告サイン仮説）。直前は71.7%/4.46GB空きで余裕あったため真因未特定。pre-commit hookがNode.js検出エラーで継続ブロック中、本セッションのcommit試行もブロックリスクあり | cfec129継続 | [Details](session-20260527-140549.md) |
 | 05-27 | クラッシュ復旧→再起動後P0全達成検証（ページファイルF:\16384/32768MB移行成功・C:空き15.3→18.30GB回復・メモリ使用率82→74.6%で7.4pt改善）+ P1完了（OneDrive自動起動レジストリ削除+全3プロセス停止で377MB→0MB、次回起動時500MB+効果見込み）。設定変更コマンドは全てユーザー側実行 | cfec129継続 | [Details](session-20260527-132737.md) |
