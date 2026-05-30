@@ -1,26 +1,37 @@
 # .sd/ Safe Commit Rule
 
-## 絶対ルール（2026-05-27 Layer 1+2+3 後の現行運用）
+## 絶対ルール（2026-05-31 実測で更新）
 
-> `.sd/` への書き込みは **Bash tool のみ**。Write/Edit/MultiEdit は物理ブロックされる。
-> `.sd/` は通常 tracked（`.gitignore` 対象外）。**commit は別bashに分けてよい。**
+> 1. `.sd/` への書き込みは **Bash tool のみ**。Write/Edit/MultiEdit は物理ブロックされる（L3）。
+> 2. `.sd/` は通常 tracked（`.gitignore` 対象外、L1）。
+> 3. **`.sd/` の変更は早めに commit する。** runtime は今も commit 時に `.sd/` を消すことがあり、
+>    自動復元（L4）は **HEAD からの復元** なので、**未commitの `.sd/` 変更は wipe で失われる**。
 
-旧ルール「`.sd/` 変更は同一bash内で `git add` + `git commit` を完了」は **撤廃**された。
-根本原因が L1+L2+L3 で構造的に解消されたため、同一bash強制という儀式（症状抑制）は不要。
-歴史的経緯は末尾「旧ルール（撤廃）」を参照。
+旧ルール「`.sd/` 変更は同一bash内で `git add` + `git commit` を完了する」は **緩和**された。
+別bash commit でも post-commit auto-restore（L4）が tracked ファイルを救うため、ディレクトリ全消失は
+復旧する。ただし **同一bash儀式が守っていた「wipe前にcommitを終わらせる」効果は残す価値がある**
+（未commitの `.sd/` 作業は L4 で戻らないため）。
 
-## 根本対策（2026-05-27 確定・3層構造）
+## 重要な訂正（2026-05-31）
 
-`.sd/` 消失の真因は2つあった。Layer 1+2+3 で構造的に解消した。
+2026-05-27 セッションは「L1+L2+L3 で `.sd/` 消失は構造的に解消、別bash commitでwipeなし」と結論した。
+**これは誤りであることが実測で判明した。**
 
-| Layer | 真因 | 対策 | コミット |
-|-------|------|------|----------|
-| L1 | `.sd/` が gitignored だが tracked の矛盾 → runtime の working tree refresh が「捨てて良いファイル」と誤判定 | `.gitignore` から `.sd/` 削除、通常 tracked 化 | `7106525` |
-| L2 | `.claude/settings.local.json` 慢性 modified が wipe 発火確率を上げる | `.gitignore` 追加 + `git rm --cached` で untrack | `7106525` |
-| L3 | Edit/Write tool on `.sd/` + 次の Bash が wipe trigger | PreToolUse hook `block-edit-write-on-sd.sh` で物理ブロック | `dcf0498` |
+- コミット `9ae3274`（`.sd/` を一切変更しない `.claude/rules/` のみの commit）で `.sd/` が **フル消失**。
+- post-commit hook が検知し HEAD から **42ファイルを自動復元** → データ損失ゼロ。
+- 結論: **L1+L2+L3 は wipe の発火要因を減らすが、wipe を根絶しない。** 実際の最終防衛線は L4（auto-restore）。
 
-検証（コミット `6b3884f`）: Bash-only edit + **別bash** commit で wipe なしを実証。
-5回連続 `find .sd -type f` で 41 ファイル安定確認。Edit tool での `.sd/` 編集試行はガードレール発火でブロック確認。
+## 4層防御の実態
+
+| Layer | 真因 / 役割 | 対策 | 効果 | コミット |
+|-------|------------|------|------|----------|
+| L1 | `.sd/` が gitignored だが tracked の矛盾 → working tree refresh が「捨てて良い」と誤判定 | `.gitignore` から `.sd/` 削除、通常 tracked 化 | 発火要因を減らす | `7106525` |
+| L2 | `.claude/settings.local.json` 慢性 modified が wipe 確率を上げる | `.gitignore` + `git rm --cached` で untrack | 発火確率を下げる | `7106525` |
+| L3 | Edit/Write tool on `.sd/` + 次の Bash が wipe trigger | PreToolUse hook `block-edit-write-on-sd.sh` で物理ブロック | trigger 1種を遮断 | `dcf0498` |
+| **L4** | **L1-L3 を経ても commit 時に `.sd/` 全消失が発生する**（`9ae3274` で実証） | **post-commit hook が全消失を検知し HEAD から自動復元** | **tracked ファイルの最終防衛線** | `.git/hooks/post-commit` |
+
+> **L4 の限界**: 復元は `git show HEAD:<path>` ベース。**HEAD にない（=未commitの）`.sd/` ファイルは復元されない。**
+> partial wipe（一部ファイルのみ消失）は現行 L4（`[ ! -d ".sd" ]` 判定）では検知できない。
 
 Refs: anthropics/claude-code#34330, #10011
 
@@ -32,53 +43,45 @@ Refs: anthropics/claude-code#34330, #10011
 | `.sd/` ファイル編集 | Bash（`sed -i`, `echo >>`） |
 | `.sd/` ファイル読み | Read tool ✅ |
 | `.sd/` への Write/Edit/MultiEdit | 物理ブロック ⛔（`block-edit-write-on-sd.sh`） |
-| `.sd/` 削除 | `block-sd-destructive.sh` で既ブロック |
-| `.sd/` の commit | **別bashに分けてよい**（同一bash強制は撤廃） |
+| `.sd/` 削除・mv・git clean | 物理ブロック ⛔（`block-sd-destructive.sh`） |
+| `.sd/` の commit | 別bash可。**ただし作成・編集したら早めに commit する**（未commitは wipe で消える） |
 
-### .sd/ファイル作成・編集の例（Bash tool）
+### 安全パターン（推奨）
 ```bash
-# 作成
+# 作成 → すぐ commit（同一bashが最も安全。別bashでも L4 が tracked を救うが未commitは救えない）
 cat > .sessions/file.txt << 'EOF'
 content
 EOF
-
-# 編集
-echo "追記行" >> .sessions/file.txt
-sed -i 's/old/new/' .sessions/file.txt
-```
-
-commit は別の Bash 呼び出しでよい:
-```bash
 git add .sessions/file.txt && git commit -m "message"
 ```
 
 ## settings.json / settings.local.json
 
-- `.claude/settings.local.json` は `.gitignore` に追加し、`git rm --cached` で untrack 済み（L2）。
-  settings.local.json の慢性 modified は wipe 発火確率を上げるため git 管理外にする。
+- `.claude/settings.local.json` は `.gitignore` 追加 + `git rm --cached` で untrack 済み（L2）。
 - `.claude/settings.json` は tracked（FW所有物）。
 
-## 消失時の復元手順（最終防衛線）
+## 消失時の手動復元手順（L4 が機能しない場合）
 
-L3 ガードレールが何らかの理由で破られた場合の最終手段。
 ```bash
-# 過去のcommitから復元（1コマンドで全て実行）
 git ls-tree -r <commit-hash> --name-only | grep "^\.sd/" | while read f; do
   mkdir -p "$(dirname "$f")"
   git show "<commit-hash>:$f" > "$f"
 done && git add .sd/ && git commit -m "fix: restore .sd from <commit-hash>"
 ```
-
 HEADに.sd/がない場合は `git log --all -- .sessions/TIMELINE.md` で最後に存在したcommitを特定。
 
-## 旧ルール（撤廃・歴史的経緯）
+## 改善候補（未対応）
 
-2026-03-28〜05-26 は「`.sd/` 変更は必ず同一bash内で `git add` + `git commit` まで完了する」を
-絶対ルールとしていた。これは L1+L2+L3 以前の応急策（症状抑制）であり、根本原因
-（gitignored-but-tracked の矛盾 + Edit/Write trigger）が解消された現在は不要。
-別bash commit が wipe を起こさないことは `6b3884f` で実証済み。
+- **L4 の partial wipe 検知**: 現行は `[ ! -d ".sd" ]`（全消失のみ）。HEAD と working tree の
+  `.sd/` ファイル数を比較して partial wipe も検知・復元すれば、L3 が破られた場合の防御が厚くなる。
+- **未commit `.sd/` の保護**: L4 は HEAD 復元のため未commit分を救えない。pre-commit ステージや
+  ローカルスナップショットでの補完を検討。
 
-at002 の実機証拠: Layer 1+2 だけでも実用上は十分（`.sd/` 123ファイル安定運用）。L3 は予防的物理強制。
+## 旧ルール（緩和・歴史的経緯）
+
+2026-03-28〜05-26 は「`.sd/` 変更は必ず同一bash内で add+commit」を絶対ルールとしていた。
+これは L4（auto-restore）が安定動作する現在は「絶対」ではないが、**未commitの `.sd/` 作業を
+wipe から守る効果は今も有効**。よって「同一bash必須」→「早めに commit（同一bashが最も安全）」へ緩和。
 
 ## 全AIモデル共通
 
