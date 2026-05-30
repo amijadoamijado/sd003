@@ -471,12 +471,17 @@ OS_TYPE="$(uname -s 2>/dev/null || echo 'Unknown')"
 if [[ "$OS_TYPE" == *"MINGW"* ]] || [[ "$OS_TYPE" == *"MSYS"* ]] || [[ "$OS_TYPE" == *"CYGWIN"* ]]; then
     # Windows (Git Bash/MSYS)
     HOOK_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"'
+    CTX_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\context-monitor-hook.ps1\"'
 else
     # Linux/Mac
     HOOK_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd003-stop-hook.sh\"'
+    CTX_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-monitor-hook.sh\"'
 fi
 
 # settings.json (skip if exists)
+# IMPORTANT: generate the FULL guardrail wiring (PreToolUse/PostToolUse/SessionStart),
+# not just the Stop hook. A minimal settings.json leaves copied guardrail hooks INACTIVE
+# (block-edit-write-on-sd / enforce-skill-read / enforce-spec-location / etc.).
 if [ -f "$TARGET_PROJECT/.claude/settings.json" ]; then
     echo "  SKIP: .claude/settings.json already exists (preserving custom hooks/permissions)"
 else
@@ -495,7 +500,197 @@ else
             "timeout": 30
           }
         ]
+      },
+      {
+        "matcher": ".*refactor.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CTX_CMD",
+            "timeout": 10
+          }
+        ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-sd-destructive.sh\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/workflow-gate.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-edit-write-on-sd.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-skill-read.sh\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-spec-location.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/sd-watchdog.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Edit",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Write",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Bash",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/deploy-package-reminder.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/agent-review.sh\"",
+            "timeout": 600
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/workflow-state-tracker.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/track-skill-read.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/session-skill-suggest.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "ralph-loop": {
+    "description": "SD003 Ralph Loop configuration",
+    "midpoint": {
+      "hook": "sd003-stop-hook.ps1",
+      "max_iterations": 20,
+      "completion_promise": "ALL_TESTS_PASS"
+    },
+    "endgame": {
+      "hook": "sd003-stop-hook-endgame.ps1",
+      "max_same_error": 2,
+      "escalation": "/dialogue-resolution"
+    },
+    "note": "Windows PowerShell version. Switch hooks manually based on phase."
+  },
+  "refactoring": {
+    "description": "SD003 Refactoring System configuration",
+    "context_monitor_hook": "context-monitor-hook.ps1",
+    "config_path": ".sd/refactor/config.json",
+    "skills": [
+      "context-autonomy",
+      "session-autosave",
+      "rollback-guard"
+    ],
+    "commands": [
+      "refactor-init",
+      "refactor-plan",
+      "refactor-batch",
+      "refactor-rollback",
+      "refactor-complete"
     ]
   }
 }
