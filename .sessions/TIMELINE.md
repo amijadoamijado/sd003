@@ -1,11 +1,17 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 89
-- **Latest Session**: 2026-05-31
+- **Total Sessions**: 90
+- **Latest Session**: 2026-06-07
 - **Project Start**: 2026-02-15
 
 ---
+
+## 2026-06
+
+| Date | Main Work | Commit | Details |
+|------|-----------|--------|---------|
+| 06-07 | **sd-deployにデプロイ時内容検証ゲート Phase 6b 実装**（配送へのWork First適用）。根本原因=既存Phase6はファイル数/存在のみ検証＋失敗してもexit0で成功扱い→9f14984のStop-only配線を素通り。単一Node検証 verify-deployment.mjs（C1 hook配線をイベント単位照合/C2 hook実在/C3 テンプレ実プレースホルダ限定/C4 廃止語/C5 文字化け.sh+.ps1/C6 JSON）＋deploy.ps1/sh にハードフェイル(exit 1)配線＋回帰テスト(9f14984再現fixture)。レビューP2/P3＋自己発見C3誤検知も根本修正。**ゲートが現役at002のガードレール不活性(block-sd-destructive未配線)を捕捉→最新テンプレ上書きで修復(C1-6全PASS)**。GEPA/SkillOpt/DSPy文書の批判的レビューも実施 | 9f0455d, 7becd7c | [Details](session-20260607-164006.md) |
 
 ## 2026-05
 
