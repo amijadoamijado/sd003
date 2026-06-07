@@ -112,6 +112,34 @@ function hookNamesFrom(hooksObj) {
   return names;
 }
 
+// Map each top-level event (PreToolUse/Stop/...) to the set of hook script names
+// wired UNDER THAT EVENT. Used to detect mis-wiring (a guard wired to the wrong
+// event) which a global name-set comparison would miss.
+function hookNamesByEvent(hooksObj) {
+  const map = {};
+  if (hooksObj && typeof hooksObj === 'object') {
+    for (const [event, arr] of Object.entries(hooksObj)) {
+      map[event] = hookNamesFrom(arr);
+    }
+  }
+  return map;
+}
+
+// Collect the exact {{PLACEHOLDER}} tokens the deploy templates actually use, so
+// C3 only flags genuine unsubstituted deploy vars and not legitimate {{VAR}} prose
+// content (e.g. an OCR prompt's {{NOW_CONTEXT}} referenced in a bespoke CLAUDE.md).
+function collectDeployPlaceholders(templatesDir) {
+  const set = new Set();
+  const re = /\{\{[A-Za-z0-9_]+\}\}/g;
+  for (const f of listFiles(templatesDir)) {
+    const t = readText(f);
+    if (t === null) continue;
+    let m;
+    while ((m = re.exec(t)) !== null) set.add(m[0]);
+  }
+  return set;
+}
+
 console.log('=== Content Verification (verify-deployment.mjs) ===');
 console.log(`  target: ${targetDir}`);
 console.log(`  source: ${sourceDir}`);
@@ -151,14 +179,24 @@ if (!tpl.ok) {
     pass('C1', `events present: ${requiredEvents.join(', ')}`);
   }
 
-  // 1b: every hook wired in the template is also wired in the deployed file
-  const expected = hookNamesFrom(tplHooks);
-  const deployed = hookNamesFrom(depHooks);
-  const missing = [...expected].filter((n) => !deployed.has(n));
-  if (missing.length) {
-    fail('C1', `hooks wired in template but NOT deployed: ${missing.join(', ')}`);
+  // 1b: every hook wired in the template must be wired UNDER THE SAME EVENT in the
+  // deployed file. Comparing per-event (not a global name set) catches a guard
+  // mis-wired to the wrong event, e.g. block-edit-write-on-sd.sh moved to Stop.
+  const expByEvent = hookNamesByEvent(tplHooks);
+  const depByEvent = hookNamesByEvent(depHooks);
+  const misWired = [];
+  let expectedTotal = 0;
+  for (const [event, names] of Object.entries(expByEvent)) {
+    const deployedForEvent = depByEvent[event] || new Set();
+    for (const n of names) {
+      expectedTotal++;
+      if (!deployedForEvent.has(n)) misWired.push(`${event}/${n}`);
+    }
+  }
+  if (misWired.length) {
+    fail('C1', `hooks missing/mis-wired (event/hook): ${misWired.join(', ')}`);
   } else {
-    pass('C1', `all ${expected.size} template hooks wired in deployment`);
+    pass('C1', `all ${expectedTotal} template hooks wired under correct events`);
   }
 }
 
@@ -187,16 +225,21 @@ const generatedFiles = [
   '.sessions/TIMELINE.md',
 ];
 {
+  const placeholders = collectDeployPlaceholders(
+    path.join(sourceDir, '.claude', 'skills', 'sd-deploy', 'templates')
+  );
   const offenders = [];
   let scanned = 0;
   for (const rel of generatedFiles) {
     const t = readText(path.join(targetDir, rel));
     if (t === null) continue; // existence is Phase 6's job
     scanned++;
-    if (/\{\{|\}\}/.test(t)) offenders.push(rel);
+    for (const token of placeholders) {
+      if (t.includes(token)) offenders.push(`${rel} -> ${token}`);
+    }
   }
-  if (offenders.length) fail('C3', `unsubstituted {{...}} template vars in: ${offenders.join(', ')}`);
-  else pass('C3', `no template-var leftovers (${scanned} generated files scanned)`);
+  if (offenders.length) fail('C3', `unsubstituted deploy placeholders: ${offenders.join(', ')}`);
+  else pass('C3', `no deploy-placeholder leftovers [${[...placeholders].join(', ')}] (${scanned} files)`);
 }
 
 // ---- C4: no deprecated tokens in deployed commands / settings / CLAUDE.md
@@ -220,10 +263,13 @@ const generatedFiles = [
   else pass('C4', `no deprecated tokens [${DEPRECATED_TOKENS.join(', ')}] (${scanned} files)`);
 }
 
-// ---- C5: no mojibake (U+FFFD replacement char) in hook scripts + settings.json
+// ---- C5: no mojibake (U+FFFD replacement char) in hook scripts (.sh + .ps1) + settings.json
 {
   const scanTargets = [
-    ...listFiles(path.join(targetDir, '.claude', 'hooks'), (f) => f.endsWith('.sh')),
+    ...listFiles(
+      path.join(targetDir, '.claude', 'hooks'),
+      (f) => f.endsWith('.sh') || f.endsWith('.ps1')
+    ),
     path.join(targetDir, '.claude', 'settings.json'),
   ];
   const offenders = [];
