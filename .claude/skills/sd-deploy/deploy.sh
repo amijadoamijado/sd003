@@ -81,7 +81,7 @@ deploy_dry_run() {
             if ! cmp -s "$f" "$tgt"; then DIV+=("$projrel"); diverged=$((diverged+1)); else same=$((same+1)); fi
         done < <(find "$SOURCE_DIR/$d" -type f)
     done
-    local scan_files=("antigravity.md" "AGENTS.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "tests/gas-fakes/setup.ts")
+    local scan_files=("antigravity.md" "AGENTS.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "tests/gas-fakes/setup.ts")
     for sf in "${scan_files[@]}"; do
         if is_kept "$sf"; then KEP+=("$sf"); kept=$((kept+1)); continue; fi
         [ -f "$SOURCE_DIR/$sf" ] || continue
@@ -328,6 +328,15 @@ if [ -f "$SOURCE_DIR/scripts/validate-test-data.sh" ]; then
     COPY_STATS["Validate Test Data (sh)"]=1
 else
     COPY_STATS["Validate Test Data (sh)"]=0
+fi
+
+# 4-15c: scripts/verify-deployment.mjs (single file - deploy content-verification gate)
+if [ -f "$SOURCE_DIR/scripts/verify-deployment.mjs" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    cp "$SOURCE_DIR/scripts/verify-deployment.mjs" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Verify Deployment (mjs)"]=1
+else
+    COPY_STATS["Verify Deployment (mjs)"]=0
 fi
 
 # 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator)
@@ -851,6 +860,31 @@ done
 echo "[Phase 6/7] Verification completed"
 
 # ============================================================
+# Phase 6b: Content verification gate (single Node verifier; hard-fail)
+# Catches mis-wired settings.json / unsubstituted template vars / deprecated
+# tokens / mojibake / invalid JSON that Phase 6's count+existence check misses.
+# ============================================================
+echo ""
+echo "=== Content Verification (Phase 6b) ==="
+if [ "$DRY_RUN" = true ]; then
+    echo "  [SKIP] dry-run: nothing generated to verify"
+else
+    VERIFY_SCRIPT="$SOURCE_DIR/scripts/verify-deployment.mjs"
+    if ! command -v node >/dev/null 2>&1; then
+        echo "  [FAIL] node not found on PATH - cannot run content verification"
+        ALL_PASSED=false
+    elif [ ! -f "$VERIFY_SCRIPT" ]; then
+        echo "  [FAIL] verifier not found: $VERIFY_SCRIPT"
+        ALL_PASSED=false
+    else
+        if ! node "$VERIFY_SCRIPT" "$TARGET_PROJECT" "$SOURCE_DIR"; then
+            ALL_PASSED=false
+        fi
+    fi
+fi
+echo "[Phase 6b/7] Content verification completed"
+
+# ============================================================
 # Phase 7: Report
 # ============================================================
 echo ""
@@ -897,4 +931,9 @@ echo "  3. Review CLAUDE.md"
 echo "  4. Run /sessionread to verify"
 echo "  5. Start with /sd:spec-init {feature}"
 echo ""
+if [ "$ALL_PASSED" != true ]; then
+    echo "SD003 deployment FAILED verification - fix the issues above and re-run."
+    echo "(Deployed files remain in place; nothing was rolled back.)"
+    exit 1
+fi
 echo "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!"
