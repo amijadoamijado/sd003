@@ -1,20 +1,20 @@
-# DONE — 引き継ぎ（2026-06-07 後半）
+# DONE — 引き継ぎ（2026-06-07 最終）
 
 ## 完了事項
-- **nm002 を最新 sd003 へ更新**: `/sd-upgrade --execute`（308新規・廃止物除去）＋ settings.json をテンプレで全hook配線 → verifier C1-C6 全PASS。CLAUDE.md は既存尊重（`.sd003-keep` に登録して保護）。
-- **deploy.sh の settings.json 上書きバグを根本修正**（`952ef66`）: 既存 settings.json を SKIP していた（deploy.ps1 は上書き）→ upgrade しても古い配線が直らなかった真因。`is_kept`（.sd003-keep）保護時のみ SKIP、それ以外は再生成（上書き）に変更。heredoc の OS対応は維持。3シナリオ実機検証済み。
-- （同日前半: Phase 6b 内容検証ゲート実装＋レビュー対応＋at002修復＋GEPA/SkillOpt批判レビュー）
+- **nm002 の最新配付用ファイル作成**: `python scripts/build_dist.py` で `D:\claudecode\nm002\dist\nm002-reconcile.tar.gz`（32ファイル・80,316 bytes・整合性OK）を生成。配布可。
+- **セキュリティ過剰反応の自己訂正**: 配布 .env の ghp_ 同梱を「重大」と報告したが、bot アカウント(3stax001)前提の**意図的例外設計**と判明。build_dist.py への変更を全 revert（差分ゼロ）。ユーザー確定: アカウント変更/revoke 不要。
+- （同日: Phase 6b検証ゲート実装＋レビュー対応＋at002修復、nm002最新化(/sd-upgrade)＋deploy.sh settings.json上書きバグ修正）
 
 ## 未完了 / 次のステップ
-- P1: 残り現役配信先（oc001/fw5yp/sb001/er001等）を `/sd-upgrade` で最新化。固有CLAUDE.mdがあれば事前に `.sd003-keep` へ `CLAUDE.md` 登録。各々 verifier で C1-6 PASS 確認。
-- P2: settings.json 真実源の単一化（template/ps1コピー/sh heredoc の3分散）。Windows専用なら優先度低。
+- P1: nm002 の未コミット framework 更新分（/sd-upgrade由来の `.claude/commands/*` 変更等）を nm002 側でレビュー＆コミット。
+- P2: 残り現役配信先（oc001/fw5yp/sb001/er001等）の `/sd-upgrade` 棚卸し。
 
 ## 関連ファイル
-- `.claude/skills/sd-deploy/deploy.sh`（settings.json 上書き修正）
-- `scripts/verify-deployment.mjs`（手動検証: `node scripts/verify-deployment.mjs <target> D:\claudecode\sd003`）
-- `.claude/skills/sd-upgrade/upgrade.sh`（`<target> [--execute]`、既定dry-run）
+- `D:\claudecode\nm002\dist\nm002-reconcile.tar.gz`（配付物）
+- `D:\claudecode\nm002\scripts\build_dist.py`（正規ビルダー: tools/→dist/同期＋tar.gz＋機密スキャン。ghp_ は .env で警告のみ＝意図的設計）
+- sd003本体: `scripts/verify-deployment.mjs`, `.claude/skills/sd-deploy/{deploy.ps1,deploy.sh}`（Phase 6b検証ゲート・settings.json上書き修正）
 
 ## 注意
-- deploy/upgrade はデフォルトで CLAUDE.md をテンプレ再生成する。**固有CLAUDE.mdを持つ配信先は `.sd003-keep` に `CLAUDE.md` を登録必須**（nm002は対応済）。
-- 今後 `/sd-upgrade` だけで既存配信先の settings.json も最新化される（SKIPバグ解消済）。
-- コミット時に post-commit hook(L4) が `.sd/` を HEAD から自動復元する。
+- **nm002 は sd003 とは別の製品プロジェクト**（会計事務所向け照合ツール）。作業前に対象プロジェクトを明示すること。
+- nm002 配布は `python scripts/build_dist.py`（手動tar禁止＝tools/との乖離防止）。配布形式は tar.gz（zip禁止）。
+- 配布 .env の ghp_ bot トークンは意図的設計。重大認定しない。

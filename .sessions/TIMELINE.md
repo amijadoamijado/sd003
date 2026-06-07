@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 91
+- **Total Sessions**: 92
 - **Latest Session**: 2026-06-07
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 06-07 | **nm002の最新配付用ファイル(tar.gz)作成**。nm002=会計事務所向け照合ツール製品(nm002-reconcile/tar.gz配布/v1.5.14)と判明、`python scripts/build_dist.py`で正規ビルド(32ファイル/80,316bytes/整合性OK)。配布.envのghp_同梱を「重大」と報告→**実は意図的例外設計(bot 3stax001・実質fine-grained等価)と判明し過剰反応を訂正**、build_dist.py変更を全revert。ユーザー: アカウント変更/revoke不要で確定。作業dir(sd003)と対象(nm002)の取り違え教訓 | (nm002側) | [Details](session-20260607-172652.md) |
 | 06-07 | **nm002を最新sd003へ更新（/sd-upgrade）＋deploy.sh settings.json上書きバグ根本修正**。nm002はガードレールhook欠落・settings.json未配線で固着→upgradeで最新化、CLAUDE.mdは既存尊重(.sd003-keep登録)、settings.json修復でC1-6全PASS。**真因=deploy.shが既存settings.jsonをSKIP(deploy.ps1は上書き)→upgradeしても古い配線が直らない**→is_kept保護時のみSKIP・他は上書きに修正(heredocのOS対応は維持、3シナリオ実機検証)。慎重精読で当初案(テンプレコピー化)を撤回 | 952ef66 | [Details](session-20260607-170010.md) |
 | 06-07 | **sd-deployにデプロイ時内容検証ゲート Phase 6b 実装**（配送へのWork First適用）。根本原因=既存Phase6はファイル数/存在のみ検証＋失敗してもexit0で成功扱い→9f14984のStop-only配線を素通り。単一Node検証 verify-deployment.mjs（C1 hook配線をイベント単位照合/C2 hook実在/C3 テンプレ実プレースホルダ限定/C4 廃止語/C5 文字化け.sh+.ps1/C6 JSON）＋deploy.ps1/sh にハードフェイル(exit 1)配線＋回帰テスト(9f14984再現fixture)。レビューP2/P3＋自己発見C3誤検知も根本修正。**ゲートが現役at002のガードレール不活性(block-sd-destructive未配線)を捕捉→最新テンプレ上書きで修復(C1-6全PASS)**。GEPA/SkillOpt/DSPy文書の批判的レビューも実施 | 9f0455d, 7becd7c | [Details](session-20260607-164006.md) |
 
