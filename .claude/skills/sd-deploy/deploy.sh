@@ -487,14 +487,19 @@ else
     CTX_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-monitor-hook.sh\"'
 fi
 
-# settings.json (skip if exists)
+# settings.json: OVERWRITE with latest full wiring unless protected by .sd003-keep.
+# WAS skip-if-exists, which left a stale/partial settings.json un-upgraded on
+# re-deploy/upgrade -> guardrails stayed INACTIVE in already-deployed targets
+# (e.g. nm002/at002). deploy.ps1 already overwrites; this aligns deploy.sh with it.
 # IMPORTANT: generate the FULL guardrail wiring (PreToolUse/PostToolUse/SessionStart),
 # not just the Stop hook. A minimal settings.json leaves copied guardrail hooks INACTIVE
 # (block-edit-write-on-sd / enforce-skill-read / enforce-spec-location / etc.).
-if [ -f "$TARGET_PROJECT/.claude/settings.json" ]; then
-    echo "  SKIP: .claude/settings.json already exists (preserving custom hooks/permissions)"
+if is_kept ".claude/settings.json"; then
+    echo "  KEEP: .claude/settings.json preserved via .sd003-keep"
+    echo ".claude/settings.json" >> "$KEPT_LOG"
 else
-    cat > "$TARGET_PROJECT/.claude/settings.json" << EOF
+    SETTINGS_TMP="$(mktemp)"
+    cat > "$SETTINGS_TMP" << EOF
 {
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
@@ -704,6 +709,11 @@ else
   }
 }
 EOF
+    if [ -f "$TARGET_PROJECT/.claude/settings.json" ] && ! cmp -s "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"; then
+        echo ".claude/settings.json" >> "$DIVERGED_LOG"
+    fi
+    mv "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"
+    echo "  UPDATE: .claude/settings.json (latest guardrail wiring applied)"
 fi
 
 # 5-6: .sd/ids/registry.json (skip if exists)
