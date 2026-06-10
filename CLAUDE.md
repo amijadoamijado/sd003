@@ -54,10 +54,10 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstdin消失、長文コマンド誤動作、ランタイムによるワーキングツリーリフレッシュ）。安定性を優先し、代替手段があればそちらを使う。バグが解消されればBash利用を解禁する。
 
 - **ファイル作成・編集**: Write/Edit tool優先。Bashのheredoc/リダイレクトは避ける
-- **.sd/操作**: Write/Edit + pre-commit hookで自動ステージ。Bashでのgit add .sd/は不要
+- **.sd/操作**: Write/EditはL3 hookで物理ブロック。安定パターン=Writeでtemp stagingに作成→Bash `cp`で.sd/へ配置→早期commit（heredoc多連結はexit 66失敗実績あり）
 - **git commit**: 短い1行コマンドのみ。heredocでのcommitメッセージは避ける
 - **Bash使用OK**: git status, ls, npm, 短いコマンド
-- **監視対象バグ**: anthropics/claude-code #15599, #24956, #11225, #34330 — 解消確認後にBash制限を緩和
+- **監視対象バグ**: anthropics/claude-code #15599, #24956, #11225, #34330 — 解消時の撤去手順: `docs/bug-workaround-sunset.md`
 - 詳細: `.claude/rules/git/sd-safe-commit.md`
 
 ---
