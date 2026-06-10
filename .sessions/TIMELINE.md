@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 95
+- **Total Sessions**: 96
 - **Latest Session**: 2026-06-10
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 06-10 | **L4 wipe防御をスナップショット方式に強化**（ユーザー「wipe改善できないのか」→文書化済み改善候補2件を実装）。pre-commitが.sd/全体を.git/sd-snapshot/へ複製→post-commitがファイル単位で欠損検知・復元（partial wipe対応+commit時点の未commit分保護+残存ファイル不可侵+意図的削除非復活）。temp repoで17ケース実機テスト全PASS+実弾wipe 2回で実証（mid-session 58ファイル/commit時58ファイル復元）。**新観察: wipeはpre-commit前=Bash起動時refreshで発火の可能性**。テンプレ正本更新（配信先は次回/sd-upgradeで反映）。残穴=mid-session自動復元（sd-watchdog拡張はユーザー判断待ち） | 679fabc | [Details](session-20260610-205210.md) |
 | 06-10 | **ss001へ/sd-upgrade展開完遂（v3.1.0→v3.2.0）**。dry-run 40 divergence→全件精査で固有化ゼロ判定（settings.json=旧テンプレ完全一致/CLAUDE.md=旧テンプレ生成のみ）→.sd003-keep不要で432コピー+7生成、廃止物13件退避、verify C1-6全PASS、290ファイルコミット(068eb07)。**Skills 118/119 FAIL=誤報と真因特定**（期待値がoptional除外3件を含むsource総数。欠落ゼロ＋旧FW残骸テンプレ2件は超過側→退避。deploy.ps1カウント修正がP2）。ss001 .gitignoreにbackup除外3パターン追加。**C:空き25.25GBに回復確認**（vm_bundles危機解消） | (ss001側) | [Details](session-20260610-202900.md) |
 | 06-10 | **at002/nm002へ/sd-upgrade展開完遂（P1）**。at002: dry-run divergence仕分け（差分行数で固有化/古FW判定）→.sd003-keep固有5保護+FW29更新、verify C1-6全PASS、266ファイルコミット(8c57d7d)。nm002: blatゴミ803個削除→06-07未コミット分+今日分を統合コミット(42e9b38,a56174c/383ファイル)、product資産温存。**nm002固有hookバグ修正**: scan-utf8-replacementのstdin modeがallowlist完全バイパス→--stdin-path追加+wrapper修正(4テスト+実コミット実証)。**C:満杯0GB緊急対応**: OCC 1.27GB+Office診断0.41GB削除、真因=Claude Desktop vm_bundles 12.5GB特定（F:退避手順provided・Desktop終了待ち）。auto-memory 2件 | (at002/nm002側) | [Details](session-20260610-164049.md) |
 | 06-10 | **SD003フレームワーク調査・評価＋推奨5件を全改修**。3並列Exploreで実体棚卸し→自前git履歴照合で裏取り（防御層A/自己整合性C+）。W1: `.sd/ai-coordination/`と`.sd/specs/`がgit履歴上一度も存在せずテンプレ全域ゼロと判明→6テンプレ+handoff+specs init実装(16ファイル)。W2: v3.2.0統一+jest coverageThreshold撤廃(柱3矛盾)+RULES.md design→spec。P2: 常時注入30件中14件にpaths:制約(~56KB/session削減、機構の実働も観測)。P2: deploy ps1/sh全文比較で**実害級差異2件発見**(CLAUDE.md skip-if-SD003=952ef66同型/materials/html欠落)→修正+静的パリティテスト新設+共通化計画。P3: バグ回避策サンセット表。jest OOM→maxWorkers:2。造語注釈ルールをグローバルCLAUDE.mdへ | 4196018, 6a15780, 7b64548, 13bd71e, 3fa3f49 | [Details](session-20260610-112231.md) |

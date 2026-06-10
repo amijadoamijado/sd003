@@ -1,4 +1,4 @@
-# DONE.md - 完了報告（2026-06-10 20:29 セッション）
+# DONE.md - 完了報告（2026-06-10 20:52 セッション）
 
 ---
 
@@ -7,48 +7,46 @@
 **変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `D:\claudecode\ss001\`（コミット 068eb07） | /sd-upgrade展開: v3.1.0→v3.2.0（290ファイル）。dry-run 40 divergence全件精査→固有化ゼロ判定（.sd003-keep不要）。廃止物13件（.gemini/・gemini.md・claude-memスタブ等）をバックアップ退避 |
-| `ss001/.gitignore` | バックアップ除外3パターン追加（.sd002-backup-*/ .sd003-backup-*/ .sd003-upgrade-backup-*/） |
-| `ss001/.claude/skills/sd-deploy/templates/` | 旧FW残骸2件（gemini.md.template / antigravity-rules.md.template）をバックアップへ退避 |
+| `.claude/skills/sd-deploy/templates/git-hooks/pre-commit` | 自動ステージ後に `.sd/` 全体を `.git/sd-snapshot/` へ複製する処理を追加 |
+| `.claude/skills/sd-deploy/templates/git-hooks/post-commit` | wipe検知を「ディレクトリ全消失」→「スナップショット基準のファイル単位」に変更。欠損のみ復元、不在時HEADフォールバック |
+| `.claude/rules/git/sd-safe-commit.md` | L4強化を反映。改善候補2件（partial wipe検知/未commit保護）を実装済みに更新 |
+| `docs/bug-workaround-sunset.md` | L4行をスナップショット方式に更新 |
+| `.git/hooks/`（管理外） | 新hook導入＋`.git/sd-snapshot` 初期化（58ファイル） |
 
 **変更内容の要約**
-ユーザー指示「ss001にsd003を展開」を完遂。ss001は既存SD003（v3.1.0）だったため
-deploy ではなく upgrade 手順を適用。dry-run→仕分け→execute→verify（C1〜C6全PASS）。
-sd003本体のコード変更なし。
+ユーザー「.sd/ wipe これ改善できないのか」→ L4防御をスナップショット方式に強化。
+旧L4の2限界（partial wipe非検知・未commit分喪失）を解消。バグ自体（#34330）は上流なので発生は止められない。
 
 ---
 
 ## 検証コマンド
 
 ```bash
-bash .claude/skills/sd-upgrade/upgrade.sh <target>            # dry-run
-bash .claude/skills/sd-upgrade/upgrade.sh <target> --execute
-node scripts/verify-deployment.mjs <target> <source>
+bash /c/AppData/Local/Temp/sd003-staging/test-sd-hooks.sh   # temp repo 17ケーステスト
+bash .git/hooks/post-commit                                  # 手動復元（wipe発生時）
 ```
 
 ## 検証結果
 
-- ss001: 432コピー+7生成、kept 0、C1〜C6全PASS、17 hooks配線健全
-- Skills 118/119 FAILは誤報（期待値がoptional除外3件を含むsource総数。commで欠落ゼロを実証）
-- コミット後の .sd/ wipeなし（HEAD=作業ツリー一致、10ファイル）
-- ユーザー業務データ（materials/csv・output/tkc-yayoi・scripts/tkc-yayoi）は未コミットのまま温存
+- temp repoテスト17ケース全PASS（full/partial復元・残存不可侵・意図的削除非復活・HEADフォールバック・未commit保護）
+- 実弾実証2回: mid-session wipe 58ファイル復元（手動実行）/ commit時wipe 58ファイル自動復元
+- **新観察**: wipeはpre-commit実行前に発火（=Bashツール起動時のrefreshの可能性が高い）
 
 ---
 
 ## 未完了・次のステップ
 
-- [ ] P1: 残り配信先（oc001/fw5yp/sb001/er001等）への /sd-upgrade（C:空き25.25GBで実施可能）
-- [ ] P2: deploy.ps1 Phase 6のSkillsカウント修正（optional除外を期待値に反映、118/119型誤報の根絶）
-- [ ] P2: deploy共通化Stage1（generate-framework-files.mjs）/ メモリ逼迫恒久対策
-- [ ] ss001のnpm install未実行（gas-fakesテスト利用時のみ必要）
+- [ ] P1: 残り配信先（oc001/fw5yp/sb001/er001等）/sd-upgrade ＋ **ss001/at002/nm002へ新hooks再展開**（本日のupgradeは旧hook）
+- [ ] P2: sd-watchdogのスナップショット復元型拡張（mid-session wipe対応）— 「警告のみ」は意図的設計のため**ユーザー判断待ち**
+- [ ] P2: deploy.ps1 Phase 6 Skillsカウント修正（118/119型誤報）/ deploy共通化Stage1 / セッションアーカイブ
 
 ## 引き継ぎ
 
-- 次のタスク: 残り配信先への /sd-upgrade 展開（手順確立済み）
+- wipe発生時の手動復元: `bash .git/hooks/post-commit` 一発（snapshot/HEADから欠損分のみ復元）
 
 **判断記録**
 | 判断ポイント | 採用 | 理由 |
 |--------------|------|------|
-| ss001への「展開」: deploy vs upgrade | upgrade | 既存SD003 v3.1.0入りと判明。「展開=新規deploy」と機械的に解釈しない |
-| 40 divergenceの扱い: keep vs 全上書き | 全上書き（kept 0） | settings.json=旧テンプレ完全一致、CLAUDE.md=独自追記なし等、全件が古いFWと客観確認 |
-| Skills 118/119 FAIL | 誤報と判定し続行 | commでファイルリスト差分を実証（欠落ゼロ＋超過側残骸2件）。at002 114/115と同型 |
+| 復元の正本: HEAD vs スナップショット | `.git/sd-snapshot/`（HEADフォールバック付き） | `.git/`内はruntime refresh対象外。commit時点の未commit分も守れる |
+| sd-watchdog（mid-session）も復元型にするか | 今回は見送り | 「警告のみ」は意図的設計。変更はユーザー判断を仰ぐ |
+| テスト方法 | temp使い捨てrepoで17ケース | 本物の.sd/を実験台にしない。実弾wipe 2回が追加実証になった |
