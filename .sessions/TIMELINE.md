@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 93
+- **Total Sessions**: 94
 - **Latest Session**: 2026-06-10
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 06-10 | **at002/nm002へ/sd-upgrade展開完遂（P1）**。at002: dry-run divergence仕分け（差分行数で固有化/古FW判定）→.sd003-keep固有5保護+FW29更新、verify C1-6全PASS、266ファイルコミット(8c57d7d)。nm002: blatゴミ803個削除→06-07未コミット分+今日分を統合コミット(42e9b38,a56174c/383ファイル)、product資産温存。**nm002固有hookバグ修正**: scan-utf8-replacementのstdin modeがallowlist完全バイパス→--stdin-path追加+wrapper修正(4テスト+実コミット実証)。**C:満杯0GB緊急対応**: OCC 1.27GB+Office診断0.41GB削除、真因=Claude Desktop vm_bundles 12.5GB特定（F:退避手順provided・Desktop終了待ち）。auto-memory 2件 | (at002/nm002側) | [Details](session-20260610-164049.md) |
 | 06-10 | **SD003フレームワーク調査・評価＋推奨5件を全改修**。3並列Exploreで実体棚卸し→自前git履歴照合で裏取り（防御層A/自己整合性C+）。W1: `.sd/ai-coordination/`と`.sd/specs/`がgit履歴上一度も存在せずテンプレ全域ゼロと判明→6テンプレ+handoff+specs init実装(16ファイル)。W2: v3.2.0統一+jest coverageThreshold撤廃(柱3矛盾)+RULES.md design→spec。P2: 常時注入30件中14件にpaths:制約(~56KB/session削減、機構の実働も観測)。P2: deploy ps1/sh全文比較で**実害級差異2件発見**(CLAUDE.md skip-if-SD003=952ef66同型/materials/html欠落)→修正+静的パリティテスト新設+共通化計画。P3: バグ回避策サンセット表。jest OOM→maxWorkers:2。造語注釈ルールをグローバルCLAUDE.mdへ | 4196018, 6a15780, 7b64548, 13bd71e, 3fa3f49 | [Details](session-20260610-112231.md) |
 | 06-07 | **nm002の最新配付用ファイル(tar.gz)作成**。nm002=会計事務所向け照合ツール製品(nm002-reconcile/tar.gz配布/v1.5.14)と判明、`python scripts/build_dist.py`で正規ビルド(32ファイル/80,316bytes/整合性OK)。配布.envのghp_同梱を「重大」と報告→**実は意図的例外設計(bot 3stax001・実質fine-grained等価)と判明し過剰反応を訂正**、build_dist.py変更を全revert。ユーザー: アカウント変更/revoke不要で確定。作業dir(sd003)と対象(nm002)の取り違え教訓 | (nm002側) | [Details](session-20260607-172652.md) |
 | 06-07 | **nm002を最新sd003へ更新（/sd-upgrade）＋deploy.sh settings.json上書きバグ根本修正**。nm002はガードレールhook欠落・settings.json未配線で固着→upgradeで最新化、CLAUDE.mdは既存尊重(.sd003-keep登録)、settings.json修復でC1-6全PASS。**真因=deploy.shが既存settings.jsonをSKIP(deploy.ps1は上書き)→upgradeしても古い配線が直らない**→is_kept保護時のみSKIP・他は上書きに修正(heredocのOS対応は維持、3シナリオ実機検証)。慎重精読で当初案(テンプレコピー化)を撤回 | 952ef66 | [Details](session-20260607-170010.md) |
