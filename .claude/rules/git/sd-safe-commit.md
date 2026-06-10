@@ -28,10 +28,15 @@
 | L1 | `.sd/` が gitignored だが tracked の矛盾 → working tree refresh が「捨てて良い」と誤判定 | `.gitignore` から `.sd/` 削除、通常 tracked 化 | 発火要因を減らす | `7106525` |
 | L2 | `.claude/settings.local.json` 慢性 modified が wipe 確率を上げる | `.gitignore` + `git rm --cached` で untrack | 発火確率を下げる | `7106525` |
 | L3 | Edit/Write tool on `.sd/` + 次の Bash が wipe trigger | PreToolUse hook `block-edit-write-on-sd.sh` で物理ブロック | trigger 1種を遮断 | `dcf0498` |
-| **L4** | **L1-L3 を経ても commit 時に `.sd/` 全消失が発生する**（`9ae3274` で実証） | **post-commit hook が全消失を検知し HEAD から自動復元** | **tracked ファイルの最終防衛線** | `.git/hooks/post-commit` |
+| **L4** | **L1-L3 を経ても commit 時に `.sd/` 全消失が発生する**（`9ae3274` で実証） | **post-commit hook がファイル単位で欠損を検知し `.git/sd-snapshot` から自動復元** | **最終防衛線（full/partial両対応）** | `.git/hooks/post-commit` |
 
-> **L4 の限界**: 復元は `git show HEAD:<path>` ベース。**HEAD にない（=未commitの）`.sd/` ファイルは復元されない。**
-> partial wipe（一部ファイルのみ消失）は現行 L4（`[ ! -d ".sd" ]` 判定）では検知できない。
+> **L4 強化（2026-06-10）**: pre-commit が commit 時点の `.sd/` 全体を `.git/sd-snapshot/` へ複製
+> （`.git/` 内はランタイムの working tree refresh の対象外）。post-commit はスナップショットを正として
+> **ファイル単位**で欠損を検知・復元する。これにより旧L4の2つの限界を解消:
+> ① partial wipe（一部ファイルのみ消失）も検知・復元する。
+> ② commit 時点でディスクにあったファイルは HEAD 非依存で復元される（スナップショット不在時のみ HEAD フォールバック）。
+> 残る限界: **commit と commit の間（mid-session）の wipe は L4 の射程外**（sd-watchdog が警告のみ）。
+> 実機テスト 17 ケース全 PASS（full/partial 復元・残存ファイル不可侵・意図的削除の非復活・HEAD フォールバック・未commit分保護）。
 
 Refs: anthropics/claude-code#34330, #10011
 
@@ -70,12 +75,15 @@ done && git add .sd/ && git commit -m "fix: restore .sd from <commit-hash>"
 ```
 HEADに.sd/がない場合は `git log --all -- .sessions/TIMELINE.md` で最後に存在したcommitを特定。
 
-## 改善候補（未対応）
+## 改善候補
 
-- **L4 の partial wipe 検知**: 現行は `[ ! -d ".sd" ]`（全消失のみ）。HEAD と working tree の
-  `.sd/` ファイル数を比較して partial wipe も検知・復元すれば、L3 が破られた場合の防御が厚くなる。
-- **未commit `.sd/` の保護**: L4 は HEAD 復元のため未commit分を救えない。pre-commit ステージや
-  ローカルスナップショットでの補完を検討。
+- ~~**L4 の partial wipe 検知**~~ → **実装済み（2026-06-10）**: post-commit がスナップショット基準の
+  ファイル単位検知に改良され、partial wipe も検知・復元する。
+- ~~**未commit `.sd/` の保護（commit時点）**~~ → **実装済み（2026-06-10）**: pre-commit の
+  `.git/sd-snapshot/` 採取により、commit 時点でディスクにあったファイルは HEAD 非依存で復元される。
+- **mid-session wipe の自動復元（未対応）**: commit を挟まないタイミングの wipe は sd-watchdog が
+  警告のみ。watchdog をスナップショット復元型に拡張する案はあるが、「警告のみ」は意図的設計のため
+  変更はユーザー判断待ち。現行の緩和策は「`.sd/` 変更後の早めの commit」。
 
 ## 旧ルール（緩和・歴史的経緯）
 

@@ -3,20 +3,41 @@
 #
 # 背景: 2026-03-28 Bug Trace で確定。2026-04-04 再発。
 # commit直後にランタイムが .sd/ を消すことがあるため、post-commitで検知して即復元する。
+# 2026-06-10 改良: ディレクトリ全消失判定 → ファイル単位判定（partial wipe対応）。
+# 復元の正本は pre-commit が採取した .git/sd-snapshot（commit時点のディスク内容＝未commit分も含む）。
+# スナップショットが無い場合は HEAD から復元（旧挙動フォールバック）。
 # Refs: anthropics/claude-code#34330
 
-# === .sd/ 消失検知 + 自動復元 ===
-# HEADに .sd/ ファイルが存在するか確認
-SD_IN_HEAD=$(git ls-tree -r HEAD --name-only 2>/dev/null | grep "^\.sd/" | head -1)
+# === .sd/ 消失検知 + 自動復元（full / partial wipe 両対応） ===
+GIT_DIR_PATH=$(git rev-parse --git-dir 2>/dev/null)
+SNAPSHOT="$GIT_DIR_PATH/sd-snapshot"
+restored=0
 
-if [ -n "$SD_IN_HEAD" ] && [ ! -d ".sd" ]; then
-    # HEADにあるのにディスクにない = 消失
-    echo "[post-commit] WARNING: .sd/ disappeared after commit. Auto-restoring..."
-    git ls-tree -r HEAD --name-only | grep "^\.sd/" | while read f; do
-        mkdir -p "$(dirname "$f")"
-        git show "HEAD:$f" > "$f"
-    done
-    echo "[post-commit] .sd/ restored from HEAD ($(git ls-tree -r HEAD --name-only | grep -c '^\.sd/') files)"
+if [ -n "$GIT_DIR_PATH" ] && [ -d "$SNAPSHOT" ]; then
+    # 正本=スナップショット。欠損ファイルのみ復元（残存ファイルは触らない）
+    while IFS= read -r src; do
+        rel=".sd/${src#"$SNAPSHOT"/}"
+        if [ ! -f "$rel" ]; then
+            mkdir -p "$(dirname "$rel")"
+            cp "$src" "$rel"
+            restored=$((restored+1))
+        fi
+    done < <(find "$SNAPSHOT" -type f)
+    if [ "$restored" -gt 0 ]; then
+        echo "[post-commit] WARNING: .sd/ wipe detected (full or partial). Restored $restored file(s) from .git/sd-snapshot."
+    fi
+else
+    # フォールバック: HEADから欠損ファイルを復元（未commit分は救えない）
+    while IFS= read -r f; do
+        if [ ! -f "$f" ]; then
+            mkdir -p "$(dirname "$f")"
+            git show "HEAD:$f" > "$f"
+            restored=$((restored+1))
+        fi
+    done < <(git ls-tree -r HEAD --name-only 2>/dev/null | grep "^\.sd/")
+    if [ "$restored" -gt 0 ]; then
+        echo "[post-commit] WARNING: .sd/ wipe detected. Restored $restored file(s) from HEAD (no snapshot found)."
+    fi
 fi
 
 # === async push ===
