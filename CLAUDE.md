@@ -134,4 +134,4 @@ IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the se
 | Cleanup | `/cleanup`, `restore`, `history` |
 
 ---
-SD003 v3.1.0 | Updated: 2026-04-11 | Style: `.claude/rules/global/claude-md-style.md`
+SD003 v3.2.0 | Updated: 2026-06-10 | Style: `.claude/rules/global/claude-md-style.md`

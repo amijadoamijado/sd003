@@ -81,4 +81,4 @@ IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the se
 | Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
 
 ---
-SD003 v3.1.0 | Deployed: {{DATE}} | Style: `.claude/rules/global/claude-md-style.md`
+SD003 v3.2.0 | Deployed: {{DATE}} | Style: `.claude/rules/global/claude-md-style.md`

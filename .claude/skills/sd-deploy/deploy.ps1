@@ -1,4 +1,4 @@
-# SD003 Framework Deployment Script v3.1.0 (PowerShell)
+# SD003 Framework Deployment Script v3.2.0 (PowerShell)
 # Usage: powershell -ExecutionPolicy Bypass -File deploy.ps1 <target-project-path>
 
 param(
@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$SD003_VERSION = "3.1.0"
+$SD003_VERSION = "3.2.0"
 $FRAMEWORK_VERSION = "2.14.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"

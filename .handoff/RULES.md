@@ -8,7 +8,7 @@
 | ディレクトリ | 役割 |
 |-------------|------|
 | `.handoff/` | 引き継ぎパック（ORDER.md、DONE.md） |
-| `.sd/specs/` | 仕様書（requirements.md、design.md、tasks.md） |
+| `.sd/specs/` | 仕様書（requirements.md、spec.md、tasks.md） |
 | `src/` | 実装コード |
 | `tests/` | テストコード |
 | `dist/` | ビルド出力（.gitignore） |
@@ -136,7 +136,7 @@ npm run build && npm test && npm run lint
 作業開始前に、必ず `.sd/specs/` を確認してください：
 
 1. `requirements.md` - 何を作るべきか
-2. `design.md` - どう設計するか
+2. `spec.md` - どう設計するか（`design.md` は使わない。Antigravity がUI設計用に予約）
 3. `tasks.md` - タスクリストと進捗
 
 ---
@@ -151,7 +151,7 @@ npm run build && npm test && npm run lint
 | ファイル | 保存先 |
 |---------|--------|
 | 要件定義書 | `.sd/specs/{feature}/requirements.md` |
-| 技術設計書 | `.sd/specs/{feature}/design.md` |
+| 技術設計書 | `.sd/specs/{feature}/spec.md` |
 | タスクリスト | `.sd/specs/{feature}/tasks.md` |
 
 ### AI協調ワークフロー
