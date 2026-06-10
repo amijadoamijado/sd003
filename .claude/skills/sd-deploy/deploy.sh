@@ -163,6 +163,7 @@ DIRS=(
     "docs/troubleshooting/bug-reports"
     "materials/csv"
     "materials/excel"
+    "materials/html"
     "materials/pdf"
     "materials/images"
     "materials/text"
@@ -397,13 +398,14 @@ done
 # ============================================================
 PROJECT_NAME=$(basename "$TARGET_PROJECT")
 
-# 5-1: CLAUDE.md from template (skip if SD003-based, overwrite if legacy)
+# 5-1: CLAUDE.md from template (overwrite unless protected by .sd003-keep)
+# NOTE: former SKIP-if-SD003 branch removed (parity with deploy.ps1): an old
+# SD003-based CLAUDE.md must be upgraded, not preserved. Bespoke versions are
+# protected via .sd003-keep (same bug class as the settings.json fix 952ef66).
 CLAUDE_TEMPLATE="$SOURCE_DIR/.claude/skills/sd-deploy/templates/CLAUDE.md.template"
 if is_kept "CLAUDE.md"; then
     echo "  KEEP: CLAUDE.md preserved via .sd003-keep (bespoke version kept)"
     echo "CLAUDE.md" >> "$KEPT_LOG"
-elif [ -f "$TARGET_PROJECT/CLAUDE.md" ] && grep -q "SD003" "$TARGET_PROJECT/CLAUDE.md"; then
-    echo "  SKIP: CLAUDE.md already exists (SD003-based, preserving)"
 elif [ -f "$CLAUDE_TEMPLATE" ]; then
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
         -e "s/{{DATE}}/$DATE/g" \
