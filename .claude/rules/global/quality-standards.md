@@ -1,5 +1,8 @@
 ---
-description: SD003フレームワーク品質基準（全ファイル適用）
+description: SD003フレームワーク品質基準（src/tests配下適用）
+paths:
+  - "src/**/*"
+  - "tests/**/*"
 ---
 
 # 品質基準

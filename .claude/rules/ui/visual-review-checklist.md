@@ -1,5 +1,9 @@
 ---
 description: Web UI 視覚的評価チェックリスト（7項目スコアリング）。スクショ撮影後に適用。
+paths:
+  - "**/*.html"
+  - "**/*.css"
+  - "materials/images/**/*"
 ---
 
 # 視覚的評価チェックリスト

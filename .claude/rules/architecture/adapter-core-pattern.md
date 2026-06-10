@@ -1,5 +1,7 @@
 ---
 description: Adapter-Core分離パターン - データ品質の抽象化
+paths:
+  - "src/**/*"
 ---
 
 # Adapter-Core分離パターン

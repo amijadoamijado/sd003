@@ -1,3 +1,10 @@
+---
+description: CLAUDE.md スタイルガイド（200行以下・条件付きブロック規約）。CLAUDE.md編集時に適用。
+paths:
+  - "CLAUDE.md"
+  - "**/CLAUDE.md.template"
+---
+
 # CLAUDE.md スタイルガイド（条件付きブロック規約）
 
 ## 原則

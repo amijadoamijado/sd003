@@ -1,3 +1,9 @@
+---
+description: AI協調体制（Codex/Antigravity連携の正本）。協調文書作成時に適用。要約とトリガー語はCLAUDE.mdの条件ブロック参照。
+paths:
+  - ".sd/ai-coordination/**/*"
+---
+
 # AI協調体制
 
 ## 対応AI（3種類）

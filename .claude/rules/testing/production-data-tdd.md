@@ -1,5 +1,8 @@
 ---
 description: 変則TDD - 本番データ駆動テスト戦略
+paths:
+  - "tests/**/*"
+  - "src/adapters/**/*"
 ---
 
 # 変則TDD（本番データ駆動開発）

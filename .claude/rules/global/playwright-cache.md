@@ -1,3 +1,11 @@
+---
+description: Playwright共有キャッシュ（D:\playwright-browsers固定）。要点はCLAUDE.mdの条件ブロック参照。
+paths:
+  - "playwright.config.*"
+  - "tests/e2e/**/*"
+  - ".claude/skills/gas-e2e/**/*"
+---
+
 # Playwright ブラウザキャッシュ共有ルール
 
 ## 原則

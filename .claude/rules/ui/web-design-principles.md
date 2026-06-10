@@ -1,5 +1,8 @@
 ---
 description: Web UI デザイン原則（8原則+禁止事項）。GAS Web App含む全Web開発に適用。
+paths:
+  - "**/*.html"
+  - "**/*.css"
 ---
 
 # Web UIデザイン原則

@@ -1,3 +1,9 @@
+---
+description: Ralph Loop運用ルール（/sd003:loop-* と /ralph-wiggum:*）。要約はCLAUDE.mdの条件ブロック参照。
+paths:
+  - ".sd/ralph/**/*"
+---
+
 # Ralph Loop Operation Rules
 
 ## Phase-Based Application

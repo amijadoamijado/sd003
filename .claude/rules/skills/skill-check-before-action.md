@@ -1,3 +1,13 @@
+---
+description: ファイル操作前のスキル確認必須ルール。物理強制は enforce-skill-read.sh が常時担うため、本文書は対象ファイル操作時のみ注入。
+paths:
+  - "**/*.xlsx"
+  - "**/*.xls"
+  - "**/*.csv"
+  - "**/*.pdf"
+  - "materials/**/*"
+---
+
 # スキル確認必須ルール（ファイル操作前）
 
 ## 物理ガードレール（PreToolUse hook で強制）

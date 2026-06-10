@@ -1,3 +1,9 @@
+---
+description: リファクタリングワークフロー（/refactor:*）。要約はCLAUDE.mdの条件ブロック参照。
+paths:
+  - ".sd/refactor/**/*"
+---
+
 # リファクタリングシステム
 
 ## 概要

@@ -1,3 +1,9 @@
+---
+description: ルール集の目次（人間向け）。ルール編集時のみ注入。
+paths:
+  - ".claude/rules/**/*"
+---
+
 # .claude/rules/
 
 SD003フレームワークの開発ルール集。Claude Codeが自動読込する。

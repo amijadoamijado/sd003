@@ -1,5 +1,7 @@
 ---
-description: 仕様書バージョン管理（常時適用）
+description: 仕様書バージョン管理（.sd/specs/配下適用。配置強制は常時適用のspec-driven.mdが担う）
+paths:
+  - ".sd/specs/**/*"
 ---
 
 # 仕様書バージョン管理
