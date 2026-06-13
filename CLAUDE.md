@@ -127,7 +127,7 @@ IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the se
 | AI Workflow | `/workflow:init`, `order`, `request`, `impl`, `review`, `test`, `status` |
 | Loop | `/sd003:loop-test`, `loop-lint`, `loop-type` |
 | Night | `/ralph-wiggum:run`, `status`, `plan` |
-| Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution` |
+| Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution`, `/ai-suspect` |
 | Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
 | Skills | `/sd:skills-find`, `skills-add`, `skills-list` |
 | Refactor | `/refactor:init`, `plan`, `batch`, `complete`, `rollback` |

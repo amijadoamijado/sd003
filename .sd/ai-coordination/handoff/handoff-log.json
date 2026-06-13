@@ -1,5 +1,0 @@
-{
-  "version": "2.0.0",
-  "description": "AI間引き継ぎログ。依頼・報告の発行時に必ず追記する。形式: .claude/rules/workflow/ai-coordination.md 参照",
-  "handoffs": []
-}

@@ -404,6 +404,22 @@ REQUIRED_FILES=(
 )
 ```
 
+### Step 9b: 内容検証ゲート（自動・hard-fail）
+
+deploy は Phase 6b で `node scripts/verify-deployment.mjs <target> <source>` を自動実行する。
+ファイルの存在だけでなく**中身**を検証する（hook配線・テンプレ未置換・廃止語・文字化け・JSON妥当性）。
+**検証に失敗すると deploy は exit 1 で停止する**（従来は失敗しても成功扱いだった）。
+
+手動で再検証する場合:
+
+```bash
+node scripts/verify-deployment.mjs "<target-project>" "<sd003-source>"
+# 全PASS → exit 0 / 1件でもFAIL → exit 1（欠陥を列挙）
+```
+
+詳細・検査項目一覧（C1〜C6）・deny-list 調整は `SKILL.md` の「Phase 6b: 内容検証ゲート」を参照。
+既存デプロイ先は `settings.json` を上書きしない仕様のため、古い配信先で FAIL したら当該ファイルを削除して再deployする。
+
 ## 展開レポート
 
 ```

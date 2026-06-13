@@ -1,11 +1,11 @@
 #!/bin/bash
-# SD003 Framework Deployment Script v3.1.0 (Bash)
+# SD003 Framework Deployment Script v3.2.0 (Bash)
 # Usage: ./deploy.sh <target-project-path>
 
 set -e
 
 # Configuration
-SD003_VERSION="3.1.0"
+SD003_VERSION="3.2.0"
 FRAMEWORK_VERSION="2.14.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
@@ -81,7 +81,7 @@ deploy_dry_run() {
             if ! cmp -s "$f" "$tgt"; then DIV+=("$projrel"); diverged=$((diverged+1)); else same=$((same+1)); fi
         done < <(find "$SOURCE_DIR/$d" -type f)
     done
-    local scan_files=("antigravity.md" "AGENTS.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "tests/gas-fakes/setup.ts")
+    local scan_files=("antigravity.md" "AGENTS.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "tests/gas-fakes/setup.ts")
     for sf in "${scan_files[@]}"; do
         if is_kept "$sf"; then KEP+=("$sf"); kept=$((kept+1)); continue; fi
         [ -f "$SOURCE_DIR/$sf" ] || continue
@@ -163,6 +163,7 @@ DIRS=(
     "docs/troubleshooting/bug-reports"
     "materials/csv"
     "materials/excel"
+    "materials/html"
     "materials/pdf"
     "materials/images"
     "materials/text"
@@ -330,6 +331,15 @@ else
     COPY_STATS["Validate Test Data (sh)"]=0
 fi
 
+# 4-15c: scripts/verify-deployment.mjs (single file - deploy content-verification gate)
+if [ -f "$SOURCE_DIR/scripts/verify-deployment.mjs" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    cp "$SOURCE_DIR/scripts/verify-deployment.mjs" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Verify Deployment (mjs)"]=1
+else
+    COPY_STATS["Verify Deployment (mjs)"]=0
+fi
+
 # 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator)
 if [ -f "$SOURCE_DIR/scripts/sync-cli-commands.py" ]; then
     mkdir -p "$TARGET_PROJECT/scripts"
@@ -388,13 +398,14 @@ done
 # ============================================================
 PROJECT_NAME=$(basename "$TARGET_PROJECT")
 
-# 5-1: CLAUDE.md from template (skip if SD003-based, overwrite if legacy)
+# 5-1: CLAUDE.md from template (overwrite unless protected by .sd003-keep)
+# NOTE: former SKIP-if-SD003 branch removed (parity with deploy.ps1): an old
+# SD003-based CLAUDE.md must be upgraded, not preserved. Bespoke versions are
+# protected via .sd003-keep (same bug class as the settings.json fix 952ef66).
 CLAUDE_TEMPLATE="$SOURCE_DIR/.claude/skills/sd-deploy/templates/CLAUDE.md.template"
 if is_kept "CLAUDE.md"; then
     echo "  KEEP: CLAUDE.md preserved via .sd003-keep (bespoke version kept)"
     echo "CLAUDE.md" >> "$KEPT_LOG"
-elif [ -f "$TARGET_PROJECT/CLAUDE.md" ] && grep -q "SD003" "$TARGET_PROJECT/CLAUDE.md"; then
-    echo "  SKIP: CLAUDE.md already exists (SD003-based, preserving)"
 elif [ -f "$CLAUDE_TEMPLATE" ]; then
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
         -e "s/{{DATE}}/$DATE/g" \
@@ -471,16 +482,26 @@ OS_TYPE="$(uname -s 2>/dev/null || echo 'Unknown')"
 if [[ "$OS_TYPE" == *"MINGW"* ]] || [[ "$OS_TYPE" == *"MSYS"* ]] || [[ "$OS_TYPE" == *"CYGWIN"* ]]; then
     # Windows (Git Bash/MSYS)
     HOOK_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"'
+    CTX_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\context-monitor-hook.ps1\"'
 else
     # Linux/Mac
     HOOK_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd003-stop-hook.sh\"'
+    CTX_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-monitor-hook.sh\"'
 fi
 
-# settings.json (skip if exists)
-if [ -f "$TARGET_PROJECT/.claude/settings.json" ]; then
-    echo "  SKIP: .claude/settings.json already exists (preserving custom hooks/permissions)"
+# settings.json: OVERWRITE with latest full wiring unless protected by .sd003-keep.
+# WAS skip-if-exists, which left a stale/partial settings.json un-upgraded on
+# re-deploy/upgrade -> guardrails stayed INACTIVE in already-deployed targets
+# (e.g. nm002/at002). deploy.ps1 already overwrites; this aligns deploy.sh with it.
+# IMPORTANT: generate the FULL guardrail wiring (PreToolUse/PostToolUse/SessionStart),
+# not just the Stop hook. A minimal settings.json leaves copied guardrail hooks INACTIVE
+# (block-edit-write-on-sd / enforce-skill-read / enforce-spec-location / etc.).
+if is_kept ".claude/settings.json"; then
+    echo "  KEEP: .claude/settings.json preserved via .sd003-keep"
+    echo ".claude/settings.json" >> "$KEPT_LOG"
 else
-    cat > "$TARGET_PROJECT/.claude/settings.json" << EOF
+    SETTINGS_TMP="$(mktemp)"
+    cat > "$SETTINGS_TMP" << EOF
 {
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
@@ -495,11 +516,206 @@ else
             "timeout": 30
           }
         ]
+      },
+      {
+        "matcher": ".*refactor.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CTX_CMD",
+            "timeout": 10
+          }
+        ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-sd-destructive.sh\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
+            "timeout": 120
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/workflow-gate.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-edit-write-on-sd.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-skill-read.sh\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-spec-location.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/sd-watchdog.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Edit",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Write",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Bash",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/deploy-package-reminder.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/agent-review.sh\"",
+            "timeout": 600
+          },
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/workflow-state-tracker.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/track-skill-read.sh\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/session-skill-suggest.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "ralph-loop": {
+    "description": "SD003 Ralph Loop configuration",
+    "midpoint": {
+      "hook": "sd003-stop-hook.ps1",
+      "max_iterations": 20,
+      "completion_promise": "ALL_TESTS_PASS"
+    },
+    "endgame": {
+      "hook": "sd003-stop-hook-endgame.ps1",
+      "max_same_error": 2,
+      "escalation": "/dialogue-resolution"
+    },
+    "note": "Windows PowerShell version. Switch hooks manually based on phase."
+  },
+  "refactoring": {
+    "description": "SD003 Refactoring System configuration",
+    "context_monitor_hook": "context-monitor-hook.ps1",
+    "config_path": ".sd/refactor/config.json",
+    "skills": [
+      "context-autonomy",
+      "session-autosave",
+      "rollback-guard"
+    ],
+    "commands": [
+      "refactor-init",
+      "refactor-plan",
+      "refactor-batch",
+      "refactor-rollback",
+      "refactor-complete"
     ]
   }
 }
 EOF
+    if [ -f "$TARGET_PROJECT/.claude/settings.json" ] && ! cmp -s "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"; then
+        echo ".claude/settings.json" >> "$DIVERGED_LOG"
+    fi
+    mv "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"
+    echo "  UPDATE: .claude/settings.json (latest guardrail wiring applied)"
 fi
 
 # 5-6: .sd/ids/registry.json (skip if exists)
@@ -656,6 +872,31 @@ done
 echo "[Phase 6/7] Verification completed"
 
 # ============================================================
+# Phase 6b: Content verification gate (single Node verifier; hard-fail)
+# Catches mis-wired settings.json / unsubstituted template vars / deprecated
+# tokens / mojibake / invalid JSON that Phase 6's count+existence check misses.
+# ============================================================
+echo ""
+echo "=== Content Verification (Phase 6b) ==="
+if [ "$DRY_RUN" = true ]; then
+    echo "  [SKIP] dry-run: nothing generated to verify"
+else
+    VERIFY_SCRIPT="$SOURCE_DIR/scripts/verify-deployment.mjs"
+    if ! command -v node >/dev/null 2>&1; then
+        echo "  [FAIL] node not found on PATH - cannot run content verification"
+        ALL_PASSED=false
+    elif [ ! -f "$VERIFY_SCRIPT" ]; then
+        echo "  [FAIL] verifier not found: $VERIFY_SCRIPT"
+        ALL_PASSED=false
+    else
+        if ! node "$VERIFY_SCRIPT" "$TARGET_PROJECT" "$SOURCE_DIR"; then
+            ALL_PASSED=false
+        fi
+    fi
+fi
+echo "[Phase 6b/7] Content verification completed"
+
+# ============================================================
 # Phase 7: Report
 # ============================================================
 echo ""
@@ -702,4 +943,9 @@ echo "  3. Review CLAUDE.md"
 echo "  4. Run /sessionread to verify"
 echo "  5. Start with /sd:spec-init {feature}"
 echo ""
+if [ "$ALL_PASSED" != true ]; then
+    echo "SD003 deployment FAILED verification - fix the issues above and re-run."
+    echo "(Deployed files remain in place; nothing was rolled back.)"
+    exit 1
+fi
 echo "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!"

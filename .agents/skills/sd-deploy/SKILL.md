@@ -102,7 +102,32 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 | 4 | **動的コピー**（ディレクトリ単位、ハードコードなし） |
 | 5 | 生成ファイル作成（CLAUDE.md, antigravity.md, session等） |
 | 6 | 検証（ソースvsターゲットのファイル数比較） |
+| 6b | **内容検証ゲート**（`node scripts/verify-deployment.mjs`。hard-fail） |
 | 7 | レポート出力 |
+
+### Phase 6b: 内容検証ゲート（hard-fail）
+
+> Phase 6 はファイル「数」と「存在」しか見ない。`settings.json` の**中身**が壊れていても
+> （例: commit `9f14984` はガードレールが Stop にしか配線されず PreToolUse 空 = 防御不活性で出荷）
+> 「ファイルは存在する」だけで素通りした。Phase 6b はその穴を塞ぐ。
+
+- 実装は単一の Node スクリプト `scripts/verify-deployment.mjs`（PS1/sh のロジック二重化を回避）。
+  Node 標準モジュールのみ使用 → `npm install` 前でも動く。
+- **失敗するとデプロイが exit 1 で止まる**（旧来は検証失敗でも exit 0 で「成功」だった）。
+- `--dry-run` 時はスキップ（生成物がないため）。`node` が PATH にない場合は FAIL（黙ってスキップしない）。
+
+| 検査 | 内容 | 捕捉する欠陥 |
+|------|------|------------|
+| C1 | `settings.json.template` から期待hook集合を導出し、配信先の `settings.json` が同じhookを配線し PreToolUse/PostToolUse/Stop/SessionStart が非空か | mis-wiring（9f14984級）、置換でJSON破損 |
+| C2 | 配信先 `settings.json` が参照する各hookファイルが `.claude/hooks/` に実在するか | dangling wiring |
+| C3 | 生成ファイルに未置換テンプレ変数 `{{...}}` が残っていないか | 半端な生成 |
+| C4 | `.claude/commands/*.md` / `settings.json` / `CLAUDE.md` に廃止語が無いか | `.kiro` 残存・stale ref |
+| C5 | hookスクリプトと `settings.json` に文字化け（U+FFFD）が無いか | デプロイ時文字化け |
+| C6 | 生成JSON（registry / handoff-log）がparse可能か（BOM許容） | JSON破損 |
+
+**手動実行**: `node scripts/verify-deployment.mjs <targetDir> [sourceDir]`（全PASSでexit 0、1件でもFAILでexit 1）。
+**deny-list の調整（C4）**: 環境変数 `SD003_DEPRECATED_TOKENS="tok1,tok2"`（既定 `.kiro`）。誤検知でゲート信頼を損なわないよう最小限に保つ。
+**既存デプロイ先の落とし穴**: deploy は既存 `settings.json` を上書きしない（SKIP）。古い配信先は壊れた配線のまま固着するため、Phase 6b が FAIL したら `settings.json` を削除して再deployするか手動で再配線する。
 
 ## 動的コピー対象
 
@@ -121,6 +146,7 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 | 12 | `docs/quality-gates.md` | 単体コピー |
 | 13 | `.handoff/` | ツリーコピー |
 | 14 | `scripts/sync-cli-commands.py`（agy/codex skill生成器） | 単体コピー |
+| 15 | `scripts/verify-deployment.mjs`（Phase 6b 内容検証ゲート） | 単体コピー |
 | 16 | `AGENTS.md` | 単体コピー |
 | 17 | `.sd/ralph/` | ツリーコピー |
 | 18 | `.sd/steering/` | ツリーコピー |

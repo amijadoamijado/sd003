@@ -1,4 +1,4 @@
-# SD003 Framework Deployment Script v3.1.0 (PowerShell)
+# SD003 Framework Deployment Script v3.2.0 (PowerShell)
 # Usage: powershell -ExecutionPolicy Bypass -File deploy.ps1 <target-project-path>
 
 param(
@@ -11,7 +11,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$SD003_VERSION = "3.1.0"
+$SD003_VERSION = "3.2.0"
 $FRAMEWORK_VERSION = "2.14.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
@@ -118,6 +118,7 @@ function Invoke-DeployDryRun {
         "antigravity.md", "AGENTS.md", ".claude\settings.json",
         "docs\quality-gates.md", "scripts\validate-test-data.ps1",
         "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
+        "scripts\verify-deployment.mjs",
         "tests\gas-fakes\setup.ts"
     )
     foreach ($f in $scanFiles) {
@@ -423,6 +424,17 @@ if (Test-Path $vtdShSrc) {
     $copyStats["Validate Test Data (sh)"] = 1
 } else {
     $copyStats["Validate Test Data (sh)"] = 0
+}
+
+# 4-15c: scripts/verify-deployment.mjs (single file - deploy content-verification gate)
+$verifySrc = Join-Path $SOURCE_DIR "scripts\verify-deployment.mjs"
+if (Test-Path $verifySrc) {
+    $scriptsDst = Join-Path $TargetProject "scripts"
+    if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
+    Copy-Item $verifySrc (Join-Path $scriptsDst "verify-deployment.mjs") -Force
+    $copyStats["Verify Deployment (mjs)"] = 1
+} else {
+    $copyStats["Verify Deployment (mjs)"] = 0
 }
 
 # 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator)
@@ -799,6 +811,31 @@ foreach ($f in $generatedFiles) {
 Write-Host "[Phase 6/7] Verification completed" -ForegroundColor Green
 
 # ============================================================
+# Phase 6b: Content verification gate (single Node verifier; hard-fail)
+# Catches mis-wired settings.json / unsubstituted template vars / deprecated
+# tokens / mojibake / invalid JSON that Phase 6's count+existence check misses.
+# ============================================================
+Write-Host ""
+Write-Host "=== Content Verification (Phase 6b) ===" -ForegroundColor Cyan
+if ($DryRun) {
+    Write-Host "  [SKIP] dry-run: nothing generated to verify" -ForegroundColor Yellow
+} else {
+    $verifyScript = Join-Path $SOURCE_DIR "scripts\verify-deployment.mjs"
+    $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
+    if (-not $nodeCmd) {
+        Write-Host "  [FAIL] node not found on PATH - cannot run content verification" -ForegroundColor Red
+        $allPassed = $false
+    } elseif (-not (Test-Path $verifyScript)) {
+        Write-Host "  [FAIL] verifier not found: $verifyScript" -ForegroundColor Red
+        $allPassed = $false
+    } else {
+        & node $verifyScript $TargetProject $SOURCE_DIR
+        if ($LASTEXITCODE -ne 0) { $allPassed = $false }
+    }
+}
+Write-Host "[Phase 6b/7] Content verification completed" -ForegroundColor Green
+
+# ============================================================
 # Phase 7: Report
 # ============================================================
 Write-Host ""
@@ -840,4 +877,9 @@ Write-Host "  3. Review CLAUDE.md"
 Write-Host "  4. Run /sessionread to verify"
 Write-Host "  5. Start with /sd:spec-init {feature}"
 Write-Host ""
+if (-not $allPassed) {
+    Write-Host "SD003 deployment FAILED verification - fix the issues above and re-run." -ForegroundColor Red
+    Write-Host "(Deployed files remain in place; nothing was rolled back.)" -ForegroundColor Yellow
+    exit 1
+}
 Write-Host "SD003 v${FRAMEWORK_VERSION} (deploy v${SD003_VERSION}) deployed successfully!" -ForegroundColor Green
