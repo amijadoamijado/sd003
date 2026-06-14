@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 97
-- **Latest Session**: 2026-06-11
+- **Total Sessions**: 98
+- **Latest Session**: 2026-06-14
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 06-14 | **`/ai-suspect`コマンド新規作成**（AI挙動不審=捏造/過信/ルール不遵守を証拠ベース5Why→真因→決定論ガードレール+bd issue登録で強制クローズ。手動のみ・3点ゲート柱4・模範5Why(at002 0613)埋込・bd未初期化フォールバック。syncで.sd/.agents/.codexミラー生成）。**commit時.sd/ wipe事故→git show復元でクリーン復旧**（git add -Aが.sd/58ファイルwipeをステージ→全削除コミット→`git show e2b2cfb:path>path`で復元+sync再生成・データ損失ゼロ。git checkoutはguardrailで不可）。**at002 bd棚卸し: 完了済5件close**(3c0.3/3c0.6/b4o/qfe/12l・各証拠付・open62→57)+登録待ち3ゲート(3c0.1/3c0.2/Claim-Evidence)のsettings.jsonスニペット作成→at002 materials/text/保存。グローバルsettings.jsonにauto-accept edits既定化。archive 6件(4MB)→GDrive | b810931, 90d0df6 | [Details](session-20260614-094708.md) |
 | 06-11 | **fl006へ/sd-upgrade展開完遂（v3.2.0）**。廃止物3件削除（.gemini/GEMINI.md/gemini.md）+FW 26ファイル更新+CLAUDE.md保護+verify C1-6全PASS（db3cd41）。powershell→pwsh切替でGet-FileHashエラー回避。**at002セッションアーカイブ1件(4MB)→Google Drive移動**（インデックス30件更新） | (fl006側) | [Details](session-20260611-141727.md) |
 | 06-10 | **L4 wipe防御をスナップショット方式に強化**（ユーザー「wipe改善できないのか」→文書化済み改善候補2件を実装）。pre-commitが.sd/全体を.git/sd-snapshot/へ複製→post-commitがファイル単位で欠損検知・復元（partial wipe対応+commit時点の未commit分保護+残存ファイル不可侵+意図的削除非復活）。temp repoで17ケース実機テスト全PASS+実弾wipe 2回で実証（mid-session 58ファイル/commit時58ファイル復元）。**新観察: wipeはpre-commit前=Bash起動時refreshで発火の可能性**。テンプレ正本更新（配信先は次回/sd-upgradeで反映）。残穴=mid-session自動復元（sd-watchdog拡張はユーザー判断待ち） | 679fabc | [Details](session-20260610-205210.md) |
 | 06-10 | **ss001へ/sd-upgrade展開完遂（v3.1.0→v3.2.0）**。dry-run 40 divergence→全件精査で固有化ゼロ判定（settings.json=旧テンプレ完全一致/CLAUDE.md=旧テンプレ生成のみ）→.sd003-keep不要で432コピー+7生成、廃止物13件退避、verify C1-6全PASS、290ファイルコミット(068eb07)。**Skills 118/119 FAIL=誤報と真因特定**（期待値がoptional除外3件を含むsource総数。欠落ゼロ＋旧FW残骸テンプレ2件は超過側→退避。deploy.ps1カウント修正がP2）。ss001 .gitignoreにbackup除外3パターン追加。**C:空き25.25GBに回復確認**（vm_bundles危機解消） | (ss001側) | [Details](session-20260610-202900.md) |
