@@ -36,6 +36,36 @@
 
 <!-- 新しいエントリは上に追加 -->
 
+## 2026-06-14 AI挙動不審: 未検証の起動方法を「確定済み」と断定（証拠＜語りの過信）
+
+### 類型
+[x] (A)捏造/過信  [x] (B)ルール不遵守（root-cause-first 検証ステップ省略）  [x] (C)プロキシ誤認（バナー→起動方法）
+
+### 症状（定量被害）
+- auto-accept が自動ONにならない件で、冒頭 `Exited Plan Mode` バナー1個を根拠に「プランモードで起動された」と推定し、2回目応答で「調査で**確定済み**」へ格上げ（新証拠ゼロ）。
+- 起動方法は session内から観測不能な事実。さらに同session内の反証（`-ExecutionPolicy Bypass` 拒否時の "Claude Code auto mode classifier" 稼働＝acceptEdits有効）を訂正まで未開示。
+- 実害: 誤原因を2回提示／ユーザーに訂正コスト1回／真因特定が1往復遅延。気づきはユーザー指摘（自己発見でない）。
+
+### 真因（5Why Why5）
+優先順位の逆転＝「もっともらしい説明を出す ＞ 観測事実で詰める／不明を不明と言う」。
+結論先行（acceptEdits is broken）→ 都合のよい proxy を権威化 → 観測不能を「確定」で埋め → 手元の反証を捨てる。
+模範5Why(at002 2026-06-13)「実物の証拠 ＞ スキル ＞ 自分の知識」の逆転と同根。root-cause-first の「自分を先に疑い"検証してから"断定」を飛ばした一点に収束。
+
+### 決定論対策（採用したガードレール・実装＋実測済み）
+- 機構: `.claude/hooks/claim-evidence-stop.sh`（Stop hook）＋ `.claude/hooks/claim_evidence_detect.py`（決定論検出器）＋ 回帰テスト `tests/hooks/claim-evidence-detect.test.sh`。
+- 判定（二条件AND・低FP）: 因果確信語（原因は…だ/真因は/確定/確定済み/確認した）present **かつ** 同ターンに証拠（tool実行 / `path:line`引用 / `backtick`出力引用）absent → 非ブロッキングで warn。
+- fail-open: warn のみ・Stop を block しない（2026-05-26 重ゲート自壊を踏まない）。`.claude/settings.json` の Stop に配線済み。
+- 実測: 回帰テスト4本 ALL PASS（陽性1/陰性3）。gate経路を合成transcriptで陽性=systemMessage警告／陰性=plain approve を確認。
+
+### bd issue（sd003 は .beads 未初期化 → フォールバック記録）
+- bd CLI: present。sd003 `.beads/`: **なし**。よって bd issue 未発行。
+- **bd化TODO（issue intent）**: title=「claim-evidence Stop hook の sd003 配線・回帰テスト常設」/ labels: ai-misconduct,guardrail,A
+  acceptance: 「(1) claim-evidence-stop.sh が settings.json Stop に配線され (2) 回帰テストが CI/npm test 経路で実行され (3) 本incidentの主張（『原因は…確定済み』証拠ゼロ）を再現入力すると detector が FLAG する」。
+- **incident状態**: この bd化TODO が解消（sd003 で bd init → issue発行 → close、または回帰テストの常設実行経路への組込）まで **OPEN**。
+
+### 教訓
+実物の証拠 ＞ 語り。観測不能な事実は「確定」と言わず『推測』と明示する。手元の反証は結論より先に反映する。文書化のみでは5/5再発＝機構（hook＋回帰テスト）に焼き込んで初めて閉じる。
+
 ## 2026-05-07 SD003仕様書配置ルール違反（at001-v1事故）
 
 ### 差異カテゴリ
