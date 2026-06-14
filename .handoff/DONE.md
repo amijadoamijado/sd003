@@ -1,19 +1,20 @@
-# DONE.md - 完了報告（2026-06-14 セッション）
+# DONE.md - 完了報告（2026-06-14〜15 セッション）
 
 ## やったこと
 
-**変更したファイル（sd003: commit b810931 → 90d0df6）**
+**変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `.claude/commands/ai-suspect.md` | 新規・主成果物（AI挙動不審の5Why→決定論ガードレール→bd issue） |
-| `CLAUDE.md` | Quick Command Reference Debug行に `/ai-suspect` 追記 |
-| `.sd/commands/specs/ai-suspect.md` ＋ `manifest.json` | sync生成 |
-| `.agents/skills/ai-suspect/` ＋ `.codex/skills/ai-suspect/` | sync生成（agy/codexミラー） |
-| `.agents/skills/sd-deploy/*` | v3.1→3.2 mirror drift解消（sync副産物） |
-| `.sd/` 全58ファイル | wipe事故から復元（90d0df6） |
+| `.claude/hooks/claim_evidence_detect.py` | 新規・決定論検出器（因果確信語 present かつ 証拠 absent → warn） |
+| `.claude/hooks/claim-evidence-stop.sh` | 新規・Stop hook wrapper（fail-open） |
+| `tests/hooks/claim-evidence-detect.test.sh` | 新規・回帰テスト4本（ALL PASS） |
+| `.claude/settings.json` | Stop に配線（**gitignore対象＝非commit・live限定**） |
+| `docs/troubleshooting/RESOLUTION_LOG.md` | /ai-suspect 結果を追記 |
+| `D:\claudecode\at002\*`（別repo・098cb27） | /sd-upgrade で256ファイル最新化＋`.sd003-keep`に registry.json 追加保護 |
+| `C:\Users\a-odajima\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | `claude` 関数追記（`--permission-mode acceptEdits` 強制・再帰安全） |
 
 **変更内容の要約**
-`/ai-suspect` コマンドを新規作成（AIの捏造・過信・ルール不遵守を証拠ベース5Whyで真因特定し、決定論ガードレール＋bd issue登録まで強制クローズ）。途中 commit時に `.sd/` wipeバグが発火したが `git show` ベースでクリーン復旧（データ損失ゼロ）。並行して at002 の bd issue を棚卸しし完了済み5件をclose、登録待ちゲートのsettings.jsonスニペットを作成。
+auto-mode 起動時ON 調査中に「プランモード起動が原因」と確定的に誤断定→ユーザー訂正。これを `/ai-suspect` で起訴し、真因=「証拠＜語りの過信」を5Whyで特定、決定論ガードレール（claim-evidence Stop hook＋検出器＋回帰テスト）を実装・実機検証・commit（ba5f3f9）。並行して at002 へ最新SD003を /sd-upgrade（registry.json 会計82件を保護して無傷・098cb27）。① は pwsh profile に起動フラグ強制の `claude` 関数を配線（最終ON確認はユーザー待ち）。
 
 ---
 
@@ -21,34 +22,36 @@
 
 **実行したコマンド**
 ```bash
-python scripts/sync-cli-commands.py        # 3ミラー生成
-bd create --dry-run ... (at002)            # bd配線確認
-git show e2b2cfb:<path> > <path> (×58)     # .sd/復元
+bash tests/hooks/claim-evidence-detect.test.sh   # 回帰4本 ALL PASS
+# gate経路を合成transcript(Windowsパス)で実機検証 → 陽性=systemMessage警告 / 陰性=plain approve
+claude --version    # 2.1.177 / --permission-mode に acceptEdits 実在を確認
+& upgrade.ps1 D:/claudecode/at002 -Execute        # at002最新化
 ```
 
 **結果**
-- ai-suspect: `.claude/commands/` 正本＋3ミラー生成・manifest登録・廃止語clean
-- bd: at002で dry-run成功（type/priority/labels正常）・sd003はDB無でフォールバック
-- `.sd/`: 全58ファイル復元・git status clean・HEAD tracked 59（+ai-suspect spec）
-- at002 bd: 完了済み5件close（open 62→57・各証拠付き）
+- claim-evidence: 回帰4本 ALL PASS、gate実機OK、settings.json VALID・Stop 3本配線
+- ① auto-mode: グローバル `defaultMode:acceptEdits` は正しい／上書き設定なし／pwsh profile 関数=構文OK・exe実在・再帰安全
+- ② at002: working tree CLEAN・.sd/ 116ファイル・registry 会計82件 無傷、C1 FAIL は良性
+- commit時 .sd/ wipe発火 → post-commit L4 が59ファイル自動復元（データ損失ゼロ）
 
 **動作確認**
-- [x] `/ai-suspect` がスキル一覧に出現（登録成功）
-- [x] `.sd/` 復元後 git status クリーン
-- [ ] `/ai-suspect` 実運用ドライ走行（次回P2）
+- [x] 回帰テスト ALL PASS／gate 陽性・陰性 実機確認
+- [x] at002 upgrade 後 registry 82件・独自hook 生存を実測
+- [ ] ① auto-mode の新ウィンドウ起動でのON表示（**ユーザー確認待ち**）
 
 ---
 
 ## 残っていること
 
 **未完了タスク**
-- [ ] at002 でスニペット①②③適用→再起動→検証→3c0.1/3c0.2/g6q close（P1・要 at002 再起動）
-- [ ] 残り配信先への `/sd-upgrade` 展開（P1・継続）
-- [ ] `.sd/` wipe `git add -A` リスクを auto-memory に追記（P2）
+- [ ] ① auto-mode: ユーザーが新 PowerShell で `⏵⏵ accept edits on` を確認（P0）
+- [ ] sd003 `bd init` → bd化TODO を正式 issue 化し /ai-suspect incident を close（P1・現状 OPEN）
+- [ ] claim-evidence ガードレールを deploy テンプレ `settings.json.template` へ展開（P1・他PJ propagation）
+- [ ] Windows PowerShell 5.1 も使う場合は 5.1 profile にも `claude` 関数追記（P2）
 
 **次の手順**
-- 次のタスク: 上記P1のスニペット適用 or 配信先upgrade
-- 依存関係: スニペット検証は at002 での Claude Code 再起動が必要
+- 次のタスク: ①の確認結果を受けて（NGなら起動方法を再診断）→ bd init とテンプレ展開
+- 依存関係: ①確認は新ターミナル起動が必要
 
 ---
 
@@ -57,20 +60,20 @@ git show e2b2cfb:<path> > <path> (×58)     # .sd/復元
 **設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| /ai-suspect トリガー | 手動コマンドのみ | 自動ルール併設は判断1で除外（ルール増殖回避） |
-| 完了の定義 | 決定論ガードレール＋bd issue登録 | 「気をつける」は対策にあらず（at002流） |
-| ゲート頻度 | 3点ゲート | 柱4 Segmented Sequencing（全ステップ確認は過剰） |
-| .sd/復元方法 | git show > file | git checkout はguardrailでブロック・非破壊 |
+| ① の恒久固定策 | pwsh profile の起動フラグ強制 | 真因（起動方法）が観測不能でも確実に効く |
+| ガードレール機構 | Stop hook（fail-open warn）＋回帰テスト | 経路上・決定論AND・低FP。block は重ゲート自壊(0526)回避 |
+| at002 registry.json | `.sd003-keep` で保護してから execute | 会計82件の登録消失を防ぐ（データ損失ゼロ） |
+| at002 C1 FAIL | 直さない | 独自settings.json保護の良性結果。直す=証拠追跡破壊 |
 
 **採用しなかった案と理由**
-- b810931 の revert: 良い変更（/ai-suspect）も消えるため、前進修正（git show復元）を採用
-- bd auto-close: 未検証closeは虚偽報告の再発。証拠付き手動closeのみ
+- at002 settings.json を FW標準で上書き（C1を通す）: at002 の証拠追跡hook を破壊するため不採用
+- claim-evidence を at002版から流用: 別設計（構造化CLAIM_EVIDENCEブロック）と判明→sd003独自実装
 
 ---
 
 ## 追加情報
-- bd: global CLI、DBは各PJ `.beads/`。at002操作は `BEADS_DIR=/d/claudecode/at002/.beads bd ...`
-- at002 `.beads/`（5件close）と `materials/text/` 新ファイルは未コミット（at002側・ユーザー判断）
-- auto mode（auto-accept edits）は次回起動から全PJ有効（グローバルsettings.json）
+- **前セッションDONE.mdの「auto modeは次回起動から全PJ有効」は誤り**だった。グローバル `defaultMode:acceptEdits` は新規セッションのシード値で、`--continue`/起動フラグに上書きされ起動時に効かない。→ pwsh profile の `--permission-mode acceptEdits` 強制で対処。
+- sd003 `.claude/settings.json` は `.gitignore:62` 対象。Stop hook 配線は live のみ（commit/deploy に乗らない）。
+- 自己適用: 本セッションの主張は回帰テスト出力・実機ログ・`settings.json:8` 等の証拠付き。観測不能な「起動方法」は推測のまま据え置き。
 
 ---
