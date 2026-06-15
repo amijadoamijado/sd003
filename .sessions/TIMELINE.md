@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 99
+- **Total Sessions**: 100
 - **Latest Session**: 2026-06-15
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 06-15 | **z.ai GLM運用構成の検証・修正**（5.2メイン+4.7背景+deny封印+ToolSearch無効）。**deny の local 上書き問題を発見・修正**: 新セッションで`TaskCreate`が実際に成功(文字化けタスク事故)→グローバル`deny:[Agent,Task]`が PJ local の`deny:[]`に上書きされ無効と確定→sd003 local に`deny:["Agent","Task"]`追記→新セッションでAgent/Task呼ばずBash直フォールバック・`/sessionread`正常完走を実証。**alwaysThinkingEnabled:false で思考暴走対策**(glm-5.2[1m] think強制ON=11分26秒→OFF=6分0秒に半減・残6分はモデル自体の遅さ=モデル更新待ちでユーザー解決扱い)。**auto mode classifierが「ユーザー選択≠実施承認」を検出しグローバル設定変更をブロック**(前回/ai-suspect真因と同根・正しい安全装置として受領→明示的go後に実施)。① auto-mode `⏵⏵ accept edits on`確認OKで前回P0クローズ。知見3件をfeedback_glm_zai_model_selection.mdへ焼込 | (gitignore対象・非commit) | [Details](session-20260615-201212.md) |
 | 06-15 | **`/ai-suspect`で自分の捏造を起訴→決定論ガードレール化**（auto-mode自動ON調査中に「このセッションはプランモードで起動された」と**確定的に誤断定→ユーザー訂正**。5Why真因=証拠＜語りの過信＝優先順位の逆転（結論先行→proxy権威化→観測不能を「確定」で埋め→反証=auto mode classifier稼働を不開示）。claim-evidence Stop hook+二条件AND検出器+回帰テスト4本**ALL PASS**を実装・gate実機検証・settings.json配線・RESOLUTION_LOG記録、ba5f3f9。sd003 bd未初期化→bd化TODOで記録・incident **OPEN**。配線はgitignore対象でlive限定=テンプレ展開がP1）。**① auto-mode**: グローバルsettings.json `defaultMode:acceptEdits` 自体は正しい、真因は起動方法(`--continue`/フラグ優先・観測不能)。Claude 2.1.177で`--permission-mode acceptEdits`有効確認→pwsh profileに**再帰安全な**`claude`関数配線(構文/exe/再帰を実機検証)、新窓ON確認はユーザー待ち。**② at002 /sd-upgrade**: dry-runで**registry.json(会計82件)損失リスク発見**→.sd003-keep保護追加→execute。256更新・廃止物0・固有資産(registry82/独自settings.json/4hook)無傷、C1 FAILは独自settings.json保護の**良性**と特定、098cb27 | ba5f3f9, 098cb27 | [Details](session-20260615-025531.md) |
 | 06-14 | **`/ai-suspect`コマンド新規作成**（AI挙動不審=捏造/過信/ルール不遵守を証拠ベース5Why→真因→決定論ガードレール+bd issue登録で強制クローズ。手動のみ・3点ゲート柱4・模範5Why(at002 0613)埋込・bd未初期化フォールバック。syncで.sd/.agents/.codexミラー生成）。**commit時.sd/ wipe事故→git show復元でクリーン復旧**（git add -Aが.sd/58ファイルwipeをステージ→全削除コミット→`git show e2b2cfb:path>path`で復元+sync再生成・データ損失ゼロ。git checkoutはguardrailで不可）。**at002 bd棚卸し: 完了済5件close**(3c0.3/3c0.6/b4o/qfe/12l・各証拠付・open62→57)+登録待ち3ゲート(3c0.1/3c0.2/Claim-Evidence)のsettings.jsonスニペット作成→at002 materials/text/保存。グローバルsettings.jsonにauto-accept edits既定化。archive 6件(4MB)→GDrive | b810931, 90d0df6 | [Details](session-20260614-094708.md) |
 | 06-11 | **fl006へ/sd-upgrade展開完遂（v3.2.0）**。廃止物3件削除（.gemini/GEMINI.md/gemini.md）+FW 26ファイル更新+CLAUDE.md保護+verify C1-6全PASS（db3cd41）。powershell→pwsh切替でGet-FileHashエラー回避。**at002セッションアーカイブ1件(4MB)→Google Drive移動**（インデックス30件更新） | (fl006側) | [Details](session-20260611-141727.md) |
