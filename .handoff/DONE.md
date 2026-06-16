@@ -1,55 +1,72 @@
-# DONE.md - 完了報告（2026-06-15 GLM運用構成セッション）
+# DONE.md - 完了報告（2026-06-17 er001 SD003アップグレードセッション）
 
 ## やったこと
 
-**変更したファイル**（全て gitignore 対象＝非commit。正本/メモリ含む）
-| ファイル | 変更内容 |
-|---------|----------|
-| `C:\Users\a-odajima\.claude\settings.json` | `alwaysThinkingEnabled:false`（思考暴走対策・ユーザー手動反映） |
-| `D:\claudecode\sd003\.claude\settings.local.json` | `deny:["Agent","Task"]` 追記（local上書き問題の修正） |
-| `D:\claudecode\.claude\settings-glm.json` | `alwaysThinkingEnabled:false`（正本） |
-| `...\memory\feedback_glm_zai_model_selection.md` | GLM知見を新規保存＋実証3件追記 |
-| `...\memory\MEMORY.md` | index 追記 |
+**作業対象**: D:\claudecode\er001（別プロジェクト）への SD003 アップグレード
+
+| 対象 | 変更内容 |
+|------|----------|
+| er001 フレームワーク全体 | SD003 v3.1.0 → v3.2.0 へ最新化（435コピー＋7生成） |
+| er001 退役物 | `.gemini/` `.cursor/` `.windsurf/` `.agent/` `GEMINI.md` 等＋claude-memスタブ9件を削除（バックアップ退避） |
+| sd003 `.sessions/` `.handoff/DONE.md` | セッション記録更新 |
 
 **変更内容の要約**
-z.ai GLM運用構成（5.2メイン+4.7背景+deny封印+ToolSearch無効）を検証・修正した。グローバル `deny:[Agent,Task]` が PJ local の `deny:[]` に上書きされ無効化していた問題を発見し sd003 local に deny 追記。alwaysThinkingEnabled:false で思考暴走を11分→6分に半減。
+er001は既にSD003 v3.1.0展開済みだったため、新規デプロイではなく `/sd-upgrade` で v3.2.0 へ最新化。dry-runで36件のdivergenceを全件精査し「固有化ゼロ（全てバージョン差）」と判定 → `.sd003-keep` 不要で実行。退役物削除＋FW再配備、全てバックアップへ退避。
 
 ---
 
 ## 確認結果
 
-**動作確認（新規セッション実測）**
-- [x] メイン `glm-5.2[1m]` 表示確認
-- [x] deny有効化＝Agent/Task呼ばずBash直実行にフォールバック、`/sessionread` 正常完走（文字化けタスク事故ゼロ）
-- [x] alwaysThinkingEnabled:false で思考11分→6分に半減
-- [x] auto-mode `⏵⏵ accept edits on` 表示確認（前回P0クローズ）
+**実行したコマンド**
+```bash
+bash .claude/skills/sd-upgrade/upgrade.sh "D:\claudecode\er001"           # dry-run
+bash .claude/skills/sd-upgrade/upgrade.sh "D:\claudecode\er001" --execute # execute
+```
+
+**結果**
+```
+内容検証 C1-C6: ALL PASS（hook配線17/実在/プレースホルダ無/廃止語無/文字化け無/JSON有効）
+Files copied: 435 / generated: 7
+agyスキル: 63件配備確認
+バージョンマーカー: SD003 v3.2.0 | Deployed: 2026-06-17
+er001コミット: 5eb62a9（作業ツリークリーン）
+```
+
+**動作確認**
+- [x] バージョンマーカー v3.2.0 反映確認
+- [x] 退役物（.gemini/.cursor/.windsurf/.agent/GEMINI.md）削除確認
+- [x] sd003-stop-hook は現行テンプレート標準（hookファイル実在・C1 PASS）
+- [x] バックアップ2世代生成（upgrade-backup＝退役物 / backup＝上書きdivergence）
 
 ---
 
 ## 残っていること
 
-**未完了タスク（前回からの継続）**
-- [ ] P1: sd003 `bd init` → /ai-suspect incident を正式 issue 化して close
-- [ ] P1: claim-evidence ガードレールを deploy テンプレ `settings.json.template` へ展開
-- [ ] P2: 他PJ local の `deny` 確認（GLM運用PJは `deny:[Agent,Task]` 追記必要・local上書き問題）
+**未完了タスク**
+なし（アップグレード自体は完了）。er001側で任意:
+- [ ] `npm install`（gas-fakes等依存導入）
+- [ ] agy再起動して `/skills` でコマンド表示確認
 
 **次の手順**
-- glm-5.2 の6分応答はユーザー判断で解決扱い（モデル更新待ち・再検証不要）
+- sd003 P1継続: bd init → /ai-suspect incident close、claim-evidenceガードレールのテンプレ展開
 
 ---
 
 ## 判断したこと
 
+**設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| alwaysThinking true vs false | false (B1) | 5.2能力維持しつつ思考暴走（最大の害）を抑止 |
-| deny修正の即実行 vs 承認待ち | 承認待ち→明示的go後実行 | classifierが選択≠承認を検出。前回/ai-suspect真因と同根の自戒 |
-| glm-5.2の6分応答 | issue化せず解決扱い | モデル自体の遅さ＝モデル更新待ち（ユーザー判断） |
+| /sd-deploy（新規） vs /sd-upgrade（最新化） | /sd-upgrade | er001は既にv3.1.0展開済み＝最新化が正 |
+| `.sd003-keep` 登録 vs 上書き許可 | 上書き許可 | 36件divergenceは全てバージョン差・固有化ゼロと精査確定 |
+| powershell -ExecutionPolicy Bypass vs bash版 | bash版 | classifierがBypassをブロック→公式bash版で正常完走 |
+
+**採用しなかった案と理由**
+- powershell -ExecutionPolicy Bypass: auto mode classifierが「Security Weaken」と判定しブロック → 回避せず代替手段（bash版）採用
 
 ---
 
 ## 追加情報
-- **設定は起動時1回読込**。検証は必ず新規セッション起動で行う（起動済みセッションには非反映）。
-- deny の local 上書きは横展開要注意（グローバルだけでは各PJに効かない）。
 
----
+- 事前説明の訂正: 「退役済みsd003-stop-hookが消える」は誤り。現行テンプレが当該フックを維持しており、er001は現行FW標準に整合した。
+- 復元: 万一固有化を見落とした場合は `D:\claudecode\er001\.sd003-backup-20260617_075758`（上書き分）/ `.sd003-upgrade-backup-20260617_075754`（退役物）から復元し `.sd003-keep` 登録。
