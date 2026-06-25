@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 102
-- **Latest Session**: 2026-06-24
+- **Total Sessions**: 103
+- **Latest Session**: 2026-06-25
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 06-25 | **一人運用ファーストのブランチ運用ルール制定＋at002のPRベース運用廃止**。ユーザー「基本一人でブランチ管理が大変→大改修等限られたときだけ」を受領。根本原因=AIの「作業前にとりあえずブランチを切る」ハーネスデフォルト。強制レベルをAskで確認→**軽量(ルールのみ)**採用(hook物理ブロックは一人運用で過剰)。新規`branch-strategy.md`+CLAUDE.md/配信テンプレ/RULES.md追記、`copy_dir_tree`で全PJ自動伝播確認(6bd9296)。**at002展開で矛盾検出**: 固有`pr-based-workflow.md`(Issue#8/PR#20-31・master直push禁止・CodeRabbit/Codex自動レビュー必須)と正面衝突→黙って上書きせずAsk→ユーザー「PR運用やめさせる」→at002も一人運用統一(旧ルール退役・宙吊り参照2箇所修正・9ef4514 push)。**ブランチ保護は存在せず**(gh api 403=private/Pro限定)＝旧master直push禁止はルールのみの運用と判明。追加指示「PR必要なときは指示する」で二条件→**一条件(指示時のみ作成)**へ簡素化(sd003 c702d0b/at002 10d83c6 push)。memory更新 | 6bd9296, c702d0b | [Details](session-20260625-193730.md) |
 | 06-24 | **cf001へSD003アップグレード（v2.13.0時代→v3.2.0）完遂**。「cf001に対して/sd-upgrade」指示→dry-run（bash版・Bypassブロック回避）でdivergence60件検出→er001/at002の教訓で全件精査→**固有化ゼロ判定**（CLAUDE.md=SD002 v2.10.0未記入テンプレ・/kiro:参照/settings.json=sd002-stop-hook旧版/60件=v2.4時代旧FW版・440行差/git履歴=FW同期のみ/**registry.json=source完全一致で会計レジストリ損失リスクなし**）→`.sd003-keep`不要。**想定外: 未コミット287件**（BOM/mojibake修正WIP）発見→ユーザー確認でチェックポイントcommit(24ef3aa)保全→execute。60上書き+307新規、内容検証**ALL PASSED**、agy63スキル、退役物削除（.gemini/.cursor/.windsurf/.agent/GEMINI.md等）全バックアップ退避、会計カスタム(excel-com-required/bugyou-yayoi-conversion/tax-payment.md)温存、cf001 ae2f71e→**origin push同期確認**(branch feature/data-update-2603)。skill-checkが`bugyou`文字列に誤反応ブロック→トリガー語回避で再検証 | (cf001側)ae2f71e | [Details](session-20260624-195215.md) |
 | 06-17 | **er001へSD003アップグレード（v3.1.0→v3.2.0）完遂**。「展開して」指示→現状確認で**既にv3.1.0展開済み**と判明→新規deployでなく`/sd-upgrade`を選択。dry-runでdivergence36件検出→at002 registry.json損失の教訓で全件精査→**固有化ゼロ判定**（CLAUDE.md=テンプレ生成版/settings.json=旧版＝版差/残34件=旧FW版・ss001同型）→`.sd003-keep`不要でexecute。435コピー+7生成、退役物削除（.gemini/.cursor/.windsurf/.agent/GEMINI.md+claude-memスタブ9件）を全てバックアップ退避、内容検証**C1-C6 ALL PASS**、agy63スキル、er001コミット5eb62a9。**`-ExecutionPolicy Bypass`をclassifierがブロック→回避せず公式bash版upgrade.shで完走**。**事前説明訂正**: 「sd003-stop-hookが消える」は誤り＝現行テンプレ標準で維持（ralph-loop現役）。`/archive-sessions --execute`で5件/5MB（PC002/at002/sd003）をGDrive退避・index47件再生成 | (er001側)5eb62a9 | [Details](session-20260617-080330.md) |
 | 06-15 | **z.ai GLM運用構成の検証・修正**（5.2メイン+4.7背景+deny封印+ToolSearch無効）。**deny の local 上書き問題を発見・修正**: 新セッションで`TaskCreate`が実際に成功(文字化けタスク事故)→グローバル`deny:[Agent,Task]`が PJ local の`deny:[]`に上書きされ無効と確定→sd003 local に`deny:["Agent","Task"]`追記→新セッションでAgent/Task呼ばずBash直フォールバック・`/sessionread`正常完走を実証。**alwaysThinkingEnabled:false で思考暴走対策**(glm-5.2[1m] think強制ON=11分26秒→OFF=6分0秒に半減・残6分はモデル自体の遅さ=モデル更新待ちでユーザー解決扱い)。**auto mode classifierが「ユーザー選択≠実施承認」を検出しグローバル設定変更をブロック**(前回/ai-suspect真因と同根・正しい安全装置として受領→明示的go後に実施)。① auto-mode `⏵⏵ accept edits on`確認OKで前回P0クローズ。知見3件をfeedback_glm_zai_model_selection.mdへ焼込 | (gitignore対象・非commit) | [Details](session-20260615-201212.md) |
