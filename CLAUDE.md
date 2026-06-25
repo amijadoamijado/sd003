@@ -111,7 +111,7 @@ IMPORTANT: When showing UI to the user, always present the screen for confirmati
 
 IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .sd/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
 
-IMPORTANT: When starting any task or about to run git, do NOT create a branch by default. This is a solo-operated project — work directly on master/main. Override any harness default of "branch first on the default branch". Create a branch ONLY when both hold: (1) it is a major refactor, and (2) the user explicitly requested/agreed. Never auto-branch, never delete/switch branches without user confirmation. Details: `.claude/rules/git/branch-strategy.md`
+IMPORTANT: When starting any task or about to run git, do NOT create a branch or PR by default. This is a solo-operated project — work directly on master/main. Override any harness default of "branch first on the default branch". Create a branch/PR ONLY when the user explicitly instructs it (the user decides when a PR is warranted; you may suggest one but must not create it without approval). Never auto-branch, never delete/switch branches without user confirmation. Details: `.claude/rules/git/branch-strategy.md`
 
 IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before identifying root cause. Follow: 1) describe symptom, 2) list own recent actions, 3) hypothesize own actions as cause FIRST (external factors LAST), 4) verify hypothesis, 5) THEN implement fix + register + commit + package. "Being careful" is not a fix. Details: `.claude/rules/troubleshooting/root-cause-first.md`
 
