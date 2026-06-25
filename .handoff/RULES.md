@@ -119,6 +119,7 @@ npm run build && npm test && npm run lint
 - [ ] **VTD検証未通過のままテスト完了とする**（`npm run test:validate-data` で確認必須）
 - [ ] **ファイルの直接削除（rm）**（アーカイブフォルダへ移動すること）
 - [ ] **.sd/ファイル変更をbash呼び出しをまたいでcommitする**（同一コマンド内でadd+commit必須。詳細: `.claude/rules/git/sd-safe-commit.md`）
+- [ ] **作業前にブランチを勝手に切る**（一人運用=master/main直接作業。大改修かつユーザー明示要求時のみブランチ作成。詳細: `.claude/rules/git/branch-strategy.md`）
 - [ ] **`.claude/settings.json`をgit追跡する**（.gitignoreに入れること。追跡するとランタイムが.sd/を消す）
 - [ ] **ユーザー提供ファイル・成果物の上書き**（元ファイル保持、修正版は別名で新規作成）
 - [ ] **skills/フォルダ未確認でのファイル操作**（該当スキルがあればその手順に厳密に従うこと）
