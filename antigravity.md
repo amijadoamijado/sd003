@@ -149,6 +149,22 @@ npm test && npm run lint
 Antigravity CLI (`agy`) は非インタラクティブモードでプロンプト実行をサポートしています。
 SD003ワークフローでは、IMPLEMENT_REQUESTをプロンプトとして渡して自動実装を実行できます。
 
+### ⚠️ 認証・前提（非対話実行の必須条件・2026-06-28 agyレビューで判明）
+
+> **非対話の `agy --prompt`/`agy models` が完了せずフリーズする場合、原因はほぼ認証状態。** コードバグではない。
+> OAuth トークン期限切れ・初回認証未完了だと、agy がブラウザ起動や対話プロンプト入力を待ってハングする。
+
+非対話で agy を回す前に、必ず次を満たすこと（Grok の `GROK_SPEC.md` 認証節と同クラスの対処）:
+
+| # | 条件 | 確認/対処 |
+|---|------|----------|
+| 1 | OAuth ログイン完了 | **事前に手動（対話シェル）で `agy` を一度起動し、ブラウザ/OAuth認証を完了させておく** |
+| 2 | or APIキー設定 | CI/他AIからの非対話実行では `GEMINI_API_KEY`（必要に応じ `GOOGLE_API_KEY`）を設定 |
+| 3 | 疎通確認 | ローカル完結コマンド（`agy help models`）が即応するか。ハングするなら 1/2 を疑う |
+
+未認証のまま `agy --prompt ... --dangerously-skip-permissions` を回さない。逼迫・反復ハング時は
+codex-dispatch/grok-dispatch と同様に**人手ハンドオフ**（依頼書をユーザーに渡す）へ切り替える。
+
 ### 基本構文
 ```bash
 agy --prompt "プロンプト" --dangerously-skip-permissions
