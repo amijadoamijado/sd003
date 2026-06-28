@@ -51,4 +51,4 @@ Cautionレベルのスキルをインストールする前に以下を確認:
 
 ## 全AIモデル共通
 
-このポリシーはClaude Code、Codex、Gemini CLI、Antigravity全てに適用される。
+このポリシーはClaude Code、Codex、Antigravity、Grok全てに適用される。

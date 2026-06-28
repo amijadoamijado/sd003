@@ -16,7 +16,7 @@ SD003 integrates **SD001 (Spec-Driven Development Framework)** with **GA001 (GAS
 - **GAS Local Development**: Test Google Apps Script locally
 - **Env Interface Pattern**: Complete separation of business logic and infrastructure
 - **8-Stage Quality Gates**: Automated quality assurance
-- **Multi-CLI Support**: Claude Code (司令塔), Codex CLI (レビュー), Antigravity CLI/agy (実装・E2E)
+- **Multi-CLI Support**: Claude Code (司令塔), Codex CLI (レビュー), Antigravity CLI/agy (実装・E2E), Grok CLI (汎用)
 - **Ralph Wiggum**: Night-mode autonomous execution (24-hour development cycle)
 - **3-Tier Bug Resolution**: Systematic debugging framework
 
@@ -53,6 +53,7 @@ See: [Ralph Wiggum Deployment Guide](docs/ralph-wiggum-deployment.md)
 | Claude Code | CLAUDE.md, .claude/rules/ | .claude/commands/ |
 | Codex CLI | AGENTS.md, `.codex/CODEX_SPEC.md`, `.codex/skills/`, `~/.codex/skills/` | `$skill-name` |
 | Antigravity CLI (agy) | antigravity.md, AGENTS.md | `.agents/skills/*/SKILL.md`（`/skills` で確認） |
+| Grok CLI | grok.md, `.grok/GROK_SPEC.md`, `.grok/skills/`, `~/.grok/skills/` | `/skill-name`（**Windows + GROK_HOME 必須**） |
 
 ### Multi-CLI コマンド同期
 
@@ -63,6 +64,7 @@ SD003 のカスタムコマンドは、以下の流れで Claude / Codex / Antig
 - generated targets:
   - `.agents/skills/*/SKILL.md`（Antigravity CLI/agy。agyはAgent Skills=SKILL.md形式のみ読む。`.toml`不可）
   - `.codex/skills/*/SKILL.md`（Codex）
+  - `.grok/skills/*/SKILL.md`（Grok CLI。`name`+`description`形式。dispatch系スキルは再帰回避のため除外）
 
 同期コマンド:
 
@@ -132,6 +134,7 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 | 5 | `.claude/hooks/` | ツリーコピー |
 | 6 | `.codex/` | ツリーコピー |
 | 7 | `.agents/skills/`（agy） | ツリーコピー |
+| 8 | `.grok/`（Grok。コピー後 sync 再生成） | ツリーコピー |
 | 9 | `.sd/settings/` | ツリーコピー |
 | 10 | `.sessions/session-template.md` | 単体コピー |
 | 11 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
@@ -185,14 +188,14 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 
 ### Codex での同等操作
 
-| Purpose | Claude Code | Codex CLI | Antigravity (agy) |
-|---------|-------------|-----------|------------|
-| Session read | `/sessionread` | `$sessionread` / `$session-read` | `/sessionread` |
-| Session write | `/sessionwrite` | `$sessionwrite` / `$session-write` | `/sessionwrite` |
-| Session history | `/sessionhistory` | `$sessionhistory` | `/sessionhistory` |
-| Workflow init | `/workflow:init` | `$workflow-init` | `/workflow-init` |
-| Skills find | `/skills:find` | `$skills-find` | `/skills-find` |
-| SD deploy | `/sd:deploy` | `$sd-deploy` | `/sd-deploy` |
+| Purpose | Claude Code | Codex CLI | Antigravity (agy) | Grok |
+|---------|-------------|-----------|------------|------|
+| Session read | `/sessionread` | `$sessionread` / `$session-read` | `/sessionread` | `/sessionread` |
+| Session write | `/sessionwrite` | `$sessionwrite` / `$session-write` | `/sessionwrite` | `/sessionwrite` |
+| Session history | `/sessionhistory` | `$sessionhistory` | `/sessionhistory` | `/sessionhistory` |
+| Workflow init | `/workflow:init` | `$workflow-init` | `/workflow-init` | `/workflow-init` |
+| Skills find | `/skills:find` | `$skills-find` | `/skills-find` | `/skills-find` |
+| SD deploy | `/sd:deploy` | `$sd-deploy` | `/sd-deploy` | `/sd-deploy` |
 
 > Codex では `.codex/skills/` または `~/.codex/skills/` を使います。Antigravity(agy) では `.agents/skills/*/SKILL.md` を起動時に読み込みます（`/skills` で確認）。
 
@@ -347,6 +350,6 @@ MIT License
 
 ---
 
-**SD003 Framework v2.14.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline (agy/Codex) + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem
+**SD003 Framework v2.14.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline (agy/Codex/Grok) + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem
 # clean state test
 # verify

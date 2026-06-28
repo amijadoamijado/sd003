@@ -8,7 +8,7 @@
 
 SD003: Work First + 痛みから生まれた仕組みの集合体。
 TypeScript (strict) + Google Apps Script + Env Interface Pattern.
-AI協調: Claude Code(司令塔) + Codex(レビュー) + Antigravity(実装 & E2E)
+AI協調: Claude Code(司令塔) + Codex(レビュー) + Antigravity(実装 & E2E) + Grok(汎用)
 
 Common rules for all AI models: `.handoff/RULES.md`
 Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
@@ -90,6 +90,8 @@ IMPORTANT: When running tests or writing test code, enforce production data TDD.
 IMPORTANT: When coordinating with other AIs (Codex, Antigravity), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
 
 IMPORTANT: When the user asks for a quick Codex consultation or one-off review (e.g. "codexにレビューさせて", "codexに見せて", "codexに相談", "codexに調査させて") WITHOUT a project ID or workflow context, use the official plugin commands `/codex:review` (read-only review), `/codex:adversarial-review` (critical review), or `/codex:rescue` (delegate investigation/fix). Do NOT route to the heavyweight `/workflow:review` chain (which requires WORK_ORDER/IMPLEMENT_REQUEST and a project ID). The `/workflow:*` chain is for formal project deliverables; `/codex:*` is for ad-hoc consultation. Plugin: `openai/codex-plugin-cc` (already installed user-scope). If `/codex:setup` has not been run yet in this project, run it once first.
+
+IMPORTANT: When the user asks for a Grok consultation, second opinion, or to delegate a task to Grok (e.g. "grokに依頼", "grokに相談", "grokにレビュー", "grokで実装") WITHOUT a project ID or workflow context, use the `grok-dispatch` skill (`.claude/skills/grok-dispatch/`): `pwsh -File grok-run.ps1 <repo> <out> "<prompt>" [model]`, default model `grok-build`, `--output-format plain`. For ad-hoc consultation keep it in conversation; route to `.sd/ai-coordination/` only when a project ID is given. Grok is the 汎用 (general-purpose) coordination AI alongside Codex(review)/agy(impl). Details: `.claude/skills/grok-dispatch/SKILL.md`, `.claude/rules/workflow/ai-coordination.md`
 
 IMPORTANT: When deploying SD003 to another project, use `/sd-deploy` command only. Manual deploy is prohibited. Details: `.claude/skills/sd-deploy/SKILL.md`
 

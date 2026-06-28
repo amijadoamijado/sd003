@@ -49,7 +49,7 @@
 | Multi-CLI同期 | `scripts/sync-cli-commands.py` |
 | Ralph Loop | `.claude/rules/ralph-loop.md` |
 
-**判断基準**: Claude Code/Codex/Gemini/Antigravityの連携、スキル・コマンドの管理
+**判断基準**: Claude Code/Codex/Antigravity/Grokの連携、スキル・コマンドの管理
 
 ### Sukima Digital分岐（ITコーディネート）
 

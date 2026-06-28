@@ -6,14 +6,25 @@ paths:
 
 # AI協調体制
 
-## 対応AI（3種類）
+## 対応AI（4種類）
 | AI | 役割 | コマンド |
 |----|------|---------|
 | Claude Code | 計画・工程管理 | `/workflow:init`, `/workflow:order`, `/workflow:request`, `/workflow:status` |
 | Codex | レビュー・チェック・タスク委譲 | `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`（公式プラグイン）, `/workflow:review`（自動連鎖） |
-| Antigravity | 実装・E2Eテスト・探索的調査・本番確認 | `/workflow:impl`, `/workflow:test`（自動連鎖） |
+| Antigravity (agy) | 実装・E2Eテスト・探索的調査・本番確認 | `/workflow:impl`, `/workflow:test`（自動連鎖） |
+| Grok | 汎用（実装補助・調査・セカンドオピニオン・並列検証） | `/grok-dispatch`（`grok-build`モデル・非対話） |
 
-**廃止**: Cursor, Windsurf, Gemini CLI
+**廃止/置換**: Cursor, Windsurf。**Gemini CLI は agy（Antigravity）に置換済み**（gemini-dispatch は歴史的経緯で残存するが新規利用は agy/Grok に寄せる）。
+
+### 役割分岐（誰にやらせるか・司令塔の迷い防止）
+| 状況 | 担当 | 理由 |
+|------|------|------|
+| コードレビュー・チェック | **Codex** | レビュー主担当（`/codex:*`, `/workflow:review`） |
+| 実装・E2E・本番確認 | **agy** | 実装主担当（`/workflow:impl`, `/workflow:test`） |
+| セカンドオピニオン・補助調査・並列検証・軽い実装相談 | **Grok** | 汎用。Codex/agy と競合する作業は重複させない |
+| 計画・工程管理・最終判断 | **Claude Code** | 司令塔 |
+
+> **排他ルール**: 同一 repo への**複数AI同時書き込みは禁止**（git 競合回避）。プリフライトで RAM だけでなく既存 grok/codex/agy 稼働も確認する。
 
 ## ワークフローコマンド
 | コマンド | 説明 |
@@ -291,6 +302,7 @@ When user mentions a task or feature, FIRST ask or determine:
 | "実装完了", "作業完了" | Antigravity | Report completion, request review |
 | "テスト結果", "報告" | Antigravity | Create TEST_REPORT |
 | "レビュー完了" | Codex | Create REVIEW_REPORT |
+| "grokに依頼", "グロックに", "grokに相談", "grokにレビュー" | Claude Code | `/grok-dispatch` で Grok にディスパッチ（汎用・セカンドオピニオン） |
 
 ### Antigravity Aliases (ALL trigger same action)
 

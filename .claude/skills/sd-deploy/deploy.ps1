@@ -95,7 +95,7 @@ function Invoke-DeployDryRun {
 
     $scanDirs = @(
         ".claude\commands", ".claude\rules", ".claude\skills", ".claude\hooks",
-        ".agents\skills", ".codex", ".sd\settings", ".sd\design", ".sd\ralph",
+        ".agents\skills", ".codex", ".grok", ".sd\settings", ".sd\design", ".sd\ralph",
         ".sd\steering", ".handoff", "docs\troubleshooting"
     )
     foreach ($d in $scanDirs) {
@@ -115,7 +115,7 @@ function Invoke-DeployDryRun {
 
     # Direct-copy framework files (hash-comparable)
     $scanFiles = @(
-        "antigravity.md", "AGENTS.md", ".claude\settings.json",
+        "antigravity.md", "AGENTS.md", "grok.md", ".claude\settings.json",
         "docs\quality-gates.md", "scripts\validate-test-data.ps1",
         "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
         "scripts\verify-deployment.mjs",
@@ -169,7 +169,7 @@ if ($DryRun) {
 $BackupDir = Join-Path $TargetProject ".sd003-backup-$TIMESTAMP"
 New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
 
-$backupTargets = @("CLAUDE.md", "AGENTS.md", "antigravity.md")
+$backupTargets = @("CLAUDE.md", "AGENTS.md", "antigravity.md", "grok.md")
 foreach ($f in $backupTargets) {
     $path = Join-Path $TargetProject $f
     if (Test-Path $path) {
@@ -177,7 +177,7 @@ foreach ($f in $backupTargets) {
     }
 }
 
-$backupDirs = @(".claude", ".codex", ".agents", ".sd")
+$backupDirs = @(".claude", ".codex", ".agents", ".grok", ".sd")
 foreach ($d in $backupDirs) {
     $path = Join-Path $TargetProject $d
     if (Test-Path $path -PathType Container) {
@@ -196,6 +196,7 @@ $directories = @(
     ".claude/hooks",
     ".codex/skills",
     ".agents/skills",
+    ".grok/skills",
     ".sd/specs",
     ".sd/steering",
     ".sessions",
@@ -344,6 +345,9 @@ Copy-DirTree -RelPath ".agents\skills" -Label "Agents Skills (agy)"
 # 4-7: .codex/ (tree)
 Copy-DirTree -RelPath ".codex" -Label "Codex"
 
+# 4-8: .grok/ (tree) - Grok CLI reads skills here as SKILL.md + GROK_SPEC.md
+Copy-DirTree -RelPath ".grok" -Label "Grok"
+
 # 4-9: .sd/settings/ (tree)
 Copy-DirTree -RelPath ".sd\settings" -Label "SD Settings"
 
@@ -444,6 +448,20 @@ if (Test-Path $syncCliSrc) {
     if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
     Copy-Item $syncCliSrc (Join-Path $scriptsDst "sync-cli-commands.py") -Force
     $copyStats["Sync CLI"] = 1
+    # Regenerate agy/codex/grok skills in the TARGET (copy alone leaves generated
+    # skills + manifest stale). Guarded: skip if python is unavailable.
+    $py = (Get-Command python -ErrorAction SilentlyContinue)
+    if ($py) {
+        Push-Location $TargetProject
+        try {
+            & python "scripts\sync-cli-commands.py" 2>&1 | Out-Null
+            Write-Host "  Regenerated agy/codex/grok skills (sync-cli-commands.py)" -ForegroundColor Green
+        } catch {
+            Write-Host "  WARN: post-copy sync failed; run 'python scripts/sync-cli-commands.py' manually in target" -ForegroundColor Yellow
+        } finally { Pop-Location }
+    } else {
+        Write-Host "  NOTE: python not found. Run 'python scripts/sync-cli-commands.py' in target to (re)generate skills." -ForegroundColor Yellow
+    }
 } else {
     $copyStats["Sync CLI"] = 0
 }
@@ -550,6 +568,20 @@ if (Test-Kept "antigravity.md") {
     Write-Host "  UPDATE: antigravity.md (latest agy rules applied)" -ForegroundColor Green
 } else {
     Write-Host "  WARN: antigravity.md not found in source, skipping" -ForegroundColor Yellow
+}
+
+# 5-2b: grok.md (Grok CLI root config - overwrite unless protected by .sd003-keep)
+$grokSrc = Join-Path $SOURCE_DIR "grok.md"
+$grokDst = Join-Path $TargetProject "grok.md"
+if (Test-Kept "grok.md") {
+    Write-Host "  KEEP: grok.md preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "grok.md"
+} elseif (Test-Path $grokSrc) {
+    if ((Test-Path $grokDst) -and ((Get-FileHash $grokSrc).Hash -ne (Get-FileHash $grokDst).Hash)) { $script:divergedOverwrites += "grok.md" }
+    Copy-Item $grokSrc $grokDst -Force
+    Write-Host "  UPDATE: grok.md (latest Grok rules applied)" -ForegroundColor Green
+} else {
+    Write-Host "  WARN: grok.md not found in source, skipping" -ForegroundColor Yellow
 }
 
 # 5-3: session-current.md (skip if exists, use template from .sessions/templates/)
@@ -767,6 +799,7 @@ $verifyResults += Verify-Category -Label "Skills" -SourceRelPath ".claude\skills
 $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" -Recurse
 $verifyResults += Verify-Category -Label "Agents Skills (agy)" -SourceRelPath ".agents\skills" -Recurse
 $verifyResults += Verify-Category -Label "Codex" -SourceRelPath ".codex" -Recurse
+$verifyResults += Verify-Category -Label "Grok" -SourceRelPath ".grok" -Recurse
 $verifyResults += Verify-Category -Label "SD Settings" -SourceRelPath ".sd\settings" -Recurse
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
 $verifyResults += Verify-Category -Label "Design" -SourceRelPath ".sd\design" -Recurse
@@ -789,6 +822,7 @@ foreach ($r in $verifyResults) {
 $generatedFiles = @(
     "CLAUDE.md",
     "antigravity.md",
+    "grok.md",
     ".sessions\session-current.md",
     ".sessions\TIMELINE.md",
     ".claude\settings.json",

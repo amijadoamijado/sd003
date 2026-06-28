@@ -1,7 +1,7 @@
 # RULES.md - 共通開発ルール
 
 このファイルは、**全AIモデルに共通の開発作法**を定義します。
-モデル固有の設定ファイル（CLAUDE.md、AGENTS.md、GEMINI.md等）は、このファイルを参照してください。
+モデル固有の設定ファイル（CLAUDE.md、AGENTS.md、grok.md等）は、このファイルを参照してください。
 
 ## プロジェクト構造
 
@@ -144,8 +144,8 @@ npm run build && npm test && npm run lint
 
 ## ファイル配置ルール（全AI共通 - Single Source of Truth）
 
-このセクションは全AIモデル（Claude Code, Codex, Gemini CLI, Antigravity）に適用される。
-各AI設定ファイル（CLAUDE.md, AGENTS.md, gemini.md）はこのルールを参照すること。
+このセクションは全AIモデル（Claude Code, Codex, Antigravity, Grok）に適用される。
+各AI設定ファイル（CLAUDE.md, AGENTS.md, grok.md）はこのルールを参照すること。
 
 ### 仕様書
 

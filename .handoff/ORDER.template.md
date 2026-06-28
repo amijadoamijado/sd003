@@ -13,7 +13,7 @@
 - [ ] High / Medium / Low
 
 **担当モデル**
-- [ ] Claude Code / Codex / Gemini CLI / Antigravity
+- [ ] Claude Code / Codex / Antigravity / Grok
 
 ---
 

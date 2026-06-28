@@ -75,5 +75,5 @@ npx playwright install chromium
 
 ## 全AIモデル共通
 
-このルールはClaude Code、Codex、Gemini CLI、Antigravity全てに適用される。
+このルールはClaude Code、Codex、Antigravity、Grok全てに適用される。
 `.handoff/RULES.md` にも記載されている。

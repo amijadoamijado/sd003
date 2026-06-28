@@ -5,7 +5,9 @@
     "canonical_specs": ".sd/commands/specs/*.md",
     "antigravity_skills": ".agents/skills/*/SKILL.md",
     "codex_skills": ".codex/skills/*/SKILL.md",
-    "codex_spec": ".codex/CODEX_SPEC.md"
+    "codex_spec": ".codex/CODEX_SPEC.md",
+    "grok_skills": ".grok/skills/*/SKILL.md",
+    "grok_spec": ".grok/GROK_SPEC.md"
   },
   "commands": [
     {
@@ -15,6 +17,7 @@
       "claude_command": "/ai-suspect",
       "antigravity_skill": "ai-suspect/SKILL.md",
       "codex_skill": "ai-suspect",
+      "grok_skill": "ai-suspect/SKILL.md",
       "aliases": []
     },
     {
@@ -24,6 +27,7 @@
       "claude_command": "/blueprint-gate",
       "antigravity_skill": "blueprint-gate/SKILL.md",
       "codex_skill": "blueprint-gate",
+      "grok_skill": "blueprint-gate/SKILL.md",
       "aliases": []
     },
     {
@@ -33,6 +37,7 @@
       "claude_command": "/bug-quick",
       "antigravity_skill": "bug-quick/SKILL.md",
       "codex_skill": "bug-quick",
+      "grok_skill": "bug-quick/SKILL.md",
       "aliases": []
     },
     {
@@ -42,6 +47,7 @@
       "claude_command": "/bug-trace",
       "antigravity_skill": "bug-trace/SKILL.md",
       "codex_skill": "bug-trace",
+      "grok_skill": "bug-trace/SKILL.md",
       "aliases": []
     },
     {
@@ -51,6 +57,7 @@
       "claude_command": "/cleanup:history",
       "antigravity_skill": "cleanup-history/SKILL.md",
       "codex_skill": "cleanup-history",
+      "grok_skill": "cleanup-history/SKILL.md",
       "aliases": []
     },
     {
@@ -60,6 +67,7 @@
       "claude_command": "/cleanup:restore",
       "antigravity_skill": "cleanup-restore/SKILL.md",
       "codex_skill": "cleanup-restore",
+      "grok_skill": "cleanup-restore/SKILL.md",
       "aliases": []
     },
     {
@@ -69,6 +77,7 @@
       "claude_command": "/src/**,",
       "antigravity_skill": "cleanup/SKILL.md",
       "codex_skill": "cleanup",
+      "grok_skill": "cleanup/SKILL.md",
       "aliases": []
     },
     {
@@ -78,6 +87,7 @@
       "claude_command": "/dialogue-resolution",
       "antigravity_skill": "dialogue-resolution/SKILL.md",
       "codex_skill": "dialogue-resolution",
+      "grok_skill": "dialogue-resolution/SKILL.md",
       "aliases": []
     },
     {
@@ -87,6 +97,7 @@
       "claude_command": "/grillme",
       "antigravity_skill": "grillme/SKILL.md",
       "codex_skill": "grillme",
+      "grok_skill": "grillme/SKILL.md",
       "aliases": []
     },
     {
@@ -96,6 +107,7 @@
       "claude_command": "/ralph-wiggum:plan",
       "antigravity_skill": "ralph-wiggum-plan/SKILL.md",
       "codex_skill": "ralph-wiggum-plan",
+      "grok_skill": "ralph-wiggum-plan/SKILL.md",
       "aliases": []
     },
     {
@@ -105,6 +117,7 @@
       "claude_command": "/ralph-wiggum:run",
       "antigravity_skill": "ralph-wiggum-run/SKILL.md",
       "codex_skill": "ralph-wiggum-run",
+      "grok_skill": "ralph-wiggum-run/SKILL.md",
       "aliases": []
     },
     {
@@ -114,6 +127,7 @@
       "claude_command": "/ralph-wiggum:status",
       "antigravity_skill": "ralph-wiggum-status/SKILL.md",
       "codex_skill": "ralph-wiggum-status",
+      "grok_skill": "ralph-wiggum-status/SKILL.md",
       "aliases": []
     },
     {
@@ -123,6 +137,7 @@
       "claude_command": "/refactor:batch",
       "antigravity_skill": "refactor-batch/SKILL.md",
       "codex_skill": "refactor-batch",
+      "grok_skill": "refactor-batch/SKILL.md",
       "aliases": []
     },
     {
@@ -132,6 +147,7 @@
       "claude_command": "/refactor:complete",
       "antigravity_skill": "refactor-complete/SKILL.md",
       "codex_skill": "refactor-complete",
+      "grok_skill": "refactor-complete/SKILL.md",
       "aliases": []
     },
     {
@@ -141,6 +157,7 @@
       "claude_command": "/refactor:init",
       "antigravity_skill": "refactor-init/SKILL.md",
       "codex_skill": "refactor-init",
+      "grok_skill": "refactor-init/SKILL.md",
       "aliases": []
     },
     {
@@ -150,6 +167,7 @@
       "claude_command": "/refactor:plan",
       "antigravity_skill": "refactor-plan/SKILL.md",
       "codex_skill": "refactor-plan",
+      "grok_skill": "refactor-plan/SKILL.md",
       "aliases": []
     },
     {
@@ -159,6 +177,7 @@
       "claude_command": "/refactor:rollback",
       "antigravity_skill": "refactor-rollback/SKILL.md",
       "codex_skill": "refactor-rollback",
+      "grok_skill": "refactor-rollback/SKILL.md",
       "aliases": []
     },
     {
@@ -168,6 +187,7 @@
       "claude_command": "/skills:add",
       "antigravity_skill": "skills-add/SKILL.md",
       "codex_skill": "skills-add",
+      "grok_skill": "skills-add/SKILL.md",
       "aliases": []
     },
     {
@@ -177,6 +197,7 @@
       "claude_command": "/skills:find",
       "antigravity_skill": "skills-find/SKILL.md",
       "codex_skill": "skills-find",
+      "grok_skill": "skills-find/SKILL.md",
       "aliases": []
     },
     {
@@ -186,6 +207,7 @@
       "claude_command": "/skills:list",
       "antigravity_skill": "skills-list/SKILL.md",
       "codex_skill": "skills-list",
+      "grok_skill": "skills-list/SKILL.md",
       "aliases": []
     },
     {
@@ -195,6 +217,7 @@
       "claude_command": "/sd:deploy",
       "antigravity_skill": "sd-deploy/SKILL.md",
       "codex_skill": "sd-deploy",
+      "grok_skill": "sd-deploy/SKILL.md",
       "aliases": []
     },
     {
@@ -204,6 +227,7 @@
       "claude_command": "/sd003:loop-lint",
       "antigravity_skill": "sd003-loop-lint/SKILL.md",
       "codex_skill": "sd003-loop-lint",
+      "grok_skill": "sd003-loop-lint/SKILL.md",
       "aliases": []
     },
     {
@@ -213,6 +237,7 @@
       "claude_command": "/sd003:loop-test",
       "antigravity_skill": "sd003-loop-test/SKILL.md",
       "codex_skill": "sd003-loop-test",
+      "grok_skill": "sd003-loop-test/SKILL.md",
       "aliases": []
     },
     {
@@ -222,6 +247,7 @@
       "claude_command": "/sd003:loop-type",
       "antigravity_skill": "sd003-loop-type/SKILL.md",
       "codex_skill": "sd003-loop-type",
+      "grok_skill": "sd003-loop-type/SKILL.md",
       "aliases": []
     },
     {
@@ -231,6 +257,7 @@
       "claude_command": "/session-search",
       "antigravity_skill": "session-search/SKILL.md",
       "codex_skill": "session-search",
+      "grok_skill": "session-search/SKILL.md",
       "aliases": []
     },
     {
@@ -240,6 +267,7 @@
       "claude_command": "/sessionhistory",
       "antigravity_skill": "sessionhistory/SKILL.md",
       "codex_skill": "sessionhistory",
+      "grok_skill": "sessionhistory/SKILL.md",
       "aliases": []
     },
     {
@@ -249,6 +277,7 @@
       "claude_command": "/sessionread",
       "antigravity_skill": "sessionread/SKILL.md",
       "codex_skill": "sessionread",
+      "grok_skill": "sessionread/SKILL.md",
       "aliases": [
         "session-read"
       ]
@@ -260,6 +289,7 @@
       "claude_command": "/sessionwrite",
       "antigravity_skill": "sessionwrite/SKILL.md",
       "codex_skill": "sessionwrite",
+      "grok_skill": "sessionwrite/SKILL.md",
       "aliases": [
         "session-write"
       ]
@@ -271,6 +301,7 @@
       "claude_command": "/spec:archive",
       "antigravity_skill": "spec-archive/SKILL.md",
       "codex_skill": "spec-archive",
+      "grok_skill": "spec-archive/SKILL.md",
       "aliases": []
     },
     {
@@ -280,6 +311,7 @@
       "claude_command": "/spec:history",
       "antigravity_skill": "spec-history/SKILL.md",
       "codex_skill": "spec-history",
+      "grok_skill": "spec-history/SKILL.md",
       "aliases": []
     },
     {
@@ -289,6 +321,7 @@
       "claude_command": "/workflow:impl",
       "antigravity_skill": "workflow-impl/SKILL.md",
       "codex_skill": "workflow-impl",
+      "grok_skill": "workflow-impl/SKILL.md",
       "aliases": []
     },
     {
@@ -298,6 +331,7 @@
       "claude_command": "/workflow:init",
       "antigravity_skill": "workflow-init/SKILL.md",
       "codex_skill": "workflow-init",
+      "grok_skill": "workflow-init/SKILL.md",
       "aliases": []
     },
     {
@@ -307,6 +341,7 @@
       "claude_command": "/workflow:order",
       "antigravity_skill": "workflow-order/SKILL.md",
       "codex_skill": "workflow-order",
+      "grok_skill": "workflow-order/SKILL.md",
       "aliases": []
     },
     {
@@ -316,6 +351,7 @@
       "claude_command": "/workflow:request",
       "antigravity_skill": "workflow-request/SKILL.md",
       "codex_skill": "workflow-request",
+      "grok_skill": "workflow-request/SKILL.md",
       "aliases": []
     },
     {
@@ -325,6 +361,7 @@
       "claude_command": "/workflow:review",
       "antigravity_skill": "workflow-review/SKILL.md",
       "codex_skill": "workflow-review",
+      "grok_skill": "workflow-review/SKILL.md",
       "aliases": []
     },
     {
@@ -334,6 +371,7 @@
       "claude_command": "/workflow:status",
       "antigravity_skill": "workflow-status/SKILL.md",
       "codex_skill": "workflow-status",
+      "grok_skill": "workflow-status/SKILL.md",
       "aliases": []
     },
     {
@@ -343,6 +381,7 @@
       "claude_command": "/workflow:test",
       "antigravity_skill": "workflow-test/SKILL.md",
       "codex_skill": "workflow-test",
+      "grok_skill": "workflow-test/SKILL.md",
       "aliases": []
     }
   ]

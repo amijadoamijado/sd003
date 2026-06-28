@@ -70,7 +70,7 @@ deploy_dry_run() {
     echo ""
     local diverged=0 kept=0 newc=0 same=0 d f sf projrel tgt
     local DIV=() KEP=()
-    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".sd/settings" ".sd/design" ".sd/ralph" ".sd/steering" ".handoff" "docs/troubleshooting")
+    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".sd/settings" ".sd/design" ".sd/ralph" ".sd/steering" ".handoff" "docs/troubleshooting")
     for d in "${scan_dirs[@]}"; do
         [ -d "$SOURCE_DIR/$d" ] || continue
         while IFS= read -r f; do
@@ -81,7 +81,7 @@ deploy_dry_run() {
             if ! cmp -s "$f" "$tgt"; then DIV+=("$projrel"); diverged=$((diverged+1)); else same=$((same+1)); fi
         done < <(find "$SOURCE_DIR/$d" -type f)
     done
-    local scan_files=("antigravity.md" "AGENTS.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "tests/gas-fakes/setup.ts")
+    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "tests/gas-fakes/setup.ts")
     for sf in "${scan_files[@]}"; do
         if is_kept "$sf"; then KEP+=("$sf"); kept=$((kept+1)); continue; fi
         [ -f "$SOURCE_DIR/$sf" ] || continue
@@ -127,11 +127,11 @@ fi
 BACKUP_DIR="$TARGET_PROJECT/.sd003-backup-$TIMESTAMP"
 mkdir -p "$BACKUP_DIR"
 
-for f in CLAUDE.md AGENTS.md antigravity.md; do
+for f in CLAUDE.md AGENTS.md antigravity.md grok.md; do
     [ -f "$TARGET_PROJECT/$f" ] && cp "$TARGET_PROJECT/$f" "$BACKUP_DIR/" 2>/dev/null || true
 done
 
-for d in .claude .codex .agents .sd; do
+for d in .claude .codex .agents .grok .sd; do
     [ -d "$TARGET_PROJECT/$d" ] && cp -r "$TARGET_PROJECT/$d" "$BACKUP_DIR/" 2>/dev/null || true
 done
 echo "[Phase 2/7] Backup created: $BACKUP_DIR"
@@ -146,6 +146,7 @@ DIRS=(
     ".claude/hooks"
     ".codex/skills"
     ".agents/skills"
+    ".grok/skills"
     ".sd/specs"
     ".sd/steering"
     ".sessions"
@@ -264,6 +265,9 @@ copy_dir_tree ".agents/skills" "Agents Skills (agy)" "*"
 # 4-7: .codex/ (tree)
 copy_dir_tree ".codex" "Codex" "*"
 
+# 4-8: .grok/ (tree) - Grok CLI reads skills here as SKILL.md + GROK_SPEC.md
+copy_dir_tree ".grok" "Grok" "*"
+
 # 4-9: .sd/settings/ (tree)
 copy_dir_tree ".sd/settings" "SD Settings" "*"
 
@@ -345,6 +349,14 @@ if [ -f "$SOURCE_DIR/scripts/sync-cli-commands.py" ]; then
     mkdir -p "$TARGET_PROJECT/scripts"
     cp "$SOURCE_DIR/scripts/sync-cli-commands.py" "$TARGET_PROJECT/scripts/"
     COPY_STATS["Sync CLI"]=1
+    # Regenerate agy/codex/grok skills in TARGET (copy alone leaves them stale). Guarded.
+    if command -v python >/dev/null 2>&1; then
+        ( cd "$TARGET_PROJECT" && python scripts/sync-cli-commands.py >/dev/null 2>&1 ) \
+            && echo "  Regenerated agy/codex/grok skills (sync-cli-commands.py)" \
+            || echo "  WARN: post-copy sync failed; run 'python scripts/sync-cli-commands.py' in target"
+    else
+        echo "  NOTE: python not found. Run 'python scripts/sync-cli-commands.py' in target to (re)generate skills."
+    fi
 else
     COPY_STATS["Sync CLI"]=0
 fi
@@ -425,6 +437,18 @@ elif [ -f "$SOURCE_DIR/antigravity.md" ]; then
     echo "  UPDATE: antigravity.md (latest agy rules applied)"
 else
     echo "  WARN: antigravity.md not found in source, skipping"
+fi
+
+# 5-2b: grok.md (Grok CLI root config - overwrite unless protected by .sd003-keep)
+if is_kept "grok.md"; then
+    echo "  KEEP: grok.md preserved via .sd003-keep"
+    echo "grok.md" >> "$KEPT_LOG"
+elif [ -f "$SOURCE_DIR/grok.md" ]; then
+    if [ -f "$TARGET_PROJECT/grok.md" ] && ! cmp -s "$SOURCE_DIR/grok.md" "$TARGET_PROJECT/grok.md"; then echo "grok.md" >> "$DIVERGED_LOG"; fi
+    cp "$SOURCE_DIR/grok.md" "$TARGET_PROJECT/grok.md"
+    echo "  UPDATE: grok.md (latest Grok rules applied)"
+else
+    echo "  WARN: grok.md not found in source, skipping"
 fi
 
 # 5-3: session-current.md (skip if exists)
@@ -835,6 +859,7 @@ verify_category "Skills" ".claude/skills" ".claude/skills" "*" "true"
 verify_category "Hooks" ".claude/hooks" ".claude/hooks" "*" "true"
 verify_category "Agents Skills (agy)" ".agents/skills" ".agents/skills" "*" "true"
 verify_category "Codex" ".codex" ".codex" "*" "true"
+verify_category "Grok" ".grok" ".grok" "*" "true"
 verify_category "SD Settings" ".sd/settings" ".sd/settings" "*" "true"
 verify_category "Handoff" ".handoff" ".handoff" "*" "true"
 verify_category "Ralph" ".sd/ralph" ".sd/ralph" "*" "true"
@@ -853,6 +878,7 @@ echo "  Generated files:"
 GENERATED_FILES=(
     "CLAUDE.md"
     "antigravity.md"
+    "grok.md"
     ".sessions/session-current.md"
     ".sessions/TIMELINE.md"
     ".claude/settings.json"

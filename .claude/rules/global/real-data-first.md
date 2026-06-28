@@ -92,7 +92,7 @@ Adapter 層だけは本番データコピーでの徹底検証が必要。
 
 ## 全AIモデル共通
 
-このルールはClaude Code、Codex、Gemini CLI、Antigravity全てに適用される。
+このルールはClaude Code、Codex、Antigravity、Grok全てに適用される。
 
 ## 関連
 

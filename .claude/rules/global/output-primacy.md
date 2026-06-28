@@ -78,7 +78,7 @@ Codex レビューの REVIEW_REPORT.md での配点:
 
 ## 全AIモデル共通
 
-このルールはClaude Code、Codex、Gemini CLI、Antigravity全てに適用される。
+このルールはClaude Code、Codex、Antigravity、Grok全てに適用される。
 
 ## 関連
 

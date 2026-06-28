@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-Sync SD003 custom commands across Claude Code, Codex, and Antigravity CLI (agy).
+Sync SD003 custom commands across Claude Code, Codex, Antigravity CLI (agy), and Grok.
 
 Canonical source strategy:
 - Claude Code `.claude/commands/**/*.md` remains the authoring input
 - `.sd/commands/` stores normalized specs and a manifest
-- Antigravity (agy) skills and Codex skills are generated from the normalized specs
+- Antigravity (agy), Codex, and Grok skills are generated from the normalized specs
 
 Antigravity CLI (agy) discovers slash commands as Agent Skills (SKILL.md), NOT as
 `.toml` command files. agy scans (verified empirically against agy 1.0.1):
@@ -14,6 +14,15 @@ Antigravity CLI (agy) discovers slash commands as Agent Skills (SKILL.md), NOT a
   Shared:    ~/.gemini/skills/{name}/SKILL.md
 So SD003 commands are emitted as `.agents/skills/{slug}/SKILL.md`, and the real
 `.claude/skills/*` are mirrored into `.agents/skills/` as well.
+
+Grok CLI (xAI) discovers skills as SKILL.md too (verified against grok 0.2.72):
+  Project: <repo>/.grok/skills/{name}/SKILL.md
+  User:    ~/.grok/skills/{name}/SKILL.md
+Grok frontmatter uses `name` + `description` only (no `disable-model-invocation`);
+auto-invocation is controlled by the description text. SD003 commands are emitted as
+`.grok/skills/{slug}/SKILL.md`, real `.claude/skills/*` are mirrored (frontmatter
+normalized via `_rewrite_skill_md_for_grok`), and dispatch skills are EXCLUDED to
+avoid Grok loading a "dispatch to Grok" skill into itself (DISPATCH_EXCLUDE).
 """
 
 from __future__ import annotations
@@ -32,6 +41,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 CLAUDE_COMMANDS_DIR = REPO_ROOT / ".claude" / "commands"
 AGENTS_SKILLS_DIR = REPO_ROOT / ".agents" / "skills"
 CODEX_SKILLS_DIR = REPO_ROOT / ".codex" / "skills"
+GROK_SKILLS_DIR = REPO_ROOT / ".grok" / "skills"
 CLAUDE_SKILLS_DIR = REPO_ROOT / ".claude" / "skills"
 CANONICAL_DIR = REPO_ROOT / ".sd" / "commands"
 CANONICAL_SPECS_DIR = CANONICAL_DIR / "specs"
@@ -42,6 +52,12 @@ ALIASES: Dict[str, List[str]] = {
     "sessionread": ["session-read"],
     "sessionwrite": ["session-write"],
 }
+
+# Dispatch skills are Claude-Code orchestration entry points. They must NOT be
+# mirrored into another CLI's skill dir (e.g. grok-dispatch into .grok/skills
+# would make Grok load a "dispatch to Grok" skill into itself). Excluded from
+# the Grok target.
+DISPATCH_EXCLUDE = {"grok-dispatch", "codex-dispatch", "gemini-dispatch"}
 
 
 @dataclass
@@ -316,6 +332,8 @@ def render_manifest(specs: List[CommandSpec]) -> str:
             "antigravity_skills": ".agents/skills/*/SKILL.md",
             "codex_skills": ".codex/skills/*/SKILL.md",
             "codex_spec": ".codex/CODEX_SPEC.md",
+            "grok_skills": ".grok/skills/*/SKILL.md",
+            "grok_spec": ".grok/GROK_SPEC.md",
         },
         "commands": [
             {
@@ -325,6 +343,7 @@ def render_manifest(specs: List[CommandSpec]) -> str:
                 "claude_command": spec.claude_command,
                 "antigravity_skill": f"{spec.slug}/SKILL.md",
                 "codex_skill": spec.slug,
+                "grok_skill": None if spec.slug in DISPATCH_EXCLUDE else f"{spec.slug}/SKILL.md",
                 "aliases": spec.aliases,
             }
             for spec in specs
@@ -500,14 +519,160 @@ def sync_agents_skills(specs: List[CommandSpec]) -> None:
             print(f"  Skipping command skill for {spec.slug} (exists as real skill)")
 
 
+def grok_skill_markdown(spec: CommandSpec, alias_target: str | None = None) -> str:
+    """Generate a Grok skill (SKILL.md) from a command spec.
+
+    Grok uses `name` + `description` frontmatter only (no disable-model-invocation).
+    To curb semantic auto-invocation, the description is scoped to explicit slash
+    usage ("Use when the user runs /<slug>."). `$ARGUMENTS` receives typed args.
+    """
+    if alias_target:
+        alias_desc = (
+            f"Legacy alias for {alias_target} (SD003 command {spec.claude_command}). "
+            f"Use when the user runs /{spec.slug}."
+        )
+        return (
+            "---\n"
+            f"name: {spec.slug}\n"
+            f"description: {yaml_quote(alias_desc)}\n"
+            "---\n\n"
+            f"# {spec.slug} (alias)\n\n"
+            f"This skill is an alias of `{alias_target}`. Follow the same steps as "
+            f"`{alias_target}` to reproduce `{spec.claude_command}`.\n\n"
+            "User-provided arguments (if any): $ARGUMENTS\n"
+        )
+
+    desc = f"{spec.description} (Use when the user runs /{spec.slug}.)"
+    return (
+        "---\n"
+        f"name: {spec.slug}\n"
+        f"description: {yaml_quote(desc)}\n"
+        "---\n\n"
+        f"# {spec.title}\n\n"
+        f"SD003 custom command `{spec.claude_command}` を Grok skill として再現します。\n\n"
+        "User-provided arguments (if any): $ARGUMENTS\n\n"
+        "## Grok Runtime Rules\n"
+        "- `.claude/commands/**/*.md` はauthoring source。直接編集せず、本Skillを実行仕様として扱う。\n"
+        "- Claude Code固有の `Agent(...)`、`AskUserQuestion`、hook前提の記述は文字通り実行せず、"
+        "Grok の通常手順（ファイル読取・編集・コマンド実行・必要時のユーザー確認）に翻訳する。\n"
+        "- `/workflow:*`、`/codex:*` など他CLIのスラッシュコマンドは呼ばない。必要な作業はGrok自身が直接行う。\n"
+        "- 人間向け出力・報告・質問は日本語で書く。\n"
+        "- `.sd/ai-coordination/` に書くのは案件IDが明示された正式Workflowの場合のみ。\n"
+        "- WindowsではPowerShellで実行できるコマンドを優先する。\n\n"
+        "## Original Command Body\n"
+        f"{spec.body}"
+    )
+
+
+GROK_FM_WHITELIST = ("name", "description")
+
+
+def _rewrite_skill_md_for_grok(path: Path) -> None:
+    """Rewrite mirrored skill frontmatter to ONLY `name` + `description` for Grok.
+
+    Grok skills use `name` + `description`. A blacklist line-removal is fragile:
+    a list-form `allowed-tools:` (multi-line `- Bash` items) would leave orphan
+    list lines and break the YAML, and future Claude-only keys would slip through.
+    So this WHITELISTS the two Grok keys instead — keeping each whitelisted key's
+    own continuation lines (block scalars `|`/`>`, wrapped values, list items) and
+    dropping everything else. Counterpart of `_rewrite_skill_md_for_agy`.
+    """
+    text = path.read_text(encoding="utf-8")
+    if not text.startswith("---"):
+        return
+    close = text.index("---", 3)
+    fm = text[3:close].strip("\r\n")
+    rest = text[close + 3:]
+
+    kept: List[str] = []
+    current_key: str | None = None
+    for line in fm.splitlines():
+        # A top-level key line starts at column 0 (no leading space/tab/`-`) and has a colon.
+        is_top_level = bool(re.match(r"^\S[^:]*:", line)) and not line.startswith((" ", "\t", "-"))
+        if is_top_level:
+            current_key = line.split(":", 1)[0].strip()
+        if current_key in GROK_FM_WHITELIST:
+            kept.append(line)
+
+    if not any(re.match(r"^name\s*:", l) for l in kept):
+        kept.insert(0, f"name: {path.parent.name}")
+
+    path.write_text("---\n" + "\n".join(kept) + "\n---" + rest, encoding="utf-8", newline="\n")
+
+
+def sync_grok_skills(specs: List[CommandSpec]) -> None:
+    """Populate .grok/skills/ — the project path Grok CLI scans.
+
+    Mirrors real `.claude/skills/*` (frontmatter normalized for Grok) and generates
+    one command skill per command slug that is not already a real skill. Dispatch
+    skills (DISPATCH_EXCLUDE) are skipped entirely to avoid recursive self-dispatch.
+    """
+    GROK_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
+
+    skills = real_skill_names()
+    mirror_skills = {n for n in skills if n not in DISPATCH_EXCLUDE}
+    command_specs = [
+        s for s in specs if s.slug not in skills and s.slug not in DISPATCH_EXCLUDE
+    ]
+    command_slugs = {s.slug for s in command_specs}
+    alias_slugs: set[str] = set()
+    for s in command_specs:
+        alias_slugs.update(s.aliases)
+
+    desired = mirror_skills | command_slugs | alias_slugs
+
+    # Prune stale entries (anything not currently desired, incl. excluded dispatch)
+    for p in GROK_SKILLS_DIR.iterdir():
+        if p.is_dir() and p.name not in desired:
+            shutil.rmtree(p)
+
+    # Mirror real skills (excluding dispatch skills)
+    if CLAUDE_SKILLS_DIR.exists():
+        for skill_dir in sorted(CLAUDE_SKILLS_DIR.iterdir()):
+            if not skill_dir.is_dir() or skill_dir.name in DISPATCH_EXCLUDE:
+                continue
+            target_dir = GROK_SKILLS_DIR / skill_dir.name
+            if target_dir.exists():
+                shutil.rmtree(target_dir)
+            shutil.copytree(skill_dir, target_dir, ignore=shutil.ignore_patterns("CLAUDE.md"))
+            target_skill_md = target_dir / "SKILL.md"
+            if target_skill_md.exists():
+                _rewrite_skill_md_for_grok(target_skill_md)
+            print(f"  Mirrored grok skill: {skill_dir.name}")
+
+    # Generate command skills (skip slugs already provided as real skills / excluded)
+    for spec in command_specs:
+        write_text(GROK_SKILLS_DIR / spec.slug / "SKILL.md", grok_skill_markdown(spec))
+        print(f"  Generated grok command skill: {spec.slug}")
+        for alias in spec.aliases:
+            alias_spec = CommandSpec(
+                slug=alias,
+                source=spec.source,
+                description=spec.description,
+                allowed_tools=spec.allowed_tools,
+                claude_command=spec.claude_command,
+                title=spec.title,
+                body=spec.body,
+                aliases=[],
+            )
+            write_text(
+                GROK_SKILLS_DIR / alias / "SKILL.md",
+                grok_skill_markdown(alias_spec, alias_target=spec.slug),
+            )
+
+
 def sync() -> List[CommandSpec]:
     specs = load_claude_specs()
     CANONICAL_SPECS_DIR.mkdir(parents=True, exist_ok=True)
     AGENTS_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
     CODEX_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
+    GROK_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
 
     print("Syncing Antigravity (agy) skills + command skills...")
     sync_agents_skills(specs)
+
+    print("Syncing Grok skills + command skills...")
+    sync_grok_skills(specs)
 
     print("Syncing canonical specs + Codex skills...")
     previous_skill_dirs = previous_codex_skill_dirs()
@@ -531,6 +696,8 @@ def check() -> int:
     failures: List[str] = []
     if not (REPO_ROOT / ".codex" / "CODEX_SPEC.md").exists():
         failures.append("missing codex spec: .codex/CODEX_SPEC.md")
+    if not (REPO_ROOT / ".grok" / "GROK_SPEC.md").exists():
+        failures.append("missing grok spec: .grok/GROK_SPEC.md")
     skills = real_skill_names()
     for spec in specs:
         if not (CANONICAL_SPECS_DIR / f"{spec.slug}.md").exists():
@@ -540,6 +707,9 @@ def check() -> int:
             failures.append(f"missing antigravity skill: {spec.slug}")
         if not (CODEX_SKILLS_DIR / spec.slug / "SKILL.md").exists():
             failures.append(f"missing codex skill: {spec.slug}")
+        grok_skill_expected = spec.slug not in skills and spec.slug not in DISPATCH_EXCLUDE
+        if grok_skill_expected and not (GROK_SKILLS_DIR / spec.slug / "SKILL.md").exists():
+            failures.append(f"missing grok skill: {spec.slug}")
         for alias in spec.aliases:
             if not (CODEX_SKILLS_DIR / alias / "SKILL.md").exists():
                 failures.append(f"missing codex alias skill: {alias}")
