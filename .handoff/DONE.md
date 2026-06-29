@@ -4,71 +4,61 @@
 
 ## やったこと
 
-**変更したファイル**
+**変更/生成したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `.sessions/session-20260630-073603.md` | セッション記録（新規） |
-| `.sessions/session-current.md` | 最新版へ更新 |
-| `.sessions/TIMELINE.md` | エントリ追加・統計更新（105セッション） |
-| `.handoff/DONE.md` | 本ファイル |
+| `D:\claudecode\at003\` 一式 | SD003 v3.2.0 を `/sd-deploy` で新規展開（594コピー+8生成） |
+| `at003\.sd\specs\at003-資産税\requirements.md` | at002 stray ブランチから相続税BP要件定義書を回収配置 |
+| `at003\materials\html\at003-資産税-blueprint.html` | ブループリントHTMLを回収配置 |
+| `at003\materials\pdf\at003-資産税-blueprint.pdf` | ブループリントPDFを回収配置 |
+| `at003\materials\images\at003-verify.png` | 検証スクショを回収配置 |
 
 **変更内容の要約**
-外部サードパーティ Claude Code プラグイン `nam-tech-studio/toolcall-recover` を検証した。SD003 本体のコード変更はなし（検証作業のみ）。
+at003 へ SD003 フレームワークを展開し、別件で「相続税ブループリントが at003 に無い」と判明 → 未作成ではなく at002 の未マージ stray ブランチに取り残されていたと特定し、4ファイルを at003 へ回収した。
 
 ---
 
 ## 確認結果
 
-**実行したコマンド**
-```bash
-gh repo view nam-tech-studio/toolcall-recover   # 実在・MIT・★16 確認
-git clone --depth 1 ...                          # scratchpad へ浅クローン（静的レビュー）
-bash hooks/test-detect-toolcall-leak.sh          # 回帰テスト（ユーザーが ! 実行）
-Get-Command jq                                    # jq 不在を確定
-```
+**実行した検証**
+- `/sd-deploy` dry-run → 本番展開（Phase 6b 内容検証ゲート C1〜C6 全 PASS）
+- 回収4ファイルの実体・サイズ・マジックナンバー確認（PDF=%PDF / PNG=PNG / requirements.md 17,399 bytes 内容確認）
 
 **結果**
-```
-リポジトリ実在 ✅（MIT / Shell / ★16 / 2026-06-22）
-インストール手順 = README/plugin.json/marketplace.json と完全一致 ✅
-セキュリティ = 通信/書込/eval/破壊/難読化なし ✅ 危険なし
-回帰テスト = pass=3 fail=3（全行 jq: command not found ＝環境に jq 無しが単一原因）
-jq = PATH 不在を確定
-```
-
-**判定**
-- [x] リポジトリ実在・X投稿手順の正確性
-- [x] 機能と説明の整合
-- [x] セキュリティ（外部通信・破壊操作・難読化なし）＝安全
-- [ ] 回帰テスト pass=6（jq 不在で判定不能・未確認）
+- SD003 展開: 内容検証 ALL PASS。Phase 6 カウント FAIL は optional-skills 3件除外による既知の誤報（実害なし）
+- 相続税BP: 4ファイル全て at003 に配置・実体確認済み
 
 ---
 
 ## 残っていること
 
 **未完了タスク**
-- [ ] `jq` 導入（choco/scoop）→ 回帰テスト再実行で `pass=6 fail=0` 最終確認
+- [ ] at002 リモートのクリーン化方針確定（claude/* 2ブランチに未マージ作業16コミット。master 取り込み後に削除が安全）
+- [ ] at003 への commit 方針判断（at003 は独自 git でなく親 D:/claudecode 配下・remote無し。独立リポジトリ化 or 配置のみ）
+- [ ] at003 で `npm install` → `/sessionread` 動作確認
 
 **次の手順**
-- toolcall-recover を実際に導入するか判断。導入時はローカルクローン＋`claude --plugin-dir` 推奨（自己改善ループ＝notes.md 書き込みのため）。**ただし jq 未導入だと fail open で完全に無動作＝事実上 jq が前提**。
+- 次タスク: at002 stray ブランチの未マージ作業（資産税BP 9 + OCR突合 7）を master へ取り込んでからブランチ削除
 
 ---
 
 ## 判断したこと
 
+**設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| 静的レビュー vs いきなり導入 | 静的レビュー | サードパーティ＝中身精査が先（安全確認） |
-| classifier ブロックを迂回 vs ユーザー手元実行 | 手元実行(`!`) | 外部スクリプト実行ブロックは正しい安全装置。迂回しない |
+| at002 stray ブランチを即削除 vs 中身確認 | 中身確認 | 「クリーン」指示と中身（未マージ実装）が食い違う→削除前に surface |
+| 相続税BP を新規作成 vs 回収 | 回収 | 既存BPが stray ブランチに実在（git show で抽出可能）。再作成は無駄 |
+| at003 へ即 commit vs 配置のみ | 配置のみ | at003 が独自リポジトリでなく remote 無し。コミット先が曖昧なため判断保留 |
 
 **採用しなかった案と理由**
-- マーケットプレイス即導入: 中身未確認のまま hook を Stop/SubagentStop に登録するのはリスク。先に静的レビューした。
+- stray ブランチ即削除: 削除候補ブランチこそ探していた相続税BPの格納先だった。即削除すれば資産税BP一式を永久喪失していた
 
 ---
 
 ## 追加情報
 
-- **誤検知リスク（既知）**: `<invoke` `<parameter` `<function_calls>` `court` をコードフェンス外の地の文で書くとブロックされる。タグを解説するセッションで誤発火しうる（README明記の限界）。
-- **検証結論**: 安全に導入可。X投稿の主張（機能・手順・ローカルクローン推奨理由）はすべて実体と一致。
+- MSYS パス変換の罠: Git Bash で `git show <rev>:.sd/...` の `:` 直後が `.sd/` だと MSYS が Windows パスリストと誤認し `:`→`;` 変換で失敗。`MSYS_NO_PATHCONV=1` で回避
+- at002 ローカル master は origin/master より16コミット先行（未push）。本セッションでは触れていない
 
 ---
