@@ -1,11 +1,17 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 107
-- **Latest Session**: 2026-06-30
+- **Total Sessions**: 108
+- **Latest Session**: 2026-07-02
 - **Project Start**: 2026-02-15
 
 ---
+
+## 2026-07
+
+| Date | Main Work | Commit | Details |
+|------|-----------|--------|---------|
+| 07-02 | **cf001/cf002へSD003 v3.2.0を`/sd-upgrade`で再展開＋sd003本体`.sd/`mid-session wipe復旧**。①cf001: 既にv3.2.0(06-24デプロイ)だったが06-24以降の進化(Grok CLI 4AI統合・branch-strategy等)未反映と判明→dry-run 22件divergence→全件diff照合で固有化ゼロ判定→`.sd003-keep`不要でexecute、592コピー+8生成、内容検証C1-6全PASS、commit(c33face、feature/data-update-2603ブランチ)。②cf002: v3.1.0(04-28)から大幅遅れ→**実行前に矛盾確認**: cf002直近commit(acf4c7e、当日付)に「実開発はcf001へ一本化・cf002再構築せず」との決定を発見→AskUserQuestionで確認→「汎用バージョンとして継続利用するので展開して」と回答受領→実施。廃止物削除(.gemini/GEMINI.md/gemini.md/.antigravity/rules.md等12件)+584コピー+8生成、49件divergence全diff照合で固有化ゼロ判定、内容検証C1-6全PASS、commit(f6b01ad、master)。③cf001/cf002へのBash操作多数実行後、**sd003本体`.sd/`59ファイル全消失(mid-session wipe)を検知**→sd-safe-commit.md記載の既知バグと認識(root-cause-firstで自分の直前操作を第一仮説)→`git restore .sd/`はL3物理ガードレールでブロック→手動復元手順(`git show HEAD:path>path`)で59ファイル全復元・diff差分ゼロ確認、データ損失ゼロ | c33face(cf001), f6b01ad(cf002) | [Details](session-20260702-125810.md) |
 
 ## 2026-06
 
