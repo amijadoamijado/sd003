@@ -1,8 +1,8 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 108
-- **Latest Session**: 2026-07-02
+- **Total Sessions**: 109
+- **Latest Session**: 2026-07-04
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | Date | Main Work | Commit | Details |
 |------|-----------|--------|---------|
+| 07-04 | **`jobs-review`スキル新規作成＋`/sessionread`にSD003アップデート自動検知を追加＋ta001へ`/sd-upgrade`実行**。①`jobs-review`: UI/UX・対話体験（CLI/エージェント含む）・成果物完成度を「ジョブズなら満足するか」で批評しブラッシュアップ案を引き出すメタスキル（grillme/blueprint-gate型踏襲）。②sessionread Step 6: デプロイ先プロジェクトでプロジェクトCLAUDE.mdのバージョンとsd003本体`deploy.ps1`の`$FRAMEWORK_VERSION`を比較し非ブロッキング通知→`AskUserQuestion`確認後に既存`/sd-upgrade`へ委譲（サイレント自動実行はしない）。調査で`SD003_VERSION`(3.2.0)/`FRAMEWORK_VERSION`(2.14.0)/CLAUDE.md footer(3.2.0)の3値ズレを発見、`FRAMEWORK_VERSION`を正として採用（reconcileは別問題）。コミット準備中`.sd/`mid-session wipe再発→手動復元、commit時もpost-commitフック(L4)が別wipeを自動復元。③**ta001へ`/sd-upgrade`(v3.1.0→v3.2.0/FW v2.14.0)**: dry-run 51件divergenceを全件diff照合→**CLAUDE.mdのみ本物の固有カスタマイズ**(「STOP-着手前ユーザー確認」プロトコル、mz#107/108・茂原案件由来)と判明、他50件は旧FW版差分のみ→`.sd003-keep`でCLAUDE.md保護→ユーザー承認後execute(596コピー+8生成、51上書き、廃止物削除、内容検証C1-6全PASS、npm install)→ta001自身のSTOPルールに従いcommitも`AskUserQuestion`で確認後`main`へcommit | 1c2b696(sd003), 6c8d66a(ta001) | [Details](session-20260704-203743.md) |
 | 07-02 | **cf001/cf002へSD003 v3.2.0を`/sd-upgrade`で再展開＋sd003本体`.sd/`mid-session wipe復旧**。①cf001: 既にv3.2.0(06-24デプロイ)だったが06-24以降の進化(Grok CLI 4AI統合・branch-strategy等)未反映と判明→dry-run 22件divergence→全件diff照合で固有化ゼロ判定→`.sd003-keep`不要でexecute、592コピー+8生成、内容検証C1-6全PASS、commit(c33face、feature/data-update-2603ブランチ)。②cf002: v3.1.0(04-28)から大幅遅れ→**実行前に矛盾確認**: cf002直近commit(acf4c7e、当日付)に「実開発はcf001へ一本化・cf002再構築せず」との決定を発見→AskUserQuestionで確認→「汎用バージョンとして継続利用するので展開して」と回答受領→実施。廃止物削除(.gemini/GEMINI.md/gemini.md/.antigravity/rules.md等12件)+584コピー+8生成、49件divergence全diff照合で固有化ゼロ判定、内容検証C1-6全PASS、commit(f6b01ad、master)。③cf001/cf002へのBash操作多数実行後、**sd003本体`.sd/`59ファイル全消失(mid-session wipe)を検知**→sd-safe-commit.md記載の既知バグと認識(root-cause-firstで自分の直前操作を第一仮説)→`git restore .sd/`はL3物理ガードレールでブロック→手動復元手順(`git show HEAD:path>path`)で59ファイル全復元・diff差分ゼロ確認、データ損失ゼロ | c33face(cf001), f6b01ad(cf002) | [Details](session-20260702-125810.md) |
 
 ## 2026-06
