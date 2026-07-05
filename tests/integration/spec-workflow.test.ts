@@ -3,6 +3,7 @@
 import { runCli } from '../../src/cli';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import { IdRegistry } from '../../src/spec-driven/id-registry';
 import { TraceabilityEngine } from '../../src/spec-driven/traceability-engine';
 
@@ -12,14 +13,21 @@ const mockArgv = (args: string[]) => {
 };
 
 describe('Spec-Driven Workflow Integration', () => {
-  const kiroDirPath = path.join(process.cwd(), '.sd');
-  const specsDirPath = path.join(kiroDirPath, 'specs');
+  // NOTE: The CLI resolves `.sd/specs` via process.cwd(). This suite previously used the
+  // real project cwd directly, which deleted the actual D:\claudecode\sd003\.sd directory
+  // (all specs/commands/ai-coordination content) on every `npm test` run — a real data-loss
+  // incident (found 2026-07-05). Sandbox in a temp directory + process.chdir so the real
+  // project tree is never touched.
+  const originalCwd = process.cwd();
+  let tempRoot: string;
+  let kiroDirPath: string;
+  let specsDirPath: string;
 
   beforeEach(() => {
-    // Clean up .sd directory before each test
-    if (fs.existsSync(kiroDirPath)) {
-      fs.rmSync(kiroDirPath, { recursive: true, force: true });
-    }
+    tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'sd003-spec-workflow-'));
+    process.chdir(tempRoot);
+    kiroDirPath = path.join(tempRoot, '.sd');
+    specsDirPath = path.join(kiroDirPath, 'specs');
     fs.mkdirSync(specsDirPath, { recursive: true });
 
     // Reset registries
@@ -40,9 +48,10 @@ describe('Spec-Driven Workflow Integration', () => {
   afterEach(() => {
     // Restore console output
     jest.restoreAllMocks();
-    // Clean up .sd directory after each test
-    if (fs.existsSync(kiroDirPath)) {
-      fs.rmSync(kiroDirPath, { recursive: true, force: true });
+    // Return to the real cwd and clean up only the temp sandbox (never the real project)
+    process.chdir(originalCwd);
+    if (fs.existsSync(tempRoot)) {
+      fs.rmSync(tempRoot, { recursive: true, force: true });
     }
   });
 
