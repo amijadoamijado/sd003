@@ -47,6 +47,16 @@ SD003 の全判断の根拠。詳細: `docs/core-doctrine.md`
 - 原因確定前の修正反映の繰り返し
 - 複数の挙動を一度に変更
 
+## 無知の知（Known Unknowns / 4象限）
+
+> 検証前に不確実性を明示する。「知らないことを知らないまま進める」のが最大のリスク。
+> 詳細: `.claude/rules/global/known-unknowns.md`
+
+- 着手前に自分の未知を **Known Unknown** の箱へ先回りして移す（blindspot pass・1問・フォーム化しない）。
+- ラベル: **GREEN**=Known Known（証拠あり） / **YELLOW**=Known Unknown（要確認・条文/実データで潰す） / **RED**=Unknown Unknown疑い（乖離→bug-trace）。
+- **未知の宣言は報酬対象**（罰しない）。検出不能な Unknown Unknown をゲート化する ceremony は作らない。
+- 地図≠現場: CLAUDE.md/スキルは代理表現。強いモデルの失敗は静かで累積的。過剰な手取り足取りは定期的に棚卸し・削除。
+
 ---
 
 ## 基本コマンド
