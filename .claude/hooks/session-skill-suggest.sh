@@ -8,6 +8,8 @@
 #
 # Information only — does NOT block. PreToolUse enforce-skill-read.sh blocks.
 
+INPUT=$(cat)
+
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-}"
 if [ -z "$PROJECT_DIR" ]; then
   SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -15,29 +17,50 @@ if [ -z "$PROJECT_DIR" ]; then
 fi
 SESSION_FILE="$PROJECT_DIR/.sessions/session-current.md"
 REGISTRY="$PROJECT_DIR/.claude/skills/registry.json"
-LOG_FILE="$HOME/.claude/state/sd003/read-skills.log"
-
-# --- B9 fix: reset the read-skills gate every SessionStart ---
-# The log was never cleared, so "read the SKILL.md this session" quietly
-# became "ever read it, in any session" -- a permanent unlock. The log path
-# is also hardcoded to a fixed location shared across ALL deploy targets
-# (not scoped by project), so this reset additionally prevents one project's
-# read-history from silently satisfying another project's gate. This must
-# run unconditionally (before the SESSION_FILE/REGISTRY existence checks
-# below) so the gate re-arms even on the very first run of a new project.
-mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
-: > "$LOG_FILE" 2>/dev/null
-
-if [ ! -f "$SESSION_FILE" ] || [ ! -f "$REGISTRY" ]; then
-  exit 0
-fi
+LOG_DIR="$HOME/.claude/state/sd003"
 
 PY_BIN=""
 if command -v python >/dev/null 2>&1; then
   PY_BIN="python"
 elif command -v python3 >/dev/null 2>&1; then
   PY_BIN="python3"
+fi
+
+# --- B18: session-scoped read-skills log path ---
+# Key the log by session_id (byte-identical derivation to track-skill-read.sh /
+# enforce-skill-read.sh). Fall back to the legacy shared path when session_id is
+# unavailable. This must be computed before the reset below.
+SID=""
+if [ -n "$PY_BIN" ]; then
+  SID=$(printf '%s' "$INPUT" | "$PY_BIN" -c 'import sys, json, re
+try:
+    d = json.load(sys.stdin)
+except Exception:
+    d = {}
+sys.stdout.write(re.sub(r"[^A-Za-z0-9._-]", "", str(d.get("session_id", "") or "")))' 2>/dev/null)
+fi
+if [ -n "$SID" ]; then
+  LOG_FILE="$LOG_DIR/read-skills-$SID.log"
 else
+  LOG_FILE="$LOG_DIR/read-skills.log"
+fi
+
+# --- B9 fix: reset the read-skills gate every SessionStart ---
+# The log was never cleared, so "read the SKILL.md this session" quietly
+# became "ever read it, in any session" -- a permanent unlock. With B18
+# session scoping a fresh session already gets a fresh (nonexistent) file, so
+# re-arming no longer depends on this reset; it is kept as belt-and-suspenders
+# and to give an honest empty slate for the banner below. Runs unconditionally
+# (before the SESSION_FILE/REGISTRY existence checks) so the gate re-arms even
+# on the very first run of a new project.
+mkdir -p "$LOG_DIR" 2>/dev/null
+: > "$LOG_FILE" 2>/dev/null
+
+if [ ! -f "$SESSION_FILE" ] || [ ! -f "$REGISTRY" ]; then
+  exit 0
+fi
+
+if [ -z "$PY_BIN" ]; then
   exit 0
 fi
 

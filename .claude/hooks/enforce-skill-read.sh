@@ -24,7 +24,6 @@ if [ -z "$PROJECT_DIR" ]; then
 fi
 
 REGISTRY="$PROJECT_DIR/.claude/skills/registry.json"
-LOG_FILE="$HOME/.claude/state/sd003/read-skills.log"
 
 if [ ! -f "$REGISTRY" ]; then
   exit 0
@@ -42,11 +41,10 @@ else
 fi
 
 export SD003_REGISTRY="$REGISTRY"
-export SD003_LOG="$LOG_FILE"
 export SD003_INPUT_JSON="$INPUT"
 
 OUTPUT=$("$PY_BIN" <<'PYEOF'
-import os, sys, json
+import os, sys, json, re
 
 try:
     data = json.loads(os.environ.get('SD003_INPUT_JSON', ''))
@@ -78,7 +76,19 @@ if not haystack.strip():
     sys.exit(0)
 
 registry_path = os.environ.get('SD003_REGISTRY', '')
-log_path = os.environ.get('SD003_LOG', '')
+
+# Session-scoped read-skills log (B18). Previously a single fixed path shared
+# across ALL sessions/projects, so concurrent sessions clobbered each other's
+# read-history (false block) or leaked it (false unlock). Key by session_id;
+# fall back to the legacy shared path when session_id is absent. track-skill-read.sh
+# and session-skill-suggest.sh use the byte-identical derivation, so within a
+# session the three hooks always resolve to the same file -> no regression, no
+# hard-lock even if session_id is ever missing (both writer and reader fall back
+# together).
+_state_dir = os.path.join(os.path.expanduser('~'), '.claude', 'state', 'sd003')
+_sid = re.sub(r'[^A-Za-z0-9._-]', '', str(data.get('session_id', '') or ''))
+log_path = os.path.join(_state_dir, 'read-skills-' + _sid + '.log') if _sid \
+    else os.path.join(_state_dir, 'read-skills.log')
 
 try:
     with open(registry_path, 'r', encoding='utf-8') as f:

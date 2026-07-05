@@ -110,6 +110,10 @@ __pycache__/
 # stray deploy artifact（誤ってルート直下にデプロイされた残骸）
 cr001/
 
+# agy成果物の回収インボックス（ユーザーデータの一時退避先・フレームワークrepoにコミットしない）
+# scripts/recover-agy-artifacts.sh の出力。中身を確認して各PJの正しい場所へ移すこと。
+materials/_agy-recovered/
+
 # Grokディスパッチのターミナルログ残骸（2026-06-28テスト由来・~1MB）
 terminals/
 # gitignore-verify

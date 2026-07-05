@@ -49,7 +49,11 @@ fp_norm = file_path.replace('\\', '/').lower()
 
 # Heuristic: target looks like a spec location?
 # Match if path contains "/specs/" segment (e.g. docs/specs/, my-specs/, etc.)
-if '/specs/' not in fp_norm:
+# B17 fix: a project-root-relative path whose FIRST segment is "specs" (e.g.
+# "specs/foo/spec.md") has no leading slash, so "/specs/" is not a substring
+# and it was wrongly early-allowed. Also catch the bare "specs/" prefix form,
+# mirroring the ".sd/specs/" bare-prefix handling in the allow check below.
+if '/specs/' not in fp_norm and not fp_norm.startswith('specs/'):
     sys.exit(0)
 
 # Allow if under .sd/specs/ (canonical location).

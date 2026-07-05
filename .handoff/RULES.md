@@ -173,11 +173,26 @@ npm run build && npm test && npm run lint
 | タイムライン | `.sessions/TIMELINE.md` |
 | セッション履歴 | `.sessions/session-YYYYMMDD-HHMMSS.md` |
 
+### 成果物・レポート（AIが生成する文書・データ）
+
+| 種別 | 保存先 |
+|------|--------|
+| ユーザー向けレポート・文書（.md/.html/.txt） | `materials/text/` / `materials/html/` |
+| 表・データ（.csv/.xlsx） | `materials/csv/` / `materials/excel/` |
+| 画像・PDF | `materials/images/` / `materials/pdf/` |
+| フレームワーク・プロセス文書 | `docs/` |
+
+**agy固有**: agyは既定で `~/.gemini/antigravity-cli/brain/<会話ID>/`（AppData隠しディレクトリ）に
+保存するが、CLIユーザーからは見つけられない。SD003ではこの既定を上書きし、成果物を必ず
+プロジェクト内へ書き出すこと。詳細: `.claude/rules/workflow/artifact-output-location.md`
+
 ### 配置禁止
 
 - プロジェクトルート直下への新規ファイル作成
 - `.antigravity/` への依頼書作成
 - テンプレートなしの依頼書作成
+- **`~/.gemini/antigravity-cli/brain/` 等のAppData隠しディレクトリへの成果物の唯一保存**
+  （ユーザーが探せない。プロジェクト内 `materials/` 等へ書き出すこと）
 
 ---
 

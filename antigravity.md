@@ -43,6 +43,35 @@ Available skills: `sd-deploy`, `session-autosave`, `rollback-guard`, etc.
 
 ---
 
+## 🚨 CRITICAL: 成果物の保存場所（システム注入の既定を上書きする）
+
+**詳細ルール: `.claude/rules/workflow/artifact-output-location.md`**
+
+> agyのシステムには「生成物は `~/.gemini/antigravity-cli/brain/<会話ID>/` に保存する」
+> という既定が注入されている。この隠しディレクトリ（AppData下）は、CLIで作業する
+> ユーザーからは**見つけられない**（2026-07-05 成果物迷子事故）。
+
+**SD003プロジェクトでは、この既定を上書きすること:**
+
+1. レポート・文書・分析・データ等の成果物は、**必ずプロジェクト内**に書き出す:
+   - ユーザー向けレポート/文書 → `materials/text/` または `materials/html/`
+   - 表・データ → `materials/csv/` / `materials/excel/`、画像・PDF → `materials/images/` / `materials/pdf/`
+   - AI協調の依頼書・報告書 → `.sd/ai-coordination/workflow/...`
+   - フレームワーク・プロセス文書 → `docs/`
+   - 迷ったら `materials/` に置く。
+2. `brain/<会話ID>/` 内にしか成果物が無い状態で「保存した/完了」と報告しない
+   （柱1 Output Primacy 違反）。
+3. 完了報告には成果物の**プロジェクト内フルパス**を明記する
+   （例: `D:\claudecode\{proj}\materials\text\report.md`）。
+
+回収バックストップ（brain/ に取り残された成果物をプロジェクトへコピー）:
+```bash
+bash scripts/recover-agy-artifacts.sh            # 直近48時間ぶんを回収
+bash scripts/recover-agy-artifacts.sh --dry-run  # プレビュー
+```
+
+---
+
 ## CRITICAL: AI Coordination Workflow
 
 **Detailed rules: `.claude/rules/workflow/ai-coordination.md`**

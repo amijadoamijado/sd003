@@ -109,6 +109,8 @@ IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design 
 
 IMPORTANT: When running Playwright or any tool that downloads Chromium, use the shared cache at `D:\playwright-browsers`. Never set `PLAYWRIGHT_BROWSERS_PATH` to a project-local path. Details: `.claude/rules/global/playwright-cache.md`
 
+IMPORTANT: When any AI (especially agy/Antigravity) generates a deliverable (report, document, analysis, data), save it INTO the project tree where the user can open it — `materials/` for user-facing deliverables, `.sd/ai-coordination/` for coordination docs, `docs/` for framework docs. NEVER leave the only copy in an AppData hidden dir such as `~/.gemini/antigravity-cli/brain/<conversationID>/` (agy's injected default) — CLI users cannot find it (柱1 Output Primacy violation). agy runs outside Claude's hook system, so this is enforced by rule + the recovery backstop `scripts/recover-agy-artifacts.sh`. When you see an agy deliverable stranded in the brain dir, relocate it into the project and give the user the full path. Details: `.claude/rules/workflow/artifact-output-location.md`
+
 IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
 
 IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .sd/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
