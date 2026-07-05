@@ -6,52 +6,90 @@
 # 2026-06-10 改良: ディレクトリ全消失判定 → ファイル単位判定（partial wipe対応）。
 # 復元の正本は pre-commit が採取した .git/sd-snapshot（commit時点のディスク内容＝未commit分も含む）。
 # スナップショットが無い場合は HEAD から復元（旧挙動フォールバック）。
+# 2026-07-05 修正:
+#   B12: スナップショットの鮮度をsd-snapshot.metaの親commit hashで検証する。
+#        `--no-verify` 等でpre-commitがスキップされ続けた古いスナップショットは
+#        「意図的な削除」まで復元してしまうため、鮮度不一致時はHEADベースの
+#        保守的フォールバックへ回す（HEADには元々無いものは復元しない）。
+#   B13: Google Driveバックアップをbranch/remote判定より前に実行し、
+#        detached HEAD・origin無しでもバックアップされるようにする。
+#        コピー先レイアウトも `.sd/. -> DEST/` で決定論的にする。
+#   B14: 非ASCIIパス対策で core.quotepath=false + NUL区切りを使う。
 # Refs: anthropics/claude-code#34330
 
-# === .sd/ 消失検知 + 自動復元（full / partial wipe 両対応） ===
 GIT_DIR_PATH=$(git rev-parse --git-dir 2>/dev/null)
 SNAPSHOT="$GIT_DIR_PATH/sd-snapshot"
+META="$GIT_DIR_PATH/sd-snapshot.meta"
 restored=0
 
-if [ -n "$GIT_DIR_PATH" ] && [ -d "$SNAPSHOT" ]; then
-    # 正本=スナップショット。欠損ファイルのみ復元（残存ファイルは触らない）
-    while IFS= read -r src; do
+# B12: スナップショットの鮮度判定。
+# pre-commitは「これから作られるコミットの親になるHEAD」をmetaに記録している。
+# 今のHEADの親がそれと一致するなら、このスナップショットは「今回のコミット」用に
+# 採取されたもの=新鮮。一致しない（--no-verifyでpre-commitがスキップされた等）なら
+# 古いスナップショットとみなし、スナップショットベースの復元は行わない
+# （意図的な削除の再出現=B12を防ぐ）。
+CURRENT_PARENT=$(git rev-parse --verify -q HEAD^ 2>/dev/null || echo "ROOT")
+SNAPSHOT_FRESH=0
+if [ -n "$GIT_DIR_PATH" ] && [ -d "$SNAPSHOT" ] && [ -f "$META" ]; then
+    SNAPSHOT_PARENT=$(cat "$META" 2>/dev/null | tr -d '\r\n')
+    if [ "$SNAPSHOT_PARENT" = "$CURRENT_PARENT" ]; then
+        SNAPSHOT_FRESH=1
+    fi
+fi
+
+# === .sd/ 消失検知 + 自動復元（full / partial wipe 両対応） ===
+if [ "$SNAPSHOT_FRESH" = "1" ]; then
+    # 正本=スナップショット（今回のコミット用に採取された新鮮なもの）。
+    # 欠損ファイルのみ復元（残存ファイルは触らない）。非ASCIIパス対応でNUL区切り。
+    while IFS= read -r -d '' src; do
         rel=".sd/${src#"$SNAPSHOT"/}"
         if [ ! -f "$rel" ]; then
             mkdir -p "$(dirname "$rel")"
             cp "$src" "$rel"
             restored=$((restored+1))
         fi
-    done < <(find "$SNAPSHOT" -type f)
+    done < <(find "$SNAPSHOT" -type f -print0)
     if [ "$restored" -gt 0 ]; then
         echo "[post-commit] WARNING: .sd/ wipe detected (full or partial). Restored $restored file(s) from .git/sd-snapshot."
     fi
 else
-    # フォールバック: HEADから欠損ファイルを復元（未commit分は救えない）
-    while IFS= read -r f; do
+    if [ -n "$GIT_DIR_PATH" ] && [ -d "$SNAPSHOT" ]; then
+        echo "[post-commit] NOTE: .sd/ snapshot is stale (pre-commit likely skipped, e.g. --no-verify). Falling back to conservative HEAD-based restore (intentional deletions are NOT resurrected)." >&2
+    fi
+    # フォールバック: HEADから欠損ファイルを復元（未commit分は救えない、
+    # ただし意図的にHEADで削除済みのファイルは復元されない=安全側）。
+    while IFS= read -r -d '' f; do
         if [ ! -f "$f" ]; then
             mkdir -p "$(dirname "$f")"
-            git show "HEAD:$f" > "$f"
+            git -c core.quotepath=false show "HEAD:$f" > "$f"
             restored=$((restored+1))
         fi
-    done < <(git ls-tree -r HEAD --name-only 2>/dev/null | grep "^\.sd/")
+    done < <(git -c core.quotepath=false ls-tree -z -r HEAD --name-only 2>/dev/null | grep -z "^\.sd/")
     if [ "$restored" -gt 0 ]; then
-        echo "[post-commit] WARNING: .sd/ wipe detected. Restored $restored file(s) from HEAD (no snapshot found)."
+        echo "[post-commit] WARNING: .sd/ wipe detected. Restored $restored file(s) from HEAD (no fresh snapshot found)."
     fi
 fi
 
-# === async push ===
-BRANCH=$(git rev-parse --abbrev-ref HEAD)
-[ "$BRANCH" = "HEAD" ] && exit 0
-git remote get-url origin >/dev/null 2>&1 || exit 0
-
-nohup git push origin "$BRANCH" > /dev/null 2>&1 &
-
 # === Google Drive backup ===
+# B13: branch/remote判定より前に実行する（detached HEAD・origin無しでも
+# .sd/のバックアップ自体は取れて然るべきため）。コピー先は毎回 rm -rf → mkdir → 中身コピー
+# で決定論的なレイアウトにし、削除済みファイルが残留しないようにする。
 GDRIVE_BACKUP="G:/マイドライブ/sd-backup"
-PROJECT_NAME=$(basename "$(pwd)")
 if [ -d "$GDRIVE_BACKUP" ] && [ -d ".sd" ]; then
-    nohup cp -r .sd/ "$GDRIVE_BACKUP/$PROJECT_NAME/" > /dev/null 2>&1 &
+    PROJECT_NAME=$(basename "$(pwd)")
+    DEST_DIR="$GDRIVE_BACKUP/$PROJECT_NAME"
+    (
+        mkdir -p "$GDRIVE_BACKUP" 2>/dev/null
+        rm -rf "$DEST_DIR"
+        mkdir -p "$DEST_DIR"
+        cp -r .sd/. "$DEST_DIR/"
+    ) > /dev/null 2>&1 &
+fi
+
+# === async push ===
+BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+if [ "$BRANCH" != "HEAD" ] && [ -n "$BRANCH" ] && git remote get-url origin >/dev/null 2>&1; then
+    nohup git push origin "$BRANCH" > /dev/null 2>&1 &
 fi
 
 exit 0

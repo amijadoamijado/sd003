@@ -15,16 +15,42 @@
     - 0: Approve (with optional system message)
 
     This hook runs at the end of each turn to check state.
+
+    2026-07-05 fixes:
+    - Self-gate (coordination note): the invalid `.*refactor.*` Stop matcher is
+      being removed from settings.json by another pass, which means this hook
+      would otherwise fire on EVERY Stop. It now no-ops immediately unless a
+      refactor session is active (.sd/refactor/config.json exists), BEFORE doing
+      any stdin/transcript parsing, so the common case (no refactor session) is
+      cheap and fast.
+    - B2: the Stop-hook stdin JSON has no `transcript` field -- only
+      `transcript_path` (a path to the JSONL transcript file). This hook used to
+      read $json.transcript, which is always $null (wrong field name), so context
+      usage was always estimated as 0%. Now it dot-sources lib-transcript.ps1 to
+      resolve transcript_path and extract the transcript's plain text.
 #>
 
 $ErrorActionPreference = "Stop"
 
-# Read input from stdin (JSON with transcript field)
-$inputText = [Console]::In.ReadToEnd()
+# ====================
+# Self-gate (fast path): only run when a refactor session is active.
+# Read stdin first regardless (a Stop hook must always drain stdin), but skip
+# all JSON/transcript work when there's no refactor session -- this keeps the
+# no-refactor case (the common case once the Stop matcher is fixed) cheap.
+# ====================
+$input_text = [Console]::In.ReadToEnd()
 
+$projectDir = if ($env:CLAUDE_PROJECT_DIR) { $env:CLAUDE_PROJECT_DIR } else { "." }
+$configPath = Join-Path $projectDir ".sd\refactor\config.json"
+
+if (-not (Test-Path -LiteralPath $configPath)) {
+    Write-Output '{"decision": "approve"}'
+    exit 0
+}
+
+# Extract JSON from stdin (needed below for transcript_path)
 try {
-    $json = $inputText | ConvertFrom-Json
-    $transcript = $json.transcript
+    $json = $input_text | ConvertFrom-Json
 } catch {
     # No valid input, approve and continue
     Write-Output '{"decision": "approve"}'
@@ -32,7 +58,6 @@ try {
 }
 
 # Configuration
-$configPath = Join-Path $env:CLAUDE_PROJECT_DIR ".sd\refactor\config.json"
 $config = @{
     context_autonomy = @{
         enabled = $true
@@ -44,12 +69,10 @@ $config = @{
     }
 }
 
-if (Test-Path $configPath) {
-    try {
-        $config = Get-Content $configPath -Raw | ConvertFrom-Json
-    } catch {
-        # Use defaults
-    }
+try {
+    $config = Get-Content $configPath -Raw | ConvertFrom-Json
+} catch {
+    # Use defaults
 }
 
 # Skip if disabled
@@ -61,6 +84,10 @@ if (-not $config.context_autonomy.enabled) {
 # ====================
 # Context Estimation
 # ====================
+
+. (Join-Path $PSScriptRoot "lib-transcript.ps1")
+$transcript = Get-TranscriptTextFromStdinJson -JsonObj $json
+if (-not $transcript) { $transcript = "" }
 
 # Estimate context usage from transcript length
 # Rough mapping: 800K chars ~ 100% of 200K tokens

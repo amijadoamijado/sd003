@@ -4,20 +4,26 @@
 # Exit codes:
 #   0 = Success (stop approved)
 #   2 = Block (continue looping)
+#
+# 2026-07-05 B2 fix: the Stop-hook stdin JSON has no `transcript` field -- only
+# `transcript_path` (a path to the JSONL transcript file). This hook used to read
+# $json.transcript, which is always $null (wrong field name) -> permanent no-op.
+# Now it dot-sources lib-transcript.ps1 to resolve transcript_path and extract the
+# transcript's plain text from the JSONL file.
 
 $ErrorActionPreference = "Stop"
 
 # Read JSON input from stdin
 $input_text = [Console]::In.ReadToEnd()
 
-# Extract transcript from JSON (PowerShell native parsing)
 try {
     $json = $input_text | ConvertFrom-Json
-    $transcript = $json.transcript
 } catch {
-    $transcript = ""
+    $json = $null
 }
 
+. (Join-Path $PSScriptRoot "lib-transcript.ps1")
+$transcript = Get-TranscriptTextFromStdinJson -JsonObj $json
 if (-not $transcript) { $transcript = "" }
 
 # Check for test success markers
