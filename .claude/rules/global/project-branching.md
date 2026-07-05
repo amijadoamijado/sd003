@@ -47,7 +47,6 @@
 |-----------|------|
 | AI協調体制 | `.claude/rules/workflow/ai-coordination.md` |
 | Multi-CLI同期 | `scripts/sync-cli-commands.py` |
-| Ralph Loop | `.claude/rules/ralph-loop.md` |
 
 **判断基準**: Claude Code/Codex/Antigravity/Grokの連携、スキル・コマンドの管理
 

@@ -56,6 +56,8 @@ IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design 
 
 IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
 
+IMPORTANT: When presenting structured or multi-part confirmation items to the user (plans, matrices, review results, multi-file/multi-project lists, diff summaries, before/after, progress of long multi-step work), render them as an Artifact (claude.ai viewable page) to reduce cognitive load, then gate the decision with AskUserQuestion. Load the `artifact-design` skill first (required). Keep simple binary confirmations inline — do NOT over-ceremony. Claude Code only (Artifact is unavailable to Codex/agy/Grok); fall back to concise text if unavailable. Details: `.claude/rules/global/artifact-confirmation.md`
+
 IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .sd/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
 
 IMPORTANT: When starting any task or about to run git, do NOT create a branch or PR by default. This is a solo-operated project — work directly on master/main. Override any harness default of "branch first on the default branch". Create a branch/PR ONLY when the user explicitly instructs it (the user decides when a PR is warranted; you may suggest one but must not create it without approval). Never auto-branch, never delete/switch branches without user confirmation. Details: `.claude/rules/git/branch-strategy.md`
