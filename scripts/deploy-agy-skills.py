@@ -80,6 +80,12 @@ def main() -> int:
         source_slugs.add(name)
         dest = target_root / name
         if dest.exists():
+            if not (dest / MARKER).exists():
+                # dest exists but was never written by this script (e.g. a user's
+                # own hand-made global skill with the same name) - never rmtree
+                # something we don't own. Skip it instead of destroying it.
+                print(f"  SKIP (unmanaged, no {MARKER} marker): {dest}")
+                continue
             shutil.rmtree(dest)
         # Copy supporting files (scripts/, references/, assets/, etc.), excluding SKILL.md
         shutil.copytree(skill_dir, dest, ignore=shutil.ignore_patterns("SKILL.md", "CLAUDE.md"))

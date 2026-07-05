@@ -75,10 +75,18 @@ while IFS= read -r file; do
     done < <(grep -n -E 'expect\s*\(\s*false\s*\)\s*\.\s*toBe\s*\(\s*false\s*\)' "$file" 2>/dev/null || true)
 
     # VTD-005: No value-checking assertions in file
-    has_expect=$(grep -c 'expect\s*(' "$file" 2>/dev/null || echo "0")
-    has_value_check=$(grep -c -E '\.\s*(toEqual|toContain|toHaveLength|toMatchObject|toStrictEqual)' "$file" 2>/dev/null || echo "0")
+    # NOTE: `grep -c` already prints "0" on zero matches (and exits 1). Appending
+    # `|| echo "0"` used to append a SECOND "0" line to the capture on the no-match
+    # path ("0\n0"), breaking the integer comparisons below. Use `|| true` to keep
+    # grep's own "0" output as the sole captured value, and default empties via
+    # parameter expansion.
+    has_expect=$(grep -c 'expect\s*(' "$file" 2>/dev/null || true)
+    has_expect=${has_expect:-0}
+    has_value_check=$(grep -c -E '\.\s*(toEqual|toContain|toHaveLength|toMatchObject|toStrictEqual)' "$file" 2>/dev/null || true)
+    has_value_check=${has_value_check:-0}
     # Also check toBe with actual values (not just toBeDefined)
-    has_tobe_value=$(grep -c -E '\.toBe\s*\([^)]*[a-zA-Z_$]' "$file" 2>/dev/null || echo "0")
+    has_tobe_value=$(grep -c -E '\.toBe\s*\([^)]*[a-zA-Z_$]' "$file" 2>/dev/null || true)
+    has_tobe_value=${has_tobe_value:-0}
 
     if [ "$has_expect" -gt 0 ] && [ "$has_value_check" -eq 0 ] && [ "$has_tobe_value" -eq 0 ]; then
         WARNINGS="${WARNINGS}[VTD-005] ${filename} - No value-checking assertions (toEqual, toBe(value), toContain) in file\n"
@@ -86,7 +94,8 @@ while IFS= read -r file; do
     fi
 
     # VTD-003: Check for toBeDefined()-only test blocks (simplified: file-level check)
-    has_toBeDefined=$(grep -c 'toBeDefined\s*(' "$file" 2>/dev/null || echo "0")
+    has_toBeDefined=$(grep -c 'toBeDefined\s*(' "$file" 2>/dev/null || true)
+    has_toBeDefined=${has_toBeDefined:-0}
     if [ "$has_expect" -gt 0 ] && [ "$has_toBeDefined" -eq "$has_expect" ] && [ "$has_value_check" -eq 0 ] && [ "$has_tobe_value" -eq 0 ]; then
         WARNINGS="${WARNINGS}[VTD-003] ${filename} - Only toBeDefined() assertions in test file\n"
         WARNING_COUNT=$((WARNING_COUNT + 1))

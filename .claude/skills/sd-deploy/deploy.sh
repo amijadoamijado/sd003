@@ -40,7 +40,15 @@ echo "[Phase 1/7] Target validated"
 KEEP_PATTERNS=()
 KEEP_FILE="$TARGET_PROJECT/.sd003-keep"
 if [ -f "$KEEP_FILE" ]; then
+    first_line=true
     while IFS= read -r line; do
+        if [ "$first_line" = true ]; then
+            # Strip a leading UTF-8 BOM (EF BB BF) if the file was saved with one.
+            # Without this, a first line "CLAUDE.md" registers as BOM+"CLAUDE.md"
+            # (invisible extra bytes) and never matches -> protection silently fails.
+            line="${line#$'\xef\xbb\xbf'}"
+            first_line=false
+        fi
         line="$(echo "$line" | sed 's/[[:space:]]*$//;s/^[[:space:]]*//')"
         [ -z "$line" ] && continue
         case "$line" in \#*) continue ;; esac
@@ -50,11 +58,16 @@ if [ -f "$KEEP_FILE" ]; then
 fi
 
 is_kept() {
-    local rel="${1#/}" pat
+    # Case-insensitive match (aligns with deploy.ps1's `-like`, and with Windows'
+    # case-insensitive filesystem where this script mostly runs).
+    local rel pat rel_lc pat_lc
+    rel="${1#/}"
+    rel_lc="$(printf '%s' "$rel" | tr '[:upper:]' '[:lower:]')"
     for pat in "${KEEP_PATTERNS[@]}"; do
-        [ "$rel" = "$pat" ] && return 0
-        case "$rel" in "$pat"/*) return 0 ;; esac
-        case "$pat" in *[\*\?]*) case "$rel" in $pat) return 0 ;; esac ;; esac
+        pat_lc="$(printf '%s' "$pat" | tr '[:upper:]' '[:lower:]')"
+        [ "$rel_lc" = "$pat_lc" ] && return 0
+        case "$rel_lc" in "$pat_lc"/*) return 0 ;; esac
+        case "$pat_lc" in *[\*\?]*) case "$rel_lc" in $pat_lc) return 0 ;; esac ;; esac
     done
     return 1
 }
@@ -70,6 +83,7 @@ deploy_dry_run() {
     echo ""
     local diverged=0 kept=0 newc=0 same=0 d f sf projrel tgt
     local DIV=() KEP=()
+    local gh gh_name gh_rel gh_tgt
     local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".sd/settings" ".sd/design" ".sd/ralph" ".sd/steering" ".handoff" "docs/troubleshooting")
     for d in "${scan_dirs[@]}"; do
         [ -d "$SOURCE_DIR/$d" ] || continue
@@ -89,6 +103,21 @@ deploy_dry_run() {
         if ! cmp -s "$SOURCE_DIR/$sf" "$TARGET_PROJECT/$sf"; then DIV+=("$sf"); diverged=$((diverged+1)); else same=$((same+1)); fi
     done
     if is_kept "CLAUDE.md"; then KEP+=("CLAUDE.md"); kept=$((kept+1)); fi
+
+    # Git hooks: source path (templates/git-hooks) differs from target path
+    # (.git/hooks), so this can't use the generic scan_dirs/scan_files loops above.
+    local gh_src_dir="$SOURCE_DIR/.claude/skills/sd-deploy/templates/git-hooks"
+    if [ -d "$gh_src_dir" ]; then
+        for gh in "$gh_src_dir"/*; do
+            [ -f "$gh" ] || continue
+            gh_name="$(basename "$gh")"
+            gh_rel=".git/hooks/$gh_name"
+            if is_kept "$gh_rel"; then KEP+=("$gh_rel"); kept=$((kept+1)); continue; fi
+            gh_tgt="$TARGET_PROJECT/.git/hooks/$gh_name"
+            if [ ! -f "$gh_tgt" ]; then newc=$((newc+1)); continue; fi
+            if ! cmp -s "$gh" "$gh_tgt"; then DIV+=("$gh_rel"); diverged=$((diverged+1)); else same=$((same+1)); fi
+        done
+    fi
 
     if [ ${#DIV[@]} -gt 0 ]; then
         echo "WILL OVERWRITE - LOCAL CUSTOMIZATION WILL BE LOST (${#DIV[@]}):"
@@ -271,6 +300,11 @@ copy_dir_tree ".grok" "Grok" "*"
 # 4-9: .sd/settings/ (tree)
 copy_dir_tree ".sd/settings" "SD Settings" "*"
 
+# 4-9b: .sd/design/ (tree) - design tokens (already scanned by --dry-run; was
+# missing from the real copy path, so a real deploy silently skipped it while
+# dry-run reported it as new/unchanged - parity fix with deploy.ps1's 4-11a)
+copy_dir_tree ".sd/design" "Design Tokens" "*"
+
 # 4-10: .sessions/session-template.md
 if [ -f "$SOURCE_DIR/.sessions/session-template.md" ]; then
     cp "$SOURCE_DIR/.sessions/session-template.md" "$TARGET_PROJECT/.sessions/"
@@ -303,9 +337,14 @@ COPY_STATS["AI Coordination"]=$wf_count
 # 4-11: docs/troubleshooting/
 copy_dir_tree "docs/troubleshooting" "Docs/Troubleshooting" "*"
 
-# 4-12: docs/quality-gates.md
-if [ -f "$SOURCE_DIR/docs/quality-gates.md" ]; then
+# 4-12: docs/quality-gates.md (overwrite unless protected by .sd003-keep)
+if is_kept "docs/quality-gates.md"; then
+    echo "  KEEP: docs/quality-gates.md preserved via .sd003-keep"
+    echo "docs/quality-gates.md" >> "$KEPT_LOG"
+    COPY_STATS["Docs/QualityGates"]=0
+elif [ -f "$SOURCE_DIR/docs/quality-gates.md" ]; then
     mkdir -p "$TARGET_PROJECT/docs"
+    if [ -f "$TARGET_PROJECT/docs/quality-gates.md" ] && ! cmp -s "$SOURCE_DIR/docs/quality-gates.md" "$TARGET_PROJECT/docs/quality-gates.md"; then echo "docs/quality-gates.md" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/docs/quality-gates.md" "$TARGET_PROJECT/docs/"
     COPY_STATS["Docs/QualityGates"]=1
 else
@@ -317,36 +356,56 @@ copy_dir_tree ".handoff" "Handoff" "*"
 
 
 
-# 4-15a: scripts/validate-test-data.ps1 (single file)
-if [ -f "$SOURCE_DIR/scripts/validate-test-data.ps1" ]; then
+# 4-15a: scripts/validate-test-data.ps1 (single file - overwrite unless protected by .sd003-keep)
+if is_kept "scripts/validate-test-data.ps1"; then
+    echo "  KEEP: scripts/validate-test-data.ps1 preserved via .sd003-keep"
+    echo "scripts/validate-test-data.ps1" >> "$KEPT_LOG"
+    COPY_STATS["Validate Test Data (ps1)"]=0
+elif [ -f "$SOURCE_DIR/scripts/validate-test-data.ps1" ]; then
     mkdir -p "$TARGET_PROJECT/scripts"
+    if [ -f "$TARGET_PROJECT/scripts/validate-test-data.ps1" ] && ! cmp -s "$SOURCE_DIR/scripts/validate-test-data.ps1" "$TARGET_PROJECT/scripts/validate-test-data.ps1"; then echo "scripts/validate-test-data.ps1" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/scripts/validate-test-data.ps1" "$TARGET_PROJECT/scripts/"
     COPY_STATS["Validate Test Data (ps1)"]=1
 else
     COPY_STATS["Validate Test Data (ps1)"]=0
 fi
 
-# 4-15b: scripts/validate-test-data.sh (single file)
-if [ -f "$SOURCE_DIR/scripts/validate-test-data.sh" ]; then
+# 4-15b: scripts/validate-test-data.sh (single file - overwrite unless protected by .sd003-keep)
+if is_kept "scripts/validate-test-data.sh"; then
+    echo "  KEEP: scripts/validate-test-data.sh preserved via .sd003-keep"
+    echo "scripts/validate-test-data.sh" >> "$KEPT_LOG"
+    COPY_STATS["Validate Test Data (sh)"]=0
+elif [ -f "$SOURCE_DIR/scripts/validate-test-data.sh" ]; then
     mkdir -p "$TARGET_PROJECT/scripts"
+    if [ -f "$TARGET_PROJECT/scripts/validate-test-data.sh" ] && ! cmp -s "$SOURCE_DIR/scripts/validate-test-data.sh" "$TARGET_PROJECT/scripts/validate-test-data.sh"; then echo "scripts/validate-test-data.sh" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/scripts/validate-test-data.sh" "$TARGET_PROJECT/scripts/"
     COPY_STATS["Validate Test Data (sh)"]=1
 else
     COPY_STATS["Validate Test Data (sh)"]=0
 fi
 
-# 4-15c: scripts/verify-deployment.mjs (single file - deploy content-verification gate)
-if [ -f "$SOURCE_DIR/scripts/verify-deployment.mjs" ]; then
+# 4-15c: scripts/verify-deployment.mjs (single file - deploy content-verification gate - overwrite unless protected by .sd003-keep)
+if is_kept "scripts/verify-deployment.mjs"; then
+    echo "  KEEP: scripts/verify-deployment.mjs preserved via .sd003-keep"
+    echo "scripts/verify-deployment.mjs" >> "$KEPT_LOG"
+    COPY_STATS["Verify Deployment (mjs)"]=0
+elif [ -f "$SOURCE_DIR/scripts/verify-deployment.mjs" ]; then
     mkdir -p "$TARGET_PROJECT/scripts"
+    if [ -f "$TARGET_PROJECT/scripts/verify-deployment.mjs" ] && ! cmp -s "$SOURCE_DIR/scripts/verify-deployment.mjs" "$TARGET_PROJECT/scripts/verify-deployment.mjs"; then echo "scripts/verify-deployment.mjs" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/scripts/verify-deployment.mjs" "$TARGET_PROJECT/scripts/"
     COPY_STATS["Verify Deployment (mjs)"]=1
 else
     COPY_STATS["Verify Deployment (mjs)"]=0
 fi
 
-# 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator)
-if [ -f "$SOURCE_DIR/scripts/sync-cli-commands.py" ]; then
+# 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator - overwrite unless protected by .sd003-keep)
+if is_kept "scripts/sync-cli-commands.py"; then
+    echo "  KEEP: scripts/sync-cli-commands.py preserved via .sd003-keep"
+    echo "scripts/sync-cli-commands.py" >> "$KEPT_LOG"
+    COPY_STATS["Sync CLI"]=0
+elif [ -f "$SOURCE_DIR/scripts/sync-cli-commands.py" ]; then
     mkdir -p "$TARGET_PROJECT/scripts"
+    if [ -f "$TARGET_PROJECT/scripts/sync-cli-commands.py" ] && ! cmp -s "$SOURCE_DIR/scripts/sync-cli-commands.py" "$TARGET_PROJECT/scripts/sync-cli-commands.py"; then echo "scripts/sync-cli-commands.py" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/scripts/sync-cli-commands.py" "$TARGET_PROJECT/scripts/"
     COPY_STATS["Sync CLI"]=1
     # Regenerate agy/codex/grok skills in TARGET (copy alone leaves them stale). Guarded.
@@ -389,16 +448,55 @@ else
     COPY_STATS["Refactor Config"]=0
 fi
 
-# 4-20: tests/gas-fakes/setup.ts (single file)
+# 4-20: tests/gas-fakes/setup.ts (single file - overwrite unless protected by .sd003-keep)
 GAS_FAKES_SRC="$SOURCE_DIR/tests/gas-fakes/setup.ts"
-if [ -f "$GAS_FAKES_SRC" ]; then
+GAS_FAKES_DST="$TARGET_PROJECT/tests/gas-fakes/setup.ts"
+if is_kept "tests/gas-fakes/setup.ts"; then
+    echo "  KEEP: tests/gas-fakes/setup.ts preserved via .sd003-keep"
+    echo "tests/gas-fakes/setup.ts" >> "$KEPT_LOG"
+    COPY_STATS["Gas Fakes Setup"]=0
+elif [ -f "$GAS_FAKES_SRC" ]; then
     mkdir -p "$TARGET_PROJECT/tests/gas-fakes"
-    cp "$GAS_FAKES_SRC" "$TARGET_PROJECT/tests/gas-fakes/setup.ts"
+    if [ -f "$GAS_FAKES_DST" ] && ! cmp -s "$GAS_FAKES_SRC" "$GAS_FAKES_DST"; then echo "tests/gas-fakes/setup.ts" >> "$DIVERGED_LOG"; fi
+    cp "$GAS_FAKES_SRC" "$GAS_FAKES_DST"
     COPY_STATS["Gas Fakes Setup"]=1
 else
     echo "  WARN: tests/gas-fakes/setup.ts not found"
     COPY_STATS["Gas Fakes Setup"]=0
 fi
+
+# 4-21: .git/hooks/ (from templates/git-hooks/) - overwrite unless protected by
+# .sd003-keep. Existing hooks are backed up into BACKUP_DIR before overwrite
+# (parity with deploy.ps1's Phase 2 backup, and with is_kept honored - was
+# previously undistributed by deploy.sh entirely, an asymmetry vs deploy.ps1).
+GIT_HOOKS_SRC="$SOURCE_DIR/.claude/skills/sd-deploy/templates/git-hooks"
+GIT_HOOKS_DST="$TARGET_PROJECT/.git/hooks"
+hook_count=0
+if [ -d "$GIT_HOOKS_SRC" ]; then
+    mkdir -p "$GIT_HOOKS_DST"
+    for hook in "$GIT_HOOKS_SRC"/*; do
+        [ -f "$hook" ] || continue
+        hook_name="$(basename "$hook")"
+        hook_projrel=".git/hooks/$hook_name"
+        hook_target="$GIT_HOOKS_DST/$hook_name"
+        if is_kept "$hook_projrel"; then
+            echo "  KEEP: $hook_projrel preserved via .sd003-keep"
+            echo "$hook_projrel" >> "$KEPT_LOG"
+            continue
+        fi
+        if [ -f "$hook_target" ]; then
+            mkdir -p "$BACKUP_DIR/.git/hooks"
+            cp "$hook_target" "$BACKUP_DIR/.git/hooks/" 2>/dev/null || true
+            if ! cmp -s "$hook" "$hook_target"; then echo "$hook_projrel" >> "$DIVERGED_LOG"; fi
+        fi
+        cp "$hook" "$hook_target"
+        hook_count=$((hook_count + 1))
+    done
+    echo "  Git Hooks: $hook_count file(s) installed"
+else
+    echo "  WARN: templates/git-hooks/ not found"
+fi
+COPY_STATS["Git Hooks"]=$hook_count
 
 echo "[Phase 4/7] Dynamic copy completed"
 for key in "${!COPY_STATS[@]}"; do
@@ -419,9 +517,13 @@ if is_kept "CLAUDE.md"; then
     echo "  KEEP: CLAUDE.md preserved via .sd003-keep (bespoke version kept)"
     echo "CLAUDE.md" >> "$KEPT_LOG"
 elif [ -f "$CLAUDE_TEMPLATE" ]; then
+    # NOTE: the template stamps "SD003 v3.2.0" (not "v2.3.0" - that token never
+    # existed in the template, so this substitution was previously dead code
+    # and every deployed CLAUDE.md kept the hardcoded v3.2.0 forever). Match the
+    # real token "SD003 v<version>" so the stamp actually becomes $FRAMEWORK_VERSION.
     sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
         -e "s/{{DATE}}/$DATE/g" \
-        -e "s/v2\.3\.0/v$FRAMEWORK_VERSION/g" \
+        -e "s/SD003 v[0-9][0-9.]*/SD003 v$FRAMEWORK_VERSION/g" \
         "$CLAUDE_TEMPLATE" > "$TARGET_PROJECT/CLAUDE.md"
 else
     echo "  WARN: CLAUDE.md.template not found, skipping"
@@ -862,6 +964,7 @@ verify_category "Codex" ".codex" ".codex" "*" "true"
 verify_category "Grok" ".grok" ".grok" "*" "true"
 verify_category "SD Settings" ".sd/settings" ".sd/settings" "*" "true"
 verify_category "Handoff" ".handoff" ".handoff" "*" "true"
+verify_category "Design" ".sd/design" ".sd/design" "*" "true"
 verify_category "Ralph" ".sd/ralph" ".sd/ralph" "*" "true"
 verify_category "Steering" ".sd/steering" ".sd/steering" "*" "true"
 # Gas Fakes: only setup.ts is deployed (test files are project-specific)

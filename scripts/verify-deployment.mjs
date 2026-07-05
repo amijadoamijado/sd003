@@ -85,6 +85,43 @@ function listFiles(dir, predicate) {
   return out;
 }
 
+// ---- .sd003-keep awareness -------------------------------------------------
+// A target may legitimately opt a framework file out of overwrite via
+// .sd003-keep (see deploy.ps1/deploy.sh). Files on that list have a bespoke,
+// intentionally-diverged version, so strict template-equality checks below
+// must SKIP them instead of FAILing. Parsing mirrors deploy.ps1/deploy.sh:
+// BOM-stripped, case-insensitive, '#'-comment lines skipped, supports exact
+// paths / directory prefixes / '*'-'?' globs.
+function loadKeepPatterns(targetDirPath) {
+  const text = readText(path.join(targetDirPath, '.sd003-keep'));
+  if (text === null) return [];
+  return text
+    .replace(/^﻿/, '') // strip leading UTF-8 BOM if present
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'))
+    .map((l) => l.replace(/\\/g, '/').replace(/\/+$/, ''));
+}
+
+function globToRegExp(glob) {
+  // Escape regex metacharacters EXCEPT * and ? (those are the glob wildcards
+  // we want to convert, not literal characters to match).
+  const escaped = glob.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+  const withWildcards = escaped.replace(/\*/g, '.*').replace(/\?/g, '.');
+  return new RegExp(`^${withWildcards}$`, 'i');
+}
+
+function isKept(keepPatterns, relPath) {
+  const rel = relPath.replace(/\\/g, '/').replace(/^\/+/, '').toLowerCase();
+  for (const pat of keepPatterns) {
+    const patLc = pat.toLowerCase();
+    if (rel === patLc) return true;
+    if (rel.startsWith(`${patLc}/`)) return true;
+    if (/[*?]/.test(pat) && globToRegExp(pat).test(rel)) return true;
+  }
+  return false;
+}
+
 // Collect every `command` string anywhere under a settings.hooks object.
 function collectCommands(hooksObj) {
   const cmds = [];
@@ -158,8 +195,18 @@ const targetSettingsPath = path.join(targetDir, '.claude', 'settings.json');
 const tpl = readJson(templatePath);
 const dep = readJson(targetSettingsPath);
 
+// A target may protect .claude/settings.json via .sd003-keep (a bespoke,
+// intentionally-diverged version). Strict template-equality is meaningless
+// for a file the deploy scripts were told never to touch, so this must be a
+// SKIP, not a permanent FAIL.
+const keepPatterns = loadKeepPatterns(targetDir);
+const settingsKept = isKept(keepPatterns, '.claude/settings.json');
+
 let deployedHooks = null;
-if (!tpl.ok) {
+if (settingsKept) {
+  skip('C1', '.claude/settings.json is protected by .sd003-keep (bespoke version) - template-equality check skipped');
+  if (dep.ok) deployedHooks = dep.value.hooks || {};
+} else if (!tpl.ok) {
   fail('C1', `source template unreadable/invalid: ${templatePath} (${tpl.error || 'missing'})`);
 } else if (!dep.ok) {
   fail('C1', `deployed settings.json unreadable/invalid: ${targetSettingsPath} (${dep.error || 'missing'})`);

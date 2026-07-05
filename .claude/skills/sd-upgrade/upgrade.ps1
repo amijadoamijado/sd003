@@ -71,7 +71,7 @@ $stubFiles = @()
 Get-ChildItem -Path $TargetProject -Recurse -File -Filter "CLAUDE.md" -ErrorAction SilentlyContinue | ForEach-Object {
     $rel = $_.FullName.Substring($TargetProject.TrimEnd('\').Length + 1)
     if ($rel -eq "CLAUDE.md") { return }                       # keep real root CLAUDE.md
-    if ($rel -match '(^|\\)(\.git|node_modules|\.sd003-backup|\.sd003-upgrade-backup)(\\|$)') { return }
+    if ($rel -match '(^|\\)(\.git|node_modules|\.sd003-backup[^\\]*|\.sd003-upgrade-backup[^\\]*)(\\|$)') { return }
     $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
     if ($content -match '<claude-mem-context>') { $stubFiles += $rel }
 }
@@ -147,11 +147,21 @@ Write-Host "[Deploy] Running deploy.ps1 ..." -ForegroundColor Cyan
 $deployArgs = @("-ExecutionPolicy", "Bypass", "-File", $DEPLOY_PS1, $TargetProject)
 if ($IncludeOptional) { $deployArgs += "-IncludeOptional" }
 & powershell @deployArgs
+$deployExitCode = $LASTEXITCODE
+if ($deployExitCode -ne 0) {
+    Write-Host ""
+    Write-Host "[WARN] deploy.ps1 exited with code $deployExitCode." -ForegroundColor Yellow
+    Write-Host "  This can be benign (e.g. optional-skills count mismatch or a kept settings.json)," -ForegroundColor Yellow
+    Write-Host "  but this script cannot confirm success from here. Backup prune (Phase 6) will be skipped." -ForegroundColor Yellow
+}
 
 # Phase 5: verify
 Write-Host ""
 Write-Host "=== Upgrade Verification ===" -ForegroundColor Cyan
-$ok = $true
+$ok = ($deployExitCode -eq 0)
+if (-not $ok) {
+    Write-Host "  [FAIL] deploy.ps1 exited nonzero ($deployExitCode) - see warning above" -ForegroundColor Red
+}
 $agentsSkills = Join-Path $TargetProject ".agents\skills"
 if (Test-Path $agentsSkills) {
     $n = (Get-ChildItem $agentsSkills -Directory -ErrorAction SilentlyContinue | Measure-Object).Count
@@ -173,6 +183,9 @@ if ($ok) {
     Write-Host "  If any were intentional customizations, restore them and add to '$TargetProject\.sd003-keep'." -ForegroundColor Yellow
 } else {
     Write-Host "Result: issues found - review above. Backup: $BackupDir" -ForegroundColor Red
+    if ($deployExitCode -ne 0) {
+        Write-Host "  NOT claiming success: deploy.ps1 exited $deployExitCode. Existing backups were left untouched (no prune)." -ForegroundColor Red
+    }
 }
 
 # ------------------------------------------------------------------
@@ -180,32 +193,54 @@ if ($ok) {
 # Repeated deploy/upgrade runs accumulate .sd003-backup-*, .sd003-upgrade-backup-*
 # and legacy .sd002-backup-* directories with no cleanup (found piled up to 8+ in
 # cf001 during the 2026-07-05 D:\claudecode cleanup). Move stale ones to
-# <project>/.sd/cleanup/archive/<YYYYMMDD>/ instead of deleting them.
+# <project>/.sd003-archive/<YYYYMMDD>/ instead of deleting them.
+# NOTE: destination is intentionally OUTSIDE .sd/ (unlike the previous
+# .sd/cleanup/archive/ location) — .sd/ is git-tracked and gets recursively
+# copied into every future .sd003-backup-*, so archiving inside it caused
+# nested bloat (.sd/.../.sd003-backup-.../.sd/cleanup/archive/...) and pulled
+# old backups into git commits. Also skipped entirely when deploy.ps1 did not
+# exit 0, so a failed/unconfirmed deploy never causes backups to be pruned.
 # ------------------------------------------------------------------
 Write-Host ""
 Write-Host "[Prune] Checking for accumulated backup folders ..." -ForegroundColor Cyan
-$backupPatterns = @(".sd003-backup-*", ".sd003-upgrade-backup-*", ".sd002-backup-*")
-$pruned = $false
-foreach ($pattern in $backupPatterns) {
-    $found = @(Get-ChildItem -Path $TargetProject -Directory -Filter $pattern -ErrorAction SilentlyContinue |
-        Sort-Object LastWriteTime -Descending)
-    if ($found.Count -ge 2) {
-        $pruned = $true
-        $keep = $found[0]
-        $stale = $found | Select-Object -Skip 1
-        $archiveDir = Join-Path $TargetProject ".sd\cleanup\archive\$(Get-Date -Format 'yyyyMMdd')"
-        if (-not (Test-Path $archiveDir)) { New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null }
-        Write-Host "  [$pattern] $($found.Count) found. Keeping newest: $($keep.Name)" -ForegroundColor Yellow
-        foreach ($old in $stale) {
-            $dest = Join-Path $archiveDir $old.Name
-            if (Test-Path $dest) { $dest = Join-Path $archiveDir "$($old.Name)_$(Get-Date -Format 'HHmmss')" }
-            Move-Item -LiteralPath $old.FullName -Destination $dest -Force
-            Write-Host "    archived (not deleted): $($old.Name) -> $dest"
+if ($deployExitCode -ne 0) {
+    Write-Host "  [SKIP] deploy.ps1 exited nonzero ($deployExitCode) - skipping prune so existing backups stay intact." -ForegroundColor Yellow
+} else {
+    $backupPatterns = @(".sd003-backup-*", ".sd003-upgrade-backup-*", ".sd002-backup-*")
+    $pruned = $false
+    foreach ($pattern in $backupPatterns) {
+        # Sort by the yyyyMMdd_HHmmss timestamp embedded in the DIRECTORY NAME,
+        # not by LastWriteTime: touching any file inside an old backup (e.g.
+        # restoring one file from it) bumps that directory's mtime and can make
+        # LastWriteTime-based sorting misidentify the real newest backup.
+        $found = @(Get-ChildItem -Path $TargetProject -Directory -Filter $pattern -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                $sortKey = [datetime]::MinValue
+                if ($_.Name -match '(\d{8}_\d{6})$') {
+                    try { $sortKey = [datetime]::ParseExact($Matches[1], 'yyyyMMdd_HHmmss', $null) } catch {}
+                }
+                [PSCustomObject]@{ Item = $_; SortKey = $sortKey }
+            } |
+            Sort-Object SortKey -Descending |
+            ForEach-Object { $_.Item })
+        if ($found.Count -ge 2) {
+            $pruned = $true
+            $keep = $found[0]
+            $stale = $found | Select-Object -Skip 1
+            $archiveDir = Join-Path $TargetProject ".sd003-archive\$(Get-Date -Format 'yyyyMMdd')"
+            if (-not (Test-Path $archiveDir)) { New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null }
+            Write-Host "  [$pattern] $($found.Count) found. Keeping newest (by embedded timestamp): $($keep.Name)" -ForegroundColor Yellow
+            foreach ($old in $stale) {
+                $dest = Join-Path $archiveDir $old.Name
+                if (Test-Path $dest) { $dest = Join-Path $archiveDir "$($old.Name)_$(Get-Date -Format 'HHmmss')" }
+                Move-Item -LiteralPath $old.FullName -Destination $dest -Force
+                Write-Host "    archived (not deleted): $($old.Name) -> $dest"
+            }
         }
     }
-}
-if (-not $pruned) {
-    Write-Host "  (none - fewer than 2 backups per pattern, nothing to prune)" -ForegroundColor Green
+    if (-not $pruned) {
+        Write-Host "  (none - fewer than 2 backups per pattern, nothing to prune)" -ForegroundColor Green
+    }
 }
 
 Write-Host ""

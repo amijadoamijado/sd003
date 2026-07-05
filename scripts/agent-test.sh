@@ -176,13 +176,13 @@ else
 ${TEST_CONTENT}"
 
         # 実行処理（agyと従来CLIで分岐）
-        local TEST_SUCCESS=false
+        TEST_SUCCESS=false
         if [ "$ANTIGRAVITY_BIN" = "agy" ]; then
-            if agy --prompt "$TEST_PROMPT" --dangerously-skip-permissions 2>&1 > "${TEST_REPORT}" ; then
+            if agy --prompt "$TEST_PROMPT" --dangerously-skip-permissions > "${TEST_REPORT}" 2>&1 ; then
                 TEST_SUCCESS=true
             fi
         else
-            if echo "$TEST_PROMPT" | "$ANTIGRAVITY_BIN" 2>&1 > "${TEST_REPORT}" ; then
+            if echo "$TEST_PROMPT" | "$ANTIGRAVITY_BIN" > "${TEST_REPORT}" 2>&1 ; then
                 TEST_SUCCESS=true
             fi
         fi

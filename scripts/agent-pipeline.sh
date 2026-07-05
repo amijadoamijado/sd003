@@ -177,16 +177,16 @@ if [ "$AUTO_APPLY" = true ]; then
         echo "[DRY-RUN] Skipped" >> "$PIPELINE_LOG"
     else
         HAS_CHANGES=false
-        if ! git diff --quiet HEAD 2>/dev/null || ! git diff --cached --quiet HEAD 2>/dev/null; then
+        if ! git -C "$PROJECT_ROOT" diff --quiet HEAD 2>/dev/null || ! git -C "$PROJECT_ROOT" diff --cached --quiet HEAD 2>/dev/null; then
             HAS_CHANGES=true
-        elif [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+        elif [ -n "$(git -C "$PROJECT_ROOT" ls-files --others --exclude-standard 2>/dev/null)" ]; then
             HAS_CHANGES=true
         fi
 
         if [ "$HAS_CHANGES" = true ]; then
             echo -e "${BLUE}Staging and committing changes...${NC}"
-            git add -A
-            if git commit -m "feat(${PROJECT_ID}): auto-apply Antigravity output #${TASK_NUM}"; then
+            git -C "$PROJECT_ROOT" add -A
+            if git -C "$PROJECT_ROOT" commit -m "feat(${PROJECT_ID}): auto-apply Antigravity output #${TASK_NUM}"; then
                 echo -e "${GREEN}[OK] Auto-apply commit 完了${NC}"
                 echo "Status: COMMITTED" >> "$PIPELINE_LOG"
             else

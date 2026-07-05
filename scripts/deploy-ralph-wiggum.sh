@@ -96,8 +96,11 @@ copy_item() {
         echo -e "${YELLOW}[DRY-RUN] Would copy $type: $src -> $dest${NC}"
     else
         if [ -d "$src" ]; then
-            mkdir -p "$(dirname "$dest")"
-            cp -r "$src" "$dest"
+            # Contents-level copy (src/. -> dest/), NOT `cp -r "$src" "$dest"`.
+            # The latter copies INTO an existing dest dir (nesting e.g. .sd/ralph/ralph
+            # on rerun); copying "$src/." into a pre-created "$dest" is idempotent.
+            mkdir -p "$dest"
+            cp -r "$src/." "$dest/"
             echo -e "${GREEN}[COPIED] $type: $dest${NC}"
         elif [ -f "$src" ]; then
             mkdir -p "$(dirname "$dest")"
@@ -122,8 +125,14 @@ done
 echo ""
 echo -e "${BLUE}Step 3: Deploying rules...${NC}"
 if [ -f "$TARGET_DIR/.claude/rules/ralph-loop.md" ]; then
-    echo -e "${YELLOW}[INFO] ralph-loop.md already exists, appending Night Mode section...${NC}"
-    if [ "$DRY_RUN" = false ]; then
+    # Idempotency marker: if the Night Mode section is already present, do not
+    # append a second copy on rerun.
+    if grep -q '^## Night Mode' "$TARGET_DIR/.claude/rules/ralph-loop.md" 2>/dev/null; then
+        echo -e "${YELLOW}[SKIP] ralph-loop.md already contains a Night Mode section${NC}"
+    elif [ "$DRY_RUN" = true ]; then
+        echo -e "${YELLOW}[DRY-RUN] Would append Night Mode section to ralph-loop.md${NC}"
+    else
+        echo -e "${YELLOW}[INFO] ralph-loop.md already exists, appending Night Mode section...${NC}"
         # Extract Night Mode section from source
         sed -n '/^## Night Mode/,$p' "$SD003_ROOT/.claude/rules/ralph-loop.md" >> "$TARGET_DIR/.claude/rules/ralph-loop.md"
     fi

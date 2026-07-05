@@ -202,7 +202,7 @@ RESULT=$(agy --prompt "$PROMPT" --dangerously-skip-permissions 2>&1) || {
 echo "$RESULT" > "$OUTPUT_FILE"
 
 # Check for files written by Antigravity
-AGY_CHANGES=$(git status --porcelain 2>/dev/null | grep -v "^??" | head -20)
+AGY_CHANGES=$(git status --porcelain 2>/dev/null | grep -v "^??" | head -20 || true)
 if [ -n "$AGY_CHANGES" ]; then
     echo -e "${GREEN}[OK] Antigravity CLI実行完了（ファイル直接書き込み）${NC}"
     echo -e "${BLUE}Antigravityが変更したファイル:${NC}"
