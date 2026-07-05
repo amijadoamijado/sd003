@@ -79,7 +79,7 @@ IMPORTANT: When designing internal architecture (adapter, core, interface, types
 
 IMPORTANT: When writing or evaluating tests, apply Real Data First (柱3): never write tests for the sake of tests or coverage targets. Test only to reproduce/fix production bugs. Work with real data (or its copy), not mocks. Forbidden patterns (VTD-001〜005) are auto-detected. Details: `.claude/rules/global/real-data-first.md`
 
-IMPORTANT: When sequencing work (especially in workflow-impl), apply Segmented Sequencing (柱4): run non-blocking steps (tsc, lint, test, dev server, screenshot) continuously, then gate ONCE with user confirmation (AskUserQuestion) at the end. Never skip user confirmation. Never block every step. Details: `.claude/rules/global/segmented-sequencing.md`
+IMPORTANT: When sequencing work, apply Segmented Sequencing (柱4): run non-blocking steps (tsc, lint, test, dev server, screenshot) continuously, then gate ONCE with user confirmation (AskUserQuestion) at the end. Never skip user confirmation. Never block every step. Details: `.claude/rules/global/segmented-sequencing.md`
 
 IMPORTANT: When starting any task, determine which project branch applies: GAS (Google Apps Script app), Cowork (SD003 framework/AI coordination), or Sukima Digital (IT coordination/business design). If the task can be accomplished by AI direct execution without building anything, don't build. Details: `.claude/rules/global/project-branching.md`, `docs/development-philosophy.md`
 
@@ -87,9 +87,9 @@ IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.j
 
 IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
 
-IMPORTANT: When coordinating with other AIs (Codex, Antigravity), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review". Auto-chain: request → impl → review → test. Details: `.claude/rules/workflow/ai-coordination.md`
+IMPORTANT: When coordinating with other AIs (Codex, Antigravity, Grok), coordination documents go to `.sd/ai-coordination/` (never `.antigravity/` or project root). For ad-hoc consultation/implementation use the per-AI dispatch skills (codex/grok lines below); the old formal 7-stage workflow chain (WORK_ORDER→IMPLEMENT_REQUEST→REVIEW) was removed 2026-07-05 as over-engineering. Details: `.claude/rules/workflow/ai-coordination.md`
 
-IMPORTANT: When the user asks for a quick Codex consultation or one-off review (e.g. "codexにレビューさせて", "codexに見せて", "codexに相談", "codexに調査させて") WITHOUT a project ID or workflow context, use the official plugin commands `/codex:review` (read-only review), `/codex:adversarial-review` (critical review), or `/codex:rescue` (delegate investigation/fix). Do NOT route to the heavyweight `/workflow:review` chain (which requires WORK_ORDER/IMPLEMENT_REQUEST and a project ID). The `/workflow:*` chain is for formal project deliverables; `/codex:*` is for ad-hoc consultation. Plugin: `openai/codex-plugin-cc` (already installed user-scope). If `/codex:setup` has not been run yet in this project, run it once first.
+IMPORTANT: When the user asks for a quick Codex consultation or one-off review (e.g. "codexにレビューさせて", "codexに見せて", "codexに相談", "codexに調査させて") use the official plugin commands `/codex:review` (read-only review), `/codex:adversarial-review` (critical review), or `/codex:rescue` (delegate investigation/fix) for ad-hoc consultation. Plugin: `openai/codex-plugin-cc` (already installed user-scope). If `/codex:setup` has not been run yet in this project, run it once first.
 
 IMPORTANT: When the user asks for a Grok consultation, second opinion, or to delegate a task to Grok (e.g. "grokに依頼", "grokに相談", "grokにレビュー", "grokで実装") WITHOUT a project ID or workflow context, use the `grok-dispatch` skill (`.claude/skills/grok-dispatch/`): `pwsh -File grok-run.ps1 <repo> <out> "<prompt>" [model]`, default model `grok-build`, `--output-format plain`. For ad-hoc consultation keep it in conversation; route to `.sd/ai-coordination/` only when a project ID is given. Grok is the 汎用 (general-purpose) coordination AI alongside Codex(review)/agy(impl). Details: `.claude/skills/grok-dispatch/SKILL.md`, `.claude/rules/workflow/ai-coordination.md`
 
@@ -97,13 +97,9 @@ IMPORTANT: When deploying SD003 to another project, use `/sd-deploy` command onl
 
 IMPORTANT: When creating or modifying spec files (requirements/design/spec/tasks), the canonical location is `.sd/specs/{feature}/`. Never place under `docs/specs/` or any other path. Main spec file is `spec.md` (NOT `design.md` — Google Antigravity reserves `design.md` for UI). Physical guardrail: `.claude/hooks/enforce-spec-location.sh` denies writes outside `.sd/specs/`. Details: `.claude/rules/specs/spec-driven.md`
 
-IMPORTANT: When refactoring, use checkpoint-based batches with `/refactor:init`. Context auto-compact at 70%, auto-clear at 85%. Rollback requires user confirmation. Details: `.claude/rules/refactoring/refactoring-system.md`
-
 IMPORTANT: If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Skipping this check has caused data corruption (cf001 incident). Details: `.claude/rules/skills/skill-check-before-action.md`
 
 IMPORTANT: When debugging, use the 3-tier system: `/bug-quick` (5-15min, flow comparison) → `/bug-trace` (30-60min, 3-agent parallel) → `/dialogue-resolution` (AI reasoning check). Escalate on 2nd same error. Details: `.claude/rules/troubleshooting/`
-
-IMPORTANT: When in a loop session (`/sd003:loop-*`), follow Ralph Loop rules. Midpoint: loop freely. Endgame: same error 2x → stop and escalate. Night mode: `/ralph-wiggum:*`. Details: `.claude/rules/ralph-loop.md`
 
 IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design principles, apply design tokens, and check visual quality score (50/70 minimum). Details: `.claude/rules/ui/web-design-principles.md`, `.claude/rules/ui/visual-review-checklist.md`
 
@@ -130,14 +126,10 @@ IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the se
 | Category | Commands |
 |----------|----------|
 | Blueprint | `/blueprint-gate` |
-| AI Workflow | `/workflow:init`, `order`, `request`, `impl`, `review`, `test`, `status` |
-| Loop | `/sd003:loop-test`, `loop-lint`, `loop-type` |
-| Night | `/ralph-wiggum:run`, `status`, `plan` |
 | Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution`, `/ai-suspect` |
 | Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
 | Skills | `/sd:skills-find`, `skills-add`, `skills-list` |
-| Refactor | `/refactor:init`, `plan`, `batch`, `complete`, `rollback` |
 | Cleanup | `/cleanup`, `restore`, `history` |
 
 ---
-SD003 v3.2.0 | Updated: 2026-06-10 | Style: `.claude/rules/global/claude-md-style.md`
+SD003 v3.3.0 | Updated: 2026-07-05 | Style: `.claude/rules/global/claude-md-style.md`

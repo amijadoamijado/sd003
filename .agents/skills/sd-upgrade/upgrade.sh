@@ -112,11 +112,16 @@ fi
 # Phase 4: deploy
 echo ""
 echo "[Deploy] Running deploy.sh ..."
+# NOTE: deploy.sh (bash) only parses --dry-run; it has no --include-optional
+# support (unlike deploy.ps1's -IncludeOptional). Passing --include-optional
+# here used to be silently ignored by deploy.sh, and on failure this block
+# would blindly re-run an IDENTICAL deploy.sh invocation, hiding the real
+# failure behind what looked like a distinct "fallback" attempt. Run once,
+# and warn if optional-skills inclusion was requested but isn't honored.
 if [ "$INCLUDE_OPTIONAL" = true ]; then
-    bash "$DEPLOY_SH" "$TARGET_PROJECT" --include-optional || bash "$DEPLOY_SH" "$TARGET_PROJECT"
-else
-    bash "$DEPLOY_SH" "$TARGET_PROJECT"
+    echo "[WARN] --include-optional is not supported by deploy.sh (bash) - only deploy.ps1 implements -IncludeOptional. Running standard deploy."
 fi
+bash "$DEPLOY_SH" "$TARGET_PROJECT"
 
 # Phase 5: verify
 echo ""

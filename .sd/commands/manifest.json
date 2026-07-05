@@ -101,83 +101,13 @@
       "aliases": []
     },
     {
-      "slug": "ralph-wiggum-plan",
-      "source": ".claude/commands/ralph-wiggum-plan.md",
-      "description": "/ralph-wiggum:plan - Weekly Planning",
-      "claude_command": "/ralph-wiggum:plan",
-      "antigravity_skill": "ralph-wiggum-plan/SKILL.md",
-      "codex_skill": "ralph-wiggum-plan",
-      "grok_skill": "ralph-wiggum-plan/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "ralph-wiggum-run",
-      "source": ".claude/commands/ralph-wiggum-run.md",
-      "description": "/ralph-wiggum:run - Night Mode Execution",
-      "claude_command": "/ralph-wiggum:run",
-      "antigravity_skill": "ralph-wiggum-run/SKILL.md",
-      "codex_skill": "ralph-wiggum-run",
-      "grok_skill": "ralph-wiggum-run/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "ralph-wiggum-status",
-      "source": ".claude/commands/ralph-wiggum-status.md",
-      "description": "/ralph-wiggum:status - Execution Status",
-      "claude_command": "/ralph-wiggum:status",
-      "antigravity_skill": "ralph-wiggum-status/SKILL.md",
-      "codex_skill": "ralph-wiggum-status",
-      "grok_skill": "ralph-wiggum-status/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "refactor-batch",
-      "source": ".claude/commands/refactor-batch.md",
-      "description": "Execute refactoring in batched files with auto-checkpoint",
-      "claude_command": "/refactor:batch",
-      "antigravity_skill": "refactor-batch/SKILL.md",
-      "codex_skill": "refactor-batch",
-      "grok_skill": "refactor-batch/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "refactor-complete",
-      "source": ".claude/commands/refactor-complete.md",
-      "description": "Complete refactoring session and record final state",
-      "claude_command": "/refactor:complete",
-      "antigravity_skill": "refactor-complete/SKILL.md",
-      "codex_skill": "refactor-complete",
-      "grok_skill": "refactor-complete/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "refactor-init",
-      "source": ".claude/commands/refactor-init.md",
-      "description": "Initialize refactoring session with parallel impact analysis",
-      "claude_command": "/refactor:init",
-      "antigravity_skill": "refactor-init/SKILL.md",
-      "codex_skill": "refactor-init",
-      "grok_skill": "refactor-init/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "refactor-plan",
-      "source": ".claude/commands/refactor-plan.md",
-      "description": "Generate detailed execution plan from analysis",
-      "claude_command": "/refactor:plan",
-      "antigravity_skill": "refactor-plan/SKILL.md",
-      "codex_skill": "refactor-plan",
-      "grok_skill": "refactor-plan/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "refactor-rollback",
-      "source": ".claude/commands/refactor-rollback.md",
-      "description": "Rollback refactoring to a checkpoint",
-      "claude_command": "/refactor:rollback",
-      "antigravity_skill": "refactor-rollback/SKILL.md",
-      "codex_skill": "refactor-rollback",
-      "grok_skill": "refactor-rollback/SKILL.md",
+      "slug": "jobs-review",
+      "source": ".claude/commands/jobs-review.md",
+      "description": "Jobs Review - UIUX・操作性・対話体験・成果物の完成度を「ジョブズなら満足するか」で批評しブラッシュアップを引き出す",
+      "claude_command": "/jobs-review",
+      "antigravity_skill": "jobs-review/SKILL.md",
+      "codex_skill": "jobs-review",
+      "grok_skill": "jobs-review/SKILL.md",
       "aliases": []
     },
     {
@@ -218,36 +148,6 @@
       "antigravity_skill": "sd-deploy/SKILL.md",
       "codex_skill": "sd-deploy",
       "grok_skill": "sd-deploy/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "sd003-loop-lint",
-      "source": ".claude/commands/sd003-loop-lint.md",
-      "description": "/sd003:loop-lint - ESLint Completion Loop",
-      "claude_command": "/sd003:loop-lint",
-      "antigravity_skill": "sd003-loop-lint/SKILL.md",
-      "codex_skill": "sd003-loop-lint",
-      "grok_skill": "sd003-loop-lint/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "sd003-loop-test",
-      "source": ".claude/commands/sd003-loop-test.md",
-      "description": "/sd003:loop-test - Test Completion Loop",
-      "claude_command": "/sd003:loop-test",
-      "antigravity_skill": "sd003-loop-test/SKILL.md",
-      "codex_skill": "sd003-loop-test",
-      "grok_skill": "sd003-loop-test/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "sd003-loop-type",
-      "source": ".claude/commands/sd003-loop-type.md",
-      "description": "/sd003:loop-type - TypeScript Type-Check Loop",
-      "claude_command": "/sd003:loop-type",
-      "antigravity_skill": "sd003-loop-type/SKILL.md",
-      "codex_skill": "sd003-loop-type",
-      "grok_skill": "sd003-loop-type/SKILL.md",
       "aliases": []
     },
     {
@@ -312,76 +212,6 @@
       "antigravity_skill": "spec-history/SKILL.md",
       "codex_skill": "spec-history",
       "grok_skill": "spec-history/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "workflow-impl",
-      "source": ".claude/commands/workflow-impl.md",
-      "description": "AI協調ワークフロー - Antigravity(agy)/Codex実装実行（指示書→実行→復元を一括）",
-      "claude_command": "/workflow:impl",
-      "antigravity_skill": "workflow-impl/SKILL.md",
-      "codex_skill": "workflow-impl",
-      "grok_skill": "workflow-impl/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "workflow-init",
-      "source": ".claude/commands/workflow-init.md",
-      "description": "AI協調ワークフロー - 新規案件の初期化",
-      "claude_command": "/workflow:init",
-      "antigravity_skill": "workflow-init/SKILL.md",
-      "codex_skill": "workflow-init",
-      "grok_skill": "workflow-init/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "workflow-order",
-      "source": ".claude/commands/workflow-order.md",
-      "description": "AI協調ワークフロー - 発注書（WORK_ORDER）作成",
-      "claude_command": "/workflow:order",
-      "antigravity_skill": "workflow-order/SKILL.md",
-      "codex_skill": "workflow-order",
-      "grok_skill": "workflow-order/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "workflow-request",
-      "source": ".claude/commands/workflow-request.md",
-      "description": "AI協調ワークフロー - 実装指示（IMPLEMENT_REQUEST）作成",
-      "claude_command": "/workflow:request",
-      "antigravity_skill": "workflow-request/SKILL.md",
-      "codex_skill": "workflow-request",
-      "grok_skill": "workflow-request/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "workflow-review",
-      "source": ".claude/commands/workflow-review.md",
-      "description": "AI協調ワークフロー - Codexレビュー依頼作成・実行",
-      "claude_command": "/workflow:review",
-      "antigravity_skill": "workflow-review/SKILL.md",
-      "codex_skill": "workflow-review",
-      "grok_skill": "workflow-review/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "workflow-status",
-      "source": ".claude/commands/workflow-status.md",
-      "description": "AI協調ワークフロー - 工程状況の確認・更新",
-      "claude_command": "/workflow:status",
-      "antigravity_skill": "workflow-status/SKILL.md",
-      "codex_skill": "workflow-status",
-      "grok_skill": "workflow-status/SKILL.md",
-      "aliases": []
-    },
-    {
-      "slug": "workflow-test",
-      "source": ".claude/commands/workflow-test.md",
-      "description": "AI協調ワークフロー - Antigravity E2Eテスト依頼作成",
-      "claude_command": "/workflow:test",
-      "antigravity_skill": "workflow-test/SKILL.md",
-      "codex_skill": "workflow-test",
-      "grok_skill": "workflow-test/SKILL.md",
       "aliases": []
     }
   ]

@@ -132,6 +132,21 @@ function Invoke-DeployDryRun {
     $claudeKept = Test-Kept "CLAUDE.md"
     if ($claudeKept) { $kept += "CLAUDE.md" }
 
+    # Git hooks: source path (templates/git-hooks) differs from target path
+    # (.git/hooks), so this can't reuse the generic scanDirs/scanFiles loops above.
+    $gitHooksScanSrc = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\git-hooks"
+    if (Test-Path $gitHooksScanSrc -PathType Container) {
+        Get-ChildItem -Path $gitHooksScanSrc -File -ErrorAction SilentlyContinue | ForEach-Object {
+            $hookRel = ".git/hooks/$($_.Name)"
+            if (Test-Kept $hookRel) { $kept += $hookRel; return }
+            $hookTgt = Join-Path $TargetProject ".git\hooks\$($_.Name)"
+            if (-not (Test-Path $hookTgt)) { $newCount++; return }
+            if ((Get-FileHash $_.FullName).Hash -ne (Get-FileHash $hookTgt).Hash) {
+                $diverged += $hookRel
+            } else { $sameCount++ }
+        }
+    }
+
     if ($diverged.Count -gt 0) {
         Write-Host "WILL OVERWRITE - LOCAL CUSTOMIZATION WILL BE LOST ($($diverged.Count)):" -ForegroundColor Red
         Write-Host "  (target content differs from framework source. Add to .sd003-keep to preserve.)" -ForegroundColor DarkYellow
@@ -394,10 +409,16 @@ $copyStats["AI Coordination"] = $wfCount
 # 4-11: docs/troubleshooting/
 Copy-DirTree -RelPath "docs\troubleshooting" -Label "Docs/Troubleshooting"
 
-# 4-12: docs/quality-gates.md
+# 4-12: docs/quality-gates.md (overwrite unless protected by .sd003-keep)
 $qgSrc = Join-Path $SOURCE_DIR "docs\quality-gates.md"
-if (Test-Path $qgSrc) {
-    Copy-Item $qgSrc (Join-Path $TargetProject "docs\quality-gates.md") -Force
+$qgDst = Join-Path $TargetProject "docs\quality-gates.md"
+if (Test-Kept "docs/quality-gates.md") {
+    Write-Host "  KEEP: docs/quality-gates.md preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "docs/quality-gates.md"
+    $copyStats["Docs/QualityGates"] = 0
+} elseif (Test-Path $qgSrc) {
+    if ((Test-Path $qgDst) -and ((Get-FileHash $qgSrc).Hash -ne (Get-FileHash $qgDst).Hash)) { $script:divergedOverwrites += "docs/quality-gates.md" }
+    Copy-Item $qgSrc $qgDst -Force
     $copyStats["Docs/QualityGates"] = 1
 } else {
     $copyStats["Docs/QualityGates"] = 0
@@ -408,45 +429,69 @@ Copy-DirTree -RelPath ".handoff" -Label "Handoff"
 
 
 
-# 4-15a: scripts/validate-test-data.ps1 (single file)
+# 4-15a: scripts/validate-test-data.ps1 (single file - overwrite unless protected by .sd003-keep)
 $vtdPs1Src = Join-Path $SOURCE_DIR "scripts\validate-test-data.ps1"
-if (Test-Path $vtdPs1Src) {
+$vtdPs1Dst = Join-Path $TargetProject "scripts\validate-test-data.ps1"
+if (Test-Kept "scripts/validate-test-data.ps1") {
+    Write-Host "  KEEP: scripts/validate-test-data.ps1 preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "scripts/validate-test-data.ps1"
+    $copyStats["Validate Test Data (ps1)"] = 0
+} elseif (Test-Path $vtdPs1Src) {
     $scriptsDst = Join-Path $TargetProject "scripts"
     if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
-    Copy-Item $vtdPs1Src (Join-Path $scriptsDst "validate-test-data.ps1") -Force
+    if ((Test-Path $vtdPs1Dst) -and ((Get-FileHash $vtdPs1Src).Hash -ne (Get-FileHash $vtdPs1Dst).Hash)) { $script:divergedOverwrites += "scripts/validate-test-data.ps1" }
+    Copy-Item $vtdPs1Src $vtdPs1Dst -Force
     $copyStats["Validate Test Data (ps1)"] = 1
 } else {
     $copyStats["Validate Test Data (ps1)"] = 0
 }
 
-# 4-15b: scripts/validate-test-data.sh (single file)
+# 4-15b: scripts/validate-test-data.sh (single file - overwrite unless protected by .sd003-keep)
 $vtdShSrc = Join-Path $SOURCE_DIR "scripts\validate-test-data.sh"
-if (Test-Path $vtdShSrc) {
+$vtdShDst = Join-Path $TargetProject "scripts\validate-test-data.sh"
+if (Test-Kept "scripts/validate-test-data.sh") {
+    Write-Host "  KEEP: scripts/validate-test-data.sh preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "scripts/validate-test-data.sh"
+    $copyStats["Validate Test Data (sh)"] = 0
+} elseif (Test-Path $vtdShSrc) {
     $scriptsDst = Join-Path $TargetProject "scripts"
     if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
-    Copy-Item $vtdShSrc (Join-Path $scriptsDst "validate-test-data.sh") -Force
+    if ((Test-Path $vtdShDst) -and ((Get-FileHash $vtdShSrc).Hash -ne (Get-FileHash $vtdShDst).Hash)) { $script:divergedOverwrites += "scripts/validate-test-data.sh" }
+    Copy-Item $vtdShSrc $vtdShDst -Force
     $copyStats["Validate Test Data (sh)"] = 1
 } else {
     $copyStats["Validate Test Data (sh)"] = 0
 }
 
-# 4-15c: scripts/verify-deployment.mjs (single file - deploy content-verification gate)
+# 4-15c: scripts/verify-deployment.mjs (single file - deploy content-verification gate - overwrite unless protected by .sd003-keep)
 $verifySrc = Join-Path $SOURCE_DIR "scripts\verify-deployment.mjs"
-if (Test-Path $verifySrc) {
+$verifyDst = Join-Path $TargetProject "scripts\verify-deployment.mjs"
+if (Test-Kept "scripts/verify-deployment.mjs") {
+    Write-Host "  KEEP: scripts/verify-deployment.mjs preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "scripts/verify-deployment.mjs"
+    $copyStats["Verify Deployment (mjs)"] = 0
+} elseif (Test-Path $verifySrc) {
     $scriptsDst = Join-Path $TargetProject "scripts"
     if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
-    Copy-Item $verifySrc (Join-Path $scriptsDst "verify-deployment.mjs") -Force
+    if ((Test-Path $verifyDst) -and ((Get-FileHash $verifySrc).Hash -ne (Get-FileHash $verifyDst).Hash)) { $script:divergedOverwrites += "scripts/verify-deployment.mjs" }
+    Copy-Item $verifySrc $verifyDst -Force
     $copyStats["Verify Deployment (mjs)"] = 1
 } else {
     $copyStats["Verify Deployment (mjs)"] = 0
 }
 
-# 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator)
+# 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator - overwrite unless protected by .sd003-keep)
 $syncCliSrc = Join-Path $SOURCE_DIR "scripts\sync-cli-commands.py"
-if (Test-Path $syncCliSrc) {
+$syncCliDst = Join-Path $TargetProject "scripts\sync-cli-commands.py"
+if (Test-Kept "scripts/sync-cli-commands.py") {
+    Write-Host "  KEEP: scripts/sync-cli-commands.py preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "scripts/sync-cli-commands.py"
+    $copyStats["Sync CLI"] = 0
+} elseif (Test-Path $syncCliSrc) {
     $scriptsDst = Join-Path $TargetProject "scripts"
     if (-not (Test-Path $scriptsDst)) { New-Item -ItemType Directory -Path $scriptsDst -Force | Out-Null }
-    Copy-Item $syncCliSrc (Join-Path $scriptsDst "sync-cli-commands.py") -Force
+    if ((Test-Path $syncCliDst) -and ((Get-FileHash $syncCliSrc).Hash -ne (Get-FileHash $syncCliDst).Hash)) { $script:divergedOverwrites += "scripts/sync-cli-commands.py" }
+    Copy-Item $syncCliSrc $syncCliDst -Force
     $copyStats["Sync CLI"] = 1
     # Regenerate agy/codex/grok skills in the TARGET (copy alone leaves generated
     # skills + manifest stale). Guarded: skip if python is unavailable.
@@ -498,19 +543,28 @@ if (Test-Path $refactorCfgSrc) {
     $copyStats["Refactor Config"] = 0
 }
 
-# 4-20: tests/gas-fakes/setup.ts (single file)
+# 4-20: tests/gas-fakes/setup.ts (single file - overwrite unless protected by .sd003-keep)
 $gasFakesSrc = Join-Path $SOURCE_DIR "tests\gas-fakes\setup.ts"
-if (Test-Path $gasFakesSrc) {
+$gasFakesDstFile = Join-Path $TargetProject "tests\gas-fakes\setup.ts"
+if (Test-Kept "tests/gas-fakes/setup.ts") {
+    Write-Host "  KEEP: tests/gas-fakes/setup.ts preserved via .sd003-keep" -ForegroundColor Magenta
+    $script:keptFiles += "tests/gas-fakes/setup.ts"
+    $copyStats["Gas Fakes Setup"] = 0
+} elseif (Test-Path $gasFakesSrc) {
     $gasFakesDst = Join-Path $TargetProject "tests\gas-fakes"
     if (-not (Test-Path $gasFakesDst)) { New-Item -ItemType Directory -Path $gasFakesDst -Force | Out-Null }
-    Copy-Item $gasFakesSrc (Join-Path $gasFakesDst "setup.ts") -Force
+    if ((Test-Path $gasFakesDstFile) -and ((Get-FileHash $gasFakesSrc).Hash -ne (Get-FileHash $gasFakesDstFile).Hash)) { $script:divergedOverwrites += "tests/gas-fakes/setup.ts" }
+    Copy-Item $gasFakesSrc $gasFakesDstFile -Force
     $copyStats["Gas Fakes Setup"] = 1
 } else {
     Write-Host "  WARN: tests/gas-fakes/setup.ts not found" -ForegroundColor Yellow
     $copyStats["Gas Fakes Setup"] = 0
 }
 
-# 4-21: .git/hooks/ (from templates/git-hooks/)
+# 4-21: .git/hooks/ (from templates/git-hooks/) - overwrite unless protected by
+# .sd003-keep. Existing hooks are backed up into $BackupDir before overwrite
+# (Phase 2's backup pass, above, does not cover .git/hooks - a custom pre-commit
+# was previously destroyed unrecoverably on every deploy).
 $gitHooksSrc = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\git-hooks"
 $gitHooksDst = Join-Path $TargetProject ".git\hooks"
 $hookCount = 0
@@ -518,8 +572,19 @@ if (Test-Path $gitHooksSrc -PathType Container) {
     if (-not (Test-Path $gitHooksDst)) { New-Item -ItemType Directory -Path $gitHooksDst -Force | Out-Null }
     $hookFiles = Get-ChildItem -Path $gitHooksSrc -File
     foreach ($hook in $hookFiles) {
+        $hookRel = ".git/hooks/$($hook.Name)"
         $targetHook = Join-Path $gitHooksDst $hook.Name
-        # 上書き: 既存hookがあっても最新版で上書き（sd003と同一動作を保証）
+        if (Test-Kept $hookRel) {
+            Write-Host "  KEEP: $hookRel preserved via .sd003-keep" -ForegroundColor Magenta
+            $script:keptFiles += $hookRel
+            continue
+        }
+        if (Test-Path $targetHook) {
+            $hookBackupDir = Join-Path $BackupDir ".git\hooks"
+            if (-not (Test-Path $hookBackupDir)) { New-Item -ItemType Directory -Path $hookBackupDir -Force | Out-Null }
+            Copy-Item $targetHook $hookBackupDir -Force
+            if ((Get-FileHash $hook.FullName).Hash -ne (Get-FileHash $targetHook).Hash) { $script:divergedOverwrites += $hookRel }
+        }
         Copy-Item $hook.FullName $targetHook -Force
         $hookCount++
     }
@@ -546,10 +611,15 @@ if (Test-Kept "CLAUDE.md") {
     Write-Host "  KEEP: CLAUDE.md preserved via .sd003-keep (bespoke version kept)" -ForegroundColor Magenta
     $script:keptFiles += "CLAUDE.md"
 } elseif (Test-Path $claudeTemplate) {
+    # NOTE: the template stamps "SD003 v3.2.0" (not "v2.3.0" - that token never
+    # existed in the template, so this substitution was previously dead code and
+    # every deployed CLAUDE.md kept the hardcoded v3.2.0 forever, breaking the
+    # sessionread Update-Check which treats $FRAMEWORK_VERSION as canonical).
+    # Match the real token "SD003 v<version>" so the stamp becomes $FRAMEWORK_VERSION.
     $content = Get-Content $claudeTemplate -Raw -Encoding UTF8
     $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
     $content = $content -replace '\{\{DATE\}\}', $DATE
-    $content = $content -replace 'v2\.3\.0', "v$FRAMEWORK_VERSION"
+    $content = $content -replace 'SD003 v[0-9]+\.[0-9]+\.[0-9]+', "SD003 v$FRAMEWORK_VERSION"
     Set-Content -Path $claudeMdPath -Value $content -Encoding UTF8
     if (Test-Path $claudeMdPath) { Write-Host "  UPDATE: CLAUDE.md (latest rules applied)" -ForegroundColor Green }
 } else {
@@ -767,19 +837,33 @@ function Verify-Category {
         [string]$SourceRelPath,
         [string]$TargetRelPath = $SourceRelPath,
         [string]$Filter = "*",
-        [switch]$Recurse
+        [switch]$Recurse,
+        [string[]]$Exclude = @()
     )
 
     $srcPath = Join-Path $SOURCE_DIR $SourceRelPath
     $dstPath = Join-Path $TargetProject $TargetRelPath
 
     if ($Recurse) {
-        $srcCount = (Get-ChildItem -Path $srcPath -Recurse -File -Filter $Filter -ErrorAction SilentlyContinue | Measure-Object).Count
+        $srcItems = Get-ChildItem -Path $srcPath -Recurse -File -Filter $Filter -ErrorAction SilentlyContinue
         $dstCount = (Get-ChildItem -Path $dstPath -Recurse -File -Filter $Filter -ErrorAction SilentlyContinue | Measure-Object).Count
     } else {
-        $srcCount = (Get-ChildItem -Path $srcPath -File -Filter $Filter -ErrorAction SilentlyContinue | Measure-Object).Count
+        $srcItems = Get-ChildItem -Path $srcPath -File -Filter $Filter -ErrorAction SilentlyContinue
         $dstCount = (Get-ChildItem -Path $dstPath -File -Filter $Filter -ErrorAction SilentlyContinue | Measure-Object).Count
     }
+
+    # Exclude items matching -Exclude (mirrors Copy-DirTree's own -Exclude match:
+    # "*\$ex\*"), so e.g. "Skills" doesn't count optional-skills files that are
+    # intentionally never copied - counting them made a correct deploy FAIL.
+    if ($Exclude.Count -gt 0) {
+        $srcItems = $srcItems | Where-Object {
+            $full = $_.FullName
+            $isExcluded = $false
+            foreach ($ex in $Exclude) { if ($full -like "*\$ex\*") { $isExcluded = $true; break } }
+            -not $isExcluded
+        }
+    }
+    $srcCount = ($srcItems | Measure-Object).Count
 
     $status = if ($dstCount -ge $srcCount) { "PASS" } else { "FAIL" }
     if ($status -eq "FAIL") { $script:allPassed = $false }
@@ -795,7 +879,7 @@ function Verify-Category {
 $verifyResults += Verify-Category -Label "Commands" -SourceRelPath ".claude\commands" -Filter "*.md"
 $verifyResults += Verify-Category -Label "Commands/sd" -SourceRelPath ".claude\commands\sd" -Filter "*.md"
 $verifyResults += Verify-Category -Label "Rules" -SourceRelPath ".claude\rules" -Filter "*.md" -Recurse
-$verifyResults += Verify-Category -Label "Skills" -SourceRelPath ".claude\skills" -Recurse
+$verifyResults += Verify-Category -Label "Skills" -SourceRelPath ".claude\skills" -Recurse -Exclude $optionalSkills
 $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" -Recurse
 $verifyResults += Verify-Category -Label "Agents Skills (agy)" -SourceRelPath ".agents\skills" -Recurse
 $verifyResults += Verify-Category -Label "Codex" -SourceRelPath ".codex" -Recurse
@@ -911,6 +995,19 @@ Write-Host "  3. Review CLAUDE.md"
 Write-Host "  4. Run /sessionread to verify"
 Write-Host "  5. Start with /sd:spec-init {feature}"
 Write-Host ""
+
+# Registry reminder: new top-level projects under D:\claudecode must be registered
+# in PROJECT_REGISTRY.md, otherwise projects accumulate ungoverned (2026-07-05 cleanup finding).
+$resolvedTarget = (Resolve-Path $TargetProject -ErrorAction SilentlyContinue).Path
+if ($resolvedTarget) {
+    $parentDir = (Split-Path $resolvedTarget -Parent).TrimEnd('\')
+    if ($parentDir -ieq "D:\claudecode") {
+        Write-Host "[REMINDER] Target is a direct child of D:\claudecode." -ForegroundColor Yellow
+        Write-Host "  -> Add one line to D:\claudecode\PROJECT_REGISTRY.md's code table (code / purpose / status=active / created date)." -ForegroundColor Yellow
+        Write-Host "  -> Deployment is NOT considered complete until the registry entry is added." -ForegroundColor Yellow
+        Write-Host ""
+    }
+}
 if (-not $allPassed) {
     Write-Host "SD003 deployment FAILED verification - fix the issues above and re-run." -ForegroundColor Red
     Write-Host "(Deployed files remain in place; nothing was rolled back.)" -ForegroundColor Yellow

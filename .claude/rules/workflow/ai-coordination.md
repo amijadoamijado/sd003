@@ -1,342 +1,79 @@
 ---
-description: AI協調体制（Codex/Antigravity連携の正本）。協調文書作成時に適用。要約とトリガー語はCLAUDE.mdの条件ブロック参照。
+description: AI協調体制（Codex/Antigravity/Grok連携の正本）。協調文書作成時に適用。要約とトリガー語はCLAUDE.mdの条件ブロック参照。
 paths:
   - ".sd/ai-coordination/**/*"
 ---
 
-# AI協調体制
+# AI協調体制（軽量ディスパッチ版）
 
-## 対応AI（4種類）
-| AI | 役割 | コマンド |
+> **2026-07-05 変更**: 旧「7段階ワークフロー」（`/workflow:init/order/request/impl/review/test/status` による
+> WORK_ORDER→IMPLEMENT_REQUEST→REVIEW_REPORT→TEST_REQUEST の自動連鎖）は**過剰設計として撤去**した。
+> 現在のモデルは実装→失敗→修正→再実行を自己完結でき、書面受け渡しの儀式は不要。各AIへは
+> **軽量CLIディスパッチで直接依頼**する。旧コマンド・テンプレ機構は
+> `_archive/removed-overengineering-20260705/` にアーカイブ（git履歴で復元可）。
+
+## 対応AI（4種類）と役割
+
+| AI | 役割 | 呼び出し |
 |----|------|---------|
-| Claude Code | 計画・工程管理 | `/workflow:init`, `/workflow:order`, `/workflow:request`, `/workflow:status` |
-| Codex | レビュー・チェック・タスク委譲 | `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`（公式プラグイン）, `/workflow:review`（自動連鎖） |
-| Antigravity (agy) | 実装・E2Eテスト・探索的調査・本番確認 | `/workflow:impl`, `/workflow:test`（自動連鎖） |
-| Grok | 汎用（実装補助・調査・セカンドオピニオン・並列検証） | `/grok-dispatch`（`grok-build`モデル・非対話） |
+| Claude Code | 計画・工程管理・最終判断（司令塔） | — |
+| Codex | レビュー・チェック・タスク委譲 | `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`（公式プラグイン） |
+| Antigravity (agy) | 実装・E2E・探索調査・本番確認 | `agy --prompt ... --dangerously-skip-permissions`（詳細: `antigravity.md`） |
+| Grok | 汎用（実装補助・調査・セカンドオピニオン・並列検証） | `grok-dispatch`（`grok-build`モデル・非対話） |
 
-**廃止/置換**: Cursor, Windsurf。**Gemini CLI は agy（Antigravity）に置換済み**（gemini-dispatch は歴史的経緯で残存するが新規利用は agy/Grok に寄せる）。
+**廃止/置換**: Cursor, Windsurf。Gemini CLI は agy に置換済み（`gemini-dispatch` は歴史的経緯で残存するが新規は agy/Grok に寄せる）。
 
 ### 役割分岐（誰にやらせるか・司令塔の迷い防止）
+
 | 状況 | 担当 | 理由 |
 |------|------|------|
-| コードレビュー・チェック | **Codex** | レビュー主担当（`/codex:*`, `/workflow:review`） |
-| 実装・E2E・本番確認 | **agy** | 実装主担当（`/workflow:impl`, `/workflow:test`） |
+| コードレビュー・チェック | **Codex** | レビュー主担当（`/codex:*`） |
+| 実装・E2E・本番確認 | **agy** | 実装主担当（非対話ディスパッチ） |
 | セカンドオピニオン・補助調査・並列検証・軽い実装相談 | **Grok** | 汎用。Codex/agy と競合する作業は重複させない |
 | 計画・工程管理・最終判断 | **Claude Code** | 司令塔 |
 
-> **排他ルール**: 同一 repo への**複数AI同時書き込みは禁止**（git 競合回避）。プリフライトで RAM だけでなく既存 grok/codex/agy 稼働も確認する。
+> **排他ルール**: 同一 repo への**複数AI同時書き込みは禁止**（git 競合回避）。
+> プリフライトで RAM だけでなく既存 grok/codex/agy 稼働も確認する。
 
-## ワークフローコマンド
-| コマンド | 説明 |
-|----------|------|
-| `/workflow:init {slug}` | 案件初期化 |
-| `/workflow:order {案件ID}` | 発注書作成 |
-| `/workflow:request {案件ID} {番号}` | 実装指示作成（Antigravity向け） |
-| `/workflow:test {案件ID} {番号}` | テスト依頼作成（Antigravity向け） |
-| `/workflow:status {案件ID}` | 工程状況確認 |
-| `/workflow:impl {案件ID} {番号}` | 実装実行（Antigravity）→ review自動連鎖 |
-| `/workflow:review {案件ID} {番号}` | レビュー依頼・実行（Codex）|
+## 依頼のかけ方（アドホック優先）
 
----
+- **アドホックな相談・レビュー・実装補助は会話内で完結してよい**（書面依頼は不要）。
+  Codex は `/codex:*`、Grok は `grok-dispatch`、agy は `antigravity.md` の非対話呼び出し。
+- **案件IDが明示された正式な依頼・報告のときだけ** `.sd/ai-coordination/` 配下に保存する（下記）。
 
-## 依頼・報告の保存ルール（必須）
+### 保存ルール（正式依頼時のみ）
 
-### 絶対ルール
-**全AIへの依頼・報告は `.sd/ai-coordination/` 配下に統一する**
+| 種別 | 保存先 |
+|------|--------|
+| 依頼書 | `.sd/ai-coordination/workflow/spec/{案件ID}/` |
+| 報告書 | `.sd/ai-coordination/workflow/review/{案件ID}/` |
+| 引き継ぎログ | `.sd/ai-coordination/handoff/handoff-log.json` |
 
-| ファイル種別 | 保存先 | 例 |
-|-------------|--------|-----|
-| 発注書 | `workflow/spec/{案件ID}/WORK_ORDER.md` | `workflow/spec/20260102-001-test/WORK_ORDER.md` |
-| 実装指示 | `workflow/spec/{案件ID}/IMPLEMENT_REQUEST_{NNN}.md` | `IMPLEMENT_REQUEST_001.md` |
-| テスト依頼 | `workflow/spec/{案件ID}/TEST_REQUEST_{NNN}.md` | `TEST_REQUEST_001.md` |
-| レビュー結果 | `workflow/review/{案件ID}/REVIEW_{種別}_{NNN}.md` | `REVIEW_IMPL_001.md` |
-| テスト報告 | `workflow/review/{案件ID}/TEST_REPORT_{NNN}.md` | `TEST_REPORT_001.md` |
+### 禁止
 
-### 禁止事項
 | 禁止 | 理由 |
 |------|------|
-| `.antigravity/` に依頼書を作成 | 案件と紐付かない |
-| プロジェクトルートに依頼書を作成 | 散らかる |
-| テンプレートなしで依頼書を作成 | 形式がバラバラになる |
+| `.antigravity/` / プロジェクトルートへの依頼書作成 | 散らかる・案件と紐付かない |
+| 成果物をAppData隠しディレクトリに保存 | ユーザーが探せない（詳細: `.claude/rules/workflow/artifact-output-location.md`） |
 
-### AI別設定フォルダの用途
+### AI別設定フォルダの用途（依頼書は置かない）
+
 | フォルダ | 用途 | 依頼書を置く？ |
 |---------|------|--------------|
-| `.antigravity/` | Antigravityの動作ルール設定 | **NO** |
+| `.antigravity/` | agyの動作ルール設定 | **NO** |
 | `.claude/` | Claude Codeの動作ルール設定 | **NO** |
-| `.sd/ai-coordination/` | 依頼・報告・ログの集約 | **YES** |
+| `.sd/ai-coordination/` | 正式依頼・報告・ログの集約 | **YES**（案件IDあり時） |
 
----
+## ディスパッチの実務リンク
 
-## 運用フロー（7段階 + テストフェーズ）
+- **Codex**: `.claude/skills/codex-dispatch/`（`/codex:review`, `/codex:adversarial-review`, `/codex:rescue`）
+- **Grok**: `.claude/skills/grok-dispatch/`（`grok-run.ps1 <repo> <out> "<prompt>" [model]`・`--output-format plain`）
+- **agy**: `antigravity.md`（非対話は OAuth 済み＋二重起動回避が前提。ハング時は人手ハンドオフへ）
 
-```
-Phase 1: 発注書作成 (Claude Code)
-    ↓
-Phase 2: 発注書レビュー (Codex)
-    ↓ Approve
-Phase 3: 実装指示作成 (Claude Code)
-    ↓ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    ↓ ★ 自動連鎖チェーン（/workflow:request で一括実行）
-    ↓ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Phase 4: 実装 (Antigravity)          ← /workflow:impl が自動実行
-    ↓
-Phase 4.5: 視覚的評価 (Web UI案件のみ) ★NEW
-    ↓ スクショ撮影 → visual-review-checklist で採点
-    ↓ 50/70未満 → Phase 4 に差し戻し（UI修正）
-    ↓ 50/70以上 ↓
-Phase 5: 実装レビュー (Codex)       ← /workflow:review が自動実行
-    ↓ REVIEW_REPORT テンプレートでスコアリング（コード+UI）
-    ↓ Approve / Request Changes → Phase 6
-Phase 6: 修正対応 (Antigravity)
-    ↓ Approve
-Phase 7: E2Eテスト (Antigravity) ★
-    ↓ Pass
-Phase 8: 工程完了 (Claude Code)
-```
+## Grokトリガー語
 
-## 自動連鎖ルール（省略禁止）
+`grokに依頼` / `グロックに` / `grokに相談` / `grokにレビュー` → `grok-dispatch` でディスパッチ（汎用・セカンドオピニオン）。
 
-**コマンド間の自動連鎖は仕組みとして強制される。AIの「気分」で省略することは不可。**
+## 全AIモデル共通
 
-| トリガー | 自動実行 | 説明 |
-|---------|---------|------|
-| `/workflow:request` 完了 | → `/workflow:impl` | 指示書作成後、Antigravity実行は必須 |
-| `/workflow:impl` 完了 | → visual-eval（Web UI案件） → `/workflow:review` | 実装後、UI評価+Codexレビューは必須 |
-| `/workflow:review` Approve | → `/workflow:test` | レビュー承認後、TEST_REQUEST自動作成＋Antigravityディスパッチ |
-
-### 連鎖フロー図
-```
-/workflow:request {ID} {N}
-  ├── Step 1-7: 実装指示書作成 + handoff記録
-  └── Step 8: /workflow:impl {ID} {N} を自動実行
-        ├── Step 1-8: Antigravity実行（agy --prompt ... --dangerously-skip-permissions） → 検証 → コミット → handoff記録
-        ├── Step 9 (Web UI案件): スクショ撮影 → visual-review-checklist採点
-        │     ├── 50/70以上: 次へ
-        │     └── 50/70未満: UI修正 → 再impl → 再採点
-        └── Step 10: /workflow:review {ID} {N} を自動実行
-              ├── Step 1-8: レビュー依頼作成（REVIEW_REPORTテンプレート使用）→ Codex実行 → 結果保存 → 完了報告
-              └── Step 9 (Approve時): /workflow:test {ID} {N} を自動実行
-                    ├── Step 1-3: TEST_REQUEST作成 → handoff記録
-                    └── Step 4-6: Antigravityディスパッチ → 結果確認 → 完了報告
-```
-
-**違反パターン（禁止）**:
-- 指示書を作っただけで止まる
-- Antigravity実装が終わっただけで止まる
-- Web UI案件でスクショ評価をスキップする
-- レビューでスコアリングなしにApproveする
-- レビューApprove後にテスト依頼を出さずに止まる
-- 「次のステップ」を案内して終わる（案内ではなく実行せよ）
-
-## 視覚的評価（Visual Eval）ルール
-
-Web UIを含む案件では、実装完了後・レビュー前に視覚的評価を実施する。
-
-### フロー
-```
-impl完了 → push/deploy → ブラウザで表示 → スクショ撮影
-  → visual-review-checklist.md で7項目採点
-  → 50/70以上: レビューへ進む（スクショをREVIEW_REPORTに添付）
-  → 50/70未満: UI修正して再impl
-```
-
-### ルール
-| ルール | 理由 |
-|--------|------|
-| スクショは実ブラウザから取得 | コードの見た目予測ではなく実画面を評価 |
-| REVIEW_REPORTに必ずUIスコアを記載 | コード品質だけでなくUI品質も定量評価 |
-| Request Changes時はUIスコアの低項目を明記 | 「何を直すか」を具体的にフィードバック |
-| IMPLEMENT_REQUESTのAcceptance Criteriaに照らして判定 | 指示と評価の基準を一致させる |
-
-### テンプレート使用の必須化
-| テンプレート | 使用タイミング | 必須 |
-|-------------|--------------|------|
-| `IMPLEMENT_REQUEST.md` | 実装指示作成時 | 必須（Acceptance Criteria含む） |
-| `REVIEW_REPORT.md` | レビュー報告作成時 | 必須（スコアリング含む） |
-
----
-
-## Antigravityワークフロー
-
-### 役割の詳細
-| 役割 | 説明 |
-|------|------|
-| 実装実行 | 指示書に従ったコード変更および検証 |
-| E2Eテスト | 本番/ステージング環境でのUI確認 |
-| 探索的テスト | 仕様外の動作確認、UX検証 |
-| スクリーンショット取得 | 証跡収集（テスト報告に添付） |
-| 本番確認 | デプロイ後の動作確認 |
-
-### テスト依頼フロー
-
-```
-1. Claude Code: TEST_REQUEST_{NNN}.md を作成
-   → 保存先: .sd/ai-coordination/workflow/spec/{案件ID}/
-   → handoff-log.json に記録
-
-2. Antigravity: テスト実行
-   → TEST_REQUEST を参照
-   → スクリーンショット取得
-
-3. Antigravity: TEST_REPORT_{NNN}.md を作成
-   → 保存先: .sd/ai-coordination/workflow/review/{案件ID}/
-   → handoff-log.json に記録
-
-4. Claude Code: 報告を確認し次のアクションを決定
-```
-
-### テンプレート
-| テンプレート | 用途 |
-|-------------|------|
-| `templates/IMPLEMENT_REQUEST.md` | 実装指示（Acceptance Criteria付き） |
-| `templates/REVIEW_REPORT.md` | レビュー報告（スコアリング付き） |
-| `templates/TEST_REQUEST.md` | Antigravityへのテスト依頼 |
-| `templates/TEST_REPORT.md` | Antigravityからのテスト報告 |
-
----
-
-## handoff-log.json の記録（必須）
-
-**依頼・報告を発行したら必ず handoff-log.json に記録する**
-
-### 記録すべきhandoff_type
-| type | 説明 | from | to |
-|------|------|------|-----|
-| `work_order_review` | 発注書レビュー依頼 | Claude Code | Codex |
-| `implement_request` | 実装指示発行 | Claude Code | Antigravity |
-| `implement_complete` | 実装完了・レビュー依頼 | Antigravity | Codex |
-| `review_complete` | レビュー完了 | Codex | Claude Code |
-| `test_request` | テスト依頼発行 | Claude Code | Antigravity |
-| `test_report` | テスト完了報告 | Antigravity | Claude Code |
-| `exploration_request` | 探索的調査依頼 | Claude Code | Antigravity |
-| `exploration_report` | 探索的調査報告 | Antigravity | Claude Code |
-
-### 記録フォーマット
-```json
-{
-  "timestamp": "2026-01-02T10:00:00+09:00",
-  "type": "test_request",
-  "project_id": "20260102-001-test",
-  "from": "Claude Code",
-  "to": "Antigravity",
-  "file": "workflow/spec/20260102-001-test/TEST_REQUEST_001.md",
-  "note": "formatMonth修正の本番確認"
-}
-```
-
----
-
-## ディレクトリ構造
-
-```
-.sd/ai-coordination/
-├── handoff/handoff-log.json    # 引き継ぎログ（v2.0.0）
-├── sessions/                   # AI別セッション記録
-│   ├── antigravity/            # Antigravityのセッション
-│   ├── claude-code/            # Claude Codeのセッション
-│   └── codex/                  # Codexのセッション
-├── workflow/
-│   ├── README.md               # ワークフロー説明
-│   ├── CODEX_GUIDE.md          # Codexレビュー運用ガイド
-│   ├── templates/              # テンプレート
-│   │   ├── WORK_ORDER.md
-│   │   ├── IMPLEMENT_REQUEST.md
-│   │   ├── REVIEW_REPORT.md
-│   │   ├── PROJECT_STATUS.md
-│   │   ├── TEST_REQUEST.md
-│   │   └── TEST_REPORT.md
-│   ├── spec/{案件ID}/          # 案件別発注書・実装指示・テスト依頼
-│   ├── review/{案件ID}/        # 案件別レビュー結果・テスト報告
-│   └── log/{案件ID}/           # 案件別工程ログ
-```
-
-### AI別記録場所
-
-| AI | セッション | 依頼書受信 | 報告書作成 |
-|----|-----------|-----------|-----------|
-| Claude Code | `sessions/claude-code/` | - | `workflow/spec/` |
-| Codex | `sessions/codex/` | `workflow/spec/` | `workflow/review/` |
-| Antigravity | `sessions/antigravity/` | `workflow/spec/` | `workflow/review/` |
-
-## 命名規則
-| 要素 | 規則 | 例 |
-|------|------|-----|
-| 案件ID | `YYYYMMDD-NNN-slug` | `20251230-001-auth` |
-| 発注書 | `WORK_ORDER.md` | 固定 |
-| 実装指示 | `IMPLEMENT_REQUEST_NNN.md` | `IMPLEMENT_REQUEST_001.md` |
-| テスト依頼 | `TEST_REQUEST_NNN.md` | `TEST_REQUEST_001.md` |
-| レビュー結果 | `REVIEW_{種別}_NNN.md` | `REVIEW_IMPL_001.md` |
-| テスト報告 | `TEST_REPORT_NNN.md` | `TEST_REPORT_001.md` |
-
----
-
-## Trigger Words (AUTO-EXECUTE)
-
-**IMPORTANT: BEFORE creating any request/report document, FIRST initialize the project with `/workflow:init`**
-
-### Workflow Initialization
-
-When user mentions a task or feature, FIRST ask or determine:
-1. Is this a new project? → `/workflow:init {slug}`
-2. Existing project? → Get the project ID (e.g., `20260102-001-test`)
-
-### Trigger Keywords by AI
-
-| AI | Trigger Keywords | Auto Action |
-|----|-----------------|-------------|
-| Claude Code | "create work order", "create request", "assign to" | Create document using template, save to spec folder |
-| Claude Code | "check on Antigravity", "test request to Antigravity" | Create TEST_REQUEST, record handoff |
-| Antigravity | "implementation complete", "done implementing" | Report to Codex for review |
-| Antigravity | "test request", "execute test" | Read TEST_REQUEST, execute, create TEST_REPORT |
-| Codex | "review complete", "approved", "request changes" | Create REVIEW_REPORT |
-
-### Japanese Trigger Keywords
-
-| Keyword | AI | Action |
-|---------|-----|--------|
-| "...に依頼", "...を依頼" | Claude Code | Create request document for target AI |
-| "指示書を作成", "作業指示" | Claude Code | Create IMPLEMENT_REQUEST or TEST_REQUEST |
-| "テストを依頼" | Claude Code | Create TEST_REQUEST for Antigravity |
-| "アンチグラビティに依頼", "アンチグラビティに" | Claude Code | Create TEST_REQUEST for Antigravity |
-| "実装完了", "作業完了" | Antigravity | Report completion, request review |
-| "テスト結果", "報告" | Antigravity | Create TEST_REPORT |
-| "レビュー完了" | Codex | Create REVIEW_REPORT |
-| "grokに依頼", "グロックに", "grokに相談", "grokにレビュー" | Claude Code | `/grok-dispatch` で Grok にディスパッチ（汎用・セカンドオピニオン） |
-
-### Antigravity Aliases (ALL trigger same action)
-
-The following keywords ALL refer to Antigravity and trigger TEST_REQUEST creation:
-- `Antigravity` (正式名)
-- `antigravity` (小文字)
-- `アンチグラビティ` (日本語)
-
-### Auto-Execution Flow
-
-```
-User: "Antigravityにテストを依頼して"
-         ↓
-Claude Code (auto-detect):
-  1. Check: Is project initialized?
-     → NO: Ask user or auto-init with /workflow:init
-     → YES: Get project ID
-  2. Create TEST_REQUEST using template
-  3. Save to: .sd/ai-coordination/workflow/spec/{projectID}/
-  4. Record in handoff-log.json
-  5. Notify user with file path
-```
-
-### Enforcement Rules
-
-| Rule | Enforcement |
-|------|-------------|
-| All requests/reports in `.sd/ai-coordination/` | MANDATORY |
-| Use template for document creation | MANDATORY |
-| Record in handoff-log.json | MANDATORY |
-| Initialize project before first document | MANDATORY |
-
----
-
-## 詳細ドキュメント
-- `.sd/ai-coordination/workflow/README.md`
-- `.sd/ai-coordination/workflow/CODEX_GUIDE.md`
+このルールは Claude Code / Codex / Antigravity(agy) / Grok 全てに適用される。
