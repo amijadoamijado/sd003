@@ -109,6 +109,9 @@ __pycache__/
 
 # stray deploy artifact（誤ってルート直下にデプロイされた残骸）
 cr001/
+
+# Grokディスパッチのターミナルログ残骸（2026-06-28テスト由来・~1MB）
+terminals/
 # gitignore-verify
 # persist
 # sd-test
