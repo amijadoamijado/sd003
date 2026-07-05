@@ -2,4 +2,9 @@
 
 // This file is the main entry point for the sd003 CLI.
 // It delegates to the CLI controller.
-import '../dist/cli/index.js';
+const { runCli } = require('../dist/cli/index.js');
+
+runCli().catch((error) => {
+  console.error('CLI Error:', error.message);
+  process.exit(1);
+});

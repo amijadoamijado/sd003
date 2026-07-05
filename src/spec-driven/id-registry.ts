@@ -28,6 +28,13 @@ export class IdRegistry {
     let newId: string;
     do {
       counter++;
+      if (counter > 999) {
+        // isValidId() requires exactly 3 digits (TYPE-NNN); never silently emit a
+        // 4+ digit ID that would fail its own validation.
+        throw new Error(
+          `IdRegistry: cannot generate a new '${type}' ID — the 3-digit range (001-999) is exhausted.`
+        );
+      }
       newId = `${type}-${String(counter).padStart(3, '0')}`;
     } while (IdRegistry.registeredIds.has(newId));
 

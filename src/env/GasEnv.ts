@@ -67,11 +67,25 @@ export class GasEnv implements IEnv {
       error: (message: any) => Logger.log(`[ERROR] ${message}`),
       getLogs: () => {
         const log = Logger.getLog();
-        return log.split('\n').filter(Boolean).map((line: string) => ({
-          level: 'log',
-          message: line,
-          timestamp: new Date(),
-        }));
+        return log
+          .split('\n')
+          .filter(Boolean)
+          .map((line: string) => {
+            // info()/warn()/error() above prefix the message with "[INFO] "/"[WARN] "/
+            // "[ERROR] " before calling Logger.log() (log() itself adds no prefix).
+            // Recover the original level from that prefix instead of fabricating 'log'
+            // for every line regardless of how it was actually logged.
+            const match = line.match(/^\[(INFO|WARN|ERROR)\] (.*)$/s);
+            return {
+              level: match ? match[1].toLowerCase() : 'log',
+              message: match ? match[2] : line,
+              // Known limitation: GAS's Logger.getLog() does not expose a
+              // machine-parseable per-line timestamp in a format stable across GAS
+              // runtime versions, so this is the retrieval time, not the original
+              // log time.
+              timestamp: new Date(),
+            };
+          });
       },
       clear: () => Logger.clear(),
     };

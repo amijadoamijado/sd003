@@ -2,7 +2,13 @@
  * Type Definitions
  */
 
-export type IDType = 'REQ' | 'DESIGN' | 'IMPL' | 'TEST';
+import type { IdType } from '../spec-driven/id-registry';
+
+/**
+ * @deprecated Use `IdType` from `spec-driven/id-registry` (the canonical definition).
+ * Kept as a type alias so existing imports of `IDType` keep compiling.
+ */
+export type IDType = IdType;
 
 export type LogLevel = 'LOG' | 'ERROR' | 'WARN' | 'INFO';
 

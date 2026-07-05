@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
+import { extractFrontMatter, findSpecMarkdownFiles } from '../../spec-driven/spec-file-utils';
 
 interface SpecFrontMatter {
   id: string;
@@ -26,7 +27,7 @@ export function registerSpecListCommand(program: Command): void {
         return;
       }
 
-      const specFiles = fs.readdirSync(specDirPath).filter(file => file.endsWith('.md'));
+      const specFiles = findSpecMarkdownFiles(specDirPath);
 
       if (specFiles.length === 0) {
         console.log('No specification documents found.');
@@ -34,25 +35,26 @@ export function registerSpecListCommand(program: Command): void {
       }
 
       console.log('\n--- Specifications ---');
-      specFiles.forEach(file => {
-        const filePath = path.join(specDirPath, file);
+      specFiles.forEach(filePath => {
+        const relFile = path.relative(specDirPath, filePath).split(path.sep).join('/');
         const fileContent = fs.readFileSync(filePath, 'utf8');
-        const frontMatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---/);
+        const frontMatterText = extractFrontMatter(fileContent);
 
-        if (frontMatterMatch) {
+        if (frontMatterText !== null) {
           try {
-            const frontMatter = yaml.load(frontMatterMatch[1]) as SpecFrontMatter;
+            const frontMatter = yaml.load(frontMatterText) as SpecFrontMatter;
             console.log(`ID: ${frontMatter.id || 'N/A'}`);
             console.log(`  Name: ${frontMatter.name || 'N/A'}`);
             console.log(`  Type: ${frontMatter.type || 'N/A'}`);
             console.log(`  Status: ${frontMatter.status || 'N/A'}`);
-            console.log(`  File: ${file}`);
+            console.log(`  File: ${relFile}`);
             console.log('--------------------');
-          } catch (error: any) {
-            console.error(`Error parsing YAML front matter in ${file}: ${error.message}`);
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            console.error(`Error parsing YAML front matter in ${relFile}: ${message}`);
           }
         } else {
-          console.log(`File: ${file} (Missing front matter)`);
+          console.log(`File: ${relFile} (Missing front matter)`);
           console.log('--------------------');
         }
       });

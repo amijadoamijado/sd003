@@ -7,5 +7,6 @@
  * @see tests/gas-fakes/setup.ts
  */
 
-// gas-fakes移行完了。このファイルは後方互換のために残しています。
+// このファイルは意図的に空です（後方互換のための「橋渡し」は行っていません）。
+// GA001時代のLocalEnvクラスは廃止済みで、このファイルは何もexportしません。
 // ローカルテストは `npm run test:gas-fakes` で実行してください。

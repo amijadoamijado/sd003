@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml'; // You might need to install this: npm install js-yaml
 import { IdRegistry } from '../../spec-driven/id-registry';
+import { extractFrontMatter, findSpecMarkdownFiles } from '../../spec-driven/spec-file-utils';
 // TraceabilityEngine reserved for future use
 
 interface SpecFrontMatter {
@@ -33,40 +34,41 @@ export function registerSpecValidateCommand(program: Command): void {
         return;
       }
 
-      const specFiles = fs.readdirSync(specDirPath).filter(file => file.endsWith('.md'));
+      const specFiles = findSpecMarkdownFiles(specDirPath);
       let allValid = true;
 
       // First pass: Register all IDs and collect basic info
       const specs: { filePath: string; frontMatter: SpecFrontMatter; content: string }[] = [];
-      for (const file of specFiles) {
-        const filePath = path.join(specDirPath, file);
+      for (const filePath of specFiles) {
+        const relFile = path.relative(specDirPath, filePath).split(path.sep).join('/');
         const fileContent = fs.readFileSync(filePath, 'utf8');
-        const frontMatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---/);
+        const frontMatterText = extractFrontMatter(fileContent);
 
-        if (!frontMatterMatch) {
-          console.error(`❌ ${file}: Missing YAML front matter.`);
+        if (frontMatterText === null) {
+          console.error(`❌ ${relFile}: Missing YAML front matter.`);
           allValid = false;
           continue;
         }
 
         try {
-          const frontMatter = yaml.load(frontMatterMatch[1]) as SpecFrontMatter;
+          const frontMatter = yaml.load(frontMatterText) as SpecFrontMatter;
           if (!frontMatter.id || !frontMatter.name || !frontMatter.type || !frontMatter.status) {
-            console.error(`❌ ${file}: Incomplete front matter. Required: id, name, type, status.`);
+            console.error(`❌ ${relFile}: Incomplete front matter. Required: id, name, type, status.`);
             allValid = false;
             continue;
           }
 
           if (!IdRegistry.isValidId(frontMatter.id)) {
-            console.error(`❌ ${file}: Invalid ID format: ${frontMatter.id}`);
+            console.error(`❌ ${relFile}: Invalid ID format: ${frontMatter.id}`);
             allValid = false;
           } else if (!IdRegistry.registerId(frontMatter.id)) {
-            console.error(`❌ ${file}: Duplicate ID found: ${frontMatter.id}`);
+            console.error(`❌ ${relFile}: Duplicate ID found: ${frontMatter.id}`);
             allValid = false;
           }
           specs.push({ filePath, frontMatter, content: fileContent });
-        } catch (error: any) {
-          console.error(`❌ ${file}: Invalid YAML front matter: ${error.message}`);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          console.error(`❌ ${relFile}: Invalid YAML front matter: ${message}`);
           allValid = false;
         }
       }
@@ -74,13 +76,14 @@ export function registerSpecValidateCommand(program: Command): void {
       // Second pass: Validate traceability links
       for (const spec of specs) {
         const { filePath, frontMatter } = spec;
+        const relFile = path.relative(specDirPath, filePath).split(path.sep).join('/');
         if (frontMatter.traceability) {
-          for (const linkType of ['DESIGN', 'IMPL', 'TEST']) {
-            const links = (frontMatter.traceability as any)[linkType] as string[] | undefined;
+          for (const linkType of ['DESIGN', 'IMPL', 'TEST'] as const) {
+            const links = frontMatter.traceability[linkType];
             if (links) {
               for (const targetId of links) {
                 if (!IdRegistry.isIdRegistered(targetId)) {
-                  console.error(`❌ ${path.basename(filePath)}: Traceability link to unregistered ID '${targetId}' (${linkType}).`);
+                  console.error(`❌ ${relFile}: Traceability link to unregistered ID '${targetId}' (${linkType}).`);
                   allValid = false;
                 } else {
                   // Optionally add to traceability engine for matrix generation later

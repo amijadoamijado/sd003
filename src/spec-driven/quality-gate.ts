@@ -7,22 +7,30 @@ export interface QualityGateResult {
   gate: string;
   status: 'PASSED' | 'FAILED' | 'SKIPPED';
   message?: string;
-  details?: any;
+  details?: unknown;
 }
 
 /**
  * Manages an 8-stage quality gate system for SD002.
  * Each gate performs a specific validation to ensure code quality and compliance.
+ *
+ * NOTE: The 8 static methods below (SyntaxValidation, TypeValidation, ...) and the
+ * auto-registration at the bottom of this file are illustrative placeholder/demo gates
+ * for this generic, pluggable framework — they always report PASSED and are exercised
+ * directly by `tests/unit/spec-driven/quality-gate.test.ts`. The REAL, honest gates used
+ * by the production `qa:deploy:safe` CLI command (which actually run tsc/eslint/jest via
+ * child_process) are wired in `src/cli/commands/qa-deploy-safe.ts`, overwriting these
+ * placeholders at command-invocation time. See `.claude/rules/global/real-data-first.md`.
  */
 export class QualityGate {
-  public static gates: Map<string, (options?: any) => Promise<QualityGateResult>> = new Map();
+  public static gates: Map<string, (options?: unknown) => Promise<QualityGateResult>> = new Map();
 
   /**
    * Registers a quality gate function.
    * @param gateName The unique name of the gate (e.g., 'SyntaxValidation').
    * @param checkFunction The asynchronous function that performs the gate check.
    */
-  static registerGate(gateName: string, checkFunction: (options?: any) => Promise<QualityGateResult>): void {
+  static registerGate(gateName: string, checkFunction: (options?: unknown) => Promise<QualityGateResult>): void {
     if (QualityGate.gates.has(gateName)) {
       console.warn(`Quality gate '${gateName}' is already registered and will be overwritten.`);
     }
@@ -36,18 +44,19 @@ export class QualityGate {
    * @returns The result of the quality gate check.
    * @throws If the specified gate is not registered.
    */
-  static async executeGate(gateName: string, options?: any): Promise<QualityGateResult> {
+  static async executeGate(gateName: string, options?: unknown): Promise<QualityGateResult> {
     const checkFunction = QualityGate.gates.get(gateName);
     if (!checkFunction) {
       throw new Error(`Quality gate '${gateName}' is not registered.`);
     }
     try {
       return await checkFunction(options);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       return {
         gate: gateName,
         status: 'FAILED',
-        message: `An unexpected error occurred during gate execution: ${error.message}`,
+        message: `An unexpected error occurred during gate execution: ${message}`,
         details: error,
       };
     }
@@ -58,7 +67,7 @@ export class QualityGate {
    * @param options Optional parameters to pass to all gate checks.
    * @returns An array of results for all executed quality gates.
    */
-  static async executeAllGates(options?: any): Promise<QualityGateResult[]> {
+  static async executeAllGates(options?: unknown): Promise<QualityGateResult[]> {
     const results: QualityGateResult[] = [];
     const gateOrder: string[] = [
       'SyntaxValidation',

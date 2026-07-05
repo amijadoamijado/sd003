@@ -6,6 +6,7 @@ import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { IdRegistry } from '../../spec-driven/id-registry';
 import { TraceabilityEngine, TraceLink } from '../../spec-driven/traceability-engine';
+import { extractFrontMatter, findSpecMarkdownFiles } from '../../spec-driven/spec-file-utils';
 
 interface SpecFrontMatter {
   id: string;
@@ -37,38 +38,39 @@ export function registerSpecSyncCommand(program: Command): void {
       IdRegistry._reset();
       TraceabilityEngine._reset();
 
-      const specFiles = fs.readdirSync(specDirPath).filter(file => file.endsWith('.md'));
+      const specFiles = findSpecMarkdownFiles(specDirPath);
 
       // Pass 1: Register all IDs
-      for (const file of specFiles) {
-        const filePath = path.join(specDirPath, file);
+      for (const filePath of specFiles) {
+        const relFile = path.relative(specDirPath, filePath).split(path.sep).join('/');
         const fileContent = fs.readFileSync(filePath, 'utf8');
-        const frontMatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---/);
+        const frontMatterText = extractFrontMatter(fileContent);
 
-        if (frontMatterMatch) {
+        if (frontMatterText !== null) {
           try {
-            const frontMatter = yaml.load(frontMatterMatch[1]) as SpecFrontMatter;
+            const frontMatter = yaml.load(frontMatterText) as SpecFrontMatter;
             if (frontMatter.id) {
               IdRegistry.registerId(frontMatter.id);
             }
-          } catch (error: any) {
-            console.error(`Error parsing YAML front matter in ${file}: ${error.message}`);
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            console.error(`Error parsing YAML front matter in ${relFile}: ${message}`);
           }
         }
       }
 
       // Pass 2: Build traceability links
-      for (const file of specFiles) {
-        const filePath = path.join(specDirPath, file);
+      for (const filePath of specFiles) {
+        const relFile = path.relative(specDirPath, filePath).split(path.sep).join('/');
         const fileContent = fs.readFileSync(filePath, 'utf8');
-        const frontMatterMatch = fileContent.match(/^---\n([\s\S]*?)\n---/);
+        const frontMatterText = extractFrontMatter(fileContent);
 
-        if (frontMatterMatch) {
+        if (frontMatterText !== null) {
           try {
-            const frontMatter = yaml.load(frontMatterMatch[1]) as SpecFrontMatter;
+            const frontMatter = yaml.load(frontMatterText) as SpecFrontMatter;
             if (frontMatter.id && frontMatter.traceability) {
-              for (const linkType of ['DESIGN', 'IMPL', 'TEST']) {
-                const links = (frontMatter.traceability as any)[linkType] as string[] | undefined;
+              for (const linkType of ['DESIGN', 'IMPL', 'TEST'] as const) {
+                const links = frontMatter.traceability[linkType];
                 if (links) {
                   let actualLinkType: TraceLink['type'] = 'relatesTo';
                   if (linkType === 'DESIGN' || linkType === 'IMPL') {
@@ -82,8 +84,9 @@ export function registerSpecSyncCommand(program: Command): void {
                 }
               }
             }
-          } catch (error: any) {
-            console.error(`Error parsing YAML front matter in ${file} during traceability build: ${error.message}`);
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            console.error(`Error parsing YAML front matter in ${relFile} during traceability build: ${message}`);
           }
         }
       }

@@ -3,7 +3,55 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as yaml from 'js-yaml';
 import { IdRegistry } from '../../spec-driven/id-registry';
+import { extractFrontMatter, findSpecMarkdownFiles } from '../../spec-driven/spec-file-utils';
+
+interface MinimalFrontMatter {
+  id?: string;
+}
+
+/**
+ * Seeds the (per-process, in-memory) IdRegistry with every ID already present on disk.
+ * Without this, IdRegistry.generateId('REQ') always starts back at REQ-001 on every new
+ * CLI invocation (a fresh process each time), reissuing an ID that already exists and
+ * silently colliding with an existing spec.
+ */
+function seedIdRegistryFromDisk(specDirPath: string): void {
+  if (!fs.existsSync(specDirPath)) {
+    return;
+  }
+  for (const filePath of findSpecMarkdownFiles(specDirPath)) {
+    try {
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const frontMatterText = extractFrontMatter(fileContent);
+      if (frontMatterText === null) {
+        continue;
+      }
+      const frontMatter = yaml.load(frontMatterText) as MinimalFrontMatter;
+      if (frontMatter && frontMatter.id) {
+        IdRegistry.registerId(frontMatter.id);
+      }
+    } catch {
+      // Unparsable front matter is reported by `spec:validate`; ID seeding just skips it.
+    }
+  }
+}
+
+/**
+ * Sanitizes a free-form spec name into a filesystem- and Windows-safe slug.
+ * Characters invalid in Windows filenames (`:/\?*"<>|`) previously passed straight
+ * through into the generated filename, causing EINVAL/ENOENT writes.
+ */
+function sanitizeForFilename(value: string): string {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[:/\\?*"<>|]/g, '-')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 export function registerSpecCreateCommand(program: Command): void {
   program
@@ -11,20 +59,33 @@ export function registerSpecCreateCommand(program: Command): void {
     .description('Create a new specification document')
     .action(async (name: string) => {
       try {
-        const specId = IdRegistry.generateId('REQ'); // Assuming new specs are requirements
-        const specFileName = `${specId}-${name.toLowerCase().replace(/\s/g, '-')}.md`;
         const specDirPath = path.join(process.cwd(), '.sd', 'specs');
-        const specFilePath = path.join(specDirPath, specFileName);
 
         if (!fs.existsSync(specDirPath)) {
           fs.mkdirSync(specDirPath, { recursive: true });
         }
 
+        // Seed IDs already on disk so generateId() never reissues an existing ID.
+        seedIdRegistryFromDisk(specDirPath);
+
+        const specId = IdRegistry.generateId('REQ'); // Assuming new specs are requirements
+        const slug = sanitizeForFilename(name);
+        const specFileName = `${specId}-${slug}.md`;
+        const specFilePath = path.join(specDirPath, specFileName);
+
+        if (fs.existsSync(specFilePath)) {
+          // Never silently overwrite an existing spec (file-overwrite prohibition).
+          throw new Error(`Refusing to overwrite existing specification: ${specFilePath}`);
+        }
+
+        // YAML-safe serialization of `name` (js-yaml only quotes when the value actually
+        // needs it, e.g. contains ": ", so simple names remain unquoted as before).
+        const frontMatterYaml = yaml
+          .dump({ id: specId, name, type: 'REQ', status: 'DRAFT' })
+          .replace(/\n+$/, '');
+
         const template = `---
-id: ${specId}
-name: ${name}
-type: REQ
-status: DRAFT
+${frontMatterYaml}
 ---
 
 # ${name}
@@ -55,8 +116,9 @@ status: DRAFT
         fs.writeFileSync(specFilePath, template);
         console.log(`Successfully created new specification: ${specFilePath}`);
         console.log(`Generated ID: ${specId}`);
-      } catch (error: any) {
-        console.error(`Error creating specification: ${error.message}`);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        console.error(`Error creating specification: ${message}`);
         process.exit(1);
       }
     });

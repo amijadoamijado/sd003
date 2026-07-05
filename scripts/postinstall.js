@@ -6,9 +6,9 @@
  * インストール後の初期化処理
  */
 
-import fs from 'fs';
-import path from 'path';
-import { execFileSync } from 'child_process';
+const fs = require('fs');
+const path = require('path');
+const { execFileSync } = require('child_process');
 
 console.log('SD003 Framework - Postinstall');
 console.log('==============================\n');

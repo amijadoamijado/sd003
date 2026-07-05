@@ -4,7 +4,7 @@
   "description": "SD003 Framework - Spec-Driven Development with GAS Local Testing Integration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
+  "type": "commonjs",
   "bin": {
     "sd003": "./bin/sd003.js"
   },
@@ -26,14 +26,11 @@
     "clean": "node -e \"for (const d of ['dist','coverage','.nyc_output']) require('fs').rmSync(d,{recursive:true,force:true})\"",
     "prepublish": "npm run build",
     "postinstall": "node scripts/postinstall.js",
-    "dev:server": "ts-node src/dev-server/index.ts",
-    "gas:init": "node dist/scripts/gas-init.js",
     "gas:test": "npm run build && npm test",
-    "gas:deploy": "node dist/scripts/gas-deploy.js",
-    "spec:sync": "node dist/spec-driven/sync.js",
-    "spec:validate": "node dist/spec-driven/validate.js",
+    "spec:sync": "npm run build && node dist/cli/index.js spec:sync",
+    "spec:validate": "npm run build && node dist/cli/index.js spec:validate",
     "qa:test": "npm run build && npm test && npm run test:e2e",
-    "qa:deploy:safe": "npm run qa:test && node dist/scripts/deploy-guard.js",
+    "qa:deploy:safe": "npm run build && node dist/cli/index.js qa:deploy:safe",
     "test:validate-data": "powershell -ExecutionPolicy Bypass -File scripts/validate-test-data.ps1",
     "e2e:setup": "powershell -ExecutionPolicy Bypass -File .claude/skills/gas-e2e/scripts/setup-e2e.ps1"
   },
