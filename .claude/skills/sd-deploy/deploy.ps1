@@ -911,6 +911,19 @@ Write-Host "  3. Review CLAUDE.md"
 Write-Host "  4. Run /sessionread to verify"
 Write-Host "  5. Start with /sd:spec-init {feature}"
 Write-Host ""
+
+# Registry reminder: new top-level projects under D:\claudecode must be registered
+# in PROJECT_REGISTRY.md, otherwise projects accumulate ungoverned (2026-07-05 cleanup finding).
+$resolvedTarget = (Resolve-Path $TargetProject -ErrorAction SilentlyContinue).Path
+if ($resolvedTarget) {
+    $parentDir = (Split-Path $resolvedTarget -Parent).TrimEnd('\')
+    if ($parentDir -ieq "D:\claudecode") {
+        Write-Host "[REMINDER] Target is a direct child of D:\claudecode." -ForegroundColor Yellow
+        Write-Host "  -> Add one line to D:\claudecode\PROJECT_REGISTRY.md's code table (code / purpose / status=active / created date)." -ForegroundColor Yellow
+        Write-Host "  -> Deployment is NOT considered complete until the registry entry is added." -ForegroundColor Yellow
+        Write-Host ""
+    }
+}
 if (-not $allPassed) {
     Write-Host "SD003 deployment FAILED verification - fix the issues above and re-run." -ForegroundColor Red
     Write-Host "(Deployed files remain in place; nothing was rolled back.)" -ForegroundColor Yellow

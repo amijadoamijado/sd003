@@ -174,5 +174,39 @@ if ($ok) {
 } else {
     Write-Host "Result: issues found - review above. Backup: $BackupDir" -ForegroundColor Red
 }
+
+# ------------------------------------------------------------------
+# Phase 6: prune stale backup folders (keep newest only; archive, never delete).
+# Repeated deploy/upgrade runs accumulate .sd003-backup-*, .sd003-upgrade-backup-*
+# and legacy .sd002-backup-* directories with no cleanup (found piled up to 8+ in
+# cf001 during the 2026-07-05 D:\claudecode cleanup). Move stale ones to
+# <project>/.sd/cleanup/archive/<YYYYMMDD>/ instead of deleting them.
+# ------------------------------------------------------------------
+Write-Host ""
+Write-Host "[Prune] Checking for accumulated backup folders ..." -ForegroundColor Cyan
+$backupPatterns = @(".sd003-backup-*", ".sd003-upgrade-backup-*", ".sd002-backup-*")
+$pruned = $false
+foreach ($pattern in $backupPatterns) {
+    $found = @(Get-ChildItem -Path $TargetProject -Directory -Filter $pattern -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending)
+    if ($found.Count -ge 2) {
+        $pruned = $true
+        $keep = $found[0]
+        $stale = $found | Select-Object -Skip 1
+        $archiveDir = Join-Path $TargetProject ".sd\cleanup\archive\$(Get-Date -Format 'yyyyMMdd')"
+        if (-not (Test-Path $archiveDir)) { New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null }
+        Write-Host "  [$pattern] $($found.Count) found. Keeping newest: $($keep.Name)" -ForegroundColor Yellow
+        foreach ($old in $stale) {
+            $dest = Join-Path $archiveDir $old.Name
+            if (Test-Path $dest) { $dest = Join-Path $archiveDir "$($old.Name)_$(Get-Date -Format 'HHmmss')" }
+            Move-Item -LiteralPath $old.FullName -Destination $dest -Force
+            Write-Host "    archived (not deleted): $($old.Name) -> $dest"
+        }
+    }
+}
+if (-not $pruned) {
+    Write-Host "  (none - fewer than 2 backups per pattern, nothing to prune)" -ForegroundColor Green
+}
+
 Write-Host ""
 Write-Host "Next: cd $TargetProject; npm install; restart agy and run /skills to confirm commands."

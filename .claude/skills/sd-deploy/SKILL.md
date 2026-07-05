@@ -193,6 +193,16 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 }
 ```
 
+## デプロイ完了後の必須ステップ（台帳登録）
+
+展開先が `D:\claudecode` 直下の新規プロジェクトの場合、デプロイ完了後に必ず
+`D:\claudecode\PROJECT_REGISTRY.md` のコード対応表へ1行追記する（コード・用途・status=active・作成日）。
+**台帳に登録するまでデプロイ完了としない。**
+
+> 背景: 2026-07-05の D:\claudecode 全体整理で、新規プロジェクトが台帳に登録されず無秩序に増えていたことが判明した。
+> `deploy.ps1` は Phase 7 のレポートに `[REMINDER]` として台帳登録を促すメッセージを出力するが、
+> 台帳ファイル自体への追記はスクリプトが自動で行わない。AI（Claude Code等）が本手順に従って手動で追記すること。
+
 ## デプロイ後の検証
 
 スクリプトがPhase 6で自動検証を実行する。手動確認する場合：
