@@ -46,15 +46,11 @@ IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.j
 
 IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
 
-IMPORTANT: When coordinating with other AIs (Codex, Antigravity, Grok), all documents go to `.sd/ai-coordination/`. Never create in `.antigravity/` or project root. Trigger keywords: "...に依頼", "指示書作成", "test request", "implement", "review", "grokに依頼". Auto-chain: request → impl → review → test. For ad-hoc Grok consultation (no project ID), use the `grok-dispatch` skill instead. Details: `.claude/rules/workflow/ai-coordination.md`
-
-IMPORTANT: When refactoring, use checkpoint-based batches with `/refactor:init`. Context auto-compact at 70%, auto-clear at 85%. Rollback requires user confirmation. Details: `.claude/rules/refactoring/refactoring-system.md`
+IMPORTANT: When coordinating with other AIs (Codex, Antigravity, Grok), coordination documents go to `.sd/ai-coordination/` (never `.antigravity/` or project root). For ad-hoc consultation/implementation use the per-AI dispatch skills (Codex `/codex:*`, `grok-dispatch`); the old formal 7-stage workflow chain was removed 2026-07-05 as over-engineering. Details: `.claude/rules/workflow/ai-coordination.md`
 
 IMPORTANT: If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Details: `.claude/rules/skills/skill-check-before-action.md`
 
 IMPORTANT: When debugging, use the 3-tier system: `/bug-quick` (5-15min, flow comparison) → `/bug-trace` (30-60min, 3-agent parallel) → `/dialogue-resolution` (AI reasoning check). Escalate on 2nd same error. Details: `.claude/rules/troubleshooting/`
-
-IMPORTANT: When in a loop session (`/sd003:loop-*`), follow Ralph Loop rules. Midpoint: loop freely. Endgame: same error 2x → stop and escalate. Details: `.claude/rules/ralph-loop.md`
 
 IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design principles, apply design tokens, and check visual quality score (50/70 minimum). Details: `.claude/rules/ui/web-design-principles.md`, `.claude/rules/ui/visual-review-checklist.md`
 
@@ -77,8 +73,6 @@ IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the se
 | Category | Commands |
 |----------|----------|
 | Blueprint | `/blueprint-gate` |
-| AI Workflow | `/workflow:init`, `order`, `request`, `impl`, `review`, `test`, `status` |
-| Loop | `/sd003:loop-test`, `loop-lint`, `loop-type` |
 | Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution` |
 | Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
 

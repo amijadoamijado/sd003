@@ -95,7 +95,7 @@ function Invoke-DeployDryRun {
 
     $scanDirs = @(
         ".claude\commands", ".claude\rules", ".claude\skills", ".claude\hooks",
-        ".agents\skills", ".codex", ".grok", ".sd\settings", ".sd\design", ".sd\ralph",
+        ".agents\skills", ".codex", ".grok", ".sd\settings", ".sd\design",
         ".sd\steering", ".handoff", "docs\troubleshooting"
     )
     foreach ($d in $scanDirs) {
@@ -225,8 +225,6 @@ $directories = @(
     ".sd/ai-coordination/handoff",
     ".handoff",
     ".sd\design",
-    ".sd/ralph",
-    ".sd/refactor",
     "docs/troubleshooting/bug-reports",
     "materials/csv",
     "materials/excel",
@@ -526,22 +524,8 @@ if (Test-Kept "AGENTS.md") {
     $copyStats["AGENTS.md"] = 0
 }
 
-# 4-17: .sd/ralph/ (tree)
-Copy-DirTree -RelPath ".sd\ralph" -Label "Ralph"
-
 # 4-18: .sd/steering/ (tree)
 Copy-DirTree -RelPath ".sd\steering" -Label "Steering"
-
-# 4-19: .sd/refactor/config.json (single file)
-$refactorCfgSrc = Join-Path $SOURCE_DIR ".sd\refactor\config.json"
-if (Test-Path $refactorCfgSrc) {
-    $refactorDst = Join-Path $TargetProject ".sd\refactor"
-    if (-not (Test-Path $refactorDst)) { New-Item -ItemType Directory -Path $refactorDst -Force | Out-Null }
-    Copy-Item $refactorCfgSrc (Join-Path $refactorDst "config.json") -Force
-    $copyStats["Refactor Config"] = 1
-} else {
-    $copyStats["Refactor Config"] = 0
-}
 
 # 4-20: tests/gas-fakes/setup.ts (single file - overwrite unless protected by .sd003-keep)
 $gasFakesSrc = Join-Path $SOURCE_DIR "tests\gas-fakes\setup.ts"
@@ -887,7 +871,6 @@ $verifyResults += Verify-Category -Label "Grok" -SourceRelPath ".grok" -Recurse
 $verifyResults += Verify-Category -Label "SD Settings" -SourceRelPath ".sd\settings" -Recurse
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
 $verifyResults += Verify-Category -Label "Design" -SourceRelPath ".sd\design" -Recurse
-$verifyResults += Verify-Category -Label "Ralph" -SourceRelPath ".sd\ralph" -Recurse
 $verifyResults += Verify-Category -Label "Steering" -SourceRelPath ".sd\steering" -Recurse
 # Gas Fakes: only verify setup.ts exists (we deploy 1 file, not the whole directory)
 $gasFakesTarget = Join-Path $TargetProject "tests\gas-fakes\setup.ts"

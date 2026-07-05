@@ -8,17 +8,16 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"",
-            "timeout": 30
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/claim-evidence-stop.sh\"",
+            "timeout": 10
           }
         ]
       },
       {
-        "matcher": ".*refactor.*",
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\context-monitor-hook.ps1\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-check-stop.sh\"",
             "timeout": 10
           }
         ]
@@ -172,37 +171,6 @@
           }
         ]
       }
-    ]
-  },
-  "ralph-loop": {
-    "description": "SD003 Ralph Loop configuration",
-    "midpoint": {
-      "hook": "sd003-stop-hook.ps1",
-      "max_iterations": 20,
-      "completion_promise": "ALL_TESTS_PASS"
-    },
-    "endgame": {
-      "hook": "sd003-stop-hook-endgame.ps1",
-      "max_same_error": 2,
-      "escalation": "/dialogue-resolution"
-    },
-    "note": "Windows PowerShell version. Switch hooks manually based on phase."
-  },
-  "refactoring": {
-    "description": "SD003 Refactoring System configuration",
-    "context_monitor_hook": "context-monitor-hook.ps1",
-    "config_path": ".sd/refactor/config.json",
-    "skills": [
-      "context-autonomy",
-      "session-autosave",
-      "rollback-guard"
-    ],
-    "commands": [
-      "refactor-init",
-      "refactor-plan",
-      "refactor-batch",
-      "refactor-rollback",
-      "refactor-complete"
     ]
   }
 }
