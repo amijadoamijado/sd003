@@ -8,8 +8,44 @@
 
 INPUT=$(cat)
 
-# Extract command field
-COMMAND=$(echo "$INPUT" | sed -n 's/.*"command"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
+# --- Robust JSON field extraction (Python) --- (B1 fix, see block-sd-destructive.sh)
+PY_BIN=""
+if command -v python >/dev/null 2>&1; then
+  PY_BIN="python"
+elif command -v python3 >/dev/null 2>&1; then
+  PY_BIN="python3"
+fi
+
+extract_field() {
+  if [ -z "$PY_BIN" ]; then
+    printf ''
+    return
+  fi
+  SD003_INPUT_JSON="$INPUT" SD003_FIELD="$1" "$PY_BIN" <<'PYEOF'
+import os, json
+try:
+    data = json.loads(os.environ.get('SD003_INPUT_JSON', '') or '{}')
+except Exception:
+    data = {}
+ti = data.get('tool_input', {})
+if not isinstance(ti, dict):
+    ti = {}
+field = os.environ.get('SD003_FIELD', '')
+v = ti.get(field)
+if v is None:
+    v = data.get(field, '')
+if v is None:
+    v = ''
+if not isinstance(v, str):
+    try:
+        v = json.dumps(v, ensure_ascii=False)
+    except Exception:
+        v = str(v)
+print(v)
+PYEOF
+}
+
+COMMAND=$(extract_field command)
 
 # Skip non git-commit commands
 if [ -z "$COMMAND" ]; then

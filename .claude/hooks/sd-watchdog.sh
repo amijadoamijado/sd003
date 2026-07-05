@@ -12,7 +12,12 @@
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 SD_DIR="$PROJECT_DIR/.sd"
-SESSIONS_DIR="$SD_DIR/sessions"
+# B7 fix: the real session store is the ROOT-level .sessions/ directory
+# (see .claude/rules/session/session-management.md), not .sd/sessions/.
+# The old paths never matched an existing directory, so this watchdog
+# always false-warned "WARNING: .sessions/ missing" / never actually
+# detected a missing real TIMELINE.md.
+SESSIONS_DIR="$PROJECT_DIR/.sessions"
 TIMELINE="$SESSIONS_DIR/TIMELINE.md"
 
 if [ ! -d "$SD_DIR" ]; then

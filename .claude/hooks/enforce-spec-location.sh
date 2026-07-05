@@ -52,8 +52,14 @@ fp_norm = file_path.replace('\\', '/').lower()
 if '/specs/' not in fp_norm:
     sys.exit(0)
 
-# Allow if under .sd/specs/ (canonical location)
-if '/.sd/specs/' in fp_norm:
+# Allow if under .sd/specs/ (canonical location).
+# B16 fix: a relative canonical path with no leading slash (e.g.
+# ".sd/specs/foo/spec.md", as typically produced by tools that pass a
+# project-root-relative path) previously required a leading "/.sd/specs/"
+# to match, so it was wrongly DENIED. Now also accept the bare relative
+# prefix form, in addition to the "/.sd/specs/" substring form used for
+# absolute/nested paths.
+if fp_norm.startswith('.sd/specs/') or '/.sd/specs/' in fp_norm:
     sys.exit(0)
 
 # Allow rules/templates/skills/commands/hooks themselves to mention spec paths

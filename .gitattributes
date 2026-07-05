@@ -1,0 +1,12 @@
+# Guardrail durability: shell scripts, git hooks, and hook helpers MUST stay LF.
+# This repo has core.autocrlf=true; without these rules a fresh checkout would
+# rewrite these files to CRLF and break bash (`#!/bin/bash\r` is invalid).
+*.sh        text eol=lf
+*.bash      text eol=lf
+pre-commit  text eol=lf
+post-commit text eol=lf
+
+# Hook helper scripts invoked by bash-side hooks.
+.claude/hooks/*.py text eol=lf
+
+# PowerShell / JS / TS keep platform-appropriate handling (unspecified = git default).

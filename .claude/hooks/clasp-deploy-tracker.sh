@@ -37,9 +37,25 @@ except:
   fi
 }
 
+# --- GAS project detection (B19 fix) ---
+# The old is_gas_file() treated ANY `src/**.ts/.js/.html` as a GAS file,
+# which false-positives on SD003's own framework TypeScript sources
+# (D:/claudecode/sd003/src/**/*.ts is NOT a clasp/GAS project -- confirmed
+# no .clasp.json / appsscript.json anywhere in this repo). Now GAS-file
+# detection is gated on the project actually being a real clasp project
+# (presence of .clasp.json or appsscript.json at the project root).
+is_gas_project() {
+  [ -f "${CLAUDE_PROJECT_DIR:-.}/.clasp.json" ] && return 0
+  [ -f "${CLAUDE_PROJECT_DIR:-.}/appsscript.json" ] && return 0
+  return 1
+}
+
 # --- GAS source file detection ---
 is_gas_file() {
   local path="$1"
+  if ! is_gas_project; then
+    return 1
+  fi
   # GAS files: .ts, .js, .html (under src/), Code.gs etc
   if echo "$path" | grep -qiE '(src/.*\.(ts|js|html)|\.gs$|appsscript\.json)'; then
     return 0
@@ -73,7 +89,12 @@ if [ "$TOOL_NAME" = "Edit" ] || [ "$TOOL_NAME" = "Write" ]; then
   FILE_PATH=$(extract_field "file_path")
   if [ -n "$FILE_PATH" ] && is_gas_file "$FILE_PATH"; then
     CURRENT=$(read_state)
-    if [ "$CURRENT" = "clear" ] || [ "$CURRENT" = "" ]; then
+    # B19 fix: old code only transitioned to "needs-push" when state was
+    # "clear"/empty, so a re-edit AFTER a push (state="needs-deploy") left
+    # the state stuck at "needs-deploy" -- falsely implying the (now stale)
+    # deployed version still matched source. Any edit while not already
+    # "needs-push" must (re-)arm needs-push.
+    if [ "$CURRENT" != "needs-push" ]; then
       write_state "needs-push"
       cat <<'EOF' >&2
 

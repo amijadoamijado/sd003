@@ -17,6 +17,17 @@ SESSION_FILE="$PROJECT_DIR/.sessions/session-current.md"
 REGISTRY="$PROJECT_DIR/.claude/skills/registry.json"
 LOG_FILE="$HOME/.claude/state/sd003/read-skills.log"
 
+# --- B9 fix: reset the read-skills gate every SessionStart ---
+# The log was never cleared, so "read the SKILL.md this session" quietly
+# became "ever read it, in any session" -- a permanent unlock. The log path
+# is also hardcoded to a fixed location shared across ALL deploy targets
+# (not scoped by project), so this reset additionally prevents one project's
+# read-history from silently satisfying another project's gate. This must
+# run unconditionally (before the SESSION_FILE/REGISTRY existence checks
+# below) so the gate re-arms even on the very first run of a new project.
+mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null
+: > "$LOG_FILE" 2>/dev/null
+
 if [ ! -f "$SESSION_FILE" ] || [ ! -f "$REGISTRY" ]; then
   exit 0
 fi

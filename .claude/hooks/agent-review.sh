@@ -38,7 +38,11 @@ except:
     print('')
 " 2>/dev/null || echo "")
 else
-  TOOL_INPUT=$(echo "$INPUT" | grep -o '"command"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | sed 's/.*"command"[[:space:]]*:[[:space:]]*"//;s/"$//' 2>/dev/null || echo "")
+  # B1 fix: the old fallback used the same first-quote-stopping sed/grep bug
+  # as the other hooks (see block-sd-destructive.sh). Since python is the
+  # primary path and is expected to be present, fail OPEN here (empty command
+  # => skip) rather than trust a broken extraction.
+  TOOL_INPUT=""
 fi
 
 if [ -z "$TOOL_INPUT" ]; then
@@ -46,8 +50,10 @@ if [ -z "$TOOL_INPUT" ]; then
   exit 0
 fi
 
-# Only trigger on git commit commands
-if ! echo "$TOOL_INPUT" | grep -qE "^git commit|&&\s*git commit|\|\|\s*git commit"; then
+# Only trigger on git commit commands.
+# B15 fix: also match `;`-chained commands (e.g. `cd x; git commit`), which
+# the old regex (only ^, &&, ||) missed.
+if ! echo "$TOOL_INPUT" | grep -qE "^git commit|&&\s*git commit|\|\|\s*git commit|;\s*git commit"; then
   exit 0
 fi
 
@@ -141,13 +147,17 @@ fi
 echo "REVIEW: Results saved to ${REVIEW_OUTPUT}" >&2
 
 # --- Determine severity and exit ---
+# B15 fix: exit 1 from a PostToolUse hook only prints to stderr as a
+# non-blocking error -- Claude Code never sees it as feedback to act on.
+# Exit 2 is the documented "blocking/feedback" signal: stderr is fed back
+# to Claude so it actually reads and addresses the Critical findings.
 if echo "$REVIEW_RESULT" | grep -qi "\[Critical\]"; then
   CRITICAL_COUNT=$(echo "$REVIEW_RESULT" | grep -ci "\[Critical\]" || echo "0")
   echo "REVIEW_FAIL: ${CRITICAL_COUNT} critical issue(s) found. See ${REVIEW_OUTPUT}" >&2
-  exit 1
+  exit 2
 elif echo "$REVIEW_RESULT" | grep -qi "Overall.*FAIL"; then
   echo "REVIEW_FAIL: Review verdict is FAIL. See ${REVIEW_OUTPUT}" >&2
-  exit 1
+  exit 2
 else
   echo "REVIEW_PASS: No critical issues found." >&2
   exit 0

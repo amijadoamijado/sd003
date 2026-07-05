@@ -5,6 +5,9 @@
 # Warns if .clasp-deploy-state remains:
 # needs-push: GAS files edited but not pushed
 # needs-deploy: pushed but not deployed
+#
+# B6 fix: WARN-ONLY. Both branches used to `exit 1`; now both `exit 0`
+# unconditionally so this can never block Stop, only surface a reminder.
 
 STATE_FILE="${CLAUDE_PROJECT_DIR:-.}/.clasp-deploy-state"
 
@@ -26,7 +29,7 @@ WARNING: GAS files changed but NOT pushed!
 
   Changes are not reflected in production URL.
 EOF
-    exit 1
+    exit 0
     ;;
   "needs-deploy")
     cat <<'EOF' >&2
@@ -40,7 +43,7 @@ WARNING: clasp push done but NOT deployed!
 
   Only @HEAD is updated. Production URL still uses old version.
 EOF
-    exit 1
+    exit 0
     ;;
 esac
 
