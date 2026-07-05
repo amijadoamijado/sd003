@@ -254,4 +254,4 @@ Claude Code: 結果を読んで判断 → 承認 or 修正指示
 ```
 
 ---
-SD003 Framework v2.14.0 | Updated: 2026-05-22
+SD003 Framework v2.15.0 | Updated: 2026-07-06

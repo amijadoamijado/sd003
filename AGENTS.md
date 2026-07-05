@@ -180,4 +180,4 @@ $sd-deploy
 - **Templates**: `.sd/ai-coordination/workflow/templates/`
 
 ---
-SD003 Framework v2.14.0 | Updated: 2026-04-02
+SD003 Framework v2.15.0 | Updated: 2026-07-06

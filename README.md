@@ -350,6 +350,6 @@ MIT License
 
 ---
 
-**SD003 Framework v2.14.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline (agy/Codex/Grok) + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem
+**SD003 Framework v2.15.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline (agy/Codex/Grok) + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem
 # clean state test
 # verify

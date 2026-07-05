@@ -145,10 +145,10 @@ Step 2（プロジェクトCLAUDE.md読み込み）の直後に、SD003本体に
 
 - 比較対象は `D:\claudecode\sd003\.claude\skills\sd-deploy\deploy.ps1` の `$FRAMEWORK_VERSION`
   （実際にデプロイ先CLAUDE.mdへ書き込まれる値）。
-- **既知の注意**: SD003本体の `CLAUDE.md` 末尾表記（例: `SD003 v3.2.0`）と、deployスクリプトの
-  `$SD003_VERSION`（deployツール自体のバージョン）・`$FRAMEWORK_VERSION`（配布されるテンプレート
-  バージョン）は別々に管理されており、現時点でこれらの数値はズレている。本チェックは必ず
-  `$FRAMEWORK_VERSION` を「現行版」として扱う。3値の統一（reconcile）は別問題として扱う。
+- **既知の注意**: SD003本体の `CLAUDE.md` 末尾表記（例: `SD003 v3.4.0`）と、deployスクリプトの
+  `$SD003_VERSION`（deployツール自体のバージョン、2026-07-06に3.4.0へ再同期済み）・`$FRAMEWORK_VERSION`
+  （配布されるテンプレートバージョン、現在2.15.0）は別々に管理されている。本チェックは必ず
+  `$FRAMEWORK_VERSION` を「現行版」として扱う。3値の完全統一（reconcile）は別問題として扱う。
 - デプロイ先プロジェクトのCLAUDE.md本文に残る `SD003 v[数値]` の文字列のみが唯一のローカル
   バージョン痕跡（専用のバージョンファイル・manifestは存在しない）。
 

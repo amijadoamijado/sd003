@@ -1,12 +1,12 @@
 #!/bin/bash
-# SD003 Framework Deployment Script v3.2.0 (Bash)
+# SD003 Framework Deployment Script v3.4.0 (Bash)
 # Usage: ./deploy.sh <target-project-path>
 
 set -e
 
 # Configuration
-SD003_VERSION="3.2.0"
-FRAMEWORK_VERSION="2.14.0"
+SD003_VERSION="3.4.0"
+FRAMEWORK_VERSION="2.15.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
