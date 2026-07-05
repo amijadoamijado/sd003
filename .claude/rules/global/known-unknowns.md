@@ -28,12 +28,15 @@ Known Unknown の箱へ先回りして移せる。**
 
 ## 4象限（Thariq）と SD003ラベルの対応
 
-| 象限 | 定義 | ラベル | 扱い |
-|------|------|--------|------|
-| Known Known | 既に分かっている／プロンプトに書かれている | **GREEN** | 進む |
-| Known Unknown | 分かっていないと自覚している | **YELLOW** | 確認してから進む |
-| Unknown Known | 当たり前すぎて書かないが、見れば分かる | (blindspot passで表面化) | 明文化する |
-| Unknown Unknown | そもそも考えてすらいない | **RED疑い** | blindspot pass／乖離検出→Bug Trace |
+正式訳語（2026-07-05確定）: 既知の既知・既知の未知・無自覚の既知・無自覚の未知。
+危険なのは下段2つ、特に無自覚の未知。
+
+| 象限 | 正式訳語 | 定義 | ラベル | 扱い |
+|------|---------|------|--------|------|
+| Known Known | 既知の既知 | 既に分かっている／プロンプトに書かれている | **GREEN** | 進む |
+| Known Unknown | 既知の未知 | 分かっていないと自覚している | **YELLOW** | 確認してから進む |
+| Unknown Known | 無自覚の既知 | 当たり前すぎて書かないが、見れば分かる | (blindspot passで表面化) | 明文化する |
+| Unknown Unknown | 無自覚の未知 | そもそも考えてすらいない | **RED疑い** | blindspot pass／乖離検出→Bug Trace |
 
 ### GREEN / YELLOW / RED 定義
 
@@ -98,6 +101,10 @@ CLAUDE.md／スキル／プロンプトは全て仕事の**代理表現（地図
 | 検証前に不確実性を明示しない | 静かな失敗の温床 |
 | 未知を宣言した者（Unknown-Flagged）を罰する | 宣言が報酬にならないと誰も宣言しなくなる |
 | 検出不能な Unknown Unknown をゲート化する ceremony を作る（マージ前クイズ等） | 検出不能なものはゲートにできない |
+
+> **切り分け**: 上記は Unknown-Undetected（検出不能な無自覚の未知）を対象にした禁止であり、
+> Generator が既に「完了した」と自己申告した実装＝検証可能なものを対象にした
+> `.claude/rules/global/quiz-gate.md`（非ブロッキング・Blueprint Gate必須ライン限定）とは別物。混同しない。
 | 4象限を記入フォーム化して「網羅した感」を演出する | それ自体が次の Ralph Loop（弱モデル向け儀式） |
 
 ## 正直な限界
@@ -117,3 +124,4 @@ Unknown Unknown を**事前に**検出する方法は、ソクラテスにも Th
 - 着手前定義: `.claude/skills/blueprint-gate/SKILL.md`（Phase 5.5 Blindspot Pass）
 - 迷走検出: `.claude/rules/troubleshooting/dialogue-resolution.md`
 - RED エスカレーション: `.claude/rules/troubleshooting/bug-quick.md`（→ bug-trace）
+- 完了主張の能動的検証: `.claude/rules/global/quiz-gate.md`（Unknown-Undetected とは対象が異なる。上記参照）

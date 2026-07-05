@@ -22,12 +22,36 @@ Requirements → Spec → Tasks → Implementation
 ## 仕様書構造
 ```
 .sd/specs/{feature}/
-├── spec.json          # メタデータ
-├── requirements.md    # 要件定義
-├── spec.md            # 技術仕様（旧 design.md）
-├── tasks.md           # 実装タスク
-└── history/           # 履歴アーカイブ
+├── spec.json                  # メタデータ
+├── requirements.md            # 要件定義
+├── spec.md                    # 技術仕様（旧 design.md）
+├── tasks.md                   # 実装タスク
+├── implementation-notes.md    # 実装中の逸脱ログ（任意・実装中に発生した場合のみ作成）
+└── history/                   # 履歴アーカイブ
 ```
+
+## tasks.md 作成順序の原則
+
+`tasks.md` を書くとき、**後で変わりやすい判断を先頭に並べる**（データモデル・型インターフェース・
+ユーザーに見える部分）。逆に、後からでも差し替えやすい判断（内部ヘルパー、ログ整形等）は末尾でよい。
+先頭が崩れると後続タスクが総崩れになるため、崩れやすい判断ほど早く合意を取る。
+
+## implementation-notes.md（実装ノート）
+
+実装中にプラン（`tasks.md`）から逸脱した場合、または保守的な選択をした場合にのみ作成する。
+逸脱がなければ作成不要（ceremony回避）。
+
+```markdown
+# Implementation Notes: {feature}
+
+## Deviations
+
+- {何をプラン通りにしなかったか}: {理由}
+- {保守的に倒した判断}: {なぜ安全側に倒したか}
+```
+
+`.claude/rules/global/known-unknowns.md` の Unknown-Undetected（事前検出不能な無自覚の未知）の
+事後回収先としてもこのファイルを使う。
 
 ### design.md 廃止理由
 Google Antigravity は `design.md` を UI 設計ファイル名として予約済み。
