@@ -1,42 +1,23 @@
-# DONE.md - 完了報告
+# 引き継ぎ（DONE.md）— 2026-07-06 08:07
 
-## やったこと
+## 完了
+- **SD003 upgradeツール根本修正（sd003本体 commit d9f00d5）**: `upgrade.sh`/`upgrade.ps1` のDELETEリストに07-05過剰設定撤去物（ralph/refactor/sd003-loop/workflow-impl/context系）を全root（.claude+.agents/.codex/.grok/.sd/commands mirror）でパージ追加。確認事項Artifact化ルール `artifact-confirmation.md` 新設（+CLAUDE.md/template）。dangling参照3件修正。
+- **D:\claudecode 全登録PJへ最新SD003を一斉upgrade（29/42完了）**。各配信先で個別commit（push無し）。破損ゼロ・永久データ損失ゼロ。
+- Artifact進捗ダッシュボード: https://claude.ai/code/artifact/0bbd9e8e-5a80-409e-a42e-330ca5421afd
 
-**変更したファイル（主要）**
-| ファイル | 変更内容 |
-|---------|----------|
-| `.claude/rules/global/known-unknowns.md` | 新設: 無知の知（4象限=GREEN/YELLOW/RED・blindspot pass・地図≠現場） |
-| `.claude/skills/blueprint-gate/SKILL.md` | Phase 5.5 Blindspot Pass ＋ テンプレに Known Unknowns 節 |
-| `_archive/removed-overengineering-20260705/` | Ralph Loop/リファクタリング/7段階workflow を撤去アーカイブ（72ファイル） |
-| `.claude/rules/workflow/ai-coordination.md` | 7段階workflow除去→軽量dispatch版へ書換 |
-| `.claude/skills/sd-deploy/{deploy.sh,ps1,templates/*}` | 撤去の配信伝播＋Stop配線に正規フック配線 |
-| `.claude/rules/workflow/artifact-output-location.md` / `scripts/recover-agy-artifacts.sh` | agy成果物のプロジェクト内保存＋回収 |
-| `.eslintrc.cjs` / `.claude/hooks/{enforce-spec-location,track-skill-read,enforce-skill-read,session-skill-suggest}.sh` | P2修正（Lint gate/B17/B18） |
+## 未完了（次のステップ）
+- **未着手13件のupgrade**: at001, ss001, ck001, cf001(feature branch), cr001, nl001, er001(feature branch), rc001, at002(keep完全), nm002, cf002, fl006, ta001。
+  - 手順: `bash <scratchpad>/batch-upgrade2.sh <3件>` を **foregroundで3件ずつ**（**background禁止=ゾンビ事故防止**）。
+  - registry.jsonは自動 .sd003-keep 保護。settings上書きはbackup退避。
+  - **ta001**: framework-onlyでcommit（web/tests作業4件は温存＝`git add -A`後に`git restore --staged web tests`）。
+- 全完了後にfleet再audit + Artifact最終更新（42/42）。
 
-**変更内容の要約**
-過剰設定（Ralph Loop・リファクタリングシステム・7段階workflow）を撤去し、逆に無知の知（Known Unknowns 4象限）を統合。両者を同じ判断軸「地図≠現場／強いモデルの失敗は静か→未知を表面化せよ・儀式は足枷」で貫いた。加えてP2 3件解消・agy成果物問題修正・ta001の.kiro→.sd根本対処（未コミット保留）。
+## 重要な注意
+- **ゾンビプロセス**: `run_in_background`の"killed"通知は実プロセス停止を保証しない。実行後は必ず `Get-CimInstance Win32_Process`（CommandLine match `upgrade\.sh|deploy\.sh`）で残存確認し、あれば `Stop-Process -Force`。
+- **nul問題**: Windows予約名`nul`ファイルが `git add -A` をabortさせる→`.gitignore`に`nul`/`NUL`追記で回避（batch-upgrade2.sh組込済）。
+- **.sd/specs/ralph-wiggum** 等の旧spec/archive/commands_backupは保護領域→残置（勝手に消さない）。
 
-## 確認結果
-```
-build OK / lint 0error / 撤去後 temp deploy: Content verification C1-C6 全PASS
-skill-read B18: 10/10 E2E PASS / spec-location B17: 全ケース期待通り
-ta001: pipeline-history が .sd/ から state読込を機能検証
-全commit(294d35f/f5d3c7b/5f628f0/6c7de64/546c404) master push済み・remote同期
-```
-
-## 残っていること
-- [ ] ta001 コミット（ステージ済み・ユーザー指示で保留。「ta001 コミットして」で実行）
-- [ ] 配信先へ `/sd-upgrade` 反映（過剰設定撤去は破壊的→慎重に）
-- [ ] bl001にYELLOW=条文確認ラベル適用（bl001着手時）
-
-## 判断したこと
-| 選択肢 | 採用 | 理由 |
-|--------|------|------|
-| 撤去は削除 vs アーカイブ | `_archive/`へgit mv | rm禁止・履歴保持・復元可 |
-| 4象限をフォーム/クイズ化 vs しない | しない | 検出不能なUnknown Unknownのゲート化は次のRalph Loop（儀式） |
-| ta001 .kiroを掃討 vs 根本対処 | 根本対処 | 実データ（実行中パイプライン）と判明。掃討は破壊的 |
-| ta001 コミット vs 保留 | 保留 | ユーザーがAskで選択 |
-
-## 追加情報
-- 「sd003完成」= 無知の知の統合をもってユーザーが宣言。
-- git-bash/WSL落とし穴: python subprocess['bash']はWSL拾う→git-bash明示（メモリ化）。
+## 関連ファイル
+- sd003本体: `.claude/skills/sd-upgrade/upgrade.{sh,ps1}`, `.claude/rules/global/artifact-confirmation.md`
+- 作業スクリプト: `<scratchpad>/batch-upgrade2.sh`（再利用）, `<scratchpad>/upgrade-logs/`
+- セッション詳細: `.sessions/session-20260706-080731.md`
