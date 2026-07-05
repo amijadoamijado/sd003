@@ -31,6 +31,17 @@ MODE=$([ "$EXECUTE" = true ] && echo "EXECUTE" || echo "DRY-RUN")
 DEPRECATED_DIRS=(".gemini" ".cursor" ".windsurf" ".qwen" ".agent" ".kiro" ".codex/prompts" ".antigravity/commands" ".antigravity/skills")
 DEPRECATED_FILES=("GEMINI.md" "gemini.md" "scripts/sync-gemini-features.js" "scripts/migrate-kiro-to-sd.ps1" ".antigravity/rules.md")
 
+# Over-engineering artifacts removed from SD003 on 2026-07-05 (Ralph Loop / refactor
+# system / 7-stage workflow / context-autonomy). They were archived out of the framework
+# body, but deploy only COPIES+overwrites — it never prunes files that no longer exist in
+# source. Without purging these here, every upgraded project keeps ORPHANED command/skill/
+# rule files that reference deleted rules. Matched across ALL known roots (.claude, the
+# mirror skill dirs .agents/.codex/.grok, and the .sd generated mirrors). .gemini mirror
+# copies are already covered by the wholesale .gemini removal above.
+OVERENG_CMD_NAMES=("ralph-wiggum-plan" "ralph-wiggum-run" "ralph-wiggum-status" "refactor-batch" "refactor-complete" "refactor-init" "refactor-plan" "refactor-rollback" "sd003-loop-lint" "sd003-loop-test" "sd003-loop-type" "workflow-impl")
+OVERENG_SKILL_NAMES=("context-autonomy" "rollback-guard" "session-autosave")
+OVERENG_EXTRA=(".claude/hooks/context-monitor-hook.ps1" ".claude/rules/ralph-loop.md" ".claude/rules/refactoring" ".sd/ralph" ".sd/refactor")
+
 echo "=== SD003 Safe Upgrade ($MODE) ==="
 echo "Source: $SOURCE_DIR"
 echo "Target: $TARGET_PROJECT"
@@ -44,6 +55,17 @@ echo ""
 # Phase 2: detect
 DEL_DIRS=(); for d in "${DEPRECATED_DIRS[@]}"; do [ -e "$TARGET_PROJECT/$d" ] && DEL_DIRS+=("$d"); done
 DEL_FILES=(); for f in "${DEPRECATED_FILES[@]}"; do [ -e "$TARGET_PROJECT/$f" ] && DEL_FILES+=("$f"); done
+
+# Expand over-engineering artifacts to concrete relative paths across all roots; keep present ones.
+OVERENG_ALL=()
+for c in "${OVERENG_CMD_NAMES[@]}"; do
+    OVERENG_ALL+=(".claude/commands/$c.md" ".sd/commands/specs/$c.md" ".agents/skills/$c" ".codex/skills/$c" ".grok/skills/$c")
+done
+for s in "${OVERENG_SKILL_NAMES[@]}"; do
+    OVERENG_ALL+=(".claude/skills/$s" ".agents/skills/$s" ".codex/skills/$s" ".grok/skills/$s")
+done
+OVERENG_ALL+=("${OVERENG_EXTRA[@]}")
+DEL_OVERENG=(); for p in "${OVERENG_ALL[@]}"; do [ -e "$TARGET_PROJECT/$p" ] && DEL_OVERENG+=("$p"); done
 
 # claude-mem stub CLAUDE.md (nested, content-marked), excluding root + vcs/deps/backups
 STUBS=()
@@ -60,12 +82,13 @@ VER="(unknown)"
 echo "[Detect] Current version marker: $VER"
 echo ""
 echo "Will REMOVE (archived to backup first):"
-if [ ${#DEL_DIRS[@]} -eq 0 ] && [ ${#DEL_FILES[@]} -eq 0 ] && [ ${#STUBS[@]} -eq 0 ]; then
+if [ ${#DEL_DIRS[@]} -eq 0 ] && [ ${#DEL_FILES[@]} -eq 0 ] && [ ${#STUBS[@]} -eq 0 ] && [ ${#DEL_OVERENG[@]} -eq 0 ]; then
     echo "  (none — no deprecated artifacts found)"
 else
     for d in "${DEL_DIRS[@]}"; do echo "  [dir]  $d"; done
     for f in "${DEL_FILES[@]}"; do echo "  [file] $f"; done
     for s in "${STUBS[@]}"; do echo "  [stub] $s"; done
+    for o in "${DEL_OVERENG[@]}"; do echo "  [oeng] $o"; done
 fi
 echo ""
 echo "Will DEPLOY latest framework via deploy.sh (overwrites framework, preserves data)."
@@ -102,6 +125,7 @@ move_to_backup() {
 for d in "${DEL_DIRS[@]}"; do move_to_backup "$d"; done
 for f in "${DEL_FILES[@]}"; do move_to_backup "$f"; done
 for s in "${STUBS[@]}"; do move_to_backup "$s"; done
+for o in "${DEL_OVERENG[@]}"; do move_to_backup "$o"; done
 
 # Remove .antigravity if now empty
 if [ -d "$TARGET_PROJECT/.antigravity" ] && [ -z "$(ls -A "$TARGET_PROJECT/.antigravity" 2>/dev/null)" ]; then

@@ -84,7 +84,7 @@ deploy_dry_run() {
     local diverged=0 kept=0 newc=0 same=0 d f sf projrel tgt
     local DIV=() KEP=()
     local gh gh_name gh_rel gh_tgt
-    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".sd/settings" ".sd/design" ".sd/ralph" ".sd/steering" ".handoff" "docs/troubleshooting")
+    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".sd/settings" ".sd/design" ".sd/steering" ".handoff" "docs/troubleshooting")
     for d in "${scan_dirs[@]}"; do
         [ -d "$SOURCE_DIR/$d" ] || continue
         while IFS= read -r f; do
@@ -188,8 +188,6 @@ DIRS=(
     ".sd/ai-coordination/workflow/log"
     ".sd/ai-coordination/handoff"
     ".handoff"
-    ".sd/ralph"
-    ".sd/refactor"
     "docs/troubleshooting/bug-reports"
     "materials/csv"
     "materials/excel"
@@ -433,20 +431,8 @@ else
     COPY_STATS["AGENTS.md"]=0
 fi
 
-# 4-17: .sd/ralph/ (tree)
-copy_dir_tree ".sd/ralph" "Ralph" "*"
-
 # 4-18: .sd/steering/ (tree)
 copy_dir_tree ".sd/steering" "Steering" "*"
-
-# 4-19: .sd/refactor/config.json (single file)
-if [ -f "$SOURCE_DIR/.sd/refactor/config.json" ]; then
-    mkdir -p "$TARGET_PROJECT/.sd/refactor"
-    cp "$SOURCE_DIR/.sd/refactor/config.json" "$TARGET_PROJECT/.sd/refactor/"
-    COPY_STATS["Refactor Config"]=1
-else
-    COPY_STATS["Refactor Config"]=0
-fi
 
 # 4-20: tests/gas-fakes/setup.ts (single file - overwrite unless protected by .sd003-keep)
 GAS_FAKES_SRC="$SOURCE_DIR/tests/gas-fakes/setup.ts"
@@ -603,18 +589,7 @@ else
 EOF
 fi
 
-# 5-5: .claude/settings.json (OS-aware)
-OS_TYPE="$(uname -s 2>/dev/null || echo 'Unknown')"
-if [[ "$OS_TYPE" == *"MINGW"* ]] || [[ "$OS_TYPE" == *"MSYS"* ]] || [[ "$OS_TYPE" == *"CYGWIN"* ]]; then
-    # Windows (Git Bash/MSYS)
-    HOOK_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\sd003-stop-hook.ps1\"'
-    CTX_CMD='powershell -ExecutionPolicy Bypass -File \"$CLAUDE_PROJECT_DIR\\.claude\\hooks\\context-monitor-hook.ps1\"'
-else
-    # Linux/Mac
-    HOOK_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd003-stop-hook.sh\"'
-    CTX_CMD='bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/context-monitor-hook.sh\"'
-fi
-
+# 5-5: .claude/settings.json
 # settings.json: OVERWRITE with latest full wiring unless protected by .sd003-keep.
 # WAS skip-if-exists, which left a stale/partial settings.json un-upgraded on
 # re-deploy/upgrade -> guardrails stayed INACTIVE in already-deployed targets
@@ -638,17 +613,16 @@ else
         "hooks": [
           {
             "type": "command",
-            "command": "$HOOK_CMD",
-            "timeout": 30
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/claim-evidence-stop.sh\"",
+            "timeout": 10
           }
         ]
       },
       {
-        "matcher": ".*refactor.*",
         "hooks": [
           {
             "type": "command",
-            "command": "$CTX_CMD",
+            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-check-stop.sh\"",
             "timeout": 10
           }
         ]
@@ -803,37 +777,6 @@ else
         ]
       }
     ]
-  },
-  "ralph-loop": {
-    "description": "SD003 Ralph Loop configuration",
-    "midpoint": {
-      "hook": "sd003-stop-hook.ps1",
-      "max_iterations": 20,
-      "completion_promise": "ALL_TESTS_PASS"
-    },
-    "endgame": {
-      "hook": "sd003-stop-hook-endgame.ps1",
-      "max_same_error": 2,
-      "escalation": "/dialogue-resolution"
-    },
-    "note": "Windows PowerShell version. Switch hooks manually based on phase."
-  },
-  "refactoring": {
-    "description": "SD003 Refactoring System configuration",
-    "context_monitor_hook": "context-monitor-hook.ps1",
-    "config_path": ".sd/refactor/config.json",
-    "skills": [
-      "context-autonomy",
-      "session-autosave",
-      "rollback-guard"
-    ],
-    "commands": [
-      "refactor-init",
-      "refactor-plan",
-      "refactor-batch",
-      "refactor-rollback",
-      "refactor-complete"
-    ]
   }
 }
 EOF
@@ -965,7 +908,6 @@ verify_category "Grok" ".grok" ".grok" "*" "true"
 verify_category "SD Settings" ".sd/settings" ".sd/settings" "*" "true"
 verify_category "Handoff" ".handoff" ".handoff" "*" "true"
 verify_category "Design" ".sd/design" ".sd/design" "*" "true"
-verify_category "Ralph" ".sd/ralph" ".sd/ralph" "*" "true"
 verify_category "Steering" ".sd/steering" ".sd/steering" "*" "true"
 # Gas Fakes: only setup.ts is deployed (test files are project-specific)
 if [ -f "$TARGET_PROJECT/tests/gas-fakes/setup.ts" ]; then

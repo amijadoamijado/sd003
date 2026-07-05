@@ -36,6 +36,17 @@ $deprecatedFiles = @(
     ".antigravity\rules.md"
 )
 
+# Over-engineering artifacts removed from SD003 on 2026-07-05 (Ralph Loop / refactor
+# system / 7-stage workflow / context-autonomy). Archived out of the framework body, but
+# deploy only COPIES+overwrites and never prunes files gone from source, so without
+# purging these here every upgraded project keeps ORPHANED command/skill/rule files that
+# reference deleted rules. Matched across ALL known roots (.claude, the mirror skill dirs
+# .agents/.codex/.grok, and the .sd generated mirrors). .gemini mirror copies are already
+# covered by the wholesale .gemini removal above.
+$overengCmdNames   = @("ralph-wiggum-plan","ralph-wiggum-run","ralph-wiggum-status","refactor-batch","refactor-complete","refactor-init","refactor-plan","refactor-rollback","sd003-loop-lint","sd003-loop-test","sd003-loop-type","workflow-impl")
+$overengSkillNames = @("context-autonomy","rollback-guard","session-autosave")
+$overengExtra      = @(".claude\hooks\context-monitor-hook.ps1", ".claude\rules\ralph-loop.md", ".claude\rules\refactoring", ".sd\ralph", ".sd\refactor")
+
 # ------------------------------------------------------------------
 # PROTECTED project assets — never deleted (deploy preserves these too).
 # ------------------------------------------------------------------
@@ -66,6 +77,13 @@ if (-not (Test-Path $DEPLOY_PS1)) {
 $delDirsPresent  = @($deprecatedDirs  | Where-Object { Test-Path (Join-Path $TargetProject $_) })
 $delFilesPresent = @($deprecatedFiles | Where-Object { Test-Path (Join-Path $TargetProject $_) })
 
+# Expand over-engineering artifacts to concrete relative paths across all roots; keep present ones.
+$overengAll = @()
+foreach ($c in $overengCmdNames)   { $overengAll += ".claude\commands\$c.md", ".sd\commands\specs\$c.md", ".agents\skills\$c", ".codex\skills\$c", ".grok\skills\$c" }
+foreach ($s in $overengSkillNames) { $overengAll += ".claude\skills\$s", ".agents\skills\$s", ".codex\skills\$s", ".grok\skills\$s" }
+$overengAll += $overengExtra
+$delOverengPresent = @($overengAll | Where-Object { Test-Path (Join-Path $TargetProject $_) })
+
 # claude-mem stub CLAUDE.md files (nested, content-marked), excluding root + vcs/deps
 $stubFiles = @()
 Get-ChildItem -Path $TargetProject -Recurse -File -Filter "CLAUDE.md" -ErrorAction SilentlyContinue | ForEach-Object {
@@ -87,12 +105,13 @@ if (Test-Path $claudeMd) {
 Write-Host "[Detect] Current CLAUDE.md SD003 version: $ver"
 Write-Host ""
 Write-Host "Will REMOVE (archived to backup first):" -ForegroundColor Yellow
-if ($delDirsPresent.Count -eq 0 -and $delFilesPresent.Count -eq 0 -and $stubFiles.Count -eq 0) {
+if ($delDirsPresent.Count -eq 0 -and $delFilesPresent.Count -eq 0 -and $stubFiles.Count -eq 0 -and $delOverengPresent.Count -eq 0) {
     Write-Host "  (none — no deprecated artifacts found)" -ForegroundColor Green
 } else {
     foreach ($d in $delDirsPresent)  { Write-Host "  [dir]  $d" }
     foreach ($f in $delFilesPresent) { Write-Host "  [file] $f" }
     foreach ($s in $stubFiles)       { Write-Host "  [stub] $s" }
+    foreach ($o in $delOverengPresent) { Write-Host "  [oeng] $o" }
 }
 Write-Host ""
 Write-Host "Will DEPLOY latest framework via deploy.ps1 (overwrites framework, preserves data)." -ForegroundColor Cyan
@@ -133,6 +152,7 @@ function Move-ToBackup([string]$rel) {
 foreach ($d in $delDirsPresent)  { Move-ToBackup $d }
 foreach ($f in $delFilesPresent) { Move-ToBackup $f }
 foreach ($s in $stubFiles)       { Move-ToBackup $s }
+foreach ($o in $delOverengPresent) { Move-ToBackup $o }
 
 # If .antigravity is now empty, remove it
 $antigravityDir = Join-Path $TargetProject ".antigravity"
