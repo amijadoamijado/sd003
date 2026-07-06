@@ -1,32 +1,79 @@
-# 引き継ぎ（DONE.md）— 2026-07-06 15:32
+# DONE.md - 完了報告（2026-07-06 P1課題4件一括解決）
 
-## 完了
-- **セッションアーカイブ実行**: 7日以上前のセッション3件（at002×2、sd003本体×1、計5MB）をGoogle Driveへ移動、インデックス再生成（3283セッション）。
-- **Fleet upgrade 13/13完了**（前回セッションからの持ち越しP0を完遂）:
-  - at002(13744b3), nm002(f6f989b→誤コミット後始末061f222), fl006(f6fc41b), cf001(5742b32), er001(4bffd15), cr001(120525f), nl001(835cd22), ta001(6a6b398)
-  - 前回完了済み: ss001(70cb1f8), rc001(86a16f0), cf002(82a54b2), ck001(ab61a23), at001(13c35dcc)
-  - cr001/nl001/ta001は実作業中コード（cr001: src/実装7件・nl001: chromakey機能10件・ta001: web/tests4件）を`git restore --staged`で個別除外してからcommit。
-  - er001は`.gitignore`に`node_modules/`（ルート直下の新規untracked分のみ対象）を追記してから実行。
+---
 
-## 重大インシデントと対処（本セッション）
-- **重複プロセス起動**: er001/ta001/nl001向けの4件の`run_in_background`が即座に「killed」通知を受けたが、実際は同一スクリプト（upgrade_one.sh/upgrade.sh/deploy.sh）が時間差で複数回重複起動（er001が3回、ta001/nl001のdeploy.shが各2回）。sd5yp型の再発。
-  - AskUserQuestionでユーザー承認を得て11プロセスをPID指定で強制終了（Stop-Processは最初classifierに一度ブロックされ、承認後に実行）。
-  - 各PJの状態を個別精査: ta001/nl001は正しく完了済み（除外ファイル数=dirty数で一致確認）。er001は全ファイルステージ済みでcommitのみ中断→commit再実行で完遂。cr001はdeploy.shがPhase 3/7で中断→クリーンに単独再実行で完遂。データ損失なし（archive-then-remove設計で保護）。
-  - **根本原因未特定**（次回P1）: なぜ「killed」通知後もプロセスが生存し複数回再起動されたのかは不明。次回同種の並行バックグラウンド処理を行う際は、まず1件だけで試してから並列化するのが安全。
+## やったこと
 
-## 未完了（次のステップ）
-- フリート全13件は本セッションで完遂・監査済み。追加のfleet upgrade作業は不要。
-- Artifactダッシュボードの最終更新（42/42等）は依頼があれば実施。
+**変更したファイル**
+| ファイル | 変更内容 |
+|---------|----------|
+| `sd003: .claude/skills/sd-deploy/templates/git-hooks/pre-commit` | .sd/自動ステージのO(n)ループ→一括`git add -f --ignore-removal`化（commit 6a751a5） |
+| `sd003: .git/hooks/pre-commit` | 同上を直接コピー（非tracked） |
+| `nm002: .git/hooks/pre-commit` | 同上を直接コピー。commit実測 約8分→13秒 |
+| `at002: .claude/hooks/{track,enforce}-skill-read.sh, session-skill-suggest.sh` | 旧sed版→Python/B18版へ更新（c0aae07） |
+| `at002: .gitattributes` | 新規。.sh LF保護（3e2b237） |
+| `cf002: .claude/settings.json` | track-skill-readをPreToolUse:Read→標準のPostToolUse:Readへ復帰（gitignore対象・ディスク反映のみ、次回セッションから有効） |
+| `cf002: .sd003-keep` | 誤診コメント訂正（77bcfc9） |
+| auto-memory 2PJ 4ファイル | 誤診記録2件を真相へ訂正＋Bashバックスラッシュ破壊の罠を追記 |
 
-## 重要な発見（P1・要対応）
-- **nm002のpre-commitフック遅延**: `.sd/cleanup/archive/20260705/.sd003-backup-20260607_164853/.claude/worktrees/pedantic-elion/.git`という入れ子git（アーカイブされたworktreeバックアップ内）が存在し、nm002のpre-commitフック（`.sd/`変更の強制add）がこの内部ファイル群を毎回スキャンしようとして**コミットのたびに数分単位で遅延する**（今回2回のcommitで実測）。恒久対処（フック除外パターン追加 or 当該backup整理）は未実施。
-- **フリート横断のPostToolUse:Read既知バグ**（前々回セッションから持ち越し・未着手）: cf002で実地検証済みのCLI既知バグ。sd003本体テンプレートも`PostToolUse:Read`のまま。`/bug-trace`で本格検証してから対処すること（早合点でテンプレート書き換え禁止）。
+**変更内容の要約**
+持ち越しP1課題4件を解決。うち2件（run_in_background重複起動・PostToolUse:Read不発火）は誤診と確定し記録を訂正、nm002 pre-commit遅延は真因（フックのO(n)設計）を修正、空ブランチepic-sutherlandは削除。
 
-## 重要な注意
-- **「killed」通知はプロセス停止を保証しない**（今回はさらに「複数回の新規プロセス起動」という前例のないパターンも確認）。複数プロジェクトへの並行バックグラウンド処理は要注意。
-- **プロセス強制終了はclassifierがブロックしうる**（広範パターンマッチでのkillはリスク判定される）。AskUserQuestionでの明示承認を得てから実行する。
-- `claude/epic-sutherland-41d93f`未PRワークツリーブランチの扱い方針は依然未確認（複数セッション前から持ち越し）。
+---
 
-## 関連ファイル
-- セッション詳細: `.sessions/session-current.md`
-- 作業スクリプト（セッション固有・次回セッションでは消えている可能性大）: `C:\AppData\Local\Temp\claude\D--claudecode-sd003\16381b93-d138-490c-86bd-f8e15d538291\scratchpad\upgrade-logs\upgrade_one.sh`
+## 確認結果
+
+**実行したコマンド**
+```bash
+# nm002での新フック実測
+time bash .git/hooks/pre-commit   # → 13秒（旧 約8分）、誤ステージなし
+# at002での実ペイロード形式テスト（python json.dumps + subprocess経由）
+python hooktest.py                # → read-skills-<sid>.log に skill_id 記録 PASS
+# cf002 settings.json 妥当性
+python -c "json.load(...)"        # → JSON valid / PostToolUse:Read 1件・PreToolUse:Read 0件
+```
+
+**動作確認**
+- [x] sd003自身のcommit（6a751a5）で新pre-commitフックがライブ動作
+- [x] at002新フックがWindowsバックスラッシュパスJSONでログ記録（旧sed版が失敗していたケース）
+- [x] `git branch -d`（強制なし）成功＝epic-sutherland全変更のmaster包含を証明
+
+---
+
+## 残っていること
+
+**未完了タスク**
+- [ ] sd003 / at002 / cf002 のリモートpush（ユーザー確認待ち）
+- [ ] pre-commit修正の他13PJへの伝播（次回 /sd-upgrade 時。at002のみ手動更新済み）
+- [ ] P2: ac001登録整理 / VERSION 3値管理の単一化 / ~/.claude/state/sd003/ の0バイトログ441個掃除
+
+**次の手順**
+- 次のタスク: なし（P0/P1ゼロ）
+- 依存関係: cf002のsettings.json変更は次回cf002セッション起動から有効
+
+---
+
+## 判断したこと
+
+**設計上の選択**
+| 選択肢 | 採用 | 理由 |
+|--------|------|------|
+| フック修正: 除外パターン追加 vs 一括add化 | 一括add化 | 除外案はO(n)設計が残り再発する。一括addは件数非依存・挙動完全互換を検証済み |
+| deploy/upgradeへの冪等ロック追加 | 見送り（ユーザー判断） | 「重複起動」自体が誤診であり、並列発火禁止の運用で足りる |
+| epic-sutherland: タグ保存 vs 削除 | 削除 | 固有コミット0でタグの実益なし |
+| at002の.sd003-keep保護 | 維持（3フックのみ手動更新） | 独自hook資産を守る既存判断を尊重 |
+
+**採用しなかった案と理由**
+- cf002へのPreToolUse:Read配置の継続: 誤診由来の非標準配置。真因修正済みのため標準へ復帰
+- /bug-traceでのPostToolUse:Read本格調査: 再現・真因・修正確認まで完了したため不要と判断
+
+---
+
+## 追加情報
+
+- **横断教訓**: 誤診2件はどちらも「外部要因（ハーネスバグ）への帰属」が原因。ディスクの物理証拠（実行ごとのバックアップ・ログマーカー・実ペイロード再現）で裏取りする root-cause-first が3例目の実証
+- **新発見の罠**: Bashツールはコマンド文字列中の `\\` をシングルクォート内でも潰すことがある（実測2回）。フック/JSONテストはWriteでpythonスクリプト作成→json.dumps→subprocess投入が正しい作法
+- `~/.claude/state/sd003/` はフレームワーク共通名前空間（全PJ共有・セッションIDで衝突回避）。「sd003ハードコード」を直さないこと
+- Artifactレポート: https://claude.ai/code/artifact/bf3c60d2-ba4a-4f59-b950-b23a8f1b19e8
+
+---
