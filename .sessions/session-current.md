@@ -80,3 +80,48 @@
 - バージョン番号アップは、事前にgit logで過去の版数改定履歴（CLAUDE.md footer ⇔ SD003_VERSIONが3.0.0〜3.2.0まで完全ロックステップしていた事実）を裏取りしてから実施。これにより「なぜ3.4.0なのか」の根拠を明確化できた。
 - sync-cli-commands.py実行後に発生した無差分ファイル（LF/CRLF起因）は、`git diff`で実差分ゼロを確認する手順を踏んだ上でworking treeをクリーンに戻した。安全側の確認を挟んでから復元操作を行った。
 
+## 追記（同日09:00〜09:52、fleet upgrade続行分・9:50でユーザー指示により一旦区切り）
+
+前回セッションからの持ち越しP0「fleet upgrade未着手13件」に着手。ユーザー「go」を受けて開始。
+
+### 完了（本追記時点）
+1. **13件の事前安全確認**: 各PJのgit dirty内訳を精査し、単純な「cruft掃除込み一括commit」を機械的に適用すると危険な3件を発見:
+   - **er001**: `node_modules/`(13,192ファイル)が`.gitignore`未登録→`git add -A`で誤コミットするリスク（未対応・要修正してから着手）
+   - **cr001**: `src/`(196ファイル、client/server/shared一式)がプロジェクト初期化以来一度もコミットされていない実アプリコード（未対応・ta001と同じ「restore --staged」方式で除外要）
+   - **nl001**: `.tmp/`大量キャッシュ削除(985件・無害)に混ざり`src/deckgen/*`の実修正6件+新規テスト1件（進行中機能開発、chromakey関連）が混在（未対応・同上）
+2. **バッチ実行（foreground、`<scratchpad>/batch-upgrade2.sh`使用、ゾンビ無し確認済み）**:
+   - ss001: OK commit=70cb1f8
+   - rc001: OK commit=86a16f0
+   - **cf002: 初回FAIL-VERIFY→重要発見→手動修正→再実行でOK commit=82a54b2**（詳細は次項）
+   - ck001: OK commit=ab61a23
+3. **重要発見（フリート横断の可能性がある未解決バグ）**: cf002の`.sd003-keep`保護済み`.claude/settings.json`が、`context-monitor-hook.ps1`（07-05に削除済み）への死んだ参照でC2検証に失敗。調査の結果、cf002固有メモリ（`D--claudecode-cf002`名前空間、2026-07-04/05検証）に**「Claude Code CLIの`PostToolUse`は`matcher:"Read"`で確実に発火しない」**という既知バグの記録を発見。cf002はこれを回避するため`track-skill-read.sh`を`PreToolUse:Read`へ移設済みだったが、**sd003本体の正準テンプレート`settings.json.template`、および現在稼働中のsd003本体自身の`.claude/settings.json`も、いまだ`PostToolUse:Read`のまま**（未修正）。cf002メモリの07-05追記では「PreToolUseへ移設後もログが記録されなかった」ともあり、根本原因は未特定。
+   - ユーザー判断: 「cf002だけ手動で直して先へ進む」（フリート全体の本格調査は別タスク）。
+   - cf002の対応: 正準テンプレート内容で上書きしつつ`track-skill-read.sh`のみ`PreToolUse:Read`配置を保持、死んだ参照(`context-monitor-hook.ps1`)と廃止済み`ralph-loop`/`refactoring`ブロック（Ralph Loop退役に伴い既に無意味）を除去。`.sd003-keep`のコメントを更新。JSON妥当性確認・diffで意図した1箇所（配置）のみの差分であることを確認してから再実行しOK。
+   - **`.claude/settings.json`への直接Writeは自動モードclassifierに一度ブロックされた**（自己変更検知・ユーザーの明示指示なし）→ AskUserQuestionで承認を得てから実施。
+4. **バッチ2実行中に9:50到達、ユーザー指示で区切り**: `ck001 at001 at002`の3件チャンクを実行中、ck001完了時点(9:52頃)でat001処理中と判明。**ゾンビ事故の教訓により強制終了せず自然完了に任せた**（バックグラウンドプロセスPID 12992、9:46:28開始、正常稼働確認済み・ゾンビではない）。
+
+### 進行中（次回に必ず確認すること）
+- **at001・at002の結果を`<scratchpad>/upgrade-logs/RESULTS2.log`で確認**すること（本追記時点では未完了）。ログパス: `C:\AppData\Local\Temp\claude\D--claudecode-sd003\7d8b1a72-ce70-4781-b852-8210180d2112\scratchpad\upgrade-logs\RESULTS2.log`（このtemp scratchpadは同一セッションでのみ存在。次回セッションでは消えている可能性が高いので、まずこのファイルが残っているか確認し、無ければgit logで各PJのcommit有無を直接確認する）。
+
+### 未解決・次回タスク
+
+#### P0（緊急）
+1. **at001・at002の結果確認**（上記参照）。
+2. **未着手9件**: nm002(keep), fl006(keep), cf001(feature branch, cruft中心で安全), cr001, nl001, er001, ta001（＋at001/at002が失敗していた場合はそれも）。
+   - nm002/fl006/cf001は標準バッチで安全に処理可（cf001は非cruft差分がcleanup archive+materials html 1件のみで無害と確認済み）。
+   - **cr001**: `src/`(196ファイル)を`git add -A`後に`git restore --staged src`で除外してからフレームワークのみcommit（ta001と同方式）。除外した`src/`は別途ユーザーに「初回コミットしてよいか」を確認すること。
+   - **nl001**: `git add -A`後に`git restore --staged src/deckgen/cli.py src/deckgen/image2_slide_pdf.py src/deckgen/viewer/codex_service.py tests/deckgen/test_image2_slide_pdf.py tests/deckgen/viewer/test_codex_service.py tests/deckgen/test_chromakey_transparent.py docs/notebooklm-slide-workflow.md`で除外してからcommit。
+   - **er001**: `git add -A`前に`.gitignore`へ`node_modules/`を追記すること（現在未登録・13,192ファイルの誤コミットリスク）。node_modulesは既にgit管理外の想定（`git ls-files | grep node_modules`で0件なら安全に追記のみでよい）。
+   - **ta001**: 既存の確立手順どおり（framework-onlyでcommit、web/tests 4件は`git restore --staged`で温存）。
+3. 全13件完了後、fleet全体を再audit（up=Y commit=Y dirty=0を確認）し、Artifactダッシュボードを最終状態（42/42）に更新。
+
+#### P1（重要）
+1. **フリート横断のPostToolUse:Read問題を本格調査**（`/bug-trace`推奨）: sd003本体の`settings.json`・`settings.json.template`で`track-skill-read.sh`が`PostToolUse:Read`のまま。cf002の実地検証（`D--claudecode-cf002`メモリ`reference_posttooluse_read_limitation`）によれば発火しない可能性が高く、`enforce-skill-read.sh`のスキル既読ゲートが全プロジェクトで機能不全の疑いがある。根本原因未特定のため、まずsd003本体で再現・検証してから対処すること（早合点でテンプレートを書き換えない）。
+2. `claude/epic-sutherland-41d93f`ワークツリーブランチの扱い方針確認（前回からの持ち越し、未対応）。
+
+### 学習ナッジ
+- 修正2回検出:
+  1. cf002のsettings.json直接書き換えを自動modeが一度ブロック→AskUserQuestionでの明示承認を経てから実施（ユーザーが「推奨」選択肢を承認）。
+  2. 「9:50でいったん終了してください」→バックグラウンド強制終了はゾンビ再発リスクありと判断し自然完了待ちに変更（ユーザーからの訂正ではなく自己判断だが、直前のゾンビ事故教訓の実践确认）。
+- 永続化提案: 「`.sd003-keep`保護ファイルは"保護してあるから安全"ではなく、フリート横断の既知バグ回避策を含む場合がある→機械的なテンプレート上書きの前に中身を確認する」という手順は、at002/cf002双方で有効だったため`sd-upgrade`のSKILL.mdか運用ルールに明文化する価値がある。
+
