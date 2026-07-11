@@ -1,28 +1,33 @@
-# AI協調ワークフロー
+# AI協調ワークフロー（軽量ディスパッチ版）
 
-Claude Code（司令塔）/ Codex（レビュー）/ Antigravity（実装・E2E）の3AI協調の運用ディレクトリ。
+Claude Code（司令塔）/ Codex（レビュー）/ Antigravity（実装・E2E）/ Grok（汎用・セカンドオピニオン）の
+4AI協調の運用ディレクトリ。
 正本ルール: `.claude/rules/workflow/ai-coordination.md`
+
+> **2026-07-05 変更**: 旧「7段階ワークフロー」（WORK_ORDER→IMPLEMENT_REQUEST→REVIEW_REPORT→TEST_REQUEST
+> の自動連鎖・6テンプレート）は過剰設計として撤去した。現在は各AIへ軽量CLIディスパッチで直接依頼する
+> （書面受け渡しの儀式は不要）。旧テンプレート本体は `_archive/removed-overengineering-20260705/` へ
+> 保存済み。`templates/` 配下は廃止notice付きファイルのみ残置（.sd/はmv/rmがハードブロックのため）。
 
 ## 構造
 
 | パス | 用途 |
 |------|------|
-| `templates/` | 依頼・報告の必須テンプレート（6種） |
-| `spec/{案件ID}/` | 発注書・実装指示・テスト依頼 |
-| `review/{案件ID}/` | レビュー結果・テスト報告 |
-| `log/{案件ID}/` | 工程ログ（PROJECT_STATUS.md） |
+| `spec/{案件ID}/` | 正式依頼書（案件IDが明示された時のみ・自由形式） |
+| `review/{案件ID}/` | 正式報告書（案件IDが明示された時のみ・自由形式） |
 | `../handoff/handoff-log.json` | AI間引き継ぎログ（記録必須） |
-| `../sessions/{ai}/` | AI別セッション記録 |
+| `../sessions/{ai}/` | AI別セッション記録（antigravity / claude-code / codex / grok） |
 
-## 運用フロー（7段階+テスト）
+## 依頼のかけ方
 
-```
-Phase 1 発注書(CC) → 2 発注書レビュー(Codex) → 3 実装指示(CC)
-→ 4 実装(Agy) → 4.5 視覚評価(Web UIのみ) → 5 実装レビュー(Codex)
-→ 6 修正(Agy) → 7 E2E(Agy) → 8 完了(CC)
-```
+アドホックな相談・レビュー・実装補助は会話内で完結する（書面依頼は不要）。
 
-`/workflow:request` 以降は自動連鎖（impl → review → test）。省略禁止。
+- Codex: `/codex:review`, `/codex:adversarial-review`, `/codex:rescue`（公式プラグイン）
+- Grok: `grok-dispatch`（`grok-run.ps1 <repo> <out> "<prompt>" [model]`・`grok-build`モデル・非対話）
+- agy: `antigravity.md` の非対話呼び出し
+
+案件IDが明示された正式な依頼・報告のときだけ、上記 `spec/{案件ID}/` `review/{案件ID}/` に保存する。
+テンプレートは不要（廃止済み）。内容は案件に応じて自由記述でよい。
 
 ## 注意（.sd/ 操作）
 

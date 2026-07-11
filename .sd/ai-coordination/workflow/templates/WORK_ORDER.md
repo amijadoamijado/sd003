@@ -1,52 +1,11 @@
-# WORK_ORDER（発注書）
+# [ARCHIVED] WORK_ORDER.md
 
-## メタ情報
-- **案件ID**: {YYYYMMDD-NNN-slug}
-- **発行日**: {YYYY-MM-DD}
-- **発行者**: Claude Code
-- **レビュー担当**: Codex
+このテンプレートは2026-07-05に過剰設計として撤去された旧7段階ワークフロー
+（WORK_ORDER→IMPLEMENT_REQUEST→REVIEW_REPORT→TEST_REQUEST の自動連鎖）の一部です。
 
-## 1. 目的（なぜやるか）
+- 元の内容: `_archive/removed-overengineering-20260705/.sd/ai-coordination/workflow/templates/WORK_ORDER.md`
+- 現行の正本ルール: `.claude/rules/workflow/ai-coordination.md`（軽量CLIディスパッチ版・Grok含む4AI体制）
 
-{業務上の背景・解決したい課題。1〜3行}
-
-## 2. ゴール（ユーザーが見る画面・受け取るもの）
-
-{完成時にユーザーが見るもの・受け取る成果物を書く。ファイル一覧ではない（Output Primacy）}
-
-## 3. スコープ
-
-### 含む
-- {対象}
-
-### 含まない
-- {対象外}
-
-## 4. 成果物
-
-| # | 成果物 | 配置先 |
-|---|--------|--------|
-| 1 | {成果物} | {materials/ 等のパス} |
-
-## 5. 受入基準（Acceptance Criteria）
-
-- [ ] {実環境で検証可能な基準}
-- [ ] {ユーザーが確認できる形の基準}
-
-## 6. 制約・前提
-
-- {技術的制約（GAS制約等）、運用ルール（clasp push のみ等）}
-
-## 7. 工程
-
-| Phase | 担当 | 内容 | 状態 |
-|-------|------|------|------|
-| 1 | Claude Code | 発注書作成（本書） | - |
-| 2 | Codex | 発注書レビュー | - |
-| 3 | Claude Code | 実装指示作成 | - |
-| 4 | Antigravity | 実装 | - |
-| 4.5 | Claude Code | 視覚的評価（Web UI案件のみ） | - |
-| 5 | Codex | 実装レビュー | - |
-| 6 | Antigravity | 修正対応 | - |
-| 7 | Antigravity | E2Eテスト | - |
-| 8 | Claude Code | 工程完了 | - |
+新規案件では本ファイルを使わないこと。案件IDが明示された正式依頼のみ
+`.sd/ai-coordination/workflow/spec/{案件ID}/` `.sd/ai-coordination/workflow/review/{案件ID}/`
+に自由形式で保存する（テンプレート必須ではない）。

@@ -1,50 +1,11 @@
-# REVIEW_{種別}_{NNN}（レビュー報告）
+# [ARCHIVED] REVIEW_REPORT.md
 
-## メタ情報
-- **案件ID**: {YYYYMMDD-NNN-slug}
-- **レビュー対象**: {IMPLEMENT_REQUEST_NNN.md / WORK_ORDER.md}
-- **レビュー日**: {YYYY-MM-DD}
-- **レビュアー**: Codex
+このテンプレートは2026-07-05に過剰設計として撤去された旧7段階ワークフロー
+（WORK_ORDER→IMPLEMENT_REQUEST→REVIEW_REPORT→TEST_REQUEST の自動連鎖）の一部です。
 
-## 1. 判定
+- 元の内容: `_archive/removed-overengineering-20260705/.sd/ai-coordination/workflow/templates/REVIEW_REPORT.md`
+- 現行の正本ルール: `.claude/rules/workflow/ai-coordination.md`（軽量CLIディスパッチ版・Grok含む4AI体制）
 
-**{Approve / Request Changes}**
-
-## 2. スコアリング（Output Primacy 配点）
-
-| 項目 | 配点 | スコア | 根拠 |
-|------|------|--------|------|
-| UI/アウトプット品質 | 60 | /60 | {視覚評価70点満点を換算} |
-| 機能動作（実データで動くか） | 30 | /30 | |
-| 内部コード品質（型、命名、構造） | 10 | /10 | |
-| **合計** | 100 | /100 | |
-
-## 3. UI評価（Web UI案件のみ・visual-review-checklist 7項目）
-
-| # | 評価項目 | スコア | メモ |
-|---|---------|--------|------|
-| 1 | 視覚階層 | /10 | |
-| 2 | 余白・整列 | /10 | |
-| 3 | カラー一貫性 | /10 | |
-| 4 | タイポグラフィ | /10 | |
-| 5 | 状態表現 | /10 | |
-| 6 | レスポンシブ | /10 | |
-| 7 | 全体印象 | /10 | |
-| **合計** | | **/70** | 50未満は Request Changes |
-
-スクショ: materials/images/{案件ID}/
-
-## 4. 指摘事項
-
-| # | 重大度 | 指摘 | 該当箇所 | 修正要否 |
-|---|--------|------|---------|---------|
-| 1 | {Critical/Major/Minor} | | | |
-
-注: 「内部の綺麗さ」のみを理由とする Request Changes は禁止（Silent Interior）。
-output に影響がある場合のみブロックする。改善提案はコメント扱い。
-
-## 5. 次アクション
-
-- Approve → /workflow:test {案件ID} {NNN} へ自動連鎖
-- Request Changes → Phase 6（修正対応・Antigravity）へ差し戻し
-- handoff-log.json に review_complete を記録
+新規案件では本ファイルを使わないこと。案件IDが明示された正式依頼のみ
+`.sd/ai-coordination/workflow/spec/{案件ID}/` `.sd/ai-coordination/workflow/review/{案件ID}/`
+に自由形式で保存する（テンプレート必須ではない）。
