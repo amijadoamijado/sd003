@@ -7,7 +7,7 @@
 
 | ディレクトリ | 役割 |
 |-------------|------|
-| `.handoff/` | 引き継ぎパック（ORDER.md、DONE.md） |
+| `.handoff/` | 引き継ぎパック（ORDER.mdはアクティブ指示があるときのみ実体を持つ、DONE.md） |
 | `.sd/specs/` | 仕様書（requirements.md、spec.md、tasks.md） |
 | `src/` | 実装コード |
 | `tests/` | テストコード |
@@ -128,7 +128,7 @@ npm run build && npm test && npm run lint
 - [ ] **フォールバック付きテスト**（失敗時にスキップ/デフォルト値で通過するテスト）
 - [ ] **VTD検証未通過のままテスト完了とする**（`npm run test:validate-data` で確認必須）
 - [ ] **ファイルの直接削除（rm）**（アーカイブフォルダへ移動すること）
-- [ ] **.sd/ファイル変更をbash呼び出しをまたいでcommitする**（同一コマンド内でadd+commit必須。詳細: `.claude/rules/git/sd-safe-commit.md`）
+- [ ] **.sd/変更を長時間未commitで放置する**（変更後は早めにcommit。同一bashが最も安全。未commitの.sd/変更はwipe時にL4で復元されない）
 - [ ] **作業前にブランチ／PRを勝手に作る**（一人運用=master/main直接作業。ブランチ／PRはユーザーが指示したときのみ作成。詳細: `.claude/rules/git/branch-strategy.md`）
 - [ ] **`.claude/settings.json`をgit追跡する**（.gitignoreに入れること。追跡するとランタイムが.sd/を消す）
 - [ ] **ユーザー提供ファイル・成果物の上書き**（元ファイル保持、修正版は別名で新規作成）
@@ -169,11 +169,10 @@ npm run build && npm test && npm run lint
 
 | ファイル種別 | 保存先 |
 |-------------|--------|
-| 発注書 | `.sd/ai-coordination/workflow/spec/{projectID}/WORK_ORDER.md` |
-| 実装指示 | `.sd/ai-coordination/workflow/spec/{projectID}/IMPLEMENT_REQUEST_{NNN}.md` |
-| テスト依頼 | `.sd/ai-coordination/workflow/spec/{projectID}/TEST_REQUEST_{NNN}.md` |
-| レビュー結果 | `.sd/ai-coordination/workflow/review/{projectID}/REVIEW_{type}_{NNN}.md` |
-| テスト報告 | `.sd/ai-coordination/workflow/review/{projectID}/TEST_REPORT_{NNN}.md` |
+| 依頼書（自由形式） | `.sd/ai-coordination/workflow/spec/{案件ID}/` |
+| 報告書（自由形式） | `.sd/ai-coordination/workflow/review/{案件ID}/` |
+
+正本は `.claude/rules/workflow/ai-coordination.md`。
 
 ### セッション
 
@@ -200,11 +199,9 @@ npm run build && npm test && npm run lint
 
 - プロジェクトルート直下への新規ファイル作成
 - `.antigravity/` への依頼書作成
-- テンプレートなしの依頼書作成
 - **`~/.gemini/antigravity-cli/brain/` 等のAppData隠しディレクトリへの成果物の唯一保存**
   （ユーザーが探せない。プロジェクト内 `materials/` 等へ書き出すこと）
 
 ---
 
-**RULES.md v2.0** - Updated: 2026-02-15
-c
+**RULES.md v2.15.0** - Updated: 2026-07-12

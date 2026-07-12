@@ -65,7 +65,7 @@ Quiz Gate が対象にするのは、Generator が既に「完了した」と自
 
 Codex を Evaluator として呼び出す前提のため、実務上は Claude Code（Generator/司令塔）から
 `/codex:review` を呼ぶ形が主。Codex 側は既存の `.claude/skills/codex-dispatch/` 導線をそのまま使う。
-Antigravity(agy) / Grok が Generator の場合も、Evaluator は Codex に固定する（役割分岐の一貫性）。
+Antigravity(agy) / Grok が Generator の場合はEvaluatorをCodexとする。CodexがGeneratorの場合のEvaluatorは独立検証ドメインを持つGrokとする。非Claude Leadでは `/codex:review` の代わりに各Leadの既存Codex handoff導線（会話またはreview依頼）で出題を依頼する。
 
 ## 関連
 

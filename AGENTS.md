@@ -118,7 +118,7 @@ npm test && npm run lint
 - Tests only to reproduce production bugs (coverage target abolished; VTD-001〜005 + real-data verification)
 - ESLint errors = 0
 - TypeScript strict mode
-- **.sd/ safe commit**: .sd/ファイルの変更は同一bashコマンド内でgit add+commitまで完了すること。分割するとClaude Codeランタイムが.sd/を消す。詳細: `.claude/rules/git/sd-safe-commit.md`
+- **.sd/ safe commit**: .sd/変更後は早めにcommit（同一bashが最も安全）。未commitの.sd/変更はwipe時にL4で復元されない。詳細: `.claude/rules/git/sd-safe-commit.md`
 - **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること
 - **Codex追加仕様**: `.codex/CODEX_SPEC.md` を参照すること。Claude Codeの正本仕様を置き換えず、Codex側の実行変換だけを追加する。
 - **Codex native運用**: `.codex/CODEX_NATIVE.md` を参照すること。Codex内で `/codex:*` や `/workflow:*` を再帰実行せず、Codex自身の読取・編集・検証に置き換える。
@@ -145,32 +145,30 @@ SD003 では `.claude/commands/**/*.md` を authoring source とし、`python sc
 Claude 以外の生成物は直接手編集せず、`.claude/commands/` を修正して再同期すること。
 `.agents/skills/` は agy（Antigravity CLI）が起動時にスキャンする正規スキルパス（コマンド・実スキル両方を配置）。Codex仕様は `.codex/` 配下に置く。
 
-### Specification
+### Available Codex Skills
 ```
-$workflow-init {案件略称}
-$workflow-order {案件ID}
-$workflow-request {案件ID} {タスク番号}
-$workflow-status {案件ID}
-$workflow-review {案件ID}
-$workflow-impl {案件ID} {タスク番号}
-$workflow-test {案件ID} {タスク番号}
-```
-
-### Session Skills
-```
-$sessionread
-$sessionwrite
-$sessionhistory
-```
-
-### Utility Skills
-```
+$ai-suspect
+$blueprint-gate
 $bug-quick
 $bug-trace
 $cleanup
-$refactor-plan
-$skills-find
+$cleanup-history
+$cleanup-restore
+$dialogue-resolution
+$grillme
+$jobs-review
 $sd-deploy
+$session-read
+$session-search
+$session-write
+$sessionread
+$sessionwrite
+$sessionhistory
+$skills-add
+$skills-find
+$skills-list
+$spec-archive
+$spec-history
 ```
 
 ---
@@ -182,7 +180,7 @@ $sd-deploy
 - **Grok Native (Lead)**: `.grok/GROK_NATIVE.md`
 - **Grok Guide**: `.sd/ai-coordination/workflow/GROK_GUIDE.md`
 - **Quality Gates**: `docs/quality-gates.md`
-- **Templates**: `.sd/ai-coordination/workflow/templates/`
+- **AI協調の依頼・報告**: `.claude/rules/workflow/ai-coordination.md`（正式時のみ `spec/{案件ID}/` 自由形式）
 
 ---
 SD003 Framework v2.15.0 | Updated: 2026-07-06

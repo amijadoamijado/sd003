@@ -60,7 +60,7 @@ npm test -- --testNamePattern="login"
 
 **関連仕様書**
 - `.sd/specs/xxx/requirements.md` - セクション3.2
-- `.sd/specs/xxx/design.md` - 認証アーキテクチャ
+- `.sd/specs/xxx/spec.md` - 認証アーキテクチャ
 
 **関連ファイル**
 - `src/types/auth.ts` - 型定義

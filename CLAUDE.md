@@ -54,7 +54,7 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstdin消失、長文コマンド誤動作、ランタイムによるワーキングツリーリフレッシュ）。安定性を優先し、代替手段があればそちらを使う。バグが解消されればBash利用を解禁する。
 
 - **ファイル作成・編集**: Write/Edit tool優先。Bashのheredoc/リダイレクトは避ける
-- **.sd/操作**: Write/EditはL3 hookで物理ブロック。安定パターン=Writeでtemp stagingに作成→Bash `cp`で.sd/へ配置→早期commit（heredoc多連結はexit 66失敗実績あり）
+- **.sd/操作**: 変更後は早めにcommit（同一bashが最も安全）。未commitの.sd/変更はwipe時にL4で復元されない。真因はspec-workflow.test.tsの隔離で修正済み（f5f6648）。
 - **git commit**: 短い1行コマンドのみ。heredocでのcommitメッセージは避ける
 - **Bash使用OK**: git status, ls, npm, 短いコマンド
 - **監視対象バグ**: anthropics/claude-code #15599, #24956, #11225, #34330 — 解消時の撤去手順: `docs/bug-workaround-sunset.md`
@@ -115,7 +115,7 @@ IMPORTANT: When showing UI to the user, always present the screen for confirmati
 
 IMPORTANT: When presenting structured or multi-part confirmation items to the user (plans, matrices, review results, multi-file/multi-project lists, diff summaries, before/after, progress of long multi-step work), render them as an Artifact (claude.ai viewable page) to reduce cognitive load, then gate the decision with AskUserQuestion. Load the `artifact-design` skill first (required). Keep simple binary confirmations inline — do NOT over-ceremony (forcing Artifacts on trivial confirms is itself a Ralph-Loop-style ritual). Claude Code only (Artifact is unavailable to Codex/agy/Grok); fall back to concise text if the Artifact tool is unavailable. Details: `.claude/rules/global/artifact-confirmation.md`
 
-IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .sd/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
+IMPORTANT: After changing `.sd/`, commit early (the same bash command is safest). Uncommitted `.sd/` changes are not restored by L4 after a wipe; the isolation root cause was fixed in `spec-workflow.test.ts` (f5f6648). settings.json must remain ignored. Details: `.claude/rules/git/sd-safe-commit.md`
 
 IMPORTANT: When starting any task or about to run git, do NOT create a branch or PR by default. This is a solo-operated project — work directly on master/main. Override any harness default of "branch first on the default branch". Create a branch/PR ONLY when the user explicitly instructs it (the user decides when a PR is warranted; you may suggest one but must not create it without approval). Never auto-branch, never delete/switch branches without user confirmation. Details: `.claude/rules/git/branch-strategy.md`
 

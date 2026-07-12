@@ -32,13 +32,15 @@ paths:
 | ユーザーが Grok CLI / Grok TUI を直接起動 | **Grok** | **Lead mode**（正本: `.grok/GROK_NATIVE.md`） |
 | ユーザーが Claude Code を直接起動 | **Claude Code** | 既定の日常入口の1つ |
 | ユーザーが Codex を直接起動 | **Codex** | Native: `.codex/CODEX_NATIVE.md` |
-| ユーザーが agy を直接起動 | **agy** | 実装/E2E セッション |
+| ユーザーが agy を直接起動 | **agy** | 暫定: Lead正本未整備。長時間セッションはClaude/Grokへのhandoff推奨 |
 | 他AIから非対話ディスパッチされた | 呼び出し元が Lead、被呼び出しは **Assist** | Grok は `grok-dispatch` 経由なら Assist |
 
 明示トリガーで Lead を切り替えられる（会話中でも可）:
 
 - `Grok主導で` / `grokで進めて` / `このセッションはGrok` / `Grokに任せる` → **Grok Lead**
 - `Claudeに戻す` / `司令塔はClaude` → **Claude Lead**
+
+切替前に元Leadは (a) WIPをcommitして渡す、または (b) 未コミットパス一覧と所有権移転を宣言する。宣言があれば新Leadは当該パスを編集してよい。
 
 ## 対応AI（4種類）と役割
 
@@ -76,7 +78,7 @@ paths:
 | `clasp deploy` / 固定URL操作 | 禁止（明示指示なし） | ユーザー判断 |
 
 > **排他ルール**: 同一 repo への**複数AI同時書き込みは禁止**（git 競合回避）。
-> Lead が repo lock を持つ。Assist は Lead の範囲外を勝手に編集しない。
+> Lead は `pwsh -File scripts/lead-lock.ps1 acquire <ai>` で `.git/sd-lead.lock` を持つ。Assist は Lead の範囲外を勝手に編集しない。
 > プリフライトで RAM だけでなく既存 grok/codex/agy 稼働も確認する。
 
 ## 依頼のかけ方（アドホック優先）
@@ -94,7 +96,7 @@ paths:
 |------|--------|
 | 依頼書 | `.sd/ai-coordination/workflow/spec/{案件ID}/` |
 | 報告書 | `.sd/ai-coordination/workflow/review/{案件ID}/` |
-| 引き継ぎログ | `.sd/ai-coordination/handoff/handoff-log.json` |
+| 引き継ぎログ | `.sd/ai-coordination/handoff/handoff-log.json`（任意。AI間handoff発生時に1行推奨） |
 | Grok セッションメモ | `.sd/ai-coordination/sessions/grok/`（任意・長時間 Lead 時） |
 
 ### 禁止
@@ -119,6 +121,7 @@ paths:
 - **Grok Assist**: `.claude/skills/grok-dispatch/`（`grok-run.ps1`・非対話）
 - **Grok Lead / Native**: `.grok/GROK_NATIVE.md`、入口 `grok.md`、運用 `.sd/ai-coordination/workflow/GROK_GUIDE.md`
 - **agy**: `antigravity.md`（非対話は OAuth 済み＋二重起動回避が前提。ハング時は人手ハンドオフへ）
+- **agy-dispatch**: `.claude/skills/agy-dispatch/`（非対話・期待成果物検証）
 
 ## Grokトリガー語
 
