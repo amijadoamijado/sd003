@@ -1,86 +1,81 @@
-# DONE.md - AI中立オーケストレーター実CLI E2E完了
+# DONE.md - 4AI Lead/Assist設定レビュー→改善実装→Grok検証 完了報告
+
+セッション: 2026-07-12 13:44:58 | 最新コミット: 065fa2c
+
+---
 
 ## やったこと
 
-**変更したファイル**
-
+**変更したファイル（主要・27パス変更/新規、詳細は session-current.md）**
 | ファイル | 変更内容 |
 |---------|----------|
-| `config/orchestrator.providers.json` | Grok非対話実行を検証済みの権限モードへ変更 |
-| `src/orchestrator/runner.ts` | Windows実行解決、大容量出力、権限キャンセル検出、dry-run状態を改善 |
-| `scripts/orchestrate.js` | PowerShell/npm向けJSON位置引数補正 |
-| `scripts/check-orchestrator-providers.js` | PATH順でネイティブ実行ファイルを優先 |
-| `package.json` | `orchestrate:dry-run` を追加 |
-| `tests/integration/orchestrator-e2e.test.ts` | Windows・大出力・権限キャンセル・dry-runの回帰テスト |
-| `docs/orchestrator-contract.md` | Windows npmとGrok非対話実行の安全条件を明文化 |
+| `src/orchestrator/runner.ts`, `types.ts` | bypassPermissions隔離ガード、git実体ベースdirty判定、沈黙失敗検出一般化、stage単位artifact検査、Windows大小文字正規化 |
+| `scripts/lead-lock.ps1`（新規） | repo lock実体化（`.git/sd-lead.lock`・acquire/release/status/stale奪取） |
+| `.claude/skills/agy-dispatch/`（新規） | agy正準dispatchラッパー（grok-run.ps1ミラー） |
+| `.claude/skills/{codex,grok}-dispatch/*` | fail-loud化、`--ignore-user-config`撤去、PermissionCancelled検出精密化 |
+| `AGENTS.md`, `antigravity.md`, `.handoff/RULES.md`, `.codex/CODEX_NATIVE.md`, `.grok/GROK_NATIVE.md` | 旧7段階ワークフロー世界を一掃、Lead流動化（入口CLI=Session Lead）に同期 |
+| `.claude/skills/sd-deploy/*`, `sd-upgrade/upgrade.ps1` | deploy/upgrade配布系を4AI時代に同期 |
 
 **変更内容の要約**
+「4AI（Claude/Codex/agy/Grok）Lead/Assist設定をレビューして改善案を出す」依頼に対し、6観点71エージェントで多角レビュー→改善16件を確定→依頼書化してCodexへ実装ディスパッチ→Grok独立検証（1回目REQUEST_CHANGES・実行プローブでP0欠陥実証→修正→APPROVE）まで、レビュー対象の協調体制自身を使って完遂した。
 
-Codexを司令塔とする実プロバイダーE2EをWindowsで成立させた。Grokの成果物欠落はファイル消失ではなく権限キャンセルが真因であり、隔離workspace上の非対話権限とランナー側のfail-closed検出で解消した。
+---
 
 ## 確認結果
 
 **実行したコマンド**
-
-```powershell
+```bash
 npm run build
-npm test -- --runInBand
+npm test
 npm run lint
-npm run orchestrate:check
-python scripts/sync-cli-commands.py --check
-npm run orchestrate -- --scenario config/orchestrator.codex-e2e.json
-npm run orchestrate:dry-run -- config/orchestrator.codex-e2e.json
 ```
 
 **結果**
-
 ```
 Test Suites: 11 passed, 11 total
-Tests: 84 passed, 84 total
-Build: 成功
-Lint: 成功
-CLI同期: 成功
-実CLI E2E: 3段階・3成果物すべて成功
+Tests:       88 passed, 88 total
+✓ LINT_CLEAN (errors 0)
+Build successful
 ```
 
 **動作確認**
-- [x] Codex実装段階が成功
-- [x] Grok独立レビュー段階が成功
-- [x] Codex検証段階が成功
-- [x] 期待成果物3件が永続化
-- [x] manifestがsucceeded
-- [x] ローカルとorigin/masterが同一コミット
+- [x] Grok実行プローブ: `d:\claudecode\sd003`（ドライブ小文字）+ `--permission-mode=bypassPermissions` でガード発火（修正前はすり抜け→修正後は`GUARD_FIRED=true`）
+- [x] lead-lock acquire/release/status/stale奪取を実行確認
+- [x] Codex実装物の`git diff --check`（改行コード等）確認
+- [x] push完了、origin/masterと同期確認済み
+
+---
 
 ## 残っていること
 
 **未完了タスク**
-- [ ] 実案件データを使った隔離worktree E2E
-- [ ] Grok強権限が隔離workspace限定であることの追加ガード検討
-- [ ] stage単位成果物検査の設計検討
+- [ ] Grok Lead mode実機実測（ユーザー参加必要。手順書: `.sd/ai-coordination/workflow/spec/20260712-4ai-lead-hardening/GROK_LEAD_TEST_PLAN.md`）
+- [ ] agy非対話の権限拒否時出力の実測、判明マーカーの`cancellationPatterns`登録
 
 **次の手順**
-- 次のタスク: 実案件の依頼データを使ったCodex司令塔E2E
-- 依存関係: 実案件データと隔離worktree
+- 次のタスク: 上記2件のユーザー参加実測、またはユーザー指定の別作業
+- 依存関係: なし
+
+---
 
 ## 判断したこと
 
 **設計上の選択**
-
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| Grok `acceptEdits` / `always-approve` / `bypassPermissions` | `bypassPermissions` | 実機で成果物の作成・解析・永続化が成功した唯一のモード |
-| 終了コードのみ / stderrキャンセル検出併用 | 併用 | Grokが権限キャンセル時も終了コード0を返すため |
-| npm長オプション依存 / JSON位置引数補正 | 位置引数補正 | PowerShellのnpm shimが長オプションを除去するため |
-| dry-run共用入口 / 専用npm script | 専用npm script | フラグ除去時に実行へ化ける危険を避けるため |
+| grok-run.ps1のモデル固定 vs CLI既定委譲 | CLI既定委譲 | `grok-build`が実測でunknown model id化。サーバ側ラインナップ変更に強くする |
+| lead-lock生存判定: プロセス監視 vs pid記録+stale奪取 | pid記録+stale奪取（fail-open） | L3/L4と同型パターン。ハードロックで実運用を止めない |
+| PermissionCancelled検出: 裸マーカー一致 vs provider応答行限定 | provider応答行限定（行頭120字以内） | 裸一致は「その文字列を扱うだけの正常出力」を誤検出する実測偽陽性 |
 
 **採用しなかった案と理由**
-- `--always-approve` 単独: Grok 0.2.93で `PermissionCancelled` が継続した。
-- 終了コード0を成功扱い: 成果物未作成を見逃す。
-- npmの `--dry-run` 長オプション転送: 現環境の `npm.ps1` で除去される。
+- agyのExpectedArtifact判定を`resolveInside`と完全統合: 今回は同等ロジックを個別実装（PowerShellとTypeScriptで共有困難なため）
+
+---
 
 ## 追加情報
 
-- 完了コミット: `dc78c35`, `fc88b02`
-- 最新成功run: `20260712T014328959Z-20260712-real-codex-lead-e2e`
-- 作業ツリーはクリーン、`master` と `origin/master` は同期済み。
+- dogfooding中にdispatch実障害3件発見（codex `--ignore-user-config`沈黙失敗・背景実行stdinハング・grok-buildモデル死亡）、auto-memory訂正済み
+- Quiz Gate「CodexがGeneratorのときEvaluator=Grok」の適用第1号。Grokは実行プローブで欠陥を実証しており、静的読解に留まらない検証として機能した
+- 検証記録: `.sd/ai-coordination/workflow/review/20260712-4ai-lead-hardening/{IMPLEMENTATION_REPORT,GROK_VERIFICATION,GROK_REVERIFICATION}.md`
 
+---

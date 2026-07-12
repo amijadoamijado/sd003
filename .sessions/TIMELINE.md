@@ -1,13 +1,15 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 119
+- **Total Sessions**: 120
 - **Latest Session**: 2026-07-12
 - **Project Start**: 2026-02-15
 
 ---
 
 ## 2026-07
+
+| 07-12 | **4AI Lead/Assist設定を多角レビュー（6観点71エージェント）→改善16件をCodex実装→Grok独立検証（1回目REQUEST_CHANGES実行プローブ付き→修正→APPROVE）まで、レビュー対象の協調体制自身で完遂（dogfooding）**。bypassPermissions隔離ガード・git実体ベースdirty判定・沈黙失敗検出・stage単位artifact検査・repo lock実体化(.git/sd-lead.lock)・agy-dispatch新設・入口文書(AGENTS/antigravity/RULES/CODEX_NATIVE等)の旧7段階世界一掃・deploy/upgrade配布系の4AI同期。副産物でdispatch実障害3件発見・修正（codex `--ignore-user-config`のWindows sandbox破壊、背景実行stdinハング、grok-buildモデル死亡）。88テスト全PASS・push済み | 906b488, c83f17f, 4848a6a, dcb40cf, fb744d4, f4c2bbf, 065fa2c | [Details](session-20260712-134458.md) |
 
 | 07-12 | **Windows実プロバイダーE2Eを完遂**。Grok成果物欠落の真因をPermissionCancelledと特定し、非対話権限・キャンセル検出・Windows実行解決・大容量出力・npm引数補正・dry-run入口を整備。Codex実装→Grokレビュー→Codex検証の3段階と成果物3件が成功 | dc78c35, fc88b02 | [Details](session-20260712-105933.md) |
 
