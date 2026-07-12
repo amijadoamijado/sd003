@@ -66,6 +66,8 @@ Read: .sessions/TIMELINE.md
 - 過去セッションの概要
 - 長期的なコンテキスト
 
+`.handoff/DONE.md` が `.sessions/session-current.md` より新しい場合は併読し、差分をユーザーへ通知する。
+
 ## 表示フォーマット
 
 全ファイル読み込み後、以下の形式で要約を表示:

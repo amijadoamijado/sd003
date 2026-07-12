@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $SD003_VERSION = "3.4.0"
-$FRAMEWORK_VERSION = "2.15.0"
+$FRAMEWORK_VERSION = "2.16.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -118,7 +118,8 @@ function Invoke-DeployDryRun {
         "antigravity.md", "AGENTS.md", "grok.md", ".claude\settings.json",
         "docs\quality-gates.md", "scripts\validate-test-data.ps1",
         "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
-        "scripts\verify-deployment.mjs",
+        "scripts\verify-deployment.mjs", "scripts\recover-agy-artifacts.sh",
+        "scripts\recover-agy-artifacts.ps1",
         "tests\gas-fakes\setup.ts"
     )
     foreach ($f in $scanFiles) {
@@ -380,12 +381,12 @@ if (Test-Path $sessionTemplatesSrc) {
 # 4-11a: .sd/design/ (tree)
 Copy-DirTree -RelPath ".sd\design" -Label "Design Tokens"
 
-# 4-11b: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
+# 4-11b: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,GROK_GUIDE,templates/}
 $workflowSrc = Join-Path $SOURCE_DIR ".sd\ai-coordination\workflow"
 $workflowDst = Join-Path $TargetProject ".sd\ai-coordination\workflow"
 $wfCount = 0
 
-foreach ($f in @("README.md", "CODEX_GUIDE.md")) {
+foreach ($f in @("README.md", "CODEX_GUIDE.md", "GROK_GUIDE.md")) {
     $src = Join-Path $workflowSrc $f
     if (Test-Path $src) {
         Copy-Item $src (Join-Path $workflowDst $f) -Force
@@ -476,6 +477,11 @@ if (Test-Kept "scripts/verify-deployment.mjs") {
     $copyStats["Verify Deployment (mjs)"] = 1
 } else {
     $copyStats["Verify Deployment (mjs)"] = 0
+}
+
+foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1')) {
+    $recoverRel = "scripts/$recoverName"; $recoverSrc = Join-Path $SOURCE_DIR "scripts\$recoverName"; $recoverDst = Join-Path $TargetProject "scripts\$recoverName"
+    if (-not (Test-Kept $recoverRel) -and (Test-Path $recoverSrc)) { New-Item -ItemType Directory -Path (Split-Path $recoverDst) -Force | Out-Null; Copy-Item $recoverSrc $recoverDst -Force; $copyStats[$recoverName] = 1 }
 }
 
 # 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator - overwrite unless protected by .sd003-keep)

@@ -18,27 +18,17 @@ if [ ! -d ".sd" ]; then
     exit 0
 fi
 
-# git管理下の .sd/ ファイルがディスク上で変更されているか確認
-# .gitignore対象のため --no-index で比較
-# 非ASCIIファイル名がクォートされて壊れないよう quotepath=false + NUL区切り
-while IFS= read -r -d '' f; do
-    if [ -f "$f" ]; then
-        # ファイルが存在し、HEADと差分があればステージ
-        if ! git -c core.quotepath=false diff --quiet HEAD -- "$f" 2>/dev/null; then
-            git add -f -- "$f"
-            echo "[pre-commit] auto-staged (modified): $f"
-        fi
-    fi
-done < <(git -c core.quotepath=false ls-tree -z -r HEAD --name-only 2>/dev/null | grep -z "^\.sd/")
-
-# ディスク上に存在するが git 未追跡の .sd/ ファイルもステージ
-# --exclude-standard は使わない（.gitignore対象を検出するため）
-while IFS= read -r -d '' f; do
-    if ! git ls-files --error-unmatch -- "$f" >/dev/null 2>&1; then
-        git add -f -- "$f"
-        echo "[pre-commit] auto-staged (new): $f"
-    fi
-done < <(find .sd/ -type f -print0 2>/dev/null)
+# .sd/ の modified(tracked) + 新規(untracked, gitignore対象含む) を一括ステージ。
+# --ignore-removal: ディスク上の削除はステージしない（旧実装と同一挙動。commit直前に
+#   ランタイムwipeが起きても「削除のcommit」が発生しない安全性を維持）。
+# -f: gitignore対象（.sd/ 自体がignoreされる配布先を含む）もステージする。
+# 2026-07-06 修正: 旧実装のファイル単位ループ（gitプロセス2回/ファイル・約90ms/回）は
+# tracked .sd/ が数千件のプロジェクトで commit毎に数分かかった（nm002で2,500件×2 ≈ 8分 実測）。
+# 一括addで1プロセス化（実測0.2秒・件数非依存）。ディレクトリ内の `.git`（worktreeポインタ等）
+# は git が自動スキップするためエラーにならない。非ASCIIパスは quotepath=false + pathspec渡しで安全。
+git -c core.quotepath=false add -f --ignore-removal -- .sd/ 2>/dev/null
+git -c core.quotepath=false diff --cached --name-only -- .sd/ 2>/dev/null \
+    | sed 's/^/[pre-commit] auto-staged: /'
 
 # === .sd/ スナップショット採取（L4強化: post-commit復元の正本） ===
 # ランタイムの working tree refresh は .git/ 内部を触らないため、

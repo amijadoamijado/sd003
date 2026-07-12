@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $SD003_VERSION = "3.4.0"
-$FRAMEWORK_VERSION = "2.15.0"
+$FRAMEWORK_VERSION = "2.16.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"

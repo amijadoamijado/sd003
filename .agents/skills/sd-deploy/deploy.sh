@@ -6,7 +6,7 @@ set -e
 
 # Configuration
 SD003_VERSION="3.4.0"
-FRAMEWORK_VERSION="2.15.0"
+FRAMEWORK_VERSION="2.16.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
@@ -312,12 +312,12 @@ else
     COPY_STATS["Session Template"]=0
 fi
 
-# 4-11: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
+# 4-11: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,GROK_GUIDE,templates/}
 WF_SRC="$SOURCE_DIR/.sd/ai-coordination/workflow"
 WF_DST="$TARGET_PROJECT/.sd/ai-coordination/workflow"
 wf_count=0
 
-for f in README.md CODEX_GUIDE.md; do
+for f in README.md CODEX_GUIDE.md GROK_GUIDE.md; do
     if [ -f "$WF_SRC/$f" ]; then
         cp "$WF_SRC/$f" "$WF_DST/"
         wf_count=$((wf_count + 1))

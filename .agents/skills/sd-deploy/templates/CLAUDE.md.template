@@ -1,5 +1,7 @@
 # {{PROJECT_NAME}} - AI Development Command Center
 
+> **AI協調**: Session Leadは入口CLI（Claude Code / Codex / agy / Grok）。Grokは直接起動時Lead mode、grok-dispatch時Assist mode。成果物はユーザーが開けるプロジェクト内へ保存する。正式依頼・報告時のみ `.sd/ai-coordination/workflow/{spec|review}/{案件ID}/` を使う（詳細: `.claude/rules/workflow/ai-coordination.md`）。
+
 ## Session Start
 
 `/sessionread` → 4ファイル自動読込 | Crash Recovery: `claude --continue` + `/sessionread`
@@ -7,6 +9,7 @@
 ## Overview
 
 {{PROJECT_NAME}}: SD003 Spec-Driven Development. TypeScript (strict) + Google Apps Script + Env Interface Pattern.
+AI協調: Session Lead=入口CLI（Claude/Grok/…） + Codex(レビュー) + Antigravity(実装 & E2E) + Grok(Lead候補・探索実装・独立検証)
 
 Common rules for all AI models: `.handoff/RULES.md`
 Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
@@ -46,7 +49,11 @@ IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.j
 
 IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
 
-IMPORTANT: When coordinating with other AIs (Codex, Antigravity, Grok), coordination documents go to `.sd/ai-coordination/` (never `.antigravity/` or project root). For ad-hoc consultation/implementation use the per-AI dispatch skills (Codex `/codex:*`, `grok-dispatch`); the old formal 7-stage workflow chain was removed 2026-07-05 as over-engineering. Details: `.claude/rules/workflow/ai-coordination.md`
+IMPORTANT: When coordinating with other AIs (Codex, Antigravity, Grok), coordination documents go to `.sd/ai-coordination/` (never `.antigravity/` or project root). Session Lead = the CLI the user opened (not always Claude; see the Lead判定表). For ad-hoc consultation/implementation use the per-AI dispatch skills (Codex `/codex:*`, `grok-dispatch`, `agy-dispatch`); the old formal 7-stage workflow chain was removed 2026-07-05 as over-engineering. Details: `.claude/rules/workflow/ai-coordination.md`
+
+IMPORTANT: Grok has two modes. **Lead mode**: user opens Grok CLI directly, or says "Grok主導で" / "grokで進めて" / "このセッションはGrok" / "Grokに任せる" → Grok is Session Lead (do NOT force Claude orchestration; point user to Grok or treat as handoff). Native: `.grok/GROK_NATIVE.md`, guide: `.sd/ai-coordination/workflow/GROK_GUIDE.md`. **Assist mode**: user asks Claude to consult/delegate to Grok (e.g. "grokに依頼", "grokに相談", "grokにレビュー", "grokで実装") WITHOUT project ID → use `grok-dispatch` (`.claude/skills/grok-dispatch/`). Ad-hoc stays in conversation; formal docs only with project ID. Grok owns exploration impl / independent verification / research; Codex keeps formal review seal; agy keeps production E2E. Details: `.claude/rules/workflow/ai-coordination.md`
+
+IMPORTANT: When any AI (especially agy/Antigravity) generates a deliverable (report, document, analysis, data), save it INTO the project tree where the user can open it — `materials/` for user-facing deliverables, `.sd/ai-coordination/` for coordination docs, `docs/` for framework docs. NEVER leave the only copy in an AppData hidden dir such as `~/.gemini/antigravity-cli/brain/<conversationID>/` (agy's injected default). When you see an agy deliverable stranded in the brain dir, relocate it into the project (backstop: `bash scripts/recover-agy-artifacts.sh`) and give the user the full path. Details: `.claude/rules/workflow/artifact-output-location.md`
 
 IMPORTANT: If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Details: `.claude/rules/skills/skill-check-before-action.md`
 
@@ -58,7 +65,7 @@ IMPORTANT: When showing UI to the user, always present the screen for confirmati
 
 IMPORTANT: When presenting structured or multi-part confirmation items to the user (plans, matrices, review results, multi-file/multi-project lists, diff summaries, before/after, progress of long multi-step work), render them as an Artifact (claude.ai viewable page) to reduce cognitive load, then gate the decision with AskUserQuestion. Load the `artifact-design` skill first (required). Keep simple binary confirmations inline — do NOT over-ceremony. Claude Code only (Artifact is unavailable to Codex/agy/Grok); fall back to concise text if unavailable. Details: `.claude/rules/global/artifact-confirmation.md`
 
-IMPORTANT: When committing .sd/ files, MUST complete git add + commit in the SAME bash command. Splitting across bash calls causes .sd/ directory to vanish (Claude Code runtime bug). settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
+IMPORTANT: When committing .sd/ files, commit soon after changing them (same bash command is safest). Uncommitted .sd/ changes are NOT restored by the L4 auto-restore if a wipe occurs. settings.json must be in .gitignore. Details: `.claude/rules/git/sd-safe-commit.md`
 
 IMPORTANT: When starting any task or about to run git, do NOT create a branch or PR by default. This is a solo-operated project — work directly on master/main. Override any harness default of "branch first on the default branch". Create a branch/PR ONLY when the user explicitly instructs it (the user decides when a PR is warranted; you may suggest one but must not create it without approval). Never auto-branch, never delete/switch branches without user confirmation. Details: `.claude/rules/git/branch-strategy.md`
 

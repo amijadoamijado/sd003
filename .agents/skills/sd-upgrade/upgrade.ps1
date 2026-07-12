@@ -43,9 +43,9 @@ $deprecatedFiles = @(
 # reference deleted rules. Matched across ALL known roots (.claude, the mirror skill dirs
 # .agents/.codex/.grok, and the .sd generated mirrors). .gemini mirror copies are already
 # covered by the wholesale .gemini removal above.
-$overengCmdNames   = @("ralph-wiggum-plan","ralph-wiggum-run","ralph-wiggum-status","refactor-batch","refactor-complete","refactor-init","refactor-plan","refactor-rollback","sd003-loop-lint","sd003-loop-test","sd003-loop-type","workflow-impl")
+$overengCmdNames   = @("ralph-wiggum-plan","ralph-wiggum-run","ralph-wiggum-status","refactor-batch","refactor-complete","refactor-init","refactor-plan","refactor-rollback","sd003-loop-lint","sd003-loop-test","sd003-loop-type","workflow-init","workflow-order","workflow-request","workflow-review","workflow-status","workflow-test","workflow-impl")
 $overengSkillNames = @("context-autonomy","rollback-guard","session-autosave")
-$overengExtra      = @(".claude\hooks\context-monitor-hook.ps1", ".claude\rules\ralph-loop.md", ".claude\rules\refactoring", ".sd\ralph", ".sd\refactor")
+$overengExtra      = @(".claude\hooks\context-monitor-hook.ps1", ".claude\rules\ralph-loop.md", ".claude\rules\refactoring", ".sd\ralph", ".sd\refactor", ".claude\hooks\sd003-stop-hook.sh", ".claude\hooks\sd003-stop-hook.ps1", ".claude\hooks\sd003-stop-hook-endgame.sh", ".claude\hooks\sd003-stop-hook-endgame.ps1", "scripts\deploy-ralph-wiggum.sh")
 
 # ------------------------------------------------------------------
 # PROTECTED project assets — never deleted (deploy preserves these too).

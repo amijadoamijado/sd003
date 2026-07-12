@@ -140,16 +140,14 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 | 6 | `.agents/skills/`（agy。SKILL.md形式のコマンド+実スキル） | ツリーコピー |
 | 8 | `.sd/settings/` | ツリーコピー |
 | 9 | `.sessions/session-template.md` | 単体コピー |
-| 10 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
+| 10 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,GROK_GUIDE,templates/}` | 選択コピー |
 | 11 | `docs/troubleshooting/` | ツリーコピー |
 | 12 | `docs/quality-gates.md` | 単体コピー |
 | 13 | `.handoff/` | ツリーコピー |
 | 14 | `scripts/sync-cli-commands.py`（agy/codex skill生成器） | 単体コピー |
 | 15 | `scripts/verify-deployment.mjs`（Phase 6b 内容検証ゲート） | 単体コピー |
 | 16 | `AGENTS.md` | 単体コピー |
-| 17 | `.sd/ralph/` | ツリーコピー |
 | 18 | `.sd/steering/` | ツリーコピー |
-| 19 | `.sd/refactor/config.json` | 単体コピー |
 | 20 | `tests/gas-fakes/setup.ts` | 単体コピー |
 | 21 | `.git/hooks/` | templates/git-hooks/ からコピー（自動push + .sd/自動ステージ） |
 
