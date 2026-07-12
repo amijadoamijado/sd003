@@ -61,8 +61,10 @@ describe('AI-neutral orchestrator E2E', () => {
   });
 
   test('provider permission cancellation can never be reported as success', () => {
+    // Exact shape observed in run 20260712T012840116Z: the provider's own final response line.
+    const markerLine = '2026-07-12T00:00:00Z DEBUG received "session/prompt" response: {"stopReason":"cancelled","_meta":{"cancellationCategory":"PermissionCancelled"}}';
     const cancelled = scenario({
-      providers: { codex: { command: process.execPath, args: ['-e', "process.stderr.write('cancellationCategory\\\":\\\"PermissionCancelled');process.exit(0)"] } },
+      providers: { codex: { command: process.execPath, args: ['-e', `process.stderr.write(${JSON.stringify(markerLine)});process.exit(0)`] } },
       stages: [{ id: 'review', role: 'reviewer', provider: 'codex' }],
       expectedArtifacts: [],
     });
@@ -70,6 +72,20 @@ describe('AI-neutral orchestrator E2E', () => {
     expect(result.status).toBe('failed');
     expect(result.stages[0].status).toBe('failed');
     expect(result.error).toContain('cancelled by provider permissions');
+  });
+
+  test('marker text echoed inside conversation payload lines is not treated as cancellation', () => {
+    // sampling_request lines quote conversation content; a stage that merely READS files mentioning
+    // PermissionCancelled must not be failed (false positive observed 2026-07-12 during Grok verify).
+    const echoLine = `2026-07-12T00:00:00Z  INFO sampling_request{request_id=x model="grok-4.5" ${'y'.repeat(160)}} payload: {"text":"...\\"cancellationCategory\\":\\"PermissionCancelled\\"..."}`;
+    const script = `const fs=require('fs');fs.mkdirSync('artifacts',{recursive:true});fs.writeFileSync('artifacts/echo.json','{}');process.stderr.write(${JSON.stringify(echoLine)});`;
+    const result = runScenario(scenario({
+      providers: { codex: { command: process.execPath, args: ['-e', script] } },
+      stages: [{ id: 'review', role: 'reviewer', provider: 'codex' }],
+      expectedArtifacts: ['artifacts/echo.json'],
+    }), { runId: 'echo-run' });
+    expect(result.status).toBe('succeeded');
+    expect(result.stages[0].status).toBe('succeeded');
   });
 
   test('dry-run completes as a successful validation with skipped stages', () => {
@@ -132,6 +148,19 @@ describe('AI-neutral orchestrator E2E', () => {
     const result = runScenario(scenario({ workspace: path.resolve(__dirname, '../..'), allowDirtyWorkspace: true,
       providers: { codex: { command: process.execPath, args: ['bypassPermissions'] } },
       stages: [{ id: 'review', role: 'reviewer', provider: 'codex' }], expectedArtifacts: [] }), { runId: 'repository-bypass-run' });
+    expect(result.status).toBe('failed');
+    expect(result.error).toContain('unattendedWorkspaceAck');
+  });
+
+  test('bypassPermissions guard is case-insensitive for Windows drive letters and catches joined args', () => {
+    if (process.platform !== 'win32') return;
+    const repositoryRoot = path.resolve(__dirname, '../..');
+    const flipped = /^[a-z]/.test(repositoryRoot)
+      ? repositoryRoot[0].toUpperCase() + repositoryRoot.slice(1)
+      : repositoryRoot[0].toLowerCase() + repositoryRoot.slice(1);
+    const result = runScenario(scenario({ workspace: flipped, allowDirtyWorkspace: true,
+      providers: { codex: { command: process.execPath, args: ['--permission-mode=bypassPermissions'] } },
+      stages: [{ id: 'review', role: 'reviewer', provider: 'codex' }], expectedArtifacts: [] }), { runId: 'case-bypass-run' });
     expect(result.status).toBe('failed');
     expect(result.error).toContain('unattendedWorkspaceAck');
   });

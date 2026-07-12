@@ -1,6 +1,6 @@
 ---
 name: grok-dispatch
-description: Claude Code等からGrok CLIへAssistディスパッチする正準スキル。Lead mode（直接起動）は対象外。grok-build・--output-format plain で最終回答とstderrを分離。
+description: Claude Code等からGrok CLIへAssistディスパッチする正準スキル。Lead mode（直接起動）は対象外。モデルは省略時CLI既定・--output-format plain で最終回答とstderrを分離。
 allowed-tools: Bash, Read, Write
 ---
 
@@ -33,7 +33,7 @@ $grok = Join-Path $env:GROK_HOME 'bin\grok.exe'
 Set-Content -Path prompt.txt -Value $prompt -Encoding UTF8
 
 # 2) 実行（最終回答→out.txt / 進捗→progress.log）
-& $grok --prompt-file prompt.txt -m grok-build --output-format plain > out.txt 2> progress.log
+& $grok --prompt-file prompt.txt --output-format plain > out.txt 2> progress.log  # -m はモデル指定時のみ
 ```
 
 実行後は **`out.txt` だけ読む**。`progress.log` は原則読まない（巨大）。失敗診断時だけ `tail` する。
@@ -51,7 +51,7 @@ pwsh -File .claude/skills/grok-dispatch/grok-run.ps1 <repo> <out.txt> "<prompt>"
 | 最終回答だけ受け取る | `--output-format plain` + `> out.txt` | stdout=最終回答。`text`は無効、`plain`が正 |
 | 進捗ログを context に入れない | `2> progress.log`（**`--debug-file`と二重化しない**） | 進捗・DEBUG・telemetryは stderr |
 | 長文プロンプト | `--prompt-file <file>` | 引数渡しより堅牢 |
-| コーディング特化モデル | `-m grok-build` | xAIの実装向けモデル（`grok build`はサブコマンドではない） |
+| モデル指定（任意） | `-m <model>` | 省略時はCLI既定。`grok models`で現行一覧を確認（`grok-build`は2026-07-12にunknown model id化。固定既定はラインナップ変更で壊れる） |
 | 機械可読 | `--output-format json`（必要時） | stdout が JSON。最終回答キーを抽出 |
 | 探索抑制（相談用途） | プロンプトに「ツール不使用・探索禁止・即答」 | 既定はエージェント的に探索する |
 
@@ -89,7 +89,7 @@ CC が回すのが不安定（RAM<5GB・既存agy/codex稼働・2回連続失敗
 | **Lead** | ユーザーが Grok 直接起動 / 「Grok主導で」 | Session Lead（本スキル不使用） |
 | **Assist** | 本スキル `grok-dispatch` | 被呼び出し。呼び出し元が Lead |
 
-- Assist での典型用途: 調査 / セカンドオピニオン / 並列検証 / 補助実装（`grok-build`）。
+- Assist での典型用途: 調査 / セカンドオピニオン / 並列検証 / 補助実装。
 - 公式レビュー印は **Codex**、本番 E2E は **agy**。所有ドメインは `ai-coordination.md` に従う。
 - ad-hoc → 本スキルで `--output-format plain`。正式（案件IDあり）のみ `.sd/ai-coordination/`。
 

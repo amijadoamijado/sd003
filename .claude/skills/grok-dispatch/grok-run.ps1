@@ -25,7 +25,9 @@ param(
   [Parameter(Mandatory = $true)][string]$Out,
   [Parameter(Mandatory = $true, ParameterSetName = 'Prompt')][string]$Prompt,
   [Parameter(Mandatory = $true, ParameterSetName = 'PromptFile')][string]$PromptFile,
-  [string]$Model = "grok-build"
+  # 省略時は -m を渡さず CLI 既定モデルに委ねる（grok-build は 2026-07-12 に "unknown model id" 化。
+  # モデル名はサーバ側で入れ替わるため、固定既定値はラインナップ変更で丸ごと壊れる）
+  [string]$Model = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -74,7 +76,9 @@ try {
   if ($tmp) { Set-Content -Path $tmp -Value $Prompt -Encoding UTF8 }
   if (Test-Path $Out) { Remove-Item $Out -Force }
   Push-Location $Repo
-  & $GrokExe --prompt-file $promptPath --permission-mode bypassPermissions -m $Model --output-format plain > $Out 2> $prog
+  $grokArgs = @('--prompt-file', $promptPath, '--permission-mode', 'bypassPermissions', '--output-format', 'plain')
+  if ($Model) { $grokArgs += @('-m', $Model) }
+  & $GrokExe @grokArgs > $Out 2> $prog
   $rc = $LASTEXITCODE
 } finally {
   Pop-Location -ErrorAction SilentlyContinue
@@ -83,7 +87,9 @@ try {
 
 # --- verify（出力検証・盲目リトライ禁止）---
 # rc==0 を必須にする。grok がエラー終了（rc!=0）した場合は、部分出力があっても FAIL 扱い。
-$cancelled = (Test-Path $prog) -and ((Get-Content $prog -Raw) -match 'cancellationCategory["\:=\s]+PermissionCancelled')
+# grok自身の最終応答行のみに一致させる（sampling_request等の会話ペイロード反響行は行頭120字以内に
+# この接頭辞を持たないため除外される。裸のマーカー一致は検証対象がPermissionCancelledを扱うだけで偽陽性化・2026-07-12実測）
+$cancelled = (Test-Path $prog) -and [bool](Select-String -Path $prog -Pattern '^.{0,120}received "session/prompt" response:.*"cancellationCategory"\s*:\s*"PermissionCancelled"' -Quiet)
 if (($rc -eq 0) -and -not $cancelled -and (Test-Path $Out) -and ((Get-Item $Out).Length -gt 0)) {
   Write-Host "OK rc=$rc out=$Out bytes=$((Get-Item $Out).Length) model=$Model"
   exit 0

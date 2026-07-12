@@ -13,6 +13,7 @@ $args=@('--sandbox','--mode','accept-edits','--prompt',$Prompt)
 $process=Start-Process agy -ArgumentList $args -WorkingDirectory $Repo -RedirectStandardOutput $Out -RedirectStandardError $prog -PassThru -NoNewWindow
 if (-not $process.WaitForExit($TimeoutSeconds*1000)) { $process.Kill($true); Write-Error 'agy timed out'; exit 1 }
 if ($process.ExitCode -ne 0) { Write-Error "agy exit code $($process.ExitCode)"; exit 1 }
-if ($ExpectedArtifact) { $artifact=[IO.Path]::GetFullPath((Join-Path $Repo $ExpectedArtifact)); $root=[IO.Path]::GetFullPath($Repo); if (-not $artifact.StartsWith($root) -or -not (Test-Path $artifact)) { Write-Error "expected artifact missing: $ExpectedArtifact"; exit 1 } }
+# root一致 or root+区切り文字プレフィックスのみ許可（StartsWithだけだと D:\proj が D:\project\... を誤許可する）
+if ($ExpectedArtifact) { $artifact=[IO.Path]::GetFullPath((Join-Path $Repo $ExpectedArtifact)); $root=[IO.Path]::TrimEndingDirectorySeparator([IO.Path]::GetFullPath($Repo)); $inside=($artifact -eq $root) -or $artifact.StartsWith($root+[IO.Path]::DirectorySeparatorChar,[System.StringComparison]::OrdinalIgnoreCase); if (-not $inside -or -not (Test-Path $artifact)) { Write-Error "expected artifact missing or outside repo: $ExpectedArtifact"; exit 1 } }
 if (-not (Test-Path $Out) -or (Get-Item $Out).Length -eq 0) { Write-Error 'agy output missing'; exit 1 }
 Write-Host "OK out=$Out"

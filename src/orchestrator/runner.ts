@@ -56,15 +56,30 @@ function gitCommonDir(workspace: string): string | undefined {
   return result.status === 0 ? path.resolve(workspace, result.stdout.trim()) : undefined;
 }
 
+function canonicalPathForComparison(target: string): string {
+  let resolved = path.resolve(target);
+  try { resolved = fs.realpathSync.native(resolved); } catch { /* non-existent paths keep the resolved form */ }
+  // Windows paths are case-insensitive; `d:\repo` must compare equal to `D:\repo`.
+  return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+}
+
 function isRepositoryWorkspace(workspace: string): boolean {
   const repositoryRoot = path.resolve(__dirname, '..', '..');
-  if (workspace === repositoryRoot || workspace.startsWith(repositoryRoot + path.sep)) return true;
+  const canonicalRoot = canonicalPathForComparison(repositoryRoot);
+  const canonicalWorkspace = canonicalPathForComparison(workspace);
+  if (canonicalWorkspace === canonicalRoot || canonicalWorkspace.startsWith(canonicalRoot + path.sep)) return true;
   const repositoryCommonDir = gitCommonDir(repositoryRoot);
-  return repositoryCommonDir !== undefined && gitCommonDir(workspace) === repositoryCommonDir;
+  const workspaceCommonDir = gitCommonDir(workspace);
+  return repositoryCommonDir !== undefined && workspaceCommonDir !== undefined
+    && canonicalPathForComparison(workspaceCommonDir) === canonicalPathForComparison(repositoryCommonDir);
 }
 
 function hasProviderCancellation(output: string, patterns?: string[]): boolean {
-  return (patterns ?? ['cancellationCategory["\\\\:=\\s]+PermissionCancelled']).some(pattern => new RegExp(pattern, 'i').test(output));
+  // The default matches only the provider's own final "session/prompt" response line. Conversation
+  // payload echoes (sampling_request lines quoting files that merely mention PermissionCancelled)
+  // carry the marker thousands of characters into the line, so the head window excludes them.
+  const defaults = ['^.{0,120}received "session/prompt" response:.*"cancellationCategory"\\s*:\\s*"PermissionCancelled"'];
+  return (patterns ?? defaults).some(pattern => new RegExp(pattern, 'im').test(output));
 }
 
 export function loadScenario(file: string): OrchestratorScenario {
@@ -86,7 +101,7 @@ export function runScenario(scenario: OrchestratorScenario, options: RunOptions 
     if (!scenario.allowDirtyWorkspace && isDirtyGitWorkspace(workspace)) throw new Error('Guard blocked dirty Git workspace');
     const hasBypassPermissions = scenario.stages.some(stage => scenario.providers[stage.provider].args
       .map(arg => substitute(arg, scenario, runId, stage))
-      .some(arg => arg === 'bypassPermissions' || arg === '--dangerously-skip-permissions'));
+      .some(arg => /bypasspermissions|dangerously-skip-permissions/i.test(arg)));
     if (hasBypassPermissions && isRepositoryWorkspace(workspace) && !scenario.unattendedWorkspaceAck) throw new Error('Guard blocked bypassPermissions in repository workspace without unattendedWorkspaceAck');
     for (const result of manifest.stages) {
       const provider = scenario.providers[result.provider];
