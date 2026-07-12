@@ -18,6 +18,8 @@
 6. **codex-dispatch / grok-dispatchの実測障害3件を発見・修正し、auto-memoryのレシピを訂正した**: (a) `--ignore-user-config`がWindows sandboxを無効化しread-only沈黙失敗を起こす（フラグ撤去）、(b) 背景実行でcodexがstdin待ちハング（`< /dev/null`必須化）、(c) `grok-build`モデルがunknown model id化（wrapperをモデル固定からCLI既定委譲へ変更）。
 7. **セッションアーカイブを実行した**（`/archive-sessions --execute`、2,703件・187MBをGoogle Driveへ移動、インデックス再生成）。
 8. **agy非対話の権限拒否時出力の実測調査を完了した**。非対話かつ危険なコマンド実行時に自動拒否して即時終了するキャンセルマークは出力されず、プロンプト待ちで必ずハング（タイムアウト）する仕様であることを実測確認。早期検知のための `cancellationPatterns` 登録を見送り、タイムアウトによる早期エラー停止＋期待される成果物（expectedArtifacts）の必須化による二重の安全防衛線で事故を防ぐ設計とし、調査報告書を作成・保存した。
+9. **resolveInside 大小文字問題（P2）を解決した**。Windows環境でドライブレターなどの大小文字の違いによって `Path escapes workspace` エラーになるのを防ぐため、`canonicalPathForComparison` を介してケースインセンシティブで比較を行うように修正した。
+10. **lead-lockの生存判定強化（P2）を実装した**。一時的なスクリプト実行用の pwsh や zx などのプロセスではなく、親プロセスのツリーを遡って実質的な親（対話型シェルや永続プロセス）の PID を特定してロックに記録・生存確認するロジック（`Get-RealOwnerPid`）を `scripts/lead-lock.ps1` に導入。一時プロセスの終了によってロックが直ちに stale 化する現象を解決し、対話テストで `live` 状態の維持と排他制御の実動を確認した。
 
 ### 進行中
 なし。
@@ -25,7 +27,6 @@
 ### 未解決
 
 - ~~**Grok Lead mode実機実測**~~ → **`grok inspect`で完了（2026-07-12）**: `grok.md`/`.grok/GROK_NATIVE.md`は自動読込されないことを実証。Lead modeは`AGENTS.md`経由の参照のみ（本文未注入）。GROK_GUIDEへ起動後明示読込を追記済み。TUI対話での再確認は任意。副次: worktree上の`lead-lock`は`.git`ファイルのため失敗（本repo直下では動作）。
-- **lead-lockの生存判定の限界**: 一時pwshプロセスのpidを記録するため、acquire直後にstale化する。dispatch入口でのholder照合（実行拒否）は機能するが、Lead生存判定としては弱いことをGrok再検証でも残差として指摘された（ブロッカーではない）。
 
 ### 作成・変更ファイル
 
@@ -79,8 +80,7 @@
 - ~~Grok Lead mode実機実測~~ → 完了（`grok inspect`実証、`GROK_GUIDE.md`追記、TIMELINE記録。TUI再確認は任意）
 
 #### P2（通常）
-- lead-lockの生存判定強化（現状はdispatch入口のholder照合のみ有効。Lead側プロセスの生存確認方式は要検討）
-- `resolveInside`（`runner.ts:21-26`）がcase-sensitiveのまま残存（Grok再検証の残差指摘・ブロッカーではない）
+なし。
 
 ### 備考
 
