@@ -9,6 +9,8 @@ const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
 function resolveExecutable(command) {
   if (process.platform !== 'win32' || path.extname(command)) return { command, prefixArgs: [] };
   for (const directory of (process.env.PATH || '').split(path.delimiter)) {
+    const executable = path.join(directory, `${command}.exe`);
+    if (fs.existsSync(executable)) return { command: executable, prefixArgs: [] };
     const shim = path.join(directory, `${command}.cmd`);
     if (!fs.existsSync(shim)) continue;
     const match = fs.readFileSync(shim, 'utf8').match(/"%dp0%\\([^"\r\n]+\.js)"/i);

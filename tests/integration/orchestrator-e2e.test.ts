@@ -3,7 +3,7 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 import { OrchestratorScenario } from '../../src/orchestrator/types';
-import { runScenario } from '../../src/orchestrator/runner';
+import { resolveExecutable, runScenario } from '../../src/orchestrator/runner';
 
 describe('AI-neutral orchestrator E2E', () => {
   let root: string;
@@ -71,6 +71,32 @@ describe('AI-neutral orchestrator E2E', () => {
     const result = runScenario(scenario({ expectedArtifacts: ['artifacts/not-created.json'] }), { runId: 'missing-run' });
     expect(result.status).toBe('failed');
     expect(result.error).toContain('Expected artifact is missing');
+  });
+
+  test('provider output larger than the Node default buffer is preserved', () => {
+    const script = "const fs=require('fs'),path=require('path');fs.mkdirSync('artifacts',{recursive:true});fs.writeFileSync(path.join('artifacts','large.json'),'{}');process.stdout.write('x'.repeat(2*1024*1024));";
+    const result = runScenario(scenario({
+      providers: { codex: { command: process.execPath, args: ['-e', script] } },
+      stages: [{ id: 'large', role: 'tester', provider: 'codex' }],
+      expectedArtifacts: ['artifacts/large.json'],
+    }), { runId: 'large-output-run' });
+    expect(result.status).toBe('succeeded');
+    expect(result.stages[0].stdout).toHaveLength(2 * 1024 * 1024);
+  });
+
+  test('Windows executable resolution respects PATH order and prefers exe', () => {
+    if (process.platform !== 'win32') return;
+    const bin = path.join(root, 'bin');
+    fs.mkdirSync(bin);
+    fs.writeFileSync(path.join(bin, 'provider.exe'), '');
+    fs.writeFileSync(path.join(bin, 'provider.cmd'), '');
+    const originalPath = process.env.PATH;
+    process.env.PATH = `${bin}${path.delimiter}${originalPath || ''}`;
+    try {
+      expect(resolveExecutable('provider')).toEqual({ command: path.join(bin, 'provider.exe'), prefixArgs: [] });
+    } finally {
+      process.env.PATH = originalPath;
+    }
   });
 
   test('dirty Git workspaces are rejected by default', () => {
