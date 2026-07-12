@@ -17,6 +17,7 @@
 5. **push完了**（origin/masterと同期確認済み）。
 6. **codex-dispatch / grok-dispatchの実測障害3件を発見・修正し、auto-memoryのレシピを訂正した**: (a) `--ignore-user-config`がWindows sandboxを無効化しread-only沈黙失敗を起こす（フラグ撤去）、(b) 背景実行でcodexがstdin待ちハング（`< /dev/null`必須化）、(c) `grok-build`モデルがunknown model id化（wrapperをモデル固定からCLI既定委譲へ変更）。
 7. **セッションアーカイブを実行した**（`/archive-sessions --execute`、2,703件・187MBをGoogle Driveへ移動、インデックス再生成）。
+8. **agy非対話の権限拒否時出力の実測調査を完了した**。非対話かつ危険なコマンド実行時に自動拒否して即時終了するキャンセルマークは出力されず、プロンプト待ちで必ずハング（タイムアウト）する仕様であることを実測確認。早期検知のための `cancellationPatterns` 登録を見送り、タイムアウトによる早期エラー停止＋期待される成果物（expectedArtifacts）の必須化による二重の安全防衛線で事故を防ぐ設計とし、調査報告書を作成・保存した。
 
 ### 進行中
 なし。
@@ -24,7 +25,6 @@
 ### 未解決
 
 - **Grok Lead mode実機実測が未実施**（改善#11、ユーザー参加が必要）。手順書を準備済み: `.sd/ai-coordination/workflow/spec/20260712-4ai-lead-hardening/GROK_LEAD_TEST_PLAN.md`。grok.mdがGrok TUI起動時に自動読込されるか未実測のため、Lead modeがルール非搭載のまま動く可能性が残る。
-- **agy非対話の権限拒否時出力の実測が未実施**（改善#14後半）。判明したマーカーは`cancellationPatterns`へ未登録（claude/agy用の沈黙失敗検出は暫定でper-stage artifact必須運用に留まる）。
 - **lead-lockの生存判定の限界**: 一時pwshプロセスのpidを記録するため、acquire直後にstale化する。dispatch入口でのholder照合（実行拒否）は機能するが、Lead生存判定としては弱いことをGrok再検証でも残差として指摘された（ブロッカーではない）。
 
 ### 作成・変更ファイル
@@ -61,6 +61,7 @@
 - `.sd/ai-coordination/workflow/review/20260712-4ai-lead-hardening/IMPLEMENTATION_REPORT.md`
 - `.sd/ai-coordination/workflow/review/20260712-4ai-lead-hardening/GROK_VERIFICATION.md`
 - `.sd/ai-coordination/workflow/review/20260712-4ai-lead-hardening/GROK_REVERIFICATION.md`
+- `.sd/ai-coordination/workflow/review/20260712-4ai-lead-hardening/AGY_PERMISSION_INVESTIGATION.md`
 
 **auto-memory**:
 - `reference_codex_dispatch_recipe.md`（`--ignore-user-config`のWindows禁止を追記）
@@ -76,7 +77,6 @@
 
 #### P1（重要）
 - Grok Lead mode実機実測（`GROK_LEAD_TEST_PLAN.md`に従い隔離worktreeでGrok TUIを直接起動、grok.md自動読込とセッション開始チェック遵守を確認、結果をTIMELINEへ1行記録）
-- agy非対話の権限拒否時出力を1回実測し、判明マーカーを`config/orchestrator.providers.json`の`cancellationPatterns`へ登録
 
 #### P2（通常）
 - lead-lockの生存判定強化（現状はdispatch入口のholder照合のみ有効。Lead側プロセスの生存確認方式は要検討）

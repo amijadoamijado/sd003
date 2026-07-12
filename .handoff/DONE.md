@@ -50,10 +50,10 @@ Build successful
 
 **未完了タスク**
 - [ ] Grok Lead mode実機実測（ユーザー参加必要。手順書: `.sd/ai-coordination/workflow/spec/20260712-4ai-lead-hardening/GROK_LEAD_TEST_PLAN.md`）
-- [ ] agy非対話の権限拒否時出力の実測、判明マーカーの`cancellationPatterns`登録
+- [x] agy非対話の権限拒否時出力の実測（調査の結果、タイムアウト/ハング仕様のためcancellationPatterns登録不要と判定。調査報告書作成完了）
 
 **次の手順**
-- 次のタスク: 上記2件のユーザー参加実測、またはユーザー指定の別作業
+- 次のタスク: Grok Lead mode実機実測のユーザー参加テスト、または別タスクの実行
 - 依存関係: なし
 
 ---
