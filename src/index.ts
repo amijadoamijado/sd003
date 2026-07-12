@@ -22,6 +22,8 @@ export * from './cli';
 
 // Types
 export * from './types';
+export * from './orchestrator/types';
+export * from './orchestrator/runner';
 
 /**
  * SD002 Framework version

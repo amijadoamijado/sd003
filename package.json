@@ -16,6 +16,7 @@
     "dev": "tsc --watch",
     "sync:cli": "python scripts/sync-cli-commands.py",
     "sync:agy": "python scripts/sync-cli-commands.py",
+    "orchestrate": "node scripts/orchestrate.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",

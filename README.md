@@ -17,6 +17,7 @@ SD003 integrates **SD001 (Spec-Driven Development Framework)** with **GA001 (GAS
 - **Env Interface Pattern**: Complete separation of business logic and infrastructure
 - **8-Stage Quality Gates**: Automated quality assurance
 - **Multi-CLI Support**: Session Lead = 入口CLI（Claude / Grok 等）, Codex CLI (レビュー), Antigravity CLI/agy (実装・E2E), Grok CLI (Lead候補・探索実装・独立検証)
+- **AI-Neutral Orchestration**: `docs/orchestrator-contract.md` の共通状態・安全・完了契約をTypeScriptランナーで実行
 - **Ralph Wiggum**: Night-mode autonomous execution (24-hour development cycle)
 - **3-Tier Bug Resolution**: Systematic debugging framework
 

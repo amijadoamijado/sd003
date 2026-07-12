@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "id": "20260712-codex-orchestrator-e2e",
+  "task": "Codex orchestrates implementation, independent review, and verification of an isolated deliverable",
+  "workspace": "test-results/orchestrator-codex-e2e/workspace",
+  "evidenceDir": "test-results/orchestrator-codex-e2e/evidence",
+  "orchestrator": "codex",
+  "providers": {
+    "codex": {
+      "command": "node",
+      "args": ["../../../scripts/orchestrator-fixture-provider.js", "${stage}", "${workspace}"]
+    },
+    "agy": {
+      "command": "node",
+      "args": ["../../../scripts/orchestrator-fixture-provider.js", "${stage}", "${workspace}"]
+    },
+    "grok": {
+      "command": "node",
+      "args": ["../../../scripts/orchestrator-fixture-provider.js", "${stage}", "${workspace}"]
+    }
+  },
+  "stages": [
+    { "id": "implement", "role": "implementer", "provider": "agy" },
+    { "id": "review", "role": "reviewer", "provider": "grok" },
+    { "id": "test", "role": "tester", "provider": "codex" }
+  ],
+  "expectedArtifacts": [
+    "artifacts/implement.json",
+    "artifacts/review.json",
+    "artifacts/test.json"
+  ]
+}

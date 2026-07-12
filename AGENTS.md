@@ -56,6 +56,7 @@
 | Code Review | Review implementation quality |
 | Work Order Review | Approve/reject work orders |
 | Quality Gate Check | Verify all gates pass |
+| Session Lead | `docs/orchestrator-contract.md` に従い、役割割当・状態遷移・完了判定を統合 |
 
 ### Trigger Keywords (AUTO-EXECUTE)
 

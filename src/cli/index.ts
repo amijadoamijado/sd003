@@ -8,6 +8,7 @@ import { registerSpecListCommand } from './commands/spec-list';
 import { registerQaTestCommand } from './commands/qa-test';
 import { registerQaDeploySafeCommand } from './commands/qa-deploy-safe';
 import { registerQaCoverageCommand } from './commands/qa-coverage';
+import { registerOrchestrateCommand } from './commands/orchestrate';
 
 const program = new Command();
 
@@ -23,6 +24,7 @@ registerSpecListCommand(program);
 registerQaTestCommand(program);
 registerQaDeploySafeCommand(program);
 registerQaCoverageCommand(program);
+registerOrchestrateCommand(program);
 
 // Define global options if any
 // program.option('-v, --verbose', 'enable verbose logging');
