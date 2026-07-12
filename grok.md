@@ -15,7 +15,8 @@ python scripts/sync-cli-commands.py --check
 ```
 
 Grok CLI は `.grok/skills/*/SKILL.md` を起動時に自動検出します（ファイル変更で自動リロード、`/skills` で確認）。
-生成物は手編集せず、Claude 側の正本か同期スクリプトを変更してください。
+Lead mode の実行要約は `.grok/rules/lead-mode.md` として自動読込されます（`grok inspect` で確認）。
+生成物は手編集せず、Claude 側の正本か同期スクリプトを変更してください（`.grok/rules/` は Lead 用の例外・手動管理）。
 
 - プロジェクト Skill: `<repo>/.grok/skills/{name}/SKILL.md`
 - ユーザー Skill: `~/.grok/skills/{name}/SKILL.md`

@@ -30,12 +30,13 @@ Grok は SD003 の **Session Lead 候補**。汎用控え専用ではない。
 
 ## Lead mode の始め方
 
-1. リポジトリ直下で Grok CLI / TUI を起動する。
-2. **起動直後に `grok.md` と `.grok/GROK_NATIVE.md` を明示的に読ませる。** Grok CLI は `grok.md` を自動検出しない（`grok inspect` の Project Instructions で確認。自動読込されるのは `AGENTS.md` / `CLAUDE.md` / `.claude/rules/*.md` 等のみ。公式: `D:\grok\docs\user-guide\12-project-rules.md`）。
-3. 必要なら冒頭で「このセッションは Grok Lead」と明示する（直接起動なら省略可）。
-4. `.grok/GROK_NATIVE.md` のセッション開始チェックを行う（`git status`、sessionread 相当、`lead-lock acquire grok`、無知の知）。
-5. ゴールと完了条件（ユーザーが何を見ればよいか）を先に書く。
-6. 実装・検証を進め、成果物をプロジェクト内に置く。
+1. リポジトリ直下で Grok CLI / TUI を起動する（`grok inspect` で `.grok/rules/lead-mode.md` が読込まれることを確認）。
+2. 必要なら冒頭で「このセッションは Grok Lead」と明示する（直接起動なら省略可）。
+3. `.grok/rules/lead-mode.md`（自動読込）のセッション開始チェックを実行する。詳細は `.grok/GROK_NATIVE.md` を参照。
+4. ゴールと完了条件（ユーザーが何を見ればよいか）を先に書く。
+5. 実装・検証を進め、成果物をプロジェクト内に置く。
+
+補足: `grok.md` は Grok CLI の自動検出対象外（`AGENTS.md` / `CLAUDE.md` / `.grok/rules/*.md` が対象）。入口概要は `grok.md`、Lead 実行要約は `.grok/rules/lead-mode.md`、完全版は `GROK_NATIVE.md`。
 
 ### Lead トリガー語
 
