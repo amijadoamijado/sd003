@@ -24,7 +24,7 @@
 
 ### 未解決
 
-- **Grok Lead mode実機実測が未実施**（改善#11、ユーザー参加が必要）。手順書を準備済み: `.sd/ai-coordination/workflow/spec/20260712-4ai-lead-hardening/GROK_LEAD_TEST_PLAN.md`。grok.mdがGrok TUI起動時に自動読込されるか未実測のため、Lead modeがルール非搭載のまま動く可能性が残る。
+- ~~**Grok Lead mode実機実測**~~ → **`grok inspect`で完了（2026-07-12）**: `grok.md`/`.grok/GROK_NATIVE.md`は自動読込されないことを実証。Lead modeは`AGENTS.md`経由の参照のみ（本文未注入）。GROK_GUIDEへ起動後明示読込を追記済み。TUI対話での再確認は任意。副次: worktree上の`lead-lock`は`.git`ファイルのため失敗（本repo直下では動作）。
 - **lead-lockの生存判定の限界**: 一時pwshプロセスのpidを記録するため、acquire直後にstale化する。dispatch入口でのholder照合（実行拒否）は機能するが、Lead生存判定としては弱いことをGrok再検証でも残差として指摘された（ブロッカーではない）。
 
 ### 作成・変更ファイル
@@ -76,7 +76,7 @@
 なし。
 
 #### P1（重要）
-- Grok Lead mode実機実測（`GROK_LEAD_TEST_PLAN.md`に従い隔離worktreeでGrok TUIを直接起動、grok.md自動読込とセッション開始チェック遵守を確認、結果をTIMELINEへ1行記録）
+- ~~Grok Lead mode実機実測~~ → 完了（`grok inspect`実証、`GROK_GUIDE.md`追記、TIMELINE記録。TUI再確認は任意）
 
 #### P2（通常）
 - lead-lockの生存判定強化（現状はdispatch入口のholder照合のみ有効。Lead側プロセスの生存確認方式は要検討）

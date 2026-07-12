@@ -9,6 +9,8 @@
 
 ## 2026-07
 
+| 07-12 | **Grok Lead mode実機実測（`grok inspect`）**: `grok.md`と`.grok/GROK_NATIVE.md`は自動読込されず（Project Instructions=AGENTS.md/Claude.md/.claude/rules/README.md+~/.claude/Claude.mdのみ）。公式仕様も`grok.md`非対応を確認。隔離worktree(`sd003-worktrees/grok-lead-test`)で検証、worktree上の`lead-lock acquire`は`.git`がファイルのため失敗。GROK_GUIDEへ「起動後まずgrok.md/GROK_NATIVE.mdを読ませる」を追記 | (未コミット) | — |
+
 | 07-12 | **4AI Lead/Assist設定を多角レビュー（6観点71エージェント）→改善16件をCodex実装→Grok独立検証（1回目REQUEST_CHANGES実行プローブ付き→修正→APPROVE）まで、レビュー対象の協調体制自身で完遂（dogfooding）**。bypassPermissions隔離ガード・git実体ベースdirty判定・沈黙失敗検出・stage単位artifact検査・repo lock実体化(.git/sd-lead.lock)・agy-dispatch新設・入口文書の旧7段階世界一掃・deploy/upgrade配布系の4AI同期。副産物でdispatch実障害3件発見・修正。**[追加タスク] agy非対話の権限拒否出力の実測調査を完了**。ハング（タイムアウト）する仕様であることを実測確認。早期検知のための `cancellationPatterns` 登録を見送り、タイムアウトによる早期エラー停止＋期待される成果物（expectedArtifacts）の必須化による二重の安全防衛線で事故を防ぐ設計とし、調査報告書を作成・保存した。88テスト全PASS・push済み | 906b488, c83f17f, 4848a6a, dcb40cf, fb744d4, f4c2bbf, 065fa2c | [Details](session-20260712-134458.md) |
 
 | 07-12 | **Windows実プロバイダーE2Eを完遂**。Grok成果物欠落の真因をPermissionCancelledと特定し、非対話権限・キャンセル検出・Windows実行解決・大容量出力・npm引数補正・dry-run入口を整備。Codex実装→Grokレビュー→Codex検証の3段階と成果物3件が成功 | dc78c35, fc88b02 | [Details](session-20260712-105933.md) |
