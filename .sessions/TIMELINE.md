@@ -9,7 +9,7 @@
 
 ## 2026-07
 
-| 07-12 | **Grok Lead mode実機実測（`grok inspect`）**: `grok.md`と`.grok/GROK_NATIVE.md`は自動読込されず（Project Instructions=AGENTS.md/Claude.md/.claude/rules/README.md+~/.claude/Claude.mdのみ）。公式仕様も`grok.md`非対応を確認。隔離worktree(`sd003-worktrees/grok-lead-test`)で検証、worktree上の`lead-lock acquire`は`.git`がファイルのため失敗。GROK_GUIDEへ「起動後まずgrok.md/GROK_NATIVE.mdを読ませる」を追記 | (未コミット) | — |
+| 07-12 | **Grok Lead mode実機実測（`grok inspect`）**: `grok.md`と`.grok/GROK_NATIVE.md`は自動読込されず（Project Instructions=AGENTS.md/Claude.md/.claude/rules/README.md+~/.claude/Claude.mdのみ）。公式仕様も`grok.md`非対応を確認。隔離worktree(`sd003-worktrees/grok-lead-test`)で検証、worktree上の`lead-lock acquire`は`.git`がファイルのため失敗。GROK_GUIDEへ「起動後まずgrok.md/GROK_NATIVE.mdを読ませる」を追記 | 94b308e, 66edc3a | — |
 
 | 07-12 | **4AI Lead/Assist設定を多角レビュー（6観点71エージェント）→改善16件をCodex実装→Grok独立検証（1回目REQUEST_CHANGES実行プローブ付き→修正→APPROVE）まで、レビュー対象の協調体制自身で完遂（dogfooding）**。bypassPermissions隔離ガード・git実体ベースdirty判定・沈黙失敗検出・stage単位artifact検査・repo lock実体化(.git/sd-lead.lock)・agy-dispatch新設・入口文書の旧7段階世界一掃・deploy/upgrade配布系の4AI同期。副産物でdispatch実障害3件発見・修正。**[追加タスク] agy非対話の権限拒否出力の実測調査を完了**、調査報告書作成。**[P2対応] resolveInside大小文字問題（Windowsパス誤検知）を解決、lead-lockプロセス生存判定強化**（一時プロセスの終了により直ちにstale化する問題を、スクリプト実行ランナーをスキップして永続的な親のPIDを追跡・記録する方式 `Get-RealOwnerPid` の導入で解決）。88テスト全PASS・push済み | 906b488, c83f17f, 4848a6a, dcb40cf, fb744d4, f4c2bbf, 065fa2c, 25d931d, 6bc8306 | [Details](session-20260712-134458.md) |
 
