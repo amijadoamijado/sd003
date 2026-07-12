@@ -11,6 +11,7 @@
 | `AGENTS.md`（このファイル） | Codex全体の設定・AI Coordination・Work Order Review |
 | `.codex/CODEX_SPEC.md` | Codex固有の実行仕様・Claude Code非破壊ルール |
 | `.codex/CODEX_NATIVE.md` | Codex nativeの軽量レビュー・引継ぎ・直接実装ルール |
+| `.grok/GROK_NATIVE.md` | Grok Lead mode（Session Lead）の直接実装・引継ぎルール |
 | `.handoff/AGENTS.md` | コードレビュー専用の4段階手順 |
 
 ---
@@ -120,6 +121,7 @@ npm test && npm run lint
 - **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること
 - **Codex追加仕様**: `.codex/CODEX_SPEC.md` を参照すること。Claude Codeの正本仕様を置き換えず、Codex側の実行変換だけを追加する。
 - **Codex native運用**: `.codex/CODEX_NATIVE.md` を参照すること。Codex内で `/codex:*` や `/workflow:*` を再帰実行せず、Codex自身の読取・編集・検証に置き換える。
+- **Grok Lead mode**: `.grok/GROK_NATIVE.md` を参照すること。ユーザーが Grok を直接起動した場合、Session Lead は Grok（Claude 固定ではない）。Assist のみ `grok-dispatch`。
 
 ### GASデプロイルール（厳守）
 - **`clasp push` のみ許可。`clasp deploy` / `clasp undeploy` はユーザー明示指示なしに実行禁止**
@@ -176,6 +178,8 @@ $sd-deploy
 - **AI Coordination**: `.claude/rules/workflow/ai-coordination.md`
 - **Codex Spec**: `.codex/CODEX_SPEC.md`
 - **Codex Native**: `.codex/CODEX_NATIVE.md`
+- **Grok Native (Lead)**: `.grok/GROK_NATIVE.md`
+- **Grok Guide**: `.sd/ai-coordination/workflow/GROK_GUIDE.md`
 - **Quality Gates**: `docs/quality-gates.md`
 - **Templates**: `.sd/ai-coordination/workflow/templates/`
 

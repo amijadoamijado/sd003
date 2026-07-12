@@ -212,6 +212,7 @@ EOF
 ```bash
 cp "$SOURCE/.sd/ai-coordination/workflow/README.md" "$TARGET_PROJECT/.sd/ai-coordination/workflow/"
 cp "$SOURCE/.sd/ai-coordination/workflow/CODEX_GUIDE.md" "$TARGET_PROJECT/.sd/ai-coordination/workflow/"
+cp "$SOURCE/.sd/ai-coordination/workflow/GROK_GUIDE.md" "$TARGET_PROJECT/.sd/ai-coordination/workflow/"
 cp -r "$SOURCE/.sd/ai-coordination/workflow/templates/" "$TARGET_PROJECT/.sd/ai-coordination/workflow/"
 ```
 

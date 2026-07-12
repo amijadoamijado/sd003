@@ -1,12 +1,16 @@
 ---
 name: grok-dispatch
-description: Claude CodeからGrok CLI (grok -p) にタスクをディスパッチする正準スキル。汎用(実装/相談)・grok-buildモデル・--output-format plain で最終回答とstderrを分離。
+description: Claude Code等からGrok CLIへAssistディスパッチする正準スキル。Lead mode（直接起動）は対象外。grok-build・--output-format plain で最終回答とstderrを分離。
 allowed-tools: Bash, Read, Write
 ---
 
 # /grok-dispatch
 
-Claude Code から xAI 公式 Grok CLI にタスクを渡す正準スキル（汎用＝実装にも ad-hoc 相談にも使う）。
+Claude Code 等の **Session Lead から** xAI 公式 Grok CLI にタスクを渡す **Assist mode** 用スキル。
+
+> **Lead mode は本スキルの対象外。** ユーザーが Grok を直接起動する、または「Grok主導で」等と言った場合は
+> Grok が Session Lead。Claude はディスパッチせず、必要なら handoff する。
+> Lead 正本: `.grok/GROK_NATIVE.md` / 運用: `.sd/ai-coordination/workflow/GROK_GUIDE.md`
 
 > ⚠️ **2026-06-28 実測で確定したこと（推測コマンドを正準化しない）**
 > - `--output-format` の有効値は **`plain | json | streaming-json`**。**`text` は無効**（exit 2）。
@@ -78,10 +82,14 @@ CC が回すのが不安定（RAM<5GB・既存agy/codex稼働・2回連続失敗
 
 ## 役割と使い分け（4AI協調）
 
-- **Grok = 汎用**: 実装補助（grok-buildモデル）/ 調査 / セカンドオピニオン / 並列検証。
-- レビューの主担当は **Codex**、実装・E2E は **agy**。Grok は重複しうるので「誰がやるか」は ai-coordination.md の役割分岐表に従う。
-- ad-hoc 相談・セカンドオピニオン → 本スキルで `--output-format plain`。
-- 依頼書ベースの正式 Workflow → `.sd/ai-coordination/` に案件IDで保存（案件ID無しの相談は会話内で完結）。
+| モード | 手段 | 地位 |
+|--------|------|------|
+| **Lead** | ユーザーが Grok 直接起動 / 「Grok主導で」 | Session Lead（本スキル不使用） |
+| **Assist** | 本スキル `grok-dispatch` | 被呼び出し。呼び出し元が Lead |
+
+- Assist での典型用途: 調査 / セカンドオピニオン / 並列検証 / 補助実装（`grok-build`）。
+- 公式レビュー印は **Codex**、本番 E2E は **agy**。所有ドメインは `ai-coordination.md` に従う。
+- ad-hoc → 本スキルで `--output-format plain`。正式（案件IDあり）のみ `.sd/ai-coordination/`。
 
 ## 注意事項
 
@@ -95,3 +103,4 @@ CC が回すのが不安定（RAM<5GB・既存agy/codex稼働・2回連続失敗
 | 版 | 日付 | 内容 |
 |---|------|------|
 | 0.1 | 2026-06-28 | 初版。実測で正準invocation確定（`--output-format plain`・`--prompt-file`・stdout/stderr分離・`-m grok-build`）。codex-dispatch をミラーし grok-run.ps1 を追加。Grok自身による計画レビューを反映 |
+| 0.2 | 2026-07-12 | Lead mode 正式採用に合わせ Assist 専用と明記。Lead は GROK_NATIVE / GROK_GUIDE へ |

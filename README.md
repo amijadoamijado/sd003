@@ -16,7 +16,7 @@ SD003 integrates **SD001 (Spec-Driven Development Framework)** with **GA001 (GAS
 - **GAS Local Development**: Test Google Apps Script locally
 - **Env Interface Pattern**: Complete separation of business logic and infrastructure
 - **8-Stage Quality Gates**: Automated quality assurance
-- **Multi-CLI Support**: Claude Code (司令塔), Codex CLI (レビュー), Antigravity CLI/agy (実装・E2E), Grok CLI (汎用)
+- **Multi-CLI Support**: Session Lead = 入口CLI（Claude / Grok 等）, Codex CLI (レビュー), Antigravity CLI/agy (実装・E2E), Grok CLI (Lead候補・探索実装・独立検証)
 - **Ralph Wiggum**: Night-mode autonomous execution (24-hour development cycle)
 - **3-Tier Bug Resolution**: Systematic debugging framework
 
@@ -53,7 +53,7 @@ See: [Ralph Wiggum Deployment Guide](docs/ralph-wiggum-deployment.md)
 | Claude Code | CLAUDE.md, .claude/rules/ | .claude/commands/ |
 | Codex CLI | AGENTS.md, `.codex/CODEX_SPEC.md`, `.codex/skills/`, `~/.codex/skills/` | `$skill-name` |
 | Antigravity CLI (agy) | antigravity.md, AGENTS.md | `.agents/skills/*/SKILL.md`（`/skills` で確認） |
-| Grok CLI | grok.md, `.grok/GROK_SPEC.md`, `.grok/skills/`, `~/.grok/skills/` | `/skill-name`（**Windows + GROK_HOME 必須**） |
+| Grok CLI | grok.md, `.grok/GROK_SPEC.md`, `.grok/GROK_NATIVE.md`, `.grok/skills/`, `~/.grok/skills/` | `/skill-name`（**Windows + GROK_HOME 必須**）。直接起動=Lead |
 
 ### Multi-CLI コマンド同期
 
@@ -137,7 +137,7 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 | 8 | `.grok/`（Grok。コピー後 sync 再生成） | ツリーコピー |
 | 9 | `.sd/settings/` | ツリーコピー |
 | 10 | `.sessions/session-template.md` | 単体コピー |
-| 11 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}` | 選択コピー |
+| 11 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,GROK_GUIDE,templates/}` | 選択コピー |
 | 12 | `docs/troubleshooting/` | ツリーコピー |
 | 13 | `docs/quality-gates.md` | 単体コピー |
 

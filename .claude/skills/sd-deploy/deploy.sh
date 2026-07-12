@@ -312,12 +312,12 @@ else
     COPY_STATS["Session Template"]=0
 fi
 
-# 4-11: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
+# 4-11: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,GROK_GUIDE,templates/}
 WF_SRC="$SOURCE_DIR/.sd/ai-coordination/workflow"
 WF_DST="$TARGET_PROJECT/.sd/ai-coordination/workflow"
 wf_count=0
 
-for f in README.md CODEX_GUIDE.md; do
+for f in README.md CODEX_GUIDE.md GROK_GUIDE.md; do
     if [ -f "$WF_SRC/$f" ]; then
         cp "$WF_SRC/$f" "$WF_DST/"
         wf_count=$((wf_count + 1))

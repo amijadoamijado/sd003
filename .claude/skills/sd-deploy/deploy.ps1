@@ -380,12 +380,12 @@ if (Test-Path $sessionTemplatesSrc) {
 # 4-11a: .sd/design/ (tree)
 Copy-DirTree -RelPath ".sd\design" -Label "Design Tokens"
 
-# 4-11b: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,templates/}
+# 4-11b: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,GROK_GUIDE,templates/}
 $workflowSrc = Join-Path $SOURCE_DIR ".sd\ai-coordination\workflow"
 $workflowDst = Join-Path $TargetProject ".sd\ai-coordination\workflow"
 $wfCount = 0
 
-foreach ($f in @("README.md", "CODEX_GUIDE.md")) {
+foreach ($f in @("README.md", "CODEX_GUIDE.md", "GROK_GUIDE.md")) {
     $src = Join-Path $workflowSrc $f
     if (Test-Path $src) {
         Copy-Item $src (Join-Path $workflowDst $f) -Force

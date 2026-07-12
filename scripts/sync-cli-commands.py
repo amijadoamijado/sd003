@@ -767,6 +767,8 @@ def check() -> int:
         failures.append("missing codex spec: .codex/CODEX_SPEC.md")
     if not (REPO_ROOT / ".grok" / "GROK_SPEC.md").exists():
         failures.append("missing grok spec: .grok/GROK_SPEC.md")
+    if not (REPO_ROOT / ".grok" / "GROK_NATIVE.md").exists():
+        failures.append("missing grok native: .grok/GROK_NATIVE.md")
     skills = real_skill_names()
     for spec in specs:
         if not (CANONICAL_SPECS_DIR / f"{spec.slug}.md").exists():
