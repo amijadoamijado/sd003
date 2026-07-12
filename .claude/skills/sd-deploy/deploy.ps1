@@ -118,7 +118,8 @@ function Invoke-DeployDryRun {
         "antigravity.md", "AGENTS.md", "grok.md", ".claude\settings.json",
         "docs\quality-gates.md", "scripts\validate-test-data.ps1",
         "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
-        "scripts\verify-deployment.mjs",
+        "scripts\verify-deployment.mjs", "scripts\recover-agy-artifacts.sh",
+        "scripts\recover-agy-artifacts.ps1",
         "tests\gas-fakes\setup.ts"
     )
     foreach ($f in $scanFiles) {
@@ -476,6 +477,11 @@ if (Test-Kept "scripts/verify-deployment.mjs") {
     $copyStats["Verify Deployment (mjs)"] = 1
 } else {
     $copyStats["Verify Deployment (mjs)"] = 0
+}
+
+foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1')) {
+    $recoverRel = "scripts/$recoverName"; $recoverSrc = Join-Path $SOURCE_DIR "scripts\$recoverName"; $recoverDst = Join-Path $TargetProject "scripts\$recoverName"
+    if (-not (Test-Kept $recoverRel) -and (Test-Path $recoverSrc)) { New-Item -ItemType Directory -Path (Split-Path $recoverDst) -Force | Out-Null; Copy-Item $recoverSrc $recoverDst -Force; $copyStats[$recoverName] = 1 }
 }
 
 # 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator - overwrite unless protected by .sd003-keep)

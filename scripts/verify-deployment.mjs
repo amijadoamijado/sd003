@@ -350,6 +350,13 @@ const generatedFiles = [
   else pass('C6', `generated JSON valid (${scanned} files)`);
 }
 
+// ---- C7: Session Lead contract is distributed
+{
+  const claude = readText(path.join(targetDir, 'CLAUDE.md'));
+  if (claude === null || !claude.includes('Lead mode')) fail('C7', 'CLAUDE.md is missing Lead mode');
+  else pass('C7', 'CLAUDE.md contains Lead mode');
+}
+
 console.log('');
 if (failures.length) {
   console.log(`Content verification FAILED (${failures.length} issue(s)):`);

@@ -148,9 +148,7 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 | 14 | `scripts/sync-cli-commands.py`（agy/codex skill生成器） | 単体コピー |
 | 15 | `scripts/verify-deployment.mjs`（Phase 6b 内容検証ゲート） | 単体コピー |
 | 16 | `AGENTS.md` | 単体コピー |
-| 17 | `.sd/ralph/` | ツリーコピー |
 | 18 | `.sd/steering/` | ツリーコピー |
-| 19 | `.sd/refactor/config.json` | 単体コピー |
 | 20 | `tests/gas-fakes/setup.ts` | 単体コピー |
 | 21 | `.git/hooks/` | templates/git-hooks/ からコピー（自動push + .sd/自動ステージ） |
 

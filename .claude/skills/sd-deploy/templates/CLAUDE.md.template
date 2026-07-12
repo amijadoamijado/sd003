@@ -1,5 +1,7 @@
 # {{PROJECT_NAME}} - AI Development Command Center
 
+> **AI協調**: Session Leadは入口CLI（Claude Code / Codex / agy / Grok）。Grokは直接起動時Lead mode、grok-dispatch時Assist mode。成果物はユーザーが開けるプロジェクト内へ保存する。正式依頼・報告時のみ `.sd/ai-coordination/workflow/{spec|review}/{案件ID}/` を使う（詳細: `.claude/rules/workflow/ai-coordination.md`）。
+
 ## Session Start
 
 `/sessionread` → 4ファイル自動読込 | Crash Recovery: `claude --continue` + `/sessionread`
