@@ -23,7 +23,8 @@ Bash tool から呼ぶ場合も `pwsh -File grok-run.ps1 ...` を使う（Codex=
 param(
   [Parameter(Mandatory = $true)][string]$Repo,
   [Parameter(Mandatory = $true)][string]$Out,
-  [Parameter(Mandatory = $true)][string]$Prompt,
+  [Parameter(Mandatory = $true, ParameterSetName = 'Prompt')][string]$Prompt,
+  [Parameter(Mandatory = $true, ParameterSetName = 'PromptFile')][string]$PromptFile,
   [string]$Model = "grok-build"
 )
 
@@ -57,33 +58,37 @@ try {
     Write-Warning "free RAM ${free}MB < 5000MB — 重 CLI 同時実行は OOM 危険。人手ハンドオフ検討（SKILL.md）。"
   }
 } catch {}
-$busy = Get-Process grok, codex, agy -ErrorAction SilentlyContinue | Where-Object { $_.Path -ne $GrokExe -or $_.Id -ne $PID }
+$busy = Get-Process grok, codex, agy, claude -ErrorAction SilentlyContinue | Where-Object { $_.Path -ne $GrokExe -or $_.Id -ne $PID }
 if ($busy) {
   Write-Warning "既存 grok/codex/agy が稼働中。同一 repo への同時書き込みは排他（git 競合回避）。確認してから続行。"
 }
+$lockPath = Join-Path $Repo '.git\sd-lead.lock'
+if ((Test-Path $lockPath) -and $env:SD003_LEAD_AI) { $holder=(Get-Content $lockPath -Raw | ConvertFrom-Json).ai; if ($holder -ne $env:SD003_LEAD_AI) { Write-Error "repo lock held by $holder"; exit 1 } }
 
 # --- run（正準）---
 $env:GROK_HOME = $env:GROK_HOME  # 子プロセスへ明示継承
-$tmp = [System.IO.Path]::GetTempFileName()
+$tmp = if ($PSCmdlet.ParameterSetName -eq 'Prompt') { [System.IO.Path]::GetTempFileName() } else { $null }
+$promptPath = if ($tmp) { $tmp } else { (Resolve-Path $PromptFile).Path }
 $prog = [System.IO.Path]::ChangeExtension($Out, ".progress.log")
 try {
-  Set-Content -Path $tmp -Value $Prompt -Encoding UTF8
+  if ($tmp) { Set-Content -Path $tmp -Value $Prompt -Encoding UTF8 }
   if (Test-Path $Out) { Remove-Item $Out -Force }
   Push-Location $Repo
-  & $GrokExe --prompt-file $tmp -m $Model --output-format plain > $Out 2> $prog
+  & $GrokExe --prompt-file $promptPath --permission-mode bypassPermissions -m $Model --output-format plain > $Out 2> $prog
   $rc = $LASTEXITCODE
 } finally {
   Pop-Location -ErrorAction SilentlyContinue
-  Remove-Item $tmp -Force -ErrorAction SilentlyContinue
+  if ($tmp) { Remove-Item $tmp -Force -ErrorAction SilentlyContinue }
 }
 
 # --- verify（出力検証・盲目リトライ禁止）---
 # rc==0 を必須にする。grok がエラー終了（rc!=0）した場合は、部分出力があっても FAIL 扱い。
-if (($rc -eq 0) -and (Test-Path $Out) -and ((Get-Item $Out).Length -gt 0)) {
+$cancelled = (Test-Path $prog) -and ((Get-Content $prog -Raw) -match 'cancellationCategory["\:=\s]+PermissionCancelled')
+if (($rc -eq 0) -and -not $cancelled -and (Test-Path $Out) -and ((Get-Item $Out).Length -gt 0)) {
   Write-Host "OK rc=$rc out=$Out bytes=$((Get-Item $Out).Length) model=$Model"
   exit 0
 } else {
-  $why = if ($rc -ne 0) { "grok exit code $rc" } else { "$Out 未生成または空" }
+  $why = if ($cancelled) { 'PermissionCancelled marker' } elseif ($rc -ne 0) { "grok exit code $rc" } else { "$Out 未生成または空" }
   Write-Error "FAIL (${why})。盲目リトライ禁止。progress tail:"
   if (Test-Path $prog) { Get-Content $prog -Tail 12 | ForEach-Object { Write-Host $_ } }
   exit 1

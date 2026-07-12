@@ -22,7 +22,6 @@ Claude Code から Codex CLI (`codex exec`) にタスクを渡す正準スキル
 RUST_LOG=error codex exec "<prompt>" \
   --cd <repo> \
   -c model_reasoning_effort="medium" \
-  --ignore-user-config \
   --sandbox read-only \
   -o <out.md> \
   2> <progress.log>
@@ -32,7 +31,6 @@ RUST_LOG=error codex exec "<prompt>" \
 RUST_LOG=error codex exec "<prompt>" \
   --cd <repo> \
   -c model_reasoning_effort="medium" \
-  --ignore-user-config \
   --sandbox workspace-write \
   -o <out.md> \
   2> <progress.log>
@@ -53,10 +51,10 @@ bash .claude/skills/codex-dispatch/codex-run.sh <repo> <out.md> read-only "<prom
 | 最終回答だけ受け取る | `-o, --output-last-message <file>` | stdout=最終回答のみ。`-o`でファイル化 |
 | 進捗ログを context に入れない | `2> progress.log`（**`2>&1`禁止**） | 進捗・telemetryは stderr |
 | ログ抑制 | `RUST_LOG=error` | 既定infoでも reqwest/otel が出る |
-| 速度（タイムアウト回避） | `-c model_reasoning_effort="medium"` ＋ `--ignore-user-config` | config.toml の xhigh を無視し medium に固定。`-c reasoning_effort=medium` が必要な版もある |
+| 速度（タイムアウト回避） | `-c model_reasoning_effort="medium"` | user configを維持したままmediumを明示固定 |
 | 安全（レビューは読むだけ） | `--sandbox read-only` | 既定 read-only。編集時のみ workspace-write |
 | 機械可読 | `--json`（必要時） | stdout が JSONL |
-| 設定非依存の決定論実行 | `--ignore-user-config` / `--ignore-rules` | CI 向け |
+`--ignore-user-config` はWindowsの `[windows] sandbox="unelevated"` を無効化し、read-onlyへの沈黙フォールバックを起こすため使用禁止（2026-07-12実測）。
 
 ## 着手前プリフライト（必須・OOM/詰まり防止）
 
@@ -87,7 +85,8 @@ CC が回すのが不安定（RAM<5GB・既存agy稼働・2回連続失敗）な
 
 対象プロジェクトの `AGENTS.md` / `.handoff/RULES.md` を codex が読む。設計書を渡す:
 ```bash
-RUST_LOG=error codex exec "$(cat .handoff/IMPLEMENT_REQUEST_001.md)" --cd . -c model_reasoning_effort="medium" --ignore-user-config --sandbox workspace-write -o out.md 2> progress.log
+# Writeで長文プロンプトをファイル化し、短いパスだけをラッパーへ渡す
+bash .claude/skills/codex-dispatch/codex-run.sh . out.md workspace-write .handoff/IMPLEMENT_REQUEST_001.md
 ```
 
 ## 公式プラグインとの使い分け
@@ -106,5 +105,5 @@ RUST_LOG=error codex exec "$(cat .handoff/IMPLEMENT_REQUEST_001.md)" --cd . -c m
 | 版 | 日付 | 内容 |
 |---|------|------|
 | 0.3 | 2026-05-26 | sd003 framework に正準化して取り込み（sd003のミス＝正準レシピ不在を是正）。project-local ラッパー参照・OOM事例汎用化 |
-| 0.2 | 2026-05-26 | 事故対策。`2>&1 \| tee` 禁止→stderr分離+`-o`、xhigh→medium+`--ignore-user-config`、read-onlyサンドボックス、RAM/単一インスタンスのプリフライト、人手ハンドオフ、盲目リトライ禁止、ラッパー codex-run.sh を追加 |
+| 0.2 | 2026-05-26 | 事故対策。stderr分離+`-o`、medium固定、read-onlyサンドボックス、プリフライトを追加 |
 | 0.1 | (初版・user-global) | 並列ディスパッチ（誤: 2>&1\|tee・effort未制御） |

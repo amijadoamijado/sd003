@@ -6,6 +6,8 @@ allowed-tools: Bash, Read, Write
 
 # /grok-dispatch
 
+`--permission-mode bypassPermissions` は非対話実行に必須（2026-07-12 E2E実測）。必ず隔離workspaceで使用する。
+
 Claude Code 等の **Session Lead から** xAI 公式 Grok CLI にタスクを渡す **Assist mode** 用スキル。
 
 > **Lead mode は本スキルの対象外。** ユーザーが Grok を直接起動する、または「Grok主導で」等と言った場合は
