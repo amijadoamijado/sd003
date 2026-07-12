@@ -1,13 +1,15 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 118
+- **Total Sessions**: 119
 - **Latest Session**: 2026-07-12
 - **Project Start**: 2026-02-15
 
 ---
 
 ## 2026-07
+
+| 07-12 | **Windows実プロバイダーE2Eを完遂**。Grok成果物欠落の真因をPermissionCancelledと特定し、非対話権限・キャンセル検出・Windows実行解決・大容量出力・npm引数補正・dry-run入口を整備。Codex実装→Grokレビュー→Codex検証の3段階と成果物3件が成功 | dc78c35, fc88b02 | [Details](session-20260712-105933.md) |
 
 | 07-12 | **AI中立オーケストレーターを整備し、Codex主体E2E・実プロバイダ接続・共通ガード・`--scenario`互換を追加**。契約文書/HTMLブループリント/CLIランナー/fixture provider/プロバイダ設定/共通ガード/統合テストをまとめて実装し、既存パイプラインの呼び出し方を壊さず移行できる形へ寄せた。直近では `tt001` レジストリを廃止して `at003` の相続提案モジュールへ統合 | 19bd300, 8bff210, 17404bc, e1952bd | [Details](session-20260712-101439.md) |
 
