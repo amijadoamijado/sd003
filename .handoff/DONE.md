@@ -1,4 +1,4 @@
-# DONE.md - 完了報告（2026-07-12 Grok AI協調対応・旧ワークフロー遺物是正）
+# DONE.md - 完了報告（2026-07-12 AI中立オーケストレーター整備）
 
 ---
 
@@ -7,50 +7,55 @@
 **変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `.sd/ai-coordination/workflow/README.md` | 現行4AI軽量ディスパッチ版（Grok含む）へ全面書き直し |
-| `.sd/ai-coordination/workflow/templates/*.md`（6件） | 旧7段階ワークフロー遺物を`[ARCHIVED]`廃止notice内容へ上書き |
-| `.sd/ai-coordination/sessions/grok/.gitkeep` | 新規（`sessions/{antigravity,claude-code,codex}/`に揃える） |
-| `_archive/removed-overengineering-20260705/.sd/ai-coordination/workflow/**` | 旧テンプレート・README原本をコピー保存（7件） |
+| `docs/orchestrator-contract.md` | AI中立オーケストレーターの契約を文書化 |
+| `materials/html/ai-neutral-orchestrator-blueprint.html` | 実装方針の HTML ブループリントを追加 |
+| `src/orchestrator/types.ts` / `src/orchestrator/runner.ts` | オーケストレーターの型定義と実行ランナーを追加 |
+| `src/cli/commands/orchestrate.ts` / `src/cli/index.ts` / `src/index.ts` | CLI から実行できるように配線 |
+| `scripts/orchestrate.js` / `scripts/orchestrator-fixture-provider.js` | 実行エントリと fixture provider を追加 |
+| `config/orchestrator.codex-e2e.json` / `config/orchestrator.providers.json` | Codex E2E と実プロバイダ接続設定を追加 |
+| `scripts/check-orchestrator-providers.js` / `scripts/orchestrator-guard.js` | プロバイダ確認と共通ガードを追加 |
+| `.codex/hooks.json` / `.claude/skills/sd-deploy/templates/settings.json.template` | 共有ガードをフックへ配線 |
+| `tests/integration/orchestrator-e2e.test.ts` / `tests/integration/orchestrator-guard.test.ts` | E2E とガードの統合テストを追加 |
+| `scripts/agent-pipeline.sh` / `scripts/agent-implement.sh` / `scripts/agent-review.sh` / `scripts/agent-test.sh` | `--scenario` 互換を追加 |
+| `registry` 関連 | `tt001` を廃止し、`at003` 側の相続提案モジュールへ統合 |
 
 **変更内容の要約**
-ユーザー依頼「Grokをai協調ワークフローに対応させて」を発端に、`.sd/ai-coordination/workflow/templates/`（WORK_ORDER.md等6件）が2026-07-05の過剰設計撤去（`5f628f0`）で本来アーカイブされるはずが漏れていた旧7段階ワークフローの遺物と判明。テンプレートへのGrok追加ではなく、遺物の廃止notice化＋現行ルールとの整合を実施。
+AI 中立オーケストレーターとして `sd003` を使えるように、契約・ランナー・共有ガード・実プロバイダ設定・Codex E2E を一通り整えた。従来の `--scenario` 呼び出しも残し、移行途中でも壊れない構成にした。直近では `tt001` レジストリを廃止し、`at003` 側へ統合して整理した。
 
 ---
 
 ## 確認結果
 
 **実行したコマンド**
-```bash
-git diff --cached --stat   # 意図しないファイル混入がないか確認
-git commit -m "fix(ai-coordination): ..."
-git log --oneline -3
-ls .sd/ai-coordination/sessions/
+```powershell
+git log -1 --oneline
+git log --oneline -4
+git status --short
+Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 ```
 
 **結果**
 ```
-[master 3139110] fix(ai-coordination): archive stale 7-phase workflow templates + add Grok to 4AI structure
- 15 files changed, 346 insertions(+), 245 deletions(-)
-sessions/: antigravity/ claude-code/ codex/ grok/  ← grok/ 追加確認
+e1952bd registry: tt001を廃止（at003相続提案モジュールへ統合）
 ```
 
 **動作確認**
-- [x] `.sd/ai-coordination/` の健全性確認（消失なし・commit後も維持）
-- [x] 無関係な既存差分（scripts/agent-implement.sh等）が誤ってstageされていないことを確認
-- [ ] push（ユーザー未指示のため未実施）
+- [x] ワークツリーがクリーンであることを確認
+- [x] 最新コミットを確認
+- [x] セッション記録・履歴・引継ぎ文書を更新
 
 ---
 
 ## 残っていること
 
 **未完了タスク**
-- [ ] 今回のコミット（`3139110`）のpush可否をユーザーに確認
-- [ ] 他のsd-deploy先プロジェクト（at001/oc001/at002等）にも同様の`.sd/ai-coordination/workflow/templates/`遺物が伝播していないか確認
-- [ ] セッション開始時から存在した未コミット差分4件（`scripts/agent-implement.sh`/`scripts/agent-test.sh`/`docs/agy-suitability-report.md`/`scripts/recover-agy-artifacts.ps1`）の由来確認（本セッションでは不関与）
+- [ ] 実プロバイダを使った write 系 E2E の実施
+- [ ] 旧 project ID / task number を scenario に変換する互換レイヤーの追加
+- [ ] push 可否の判断
 
 **次の手順**
-- 次のタスク: 上記P1項目の着手
-- 依存関係: なし
+- 次のタスク: 上記 P1 項目の着手
+- 依存関係: 実プロバイダの認証・実行権限の確認
 
 ---
 
@@ -59,17 +64,12 @@ sessions/: antigravity/ claude-code/ codex/ grok/  ← grok/ 追加確認
 **設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| テンプレートにGrok欄追加 vs 廃止notice化 | 廃止notice化 | テンプレート自体が撤去済みの旧7段階ワークフローの遺物と判明。延命は過剰設計の再導入になる |
-| `.sd/`外への物理移動 vs コピー保存+上書き | コピー保存+上書き | `block-sd-destructive.sh`がmv/rmを移動元/移動先問わず無条件ブロックするため物理移動が不可能 |
-
-**採用しなかった案と理由**
-- 当初承認された「WORK_ORDER.md等にGrok欄追加」: root-cause-first裏取りで前提（テンプレートが現行運用の一部）が誤りと判明したため撤回、ユーザーに再確認の上で方針転換
+| fixture のみで終える vs 実プロバイダに接続する | まず fixture で固める | 実行経路とガードの品質を先に固定し、外部要因を切り離すため |
+| 旧 `project ID / task number` を即時破棄する vs `--scenario` 互換を残す | 互換を残す | 既存呼び出しを壊さず移行できるため |
 
 ---
 
 ## 追加情報
 
-- `.claude/rules/workflow/ai-coordination.md` と `.claude/skills/grok-dispatch/SKILL.md` は元々Grokを4AI体制として正しく扱えていた。今回の実質的な変更点は「テンプレートの延命を止めたこと」と「sessions/grok/の新設」の2点のみ。
-- auto-mode classifierが「ユーザー承認範囲を超えたスコープ拡張（廃止notice上書き）」を独立に検知しブロックした事例。二重の安全装置として機能した。
-
----
+- 実AI write E2E は次段階に分離した。認証情報やプロバイダ状態で結果が変動するため、ここで混ぜない方が安全。
+- 共有ガードは Codex / agy / Grok / Claude の運用差を吸収するための共通層として扱っている。
