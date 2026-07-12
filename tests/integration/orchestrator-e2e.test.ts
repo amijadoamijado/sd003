@@ -60,6 +60,24 @@ describe('AI-neutral orchestrator E2E', () => {
     expect(result.stages[1].status).toBe('pending');
   });
 
+  test('provider permission cancellation can never be reported as success', () => {
+    const cancelled = scenario({
+      providers: { codex: { command: process.execPath, args: ['-e', "process.stderr.write('cancellationCategory\\\":\\\"PermissionCancelled');process.exit(0)"] } },
+      stages: [{ id: 'review', role: 'reviewer', provider: 'codex' }],
+      expectedArtifacts: [],
+    });
+    const result = runScenario(cancelled, { runId: 'cancelled-run' });
+    expect(result.status).toBe('failed');
+    expect(result.stages[0].status).toBe('failed');
+    expect(result.error).toContain('cancelled by provider permissions');
+  });
+
+  test('dry-run completes as a successful validation with skipped stages', () => {
+    const result = runScenario(scenario(), { runId: 'dry-run', dryRun: true });
+    expect(result.status).toBe('succeeded');
+    expect(result.stages.every(stage => stage.status === 'skipped')).toBe(true);
+  });
+
   test('prohibited deploy commands are blocked before execution', () => {
     const blocked = scenario({ providers: { ...scenario().providers, agy: { command: 'clasp', args: ['deploy'] } } });
     const result = runScenario(blocked, { runId: 'guard-run' });

@@ -50,6 +50,10 @@ function writeManifest(manifestPath: string, manifest: RunManifest): void {
   fs.renameSync(temporary, manifestPath);
 }
 
+function hasProviderCancellation(stderr: string): boolean {
+  return /cancellationCategory["\\:=\s]+PermissionCancelled/i.test(stderr);
+}
+
 export function loadScenario(file: string): OrchestratorScenario {
   const scenario = JSON.parse(fs.readFileSync(file, 'utf8')) as OrchestratorScenario;
   if (scenario.version !== 1 || !scenario.id || !scenario.orchestrator || !Array.isArray(scenario.stages)) throw new Error('Invalid orchestrator scenario');
@@ -83,9 +87,12 @@ export function runScenario(scenario: OrchestratorScenario, options: RunOptions 
       });
       result.exitCode = execution.status ?? 1; result.stdout = execution.stdout || ''; result.stderr = execution.stderr || execution.error?.message || ''; result.completedAt = now().toISOString();
       if (execution.error || execution.status !== 0) { result.status = 'failed'; throw new Error(`Stage ${result.id} failed with exit code ${result.exitCode}: ${result.stderr}`); }
+      if (hasProviderCancellation(result.stderr)) { result.status = 'failed'; throw new Error(`Stage ${result.id} was cancelled by provider permissions`); }
       result.status = 'succeeded';
     }
-    if (!options.dryRun) {
+    if (options.dryRun) {
+      manifest.status = 'succeeded';
+    } else {
       manifest.artifacts = scenario.expectedArtifacts.map(relative => { const artifact = resolveInside(workspace, relative); if (!fs.existsSync(artifact)) throw new Error(`Expected artifact is missing: ${relative}`); return path.relative(workspace, artifact).replace(/\\/g, '/'); });
       manifest.status = 'succeeded';
     }

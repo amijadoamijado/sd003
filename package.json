@@ -17,6 +17,7 @@
     "sync:cli": "python scripts/sync-cli-commands.py",
     "sync:agy": "python scripts/sync-cli-commands.py",
     "orchestrate": "node scripts/orchestrate.js",
+    "orchestrate:dry-run": "node scripts/orchestrate.js --dry-run",
     "orchestrate:check": "node scripts/check-orchestrator-providers.js",
     "test": "jest",
     "test:watch": "jest --watch",

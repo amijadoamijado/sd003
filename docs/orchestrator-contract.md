@@ -52,6 +52,17 @@ Scenarios are JSON documents containing:
 
 Arguments may use `${workspace}`, `${evidenceDir}`, `${runId}`, `${task}`, and `${stage}` placeholders.
 
+On Windows PowerShell, use a positional scenario path through npm because some `npm.ps1` versions consume long options:
+
+```powershell
+npm run orchestrate -- config/orchestrator.codex-e2e.json
+npm run orchestrate:dry-run -- config/orchestrator.codex-e2e.json
+```
+
+Direct Node invocation continues to support `--scenario` and `--dry-run` normally.
+
+Non-interactive Grok stages require `bypassPermissions` with Grok CLI 0.2.93; `acceptEdits` may return exit code 0 while reporting `PermissionCancelled`. Because bypass mode is intentionally non-interactive, use it only with an isolated workspace and explicit expected artifacts. The runner treats a permission-cancellation marker as a failed stage even when the provider exits with code 0.
+
 ## Compatibility
 
 Existing Claude/Codex/agy/Grok skills remain adapters. They must translate into this contract rather than redefine state or completion. The TypeScript runner is the canonical execution path; Bash and PowerShell entrypoints, when retained, are thin wrappers only.

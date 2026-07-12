@@ -14,7 +14,7 @@
     "grok": {
       "command": "grok",
       "probeArgs": ["--version"],
-      "args": ["--cwd", "${workspace}", "--permission-mode", "acceptEdits", "--output-format", "plain", "--single", "${task}"]
+      "args": ["--cwd", "${workspace}", "--permission-mode", "bypassPermissions", "--output-format", "plain", "--single", "${task}"]
     },
     "claude": {
       "command": "claude",
