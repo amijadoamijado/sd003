@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "providers": {
+    "codex": {
+      "command": "codex",
+      "probeArgs": ["--version"],
+      "args": ["exec", "--ephemeral", "--sandbox", "workspace-write", "--cd", "${workspace}", "${task}"]
+    },
+    "agy": {
+      "command": "agy",
+      "probeArgs": ["--version"],
+      "args": ["--sandbox", "--mode", "accept-edits", "--prompt", "${task}"]
+    },
+    "grok": {
+      "command": "grok",
+      "probeArgs": ["--version"],
+      "args": ["--cwd", "${workspace}", "--permission-mode", "acceptEdits", "--output-format", "plain", "--single", "${task}"]
+    },
+    "claude": {
+      "command": "claude",
+      "probeArgs": ["--version"],
+      "args": ["--print", "--permission-mode", "acceptEdits", "--no-session-persistence", "${task}"]
+    }
+  }
+}

@@ -19,6 +19,12 @@
 
 set -euo pipefail
 
+if [[ "${1:-}" == "--scenario" ]]; then
+    [[ -n "${2:-}" ]] || { echo "Error: --scenario requires a JSON file" >&2; exit 2; }
+    _SD003_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    exec node "${_SD003_SCRIPT_DIR}/orchestrate.js" --scenario="${2}"
+fi
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -175,16 +181,34 @@ else
 
 ${TEST_CONTENT}"
 
-        # 実行処理（agyと従来CLIで分岐）
+        # 実行処理（agyと従来CLIで分岐、timeoutガードを追加）
         TEST_SUCCESS=false
         if [ "$ANTIGRAVITY_BIN" = "agy" ]; then
-            if agy --prompt "$TEST_PROMPT" --dangerously-skip-permissions > "${TEST_REPORT}" 2>&1 ; then
-                TEST_SUCCESS=true
+            echo -e "Executing agy for E2E Test (timeout: 5m)..."
+            if command -v timeout &>/dev/null; then
+                if timeout 300 agy --prompt "$TEST_PROMPT" --dangerously-skip-permissions > "${TEST_REPORT}" 2>&1 ; then
+                    TEST_SUCCESS=true
+                else
+                    STATUS=$?
+                    if [ $STATUS -eq 124 ]; then
+                        echo -e "${RED}Error: Antigravity CLIテスト実行がタイムアウト（5分）しました。認証待ちかロック競合の可能性があります。${NC}"
+                    fi
+                fi
+            else
+                if agy --prompt "$TEST_PROMPT" --dangerously-skip-permissions > "${TEST_REPORT}" 2>&1 ; then
+                    TEST_SUCCESS=true
+                fi
             fi
         else
             if echo "$TEST_PROMPT" | "$ANTIGRAVITY_BIN" > "${TEST_REPORT}" 2>&1 ; then
                 TEST_SUCCESS=true
             fi
+        fi
+
+        # Recover stranded deliverables from brain/ dir to project materials/
+        echo -e "${BLUE}Step 2b: テスト中に生成されたagy成果物の自動回収 (recover-agy-artifacts.sh)...${NC}"
+        if [ -f "${SCRIPT_DIR}/recover-agy-artifacts.sh" ]; then
+            bash "${SCRIPT_DIR}/recover-agy-artifacts.sh" --hours 1 || echo -e "${YELLOW}[WARN] 成果物回収に失敗しました（手動で recover-agy-artifacts.sh を実行してください）${NC}"
         fi
 
         if [ "$TEST_SUCCESS" = true ]; then

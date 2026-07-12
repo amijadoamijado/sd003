@@ -5,6 +5,17 @@ import { OrchestratorScenario, RunManifest, StageDefinition } from './types';
 
 export interface RunOptions { dryRun?: boolean; runId?: string; now?: () => Date; }
 
+function resolveExecutable(command: string): { command: string; prefixArgs: string[] } {
+  if (process.platform !== 'win32' || path.extname(command)) return { command, prefixArgs: [] };
+  for (const directory of (process.env.PATH || '').split(path.delimiter)) {
+    const shim = path.join(directory, `${command}.cmd`);
+    if (!fs.existsSync(shim)) continue;
+    const match = fs.readFileSync(shim, 'utf8').match(/"%dp0%\\([^"\r\n]+\.js)"/i);
+    if (match) return { command: process.execPath, prefixArgs: [path.join(directory, match[1])] };
+  }
+  return { command, prefixArgs: [] };
+}
+
 function resolveInside(root: string, relative: string): string {
   const resolvedRoot = path.resolve(root);
   const resolved = path.resolve(resolvedRoot, relative);
@@ -60,7 +71,8 @@ export function runScenario(scenario: OrchestratorScenario, options: RunOptions 
       assertSafeProvider(provider.command, args);
       result.status = 'running'; result.startedAt = now().toISOString(); writeManifest(manifestPath, manifest);
       if (options.dryRun) { result.status = 'skipped'; result.completedAt = now().toISOString(); continue; }
-      const execution = spawnSync(provider.command, args, { cwd: workspace, encoding: 'utf8', timeout: provider.timeoutMs ?? 300000, shell: false });
+      const executable = resolveExecutable(provider.command);
+      const execution = spawnSync(executable.command, [...executable.prefixArgs, ...args], { cwd: workspace, encoding: 'utf8', timeout: provider.timeoutMs ?? 300000, shell: false });
       result.exitCode = execution.status ?? 1; result.stdout = execution.stdout || ''; result.stderr = execution.stderr || execution.error?.message || ''; result.completedAt = now().toISOString();
       if (execution.error || execution.status !== 0) { result.status = 'failed'; throw new Error(`Stage ${result.id} failed with exit code ${result.exitCode}: ${result.stderr}`); }
       result.status = 'succeeded';

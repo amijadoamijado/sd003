@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "shell_command|Bash|Write|Edit|MultiEdit|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/orchestrator-guard.js\"",
+            "timeout": 10,
+            "statusMessage": "Checking SD003 shared safety policy"
+          }
+        ]
+      }
+    ]
+  }
+}

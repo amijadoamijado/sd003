@@ -22,6 +22,14 @@
 
 set -euo pipefail
 
+# AI-neutral v1 compatibility path. Legacy project/task arguments remain
+# available during migration; new callers should pass a scenario explicitly.
+if [[ "${1:-}" == "--scenario" ]]; then
+    [[ -n "${2:-}" ]] || { echo "Error: --scenario requires a JSON file" >&2; exit 2; }
+    _SD003_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    exec node "${_SD003_SCRIPT_DIR}/orchestrate.js" --scenario="${2}"
+fi
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'

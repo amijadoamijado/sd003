@@ -17,6 +17,12 @@
 
 set -euo pipefail
 
+if [[ "${1:-}" == "--scenario" ]]; then
+    [[ -n "${2:-}" ]] || { echo "Error: --scenario requires a JSON file" >&2; exit 2; }
+    _SD003_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    exec node "${_SD003_SCRIPT_DIR}/orchestrate.js" --scenario="${2}"
+fi
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -161,13 +167,14 @@ ${EXISTING_CODE}
 ## 出力形式（厳守）
 ファイルを直接書き込め。write_fileツールを使用してファイルを作成・変更せよ。
 差分形式（<<<<, ====, >>>>、patch形式）は絶対に使用しない。
+レポート・文書・データ・図表などの「成果物」を出力する場合は、~/.gemini/ などの隠しフォルダではなく、必ずプロジェクト内の適切なディレクトリ（例: materials/text/, docs/, src/ など）に直接保存せよ（Output Primacy原則）。
 説明は最小限にし、実装を中心に進めよ。"
 
 # Dry-run mode
 if [ "$DRY_RUN" = true ]; then
     echo ""
     echo -e "${YELLOW}========================================${NC}"
-    echo -e "${YELLOW}[DRY-RUN] Antigravityへ送信されるプロンプト:${NC}"
+    echo -e "${YELLOW}[DRY-RUN] Would execute: agent-implement.sh ${PROJECT_ID} ${TASK_NUM}${NC}"
     echo -e "${YELLOW}========================================${NC}"
     echo ""
     echo "$PROMPT"
@@ -190,16 +197,39 @@ fi
 # Create output directory
 mkdir -p "$OUTPUT_DIR"
 
-# Execute Antigravity in print mode with auto-approval
-RESULT=$(agy --prompt "$PROMPT" --dangerously-skip-permissions 2>&1) || {
-    echo -e "${RED}Error: Antigravity CLI実行に失敗しました${NC}"
-    echo "$RESULT" > "${OUTPUT_FILE%.md}-error.md"
-    echo -e "エラーログ: ${OUTPUT_FILE%.md}-error.md"
-    exit 1
-}
+# Execute Antigravity in print mode with auto-approval (with a 5-minute timeout guard)
+echo -e "Executing agy (timeout: 5m)..."
+if command -v timeout &>/dev/null; then
+    RESULT=$(timeout 300 agy --prompt "$PROMPT" --dangerously-skip-permissions 2>&1) || {
+        STATUS=$?
+        if [ $STATUS -eq 124 ]; then
+            echo -e "${RED}Error: Antigravity CLI実行がタイムアウト（5分）しました。認証待ちかロック競合の可能性があります。${NC}"
+        else
+            echo -e "${RED}Error: Antigravity CLI実行に失敗しました${NC}"
+        fi
+        echo "${RESULT:-[Timeout / No Output]}" > "${OUTPUT_FILE%.md}-error.md"
+        echo -e "エラーログ: ${OUTPUT_FILE%.md}-error.md"
+        exit 1
+    }
+else
+    RESULT=$(agy --prompt "$PROMPT" --dangerously-skip-permissions 2>&1) || {
+        echo -e "${RED}Error: Antigravity CLI実行に失敗しました${NC}"
+        echo "$RESULT" > "${OUTPUT_FILE%.md}-error.md"
+        echo -e "エラーログ: ${OUTPUT_FILE%.md}-error.md"
+        exit 1
+    }
+fi
 
 # Save output
 echo "$RESULT" > "$OUTPUT_FILE"
+
+# Recover stranded deliverables from brain/ dir to project materials/
+echo -e "${BLUE}Step 5: agy成果物の自動回収 (recover-agy-artifacts.sh)...${NC}"
+if [ -f "${SCRIPT_DIR}/recover-agy-artifacts.sh" ]; then
+    bash "${SCRIPT_DIR}/recover-agy-artifacts.sh" --hours 1 || echo -e "${YELLOW}[WARN] 成果物回収に失敗しました（手動で recover-agy-artifacts.sh を実行してください）${NC}"
+else
+    echo -e "${YELLOW}[WARN] 回回スクリプトが見つかりません: ${SCRIPT_DIR}/recover-agy-artifacts.sh${NC}"
+fi
 
 # Check for files written by Antigravity
 AGY_CHANGES=$(git status --porcelain 2>/dev/null | grep -v "^??" | head -20 || true)
