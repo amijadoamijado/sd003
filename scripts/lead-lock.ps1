@@ -4,8 +4,33 @@ param([Parameter(Position=0,Mandatory=$true)][ValidateSet('acquire','release','s
 $lock = Join-Path (Resolve-Path (Join-Path $PSScriptRoot '..\.git')) 'sd-lead.lock'
 function Read-Lock { if (Test-Path $lock) { try { Get-Content $lock -Raw | ConvertFrom-Json } catch { $null } } }
 function Is-Live($record) { if (-not $record) { return $false }; return $null -ne (Get-Process -Id $record.pid -ErrorAction SilentlyContinue) }
+function Get-RealOwnerPid {
+  $process = Get-CimInstance Win32_Process -Filter "ProcessId=$PID"
+  $realPid = $process.ParentProcessId
+  while ($process -and $process.ParentProcessId -ne 0) {
+    $parentPid = $process.ParentProcessId
+    $parent = Get-CimInstance Win32_Process -Filter "ProcessId=$parentPid" -ErrorAction SilentlyContinue
+    if (-not $parent) { break }
+    $name = $parent.Name.ToLower()
+    $cmd = $parent.CommandLine
+    $isTemporary = $false
+    if ($name -match '^(pwsh|powershell|cmd|bash|sh|node)\.exe$') {
+      if ($cmd -and ($cmd -match '\.(ps1|sh|js|bat|cmd)\b' -or $cmd -match '\s-(File|Command|c)\b')) {
+        $isTemporary = $true
+      }
+    } elseif ($name -match '^(git|tsc|npm|eslint)\.exe$') {
+      $isTemporary = $true
+    }
+    if (-not $isTemporary) {
+      $realPid = $parentPid
+      break
+    }
+    $process = $parent
+  }
+  return $realPid
+}
 $current = Read-Lock
-$ownerPid = (Get-CimInstance Win32_Process -Filter "ProcessId=$PID").ParentProcessId
+$ownerPid = Get-RealOwnerPid
 switch ($Action) {
   'acquire' {
     if (-not $Ai) { throw 'ai name is required' }

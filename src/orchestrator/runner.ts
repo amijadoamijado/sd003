@@ -21,7 +21,9 @@ export function resolveExecutable(command: string): { command: string; prefixArg
 function resolveInside(root: string, relative: string): string {
   const resolvedRoot = path.resolve(root);
   const resolved = path.resolve(resolvedRoot, relative);
-  if (resolved !== resolvedRoot && !resolved.startsWith(resolvedRoot + path.sep)) throw new Error(`Path escapes workspace: ${relative}`);
+  const canonicalRoot = canonicalPathForComparison(resolvedRoot);
+  const canonicalResolved = canonicalPathForComparison(resolved);
+  if (canonicalResolved !== canonicalRoot && !canonicalResolved.startsWith(canonicalRoot + path.sep)) throw new Error(`Path escapes workspace: ${relative}`);
   return resolved;
 }
 
