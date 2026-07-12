@@ -1,31 +1,15 @@
-# Codex レビュー運用ガイド
+# Codex 運用ガイド
 
-## 役割
+Codexは公式品質印を担う。案件IDのないアドホックFast Reviewは `.codex/CODEX_NATIVE.md` に従い会話内で完結する。
 
-Codex は SD003 ワークフローの Phase 2（発注書レビュー）と Phase 5（実装レビュー）を担当する。
+Claude Lead時は `/codex:review` プラグイン、Codex Lead時は直接レビューする。正式レビュー時のみ自由形式の結果を `review/{案件ID}/` に保存する。依頼文書は `spec/{案件ID}/` 配下の自由形式とし、handoff-logは任意（AI間handoff発生時に1行推奨）。
 
-## レビューの基準（Output Primacy 配点）
+## Output Primacy 配点
 
-| 項目 | 配点 |
-|------|------|
-| UI/アウトプット品質（視覚評価70点満点） | 60% |
-| 機能動作（実データで動くか） | 30% |
-| 内部コード品質 | 10% |
+| 観点 | 配点 |
+|---|---:|
+| UI・ユーザーが受け取るアウトプット | 60 |
+| 機能動作 | 30 |
+| 内部品質 | 10 |
 
-- 「内部コード品質が完璧だが画面が成立していない」→ Request Changes 確定
-- 「内部の綺麗さ」のみを理由とする Request Changes は禁止（Silent Interior）
-
-## 報告
-
-- `templates/REVIEW_REPORT.md` を必ず使用
-- 保存先: `review/{案件ID}/REVIEW_{種別}_{NNN}.md`
-- handoff-log.json に `review_complete` を記録
-
-## ad-hoc レビューとの使い分け
-
-| 用途 | 手段 |
-|------|------|
-| 案件の正式レビュー（本ガイド） | `/workflow:review {案件ID} {NNN}` |
-| 一発相談・軽いレビュー | `/codex:review`, `/codex:adversarial-review`（公式プラグイン） |
-
-呼び出し方法の正準: `.claude/skills/codex-dispatch/SKILL.md`
+重大度順に、場所・影響・修正案・検証証拠を報告する。

@@ -72,7 +72,7 @@ Artifact（claude.ai）は Grok では使えない。構造化確認は **HTML /
 1. 作業を止め、repo の同時編集を避ける。
 2. 渡す内容: 目的、触ったパス、検証結果、残タスク、期待する相手の作業。
 3. Codex（レビュー）/ agy（E2E）/ Claude（入口復帰）へ渡す。
-4. 可能なら `../handoff/handoff-log.json` に一行残す。
+4. handoff-logは任意（AI間handoff発生時に1行推奨）。
 
 ## 失敗時
 

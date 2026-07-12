@@ -127,4 +127,23 @@ describe('AI-neutral orchestrator E2E', () => {
     expect(result.error).toContain('dirty Git workspace');
     expect(fs.readFileSync(path.join(workspace, 'sentinel.txt'), 'utf8')).toBe('user change');
   });
+
+  test('bypassPermissions is rejected when the repository root is used directly', () => {
+    const result = runScenario(scenario({ workspace: path.resolve(__dirname, '../..'), allowDirtyWorkspace: true,
+      providers: { codex: { command: process.execPath, args: ['bypassPermissions'] } },
+      stages: [{ id: 'review', role: 'reviewer', provider: 'codex' }], expectedArtifacts: [] }), { runId: 'repository-bypass-run' });
+    expect(result.status).toBe('failed');
+    expect(result.error).toContain('unattendedWorkspaceAck');
+  });
+
+  test('a dirty real repository subdirectory is rejected', () => {
+    const repository = path.join(root, 'repository');
+    const subdirectory = path.join(repository, 'nested');
+    fs.mkdirSync(subdirectory, { recursive: true });
+    execFileSync('git', ['init'], { cwd: repository });
+    fs.writeFileSync(path.join(subdirectory, 'sentinel.txt'), 'user change');
+    const result = runScenario(scenario({ workspace: subdirectory }), { runId: 'dirty-subdirectory-run' });
+    expect(result.status).toBe('failed');
+    expect(result.error).toContain('dirty Git workspace');
+  });
 });

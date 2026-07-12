@@ -37,8 +37,9 @@ function assertSafeProvider(command: string, args: string[]): void {
 }
 
 function isDirtyGitWorkspace(workspace: string): boolean {
-  if (!fs.existsSync(path.join(workspace, '.git'))) return false;
-  const result = spawnSync('git', ['-C', workspace, 'status', '--porcelain'], { encoding: 'utf8' });
+  const probe = spawnSync('git', ['-C', workspace, 'rev-parse', '--is-inside-work-tree'], { encoding: 'utf8' });
+  if (probe.status !== 0) return false;
+  const result = spawnSync('git', ['-C', workspace, 'status', '--porcelain', '--', '.'], { encoding: 'utf8' });
   if (result.status !== 0) throw new Error(`Unable to inspect Git workspace: ${result.stderr}`);
   return result.stdout.trim().length > 0;
 }
@@ -50,8 +51,20 @@ function writeManifest(manifestPath: string, manifest: RunManifest): void {
   fs.renameSync(temporary, manifestPath);
 }
 
-function hasProviderCancellation(stderr: string): boolean {
-  return /cancellationCategory["\\:=\s]+PermissionCancelled/i.test(stderr);
+function gitCommonDir(workspace: string): string | undefined {
+  const result = spawnSync('git', ['-C', workspace, 'rev-parse', '--git-common-dir'], { encoding: 'utf8' });
+  return result.status === 0 ? path.resolve(workspace, result.stdout.trim()) : undefined;
+}
+
+function isRepositoryWorkspace(workspace: string): boolean {
+  const repositoryRoot = path.resolve(__dirname, '..', '..');
+  if (workspace === repositoryRoot || workspace.startsWith(repositoryRoot + path.sep)) return true;
+  const repositoryCommonDir = gitCommonDir(repositoryRoot);
+  return repositoryCommonDir !== undefined && gitCommonDir(workspace) === repositoryCommonDir;
+}
+
+function hasProviderCancellation(output: string, patterns?: string[]): boolean {
+  return (patterns ?? ['cancellationCategory["\\\\:=\\s]+PermissionCancelled']).some(pattern => new RegExp(pattern, 'i').test(output));
 }
 
 export function loadScenario(file: string): OrchestratorScenario {
@@ -71,6 +84,10 @@ export function runScenario(scenario: OrchestratorScenario, options: RunOptions 
   const manifest: RunManifest = { contractVersion: 1, runId, scenarioId: scenario.id, task: scenario.task, orchestrator: scenario.orchestrator, workspace, status: 'running', startedAt: now().toISOString(), stages: scenario.stages.map(stage => ({ ...stage, status: 'pending' })), artifacts: [] };
   try {
     if (!scenario.allowDirtyWorkspace && isDirtyGitWorkspace(workspace)) throw new Error('Guard blocked dirty Git workspace');
+    const hasBypassPermissions = scenario.stages.some(stage => scenario.providers[stage.provider].args
+      .map(arg => substitute(arg, scenario, runId, stage))
+      .some(arg => arg === 'bypassPermissions' || arg === '--dangerously-skip-permissions'));
+    if (hasBypassPermissions && isRepositoryWorkspace(workspace) && !scenario.unattendedWorkspaceAck) throw new Error('Guard blocked bypassPermissions in repository workspace without unattendedWorkspaceAck');
     for (const result of manifest.stages) {
       const provider = scenario.providers[result.provider];
       const args = provider.args.map(arg => substitute(arg, scenario, runId, result));
@@ -87,7 +104,10 @@ export function runScenario(scenario: OrchestratorScenario, options: RunOptions 
       });
       result.exitCode = execution.status ?? 1; result.stdout = execution.stdout || ''; result.stderr = execution.stderr || execution.error?.message || ''; result.completedAt = now().toISOString();
       if (execution.error || execution.status !== 0) { result.status = 'failed'; throw new Error(`Stage ${result.id} failed with exit code ${result.exitCode}: ${result.stderr}`); }
-      if (hasProviderCancellation(result.stderr)) { result.status = 'failed'; throw new Error(`Stage ${result.id} was cancelled by provider permissions`); }
+      if (hasProviderCancellation(`${result.stdout}\n${result.stderr}`, provider.cancellationPatterns)) { result.status = 'failed'; throw new Error(`Stage ${result.id} was cancelled by provider permissions`); }
+      for (const relative of result.expectedArtifacts ?? []) {
+        if (!fs.existsSync(resolveInside(workspace, relative))) { result.status = 'failed'; throw new Error(`Stage ${result.id} expected artifact is missing: ${relative}`); }
+      }
       result.status = 'succeeded';
     }
     if (options.dryRun) {

@@ -2,7 +2,7 @@
 
 ## Principle
 
-The orchestrator is a role, not a product. Claude, Codex, Antigravity, Grok, or a deterministic local provider may fill any role when its configured capabilities satisfy the scenario.
+The orchestrator is a role, not a product. Claude, Codex, Antigravity, Grok, or a deterministic local provider may fill any role when its configured capabilities satisfy the scenario. The `orchestrator` field is an accountability label; the deterministic runner remains the execution authority.
 
 ## Roles
 
@@ -17,7 +17,7 @@ Role names are stable. Provider names are replaceable.
 
 ## State model
 
-Each stage moves through `pending -> running -> succeeded|failed|skipped`. A run is successful only when every required stage succeeds and every expected artifact exists. Provider unavailability, non-zero exit, timeout, and missing artifacts are failures; none may be rewritten as success.
+Each stage moves through `pending -> running -> succeeded|failed|skipped`. A run is successful only when every stage succeeds and every expected artifact exists. Provider unavailability, non-zero exit, timeout, and missing artifacts are failures; none may be rewritten as success.
 
 ## Safety invariants
 
@@ -32,7 +32,7 @@ Each stage moves through `pending -> running -> succeeded|failed|skipped`. A run
 
 A run is complete only when:
 
-- all required roles reached `succeeded`;
+- all stages reached `succeeded`;
 - expected artifacts exist inside the configured workspace;
 - the manifest was written;
 - the runner exits with code 0.
@@ -50,7 +50,7 @@ Scenarios are JSON documents containing:
 - `expectedArtifacts` relative to the workspace;
 - optional `allowDirtyWorkspace` for an explicitly accepted dirty repository.
 
-Arguments may use `${workspace}`, `${evidenceDir}`, `${runId}`, `${task}`, and `${stage}` placeholders.
+Arguments may use `${workspace}`, `${evidenceDir}`, `${runId}`, `${task}`, `${stage}`, and `${role}` placeholders.
 
 On Windows PowerShell, use a positional scenario path through npm because some `npm.ps1` versions consume long options:
 
@@ -62,6 +62,8 @@ npm run orchestrate:dry-run -- config/orchestrator.codex-e2e.json
 Direct Node invocation continues to support `--scenario` and `--dry-run` normally.
 
 Non-interactive Grok stages require `bypassPermissions` with Grok CLI 0.2.93; `acceptEdits` may return exit code 0 while reporting `PermissionCancelled`. Because bypass mode is intentionally non-interactive, use it only with an isolated workspace and explicit expected artifacts. The runner treats a permission-cancellation marker as a failed stage even when the provider exits with code 0.
+
+Until cancellation markers are measured and registered for Claude and agy, scenarios using either provider must declare per-stage `expectedArtifacts`.
 
 ## Compatibility
 

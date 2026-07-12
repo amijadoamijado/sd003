@@ -1,0 +1,16 @@
+{
+  "version": 1, "id": "20260712-real-codex-lead-e2e",
+  "task": "Create a minimal AI-neutral orchestration proof. Write only artifacts/${stage}.json as valid JSON with role, stage, provider, decision, and summary.",
+  "workspace": "test-results/orchestrator-real-e2e/workspace", "evidenceDir": "test-results/orchestrator-real-e2e/evidence",
+  "orchestrator": "codex", "unattendedWorkspaceAck": true,
+  "providers": {
+    "codex": { "command": "codex", "args": ["exec", "--ephemeral", "--sandbox", "workspace-write", "--cd", "${workspace}", "Role=${role}; Stage=${stage}; ${task}"], "timeoutMs": 300000 },
+    "grok": { "command": "grok", "args": ["--cwd", "${workspace}", "--permission-mode", "bypassPermissions", "--output-format", "plain", "--single", "Role=${role}; Stage=${stage}; ${task}"], "timeoutMs": 300000 }
+  },
+  "stages": [
+    { "id": "implement", "role": "implementer", "provider": "codex", "expectedArtifacts": ["artifacts/implement.json"] },
+    { "id": "review", "role": "reviewer", "provider": "grok", "expectedArtifacts": ["artifacts/review.json"] },
+    { "id": "test", "role": "tester", "provider": "codex", "expectedArtifacts": ["artifacts/test.json"] }
+  ],
+  "expectedArtifacts": ["artifacts/implement.json", "artifacts/review.json", "artifacts/test.json"]
+}

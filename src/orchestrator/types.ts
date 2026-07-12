@@ -1,10 +1,10 @@
 export type StageStatus = 'pending' | 'running' | 'succeeded' | 'failed' | 'skipped';
-export interface ProviderDefinition { command: string; args: string[]; timeoutMs?: number; }
-export interface StageDefinition { id: string; role: 'implementer' | 'reviewer' | 'tester'; provider: string; required?: boolean; }
+export interface ProviderDefinition { command: string; args: string[]; timeoutMs?: number; cancellationPatterns?: string[]; }
+export interface StageDefinition { id: string; role: 'implementer' | 'reviewer' | 'tester'; provider: string; expectedArtifacts?: string[]; }
 export interface OrchestratorScenario {
   version: 1; id: string; task: string; workspace: string; evidenceDir: string; orchestrator: string;
   providers: Record<string, ProviderDefinition>; stages: StageDefinition[]; expectedArtifacts: string[];
-  allowDirtyWorkspace?: boolean;
+  allowDirtyWorkspace?: boolean; unattendedWorkspaceAck?: boolean;
 }
 export interface StageResult extends StageDefinition {
   status: StageStatus; startedAt?: string; completedAt?: string; exitCode?: number; stdout?: string; stderr?: string;

@@ -20,7 +20,7 @@ Claude Code / Codex（レビュー） / Antigravity（実装・E2E） / Grok（L
 | `review/{案件ID}/` | 正式報告書（案件IDが明示された時のみ・自由形式） |
 | `CODEX_GUIDE.md` | Codex レビュー運用 |
 | `GROK_GUIDE.md` | Grok Lead / Assist 運用 |
-| `../handoff/handoff-log.json` | AI間引き継ぎログ（記録必須） |
+| `../handoff/handoff-log.json` | 任意（AI間handoff発生時に1行推奨） |
 | `../sessions/{ai}/` | AI別セッション記録（antigravity / claude-code / codex / grok） |
 
 ## 依頼のかけ方
