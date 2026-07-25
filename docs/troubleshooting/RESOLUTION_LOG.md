@@ -36,6 +36,47 @@
 
 <!-- 新しいエントリは上に追加 -->
 
+## 2026-07-25 Playwrightブラウザバイナリのgit混入によるpush恒久不能（fw003/oc001/ac001）
+
+### 差異カテゴリ
+[x] 実装の逸脱（playwright-cache ルール違反が git 履歴に焼き付いた）
+[x] 外部要因・環境（GitHub の1ファイル100MB上限）
+
+### 症状
+fw003 / oc001 / ac001 の3リポジトリで、Chromium バイナリ（chrome.dll 246〜254MB 等）が
+コミットされており、**GitHub の100MB上限により push が構造的に不可能**だった。
+oc001 は19コミットが取り残され、旧 post-commit（無音push）のため誰も気づかなかった
+（＝B17「無音push失敗の可視化」が対象にした事象そのもの。文字化け復元コミットの push 失敗
+HTTP 408 で発覚）。
+
+| PJ | 混入パス | 未push容量 |
+|----|---------|-----------|
+| fw003 | `pw-browsers/` | 529MB |
+| oc001 | `.playwright-browsers/` | 700MB |
+| ac001 | `node_modules/playwright-core/.local-browsers/`（HEADに存在） | ahead 5 |
+
+### 解決策（fw003 / oc001 実施済み）
+1. バックアップ: `git bundle create .git/pre-filter-backup-20260725.bundle --all`（238MB/389MB、各リポジトリの .git/ 内に保全）
+2. `git filter-repo --invert-paths --path <dir> --force` で履歴から除去
+   （実行前に作業ツリー清浄を確認。filter-repo は reset --hard 相当を行うため未コミット変更があると失われる）
+3. `.gitignore` に当該ディレクトリを追記して再発防止
+4. origin 再設定（filter-repo が remote を削除する）→ force push → upstream 追跡を張り直し
+
+**結果**: fw003 529MB→1.4MB、oc001 700MB→134MB。100MB超blob 0個。リモート一致確認済み。
+fw003 はバイナリ混入がリモート先端より後だったため、それ以前のハッシュ不変で fast-forward になった。
+
+### 未対応（ac001）
+ac001 は無関係の未コミット変更99件（文字化け復元37件含む）を抱えており、filter-repo の
+reset --hard で失われるため**保留**。復元ファイルの commit を済ませてから同手順を適用すること。
+
+### 教訓
+1. **100MB超のファイルを一度でも commit すると、そのリポジトリは履歴書き換えまで永久に push 不能。**
+   pre-commit で 50MB 超をブロックする物理ガードレールが未整備（改善候補）。
+2. `.claude/rules/global/playwright-cache.md`（共有キャッシュ `D:\playwright-browsers` 使用）の
+   違反はディスク容量問題ではなく **push 恒久不能**として現れる。
+3. 無音 push 失敗（旧 post-commit）が本問題を4か月隠した。B17 修正（auto-push.log + 失敗マーカー）の
+   全 PJ 展開が根本対策。
+
 ## 2026-07-25 一括移行による18プロジェクト・229ファイルの文字化け（4か月放置）
 
 ### 差異カテゴリ
