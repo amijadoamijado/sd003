@@ -1,13 +1,15 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 120
-- **Latest Session**: 2026-07-12
+- **Total Sessions**: 121
+- **Latest Session**: 2026-07-25
 - **Project Start**: 2026-02-15
 
 ---
 
 ## 2026-07
+
+| 07-25 | **無音故障2件の修正 → フリート監査 → 一括移行事故の全件復旧**。①Codex自動レビューhookが `231aca3`(03-31)以降**4か月一度も成功していなかった**（`codex review` は `--commit` と `[PROMPT]` が排他で exit 2、`2>/dev/null` が真因を隠蔽）→ 正準 `codex exec` へ復帰・stderr可視化・opt-in化（実レビュー生成を実測確認）。②post-commitの自動pushが結果を破棄していた→`.git/auto-push.log`＋失敗マーカー＋次回コミット冒頭で警告。③監査で**2026-03-28の`.kiro→.sd`一括移行が18PJ・229ファイルの日本語をCP932誤読で焼いていた**ことを発見（ASCII・改行まで欠落＝変換では復元不能）→git親リビジョンから**全件復元・8,872ファイル再走査で残存0**。④復元中にHTTP 408で発覚した**Chromiumバイナリgit混入によるpush恒久不能**（GitHub 100MB上限）をfw003/oc001/ac001で`filter-repo`除去・force push（oc001は19コミット取り残しが解消）。⑤deploy.shに`.gitignore`処理が丸ごと欠けていたparity gapを実装、版数刻印の無音4件を実測値で修復、死んだGrokモデル記述を修正、復活した自動レビューが初日に検出したdeploy.ps1のoptional skills除外不一致を修正。FRAMEWORK_VERSION 2.17.0 | 5e4f5e0, 3f319e0, 1d8b8f0, 3f2029b, b12028c, 8a4a81e, b19cca7 | [Details](session-20260725-170018.md) |
 
 | 07-12 | **Grok Lead mode実機実測（`grok inspect`）**: `grok.md`と`.grok/GROK_NATIVE.md`は自動読込されず（Project Instructions=AGENTS.md/Claude.md/.claude/rules/README.md+~/.claude/Claude.mdのみ）。公式仕様も`grok.md`非対応を確認。隔離worktree(`sd003-worktrees/grok-lead-test`)で検証、worktree上の`lead-lock acquire`は`.git`がファイルのため失敗。GROK_GUIDEへ「起動後まずgrok.md/GROK_NATIVE.mdを読ませる」を追記 | 94b308e, 66edc3a | — |
 

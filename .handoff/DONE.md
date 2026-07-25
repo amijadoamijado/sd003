@@ -1,23 +1,34 @@
-# DONE.md - 4AI Lead/Assist設定レビュー→改善実装→Grok検証 完了報告
+# DONE.md - 無音故障2件の修正 → フリート監査 → 一括移行事故の全件復旧 完了報告
 
-セッション: 2026-07-12 13:44:58 | 最新コミット: 065fa2c
+セッション: 2026-07-25 17:00:18 | 最新コミット: b19cca7 | 記録: `.sessions/session-20260725-170018.md`
 
 ---
 
 ## やったこと
 
-**変更したファイル（主要・27パス変更/新規、詳細は session-current.md）**
+**変更したファイル（sd003）**
 | ファイル | 変更内容 |
 |---------|----------|
-| `src/orchestrator/runner.ts`, `types.ts` | bypassPermissions隔離ガード、git実体ベースdirty判定、沈黙失敗検出一般化、stage単位artifact検査、Windows大小文字正規化 |
-| `scripts/lead-lock.ps1`（新規） | repo lock実体化（`.git/sd-lead.lock`・acquire/release/status/stale奪取） |
-| `.claude/skills/agy-dispatch/`（新規） | agy正準dispatchラッパー（grok-run.ps1ミラー） |
-| `.claude/skills/{codex,grok}-dispatch/*` | fail-loud化、`--ignore-user-config`撤去、PermissionCancelled検出精密化 |
-| `AGENTS.md`, `antigravity.md`, `.handoff/RULES.md`, `.codex/CODEX_NATIVE.md`, `.grok/GROK_NATIVE.md` | 旧7段階ワークフロー世界を一掃、Lead流動化（入口CLI=Session Lead）に同期 |
-| `.claude/skills/sd-deploy/*`, `sd-upgrade/upgrade.ps1` | deploy/upgrade配布系を4AI時代に同期 |
+| `.claude/hooks/agent-review.sh` | `codex review --commit`＋PROMPT（排他でexit 2）→ 正準 `codex exec` へ復帰。stderr tail を成果物に添付。既定OFF・`SD_AUTO_REVIEW=1` のopt-in化＋300秒上限 |
+| `scripts/agent-review.sh` | 同型の壊れた invocation を修正＋stderr可視化 |
+| `scripts/agent-pipeline.sh` | 同上（`--commit` / `--uncommitted` 両方が壊れていた） |
+| `.claude/skills/sd-deploy/templates/git-hooks/post-commit` | 自動pushの結果を `.git/auto-push.log` に記録、失敗時マーカー＋次回コミット冒頭で警告 |
+| `.git/hooks/post-commit` | 実体をテンプレートと同期 |
+| `.claude/skills/sd-deploy/deploy.ps1` | gitignore Phase 5-5b に `.codex-review-result.md` 追加／optional skills 除外をコピー側にも適用／FRAMEWORK_VERSION 2.17.0 |
+| `.claude/skills/sd-deploy/deploy.sh` | **`.gitignore` 処理が丸ごと欠けていた**（parity gap）ため新規実装／FRAMEWORK_VERSION 2.17.0 |
+| `.agents/` `.grok/` ミラー | sync-cli-commands.py で同期 |
+| `CLAUDE.md` | 死んだGrokモデル `grok-build` の既定案内を削除（`grok models` 実測で現存は `grok-4.5` のみ） |
+| `docs/troubleshooting/RESOLUTION_LOG.md` | 事故2件（文字化け一括破壊 / バイナリ混入push不能）を記録 |
+
+**他プロジェクト**
+- 文字化け復元 231件（18PJ）、版数刻印4件（ta001/at002/fl006/ac001）、`.gitignore` 3件、履歴書き換え3件
 
 **変更内容の要約**
-「4AI（Claude/Codex/agy/Grok）Lead/Assist設定をレビューして改善案を出す」依頼に対し、6観点71エージェントで多角レビュー→改善16件を確定→依頼書化してCodexへ実装ディスパッチ→Grok独立検証（1回目REQUEST_CHANGES・実行プローブでP0欠陥実証→修正→APPROVE）まで、レビュー対象の協調体制自身を使って完遂した。
+Codex自動レビューhookが `231aca3`(2026-03-31)以降**4か月一度も成功していなかった**問題を修正
+（`codex review` は `--commit` と `[PROMPT]` が排他で exit 2、`2>/dev/null` が真因を隠蔽）。
+その調査から **2026-03-28 の `.kiro→.sd` 一括移行が18PJ・229ファイルの日本語をCP932誤読で焼いていた**事故を発見し、
+git親リビジョンから全件復元。さらに復元コミットのpush失敗から、Chromiumバイナリgit混入による
+**push恒久不能**（GitHub 100MB上限）を3PJで発見し `git filter-repo` で解消した。
 
 ---
 
@@ -25,35 +36,46 @@
 
 **実行したコマンド**
 ```bash
-npm run build
-npm test
-npm run lint
+npm test                                              # 88 tests / 11 suites
+bash -n <各修正シェル>                                  # 構文チェック
+pwsh [Parser]::ParseFile(deploy.ps1)                  # パースチェック
+SD_AUTO_REVIEW=1 bash .claude/hooks/agent-review.sh   # 実レビュー生成（実機）
+git filter-repo --invert-paths --path <dir> --force   # fw003 / oc001 / ac001
 ```
 
 **結果**
 ```
 Test Suites: 11 passed, 11 total
 Tests:       88 passed, 88 total
-✓ LINT_CLEAN (errors 0)
-Build successful
+
+[auto-review] 2026-03-08以来はじめて実レビュー生成（Warning 2 / Info 1）
+[auto-push]   [2026-07-25 13:46:02] branch=master commit=5e4f5e0 exit=0
+              4db367a..5e4f5e0  master -> master
+[文字化け]     8,872ファイル再走査 → 残存0件 / ac001 275ファイル → 残存0件
+[filter-repo] fw003 529MB→1.4MB / oc001 700MB→134MB / ac001 →3.6MB、100MB超blob 0個
 ```
 
 **動作確認**
-- [x] Grok実行プローブ: `d:\claudecode\sd003`（ドライブ小文字）+ `--permission-mode=bypassPermissions` でガード発火（修正前はすり抜け→修正後は`GUARD_FIRED=true`）
-- [x] lead-lock acquire/release/status/stale奪取を実行確認
-- [x] Codex実装物の`git diff --check`（改行コード等）確認
-- [x] push完了、origin/masterと同期確認済み
+- [x] 既定OFFで `.codex-review-result.md` を書かない（mtime不変で確認）
+- [x] `SD_AUTO_REVIEW=1` で実レビューが生成される
+- [x] 自動pushの結果がログに記録される（実コミットで確認）
+- [x] 復元ファイルが日本語として読める（複数サンプルをReadで確認）
+- [x] 3PJのforce push後、リモートとローカルのhash一致（`git ls-remote` 照合）
 
 ---
 
 ## 残っていること
 
 **未完了タスク**
-- [x] Grok Lead mode実機実測（完了：`grok inspect`実証、`GROK_GUIDE.md`追記、TIMELINE記録完了）
-- [x] agy非対話の権限拒否時出力の実測（調査の結果、タイムアウト/ハング仕様のためcancellationPatterns登録不要と判定。調査報告書作成完了）
+- [ ] 44PJが旧 `agent-review.sh`（常時ON・壊れたまま）を回し続けている。`/sd-upgrade` 展開の判断待ち
+- [ ] pre-commit で50MB超ファイルをブロックする物理ガードレールが未整備
+- [ ] B17（auto-push可視化）の配信先展開。現状44PJは無音pushのまま
+- [ ] oc001 の切れたシンボリックリンク `.claude/skills/webapp-testing`
+- [ ] nm002 の版数刻印が実体より1つ古い（2.14.0 vs 2.15.0）
+- [ ] deploy.sh に optional skills 除外機能が無い（ps1との機能差）
 
 **次の手順**
-- 次のタスク: なし（すべてのタスクを完了）
+- 次のタスク: P1（44PJの壊れたhook対応 / 50MB超ブロックのガードレール新設 / B17展開）
 - 依存関係: なし
 
 ---
@@ -63,19 +85,28 @@ Build successful
 **設計上の選択**
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| grok-run.ps1のモデル固定 vs CLI既定委譲 | CLI既定委譲 | `grok-build`が実測でunknown model id化。サーバ側ラインナップ変更に強くする |
-| lead-lock生存判定: プロセス監視 vs pid記録+stale奪取 | pid記録+stale奪取（fail-open） | L3/L4と同型パターン。ハードロックで実運用を止めない |
-| PermissionCancelled検出: 裸マーカー一致 vs provider応答行限定 | provider応答行限定（行頭120字以内） | 裸一致は「その文字列を扱うだけの正常出力」を誤検出する実測偽陽性 |
+| 自動レビュー: 常時ON / opt-in / hook撤去 | **opt-in（既定OFF）** | 実レビューは2行diffでも3〜4分。PostToolUse は同期実行（timeout=600）で毎コミット数分ブロックする。直す＝有効化ではない |
+| 配信先展開: フル `/sd-upgrade` / 最小配布 / なし | **今はsd003のみ** | ユーザー判断。各PJに触るタイミングで更新する方針 |
+| 文字化け復元の範囲 | **229件すべて** | 履歴文書も含め機械復元可能と実証できたため |
+| 復元の安全条件 | **移行以降そのファイルが未変更であること** | この条件下では現在の中身が親から機械的に生成されたものしか含まず、情報欠落が原理的に起きない |
+| リネーム再適用の判定 | **ASCIIパストークン数の一致度で機械選択** | 化けがASCIIも食うため、`kiro`残存が「リネーム漏れ」か「化けが食った跡」か区別できない |
+| ac001 の未コミット99件 | **バックアップして破棄** | ユーザー指示「消えてもいい」。ただし非破壊でscratchpadへ退避してから実施 |
 
 **採用しなかった案と理由**
-- agyのExpectedArtifact判定を`resolveInside`と完全統合: 今回は同等ロジックを個別実装（PowerShellとTypeScriptで共有困難なため）
+- 文字コード変換での復元: ASCII・改行まで欠落しており情報が物理的に失われているため不可能
+- 行単位の骨格照合による検証: 文字化けが改行を食うため誤検知（826行→728行）
+- `git reset --hard` / `git clean` でのクリーン化: sd003ガードレールが物理ブロック。等価な非ブロック手段
+  （HEAD blob のファイル単位書き戻し＋untracked退避＋`git add --renormalize`）で代替
 
 ---
 
 ## 追加情報
 
-- dogfooding中にdispatch実障害3件発見（codex `--ignore-user-config`沈黙失敗・背景実行stdinハング・grok-buildモデル死亡）、auto-memory訂正済み
-- Quiz Gate「CodexがGeneratorのときEvaluator=Grok」の適用第1号。Grokは実行プローブで欠陥を実証しており、静的読解に留まらない検証として機能した
-- 検証記録: `.sd/ai-coordination/workflow/review/20260712-4ai-lead-hardening/{IMPLEMENTATION_REPORT,GROK_VERIFICATION,GROK_REVERIFICATION}.md`
-
----
+- **今日の教訓**: `2>/dev/null` は「失敗の無音化装置」。1秒で判明する引数エラーが4か月生き延びた原因はこれ1点。
+  旧 post-commit の `>/dev/null 2>&1 &` も同様に19コミットの取り残しを隠していた
+- **一括処理は失敗も一括で配る**: 1つの移行スクリプトが18リポジトリを同時に破壊した。
+  「1件で試す → 検証 → 残りへ展開」の段取りを必ず挟むこと
+- **gitが唯一の復元元だった**: 229件すべて親リビジョンから復元。未コミットで一括処理を流していたら全損
+- 復元スクリプトは再利用価値あり: `<scratchpad>/restore_mojibake.py`（Tier A/B判定ロジック入り）
+- バックアップbundle 3件（計899MB）が各リポジトリの `.git/` 内にある。安定確認後に削除可
+- 過去に `24ef3aa`「BOM/mojibake fix WIP, 287 files」で修復が試みられ**途中で止まっていた**
