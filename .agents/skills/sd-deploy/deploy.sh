@@ -6,7 +6,7 @@ set -e
 
 # Configuration
 SD003_VERSION="3.4.0"
-FRAMEWORK_VERSION="2.16.0"
+FRAMEWORK_VERSION="2.17.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
@@ -786,6 +786,27 @@ EOF
     mv "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"
     echo "  UPDATE: .claude/settings.json (latest guardrail wiring applied)"
 fi
+
+# 5-5b: Ensure runtime-generated files are in .gitignore
+#   - .claude/settings.json   : prevents .sd/ disappearance bug
+#                               Ref: anthropics/claude-code#34330
+#   - .codex-review-result.md : output of .claude/hooks/agent-review.sh.
+#                               2026-07-25 B16: 未登録の配信先（ob001 実測）でコミット毎に
+#                               未追跡ファイルとして出現していたため追加。
+# NOTE: deploy.ps1 には以前から Phase 5-5b があったが deploy.sh には無く、
+#       sh 経由で配信されたプロジェクトは settings.json すら未登録だった（parity gap）。
+GITIGNORE_PATH="$TARGET_PROJECT/.gitignore"
+[ -f "$GITIGNORE_PATH" ] || : > "$GITIGNORE_PATH"
+ensure_gitignore_entry() {
+    local line="$1"
+    local comment="$2"
+    if ! grep -qF -- "$line" "$GITIGNORE_PATH" 2>/dev/null; then
+        printf '\n%s\n%s\n' "$comment" "$line" >> "$GITIGNORE_PATH"
+        echo "  [Phase 5-5b] Added $line to .gitignore"
+    fi
+}
+ensure_gitignore_entry ".claude/settings.json" "# Claude Code settings (must not be git-tracked, causes .sd/ disappearance)"
+ensure_gitignore_entry ".codex-review-result.md" "# Codex auto-review output (runtime generated)"
 
 # 5-6: .sd/ids/registry.json (skip if exists)
 if [ -f "$TARGET_PROJECT/.sd/ids/registry.json" ]; then
