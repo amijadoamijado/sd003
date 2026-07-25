@@ -354,13 +354,16 @@ Copy-DirTree -RelPath ".claude\skills" -Label "Skills" -Exclude $optionalSkills
 Copy-DirTree -RelPath ".claude\hooks" -Label "Hooks"
 
 # 4-6: .agents/skills/ (tree) - Antigravity CLI (agy) reads slash commands here as SKILL.md
-Copy-DirTree -RelPath ".agents\skills" -Label "Agents Skills (agy)"
+# 2026-07-25 fix: optional skills はミラー側でも除外する。4db367a が Phase 6 の検証側にだけ
+# -Exclude を足したため、コピー側（除外なし＝全件配布）と検証側（除外あり）で対象が食い違い、
+# 必須ファイルが欠落しても件数比較でPASSしうる状態だった。コピーと検証の条件を一致させる。
+Copy-DirTree -RelPath ".agents\skills" -Label "Agents Skills (agy)" -Exclude $optionalSkills
 
 # 4-7: .codex/ (tree)
 Copy-DirTree -RelPath ".codex" -Label "Codex"
 
 # 4-8: .grok/ (tree) - Grok CLI reads skills here as SKILL.md + GROK_SPEC.md
-Copy-DirTree -RelPath ".grok" -Label "Grok"
+Copy-DirTree -RelPath ".grok" -Label "Grok" -Exclude $optionalSkills
 
 # 4-9: .sd/settings/ (tree)
 Copy-DirTree -RelPath ".sd\settings" -Label "SD Settings"
