@@ -250,20 +250,36 @@ $(cat "$AGY_OUTPUT")
 - **良い点**: 評価できるポイント"
 
         # Execute Codex review
+        # 2026-07-25 B16 fix: `codex review --commit HEAD "<PROMPT>"` /
+        # `codex review --uncommitted "<PROMPT>"` はどちらも codex CLI が
+        # 「--commit / --uncommitted と [PROMPT] は同時指定不可」で exit 2 する組合せ
+        # （実測・codex-cli 0.145.0）。レビュー観点をプロンプトで渡す必要があるため、
+        # 正準invocation の codex exec を使う。参照: .claude/skills/codex-dispatch/SKILL.md
         echo -e "${BLUE}Codex CLIへレビュー依頼中...${NC}"
         if [ "$AUTO_APPLY" = true ]; then
-            REVIEW_RESULT=$(codex review --commit HEAD "$REVIEW_PROMPT" 2>/dev/null) || {
-                echo -e "${YELLOW}[WARN] Codex CLI実行に失敗（手動レビューに切り替え）${NC}"
-                echo "Status: CODEX_UNAVAILABLE" >> "$PIPELINE_LOG"
-                REVIEW_RESULT="[Codex CLI unavailable - manual review required]"
-            }
+            REVIEW_SCOPE="直近のコミット (HEAD) の変更を対象にレビューしてください（差分: \`git show HEAD\`）。"
         else
-            REVIEW_RESULT=$(codex review --uncommitted "$REVIEW_PROMPT" 2>/dev/null) || {
-                echo -e "${YELLOW}[WARN] Codex CLI実行に失敗（手動レビューに切り替え）${NC}"
-                echo "Status: CODEX_UNAVAILABLE" >> "$PIPELINE_LOG"
-                REVIEW_RESULT="[Codex CLI unavailable - manual review required]"
-            }
+            REVIEW_SCOPE="未コミットの変更を対象にレビューしてください（差分: \`git status\` / \`git diff\`）。"
         fi
+        CODEX_TMP_OUT="${TMPDIR:-/tmp}/sd-agent-pipeline-$$.md"
+        CODEX_PROGRESS="${TMPDIR:-/tmp}/sd-agent-pipeline-$$.log"
+        RUST_LOG=error codex exec "${REVIEW_SCOPE}
+
+${REVIEW_PROMPT}" \
+            -c model_reasoning_effort="medium" \
+            --sandbox read-only \
+            -o "$CODEX_TMP_OUT" \
+            >/dev/null 2>"$CODEX_PROGRESS" || true
+        if [ -s "$CODEX_TMP_OUT" ]; then
+            REVIEW_RESULT=$(cat "$CODEX_TMP_OUT")
+        else
+            echo -e "${YELLOW}[WARN] Codex CLI実行に失敗（手動レビューに切り替え）${NC}"
+            echo -e "${YELLOW}stderr (tail): ${CODEX_PROGRESS}${NC}"
+            tail -n 20 "$CODEX_PROGRESS" 2>/dev/null || true
+            echo "Status: CODEX_UNAVAILABLE" >> "$PIPELINE_LOG"
+            REVIEW_RESULT="[Codex CLI unavailable - manual review required] stderr: $(tail -n 5 "$CODEX_PROGRESS" 2>/dev/null | tr '\n' ' ')"
+        fi
+        rm -f "$CODEX_TMP_OUT"
 
         # Save review result
         {

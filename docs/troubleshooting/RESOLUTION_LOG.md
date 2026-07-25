@@ -36,6 +36,54 @@
 
 <!-- 新しいエントリは上に追加 -->
 
+## 2026-07-25 Codex自動レビューhookの無音故障（約4か月）＋ 自動pushの無音失敗
+
+### 差異カテゴリ
+[x] 実装の逸脱（外部CLIの引数仕様と実装の乖離）
+[x] 外部要因・環境（codex CLI の排他引数）
+- 共通の増幅要因: **`2>/dev/null` による stderr 破棄**（＝失敗の無音化装置）
+
+### 症状
+1. コミットのたびに `.codex-review-result.md` が「Codex CLI exited with code 2」の
+   エラースタブだけを含んで生成される。**16プロジェクトで同状態**を確認。
+   最後に成功したレビュー実体は oc001 の 2026-03-08 が最後。
+2. ob001 は `.codex-review-result.md` が `.gitignore` 未登録のため、毎コミット
+   **未追跡ファイル**として出現していた（sd003 / ta001 は登録済みのため不可視だった）。
+3. 明示的な `git push` が常に "Everything up-to-date" を返す。post-commit hook が
+   既に非同期 push 済みのため。しかも **push 失敗時は完全に無音**。
+
+### 真因
+| # | 真因 | 証拠 |
+|---|------|------|
+| 1 | commit `231aca3`(2026-03-31)「migrate Codex calls from `codex exec --full-auto` to native `codex review`」で `codex review --commit <SHA> "<PROMPT>"` に変更した。codex CLI は `--commit` と `[PROMPT]` が**排他**（`--uncommitted` も同様）。 | 実測: `error: the argument '--commit <SHA>' cannot be used with '[PROMPT]'` → exit 2（codex-cli 0.145.0） |
+| 2 | 呼び出しが `2>/dev/null` で stderr を捨てていたため、上記エラー文が4か月間一度も表示されず、記録も「exit code N」だけ＝真因が断絶していた。 | `.claude/hooks/agent-review.sh` 旧118行 |
+| 3 | post-commit の `nohup git push ... >/dev/null 2>&1 &` が終了コードも出力も破棄。 | `.git/hooks/post-commit` 旧92行 |
+
+### 検証（実測 2026-07-25 / codex-cli 0.145.0）
+- `codex review --commit 4db367a "<prompt>"` → **exit 2**（引数排他エラー・1秒未満）
+- `codex review --uncommitted "x"` → **exit 2**（同上）
+- `codex review --commit 4db367a`（PROMPT無し・正しい形）→ **240秒経過しても未完（exit 124）**
+  → 修正して実際に動かすと、PostToolUse hook（settings.json の `timeout: 600`）が
+  **毎コミット数分 Claude Code をブロックする**。既定ONにはできないことが判明。
+
+### 解決策
+| # | 対策 | 種別 | 対象 |
+|---|------|------|------|
+| 1 | 呼び出しを正準 `codex exec`（`RUST_LOG=error` / `-c model_reasoning_effort=medium` / `--sandbox read-only` / `-o` / `2> progress.log`）へ戻す | 実装修正 | `.claude/hooks/agent-review.sh`, `scripts/agent-review.sh`, `scripts/agent-pipeline.sh` |
+| 2 | 失敗時は **stderr の tail を必ず成果物に添付**（原因断絶の解消） | 可視化 | 同上 |
+| 3 | 自動レビューを **既定OFF・opt-in (`SD_AUTO_REVIEW=1`)** 化＋タイムアウト上限（既定300秒） | 設計変更 | `.claude/hooks/agent-review.sh` |
+| 4 | 自動pushの結果を `.git/auto-push.log` に必ず記録、失敗時は `.git/auto-push-failed` マーカーを残し**次回コミット冒頭で警告** | 可視化 | `templates/git-hooks/post-commit`（+ 実体 `.git/hooks/`, AIミラー） |
+| 5 | deploy 時に `.codex-review-result.md` を配信先 `.gitignore` へ自動追加 | 配信整合 | `.claude/skills/sd-deploy/deploy.ps1` Phase 5-5b |
+
+### 教訓
+1. **`2>/dev/null` は「失敗の無音化装置」**。エラーパスでは stderr の tail を必ず残す。
+   これが無かったため、1秒で判明するはずの引数エラーが4か月生き残った。
+2. **外部CLIの呼び出し形式を変えるコミットは、成功パスの実測なしにマージしない。**
+   `231aca3` は「移行した」だけで、移行後に1度も成功していない。
+3. **壊れたまま静かに回る自動化は、無いより悪い**（毎コミット無意味なファイルを撒く）。
+   直す＝有効化ではない。直したうえで「常時実行してよいコストか」を測って決める。
+4. hookの成果物は**配信先の `.gitignore` まで含めて1セット**。片方だけ配ると未追跡ゴミになる。
+
 ## 2026-06-14 AI挙動不審: 未検証の起動方法を「確定済み」と断定（証拠＜語りの過信）
 
 ### 類型

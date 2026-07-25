@@ -22,6 +22,15 @@ SNAPSHOT="$GIT_DIR_PATH/sd-snapshot"
 META="$GIT_DIR_PATH/sd-snapshot.meta"
 restored=0
 
+# === 直前の自動pushが失敗していたら警告（B17: 無音失敗の可視化） ===
+# 自動pushは非同期のため、失敗はこのコミットでは判定できない。前回の失敗マーカーを
+# ここで表示することで「ローカルにcommitがあるのにリモートに無い」状態を検知可能にする。
+if [ -n "$GIT_DIR_PATH" ] && [ -f "$GIT_DIR_PATH/auto-push-failed" ]; then
+    echo "[post-commit] WARNING: previous auto-push FAILED. Remote may be behind local." >&2
+    sed 's/^/[post-commit]   /' "$GIT_DIR_PATH/auto-push-failed" >&2
+    echo "[post-commit]   Fix: git push origin \$(git rev-parse --abbrev-ref HEAD)  (log: $GIT_DIR_PATH/auto-push.log)" >&2
+fi
+
 # B12: スナップショットの鮮度判定。
 # pre-commitは「これから作られるコミットの親になるHEAD」をmetaに記録している。
 # 今のHEADの親がそれと一致するなら、このスナップショットは「今回のコミット」用に
@@ -87,9 +96,39 @@ if [ -d "$GDRIVE_BACKUP" ] && [ -d ".sd" ]; then
 fi
 
 # === async push ===
+# 2026-07-25 B17 fix: 旧実装は `nohup git push ... > /dev/null 2>&1 &` で
+# 出力も終了コードも捨てていたため、push失敗（認証切れ・non-fast-forward・ネットワーク断）が
+# 完全に無音だった。ローカルにcommitがあるのにリモートに無い状態を誰も検知できず、
+# 後から明示的に `git push` しても "Everything up-to-date" が返るだけで検証にならない。
+#   → 結果を必ず .git/auto-push.log に記録する。
+#   → 失敗時は .git/auto-push-failed をマーカーとして残す（次回コミット冒頭で警告表示）。
 BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
 if [ "$BRANCH" != "HEAD" ] && [ -n "$BRANCH" ] && git remote get-url origin >/dev/null 2>&1; then
-    nohup git push origin "$BRANCH" > /dev/null 2>&1 &
+    PUSH_LOG="${GIT_DIR_PATH:-.git}/auto-push.log"
+    PUSH_FAIL_MARKER="${GIT_DIR_PATH:-.git}/auto-push-failed"
+    PUSH_SHA=$(git rev-parse --short HEAD 2>/dev/null)
+    PUSH_TS=$(date '+%Y-%m-%d %H:%M:%S')
+    (
+        trap '' HUP   # nohup 相当（親シェル終了で殺されない）
+        PUSH_OUT=$(git push origin "$BRANCH" 2>&1)
+        PUSH_RC=$?
+        {
+            echo "[$PUSH_TS] branch=$BRANCH commit=$PUSH_SHA exit=$PUSH_RC"
+            printf '%s\n' "$PUSH_OUT" | sed 's/^/    /'
+        } >> "$PUSH_LOG"
+        if [ "$PUSH_RC" -eq 0 ]; then
+            rm -f "$PUSH_FAIL_MARKER"
+        else
+            {
+                echo "[$PUSH_TS] branch=$BRANCH commit=$PUSH_SHA exit=$PUSH_RC"
+                printf '%s\n' "$PUSH_OUT"
+            } > "$PUSH_FAIL_MARKER"
+        fi
+        # ログ肥大防止（末尾500行のみ保持）
+        if [ "$(wc -l < "$PUSH_LOG" 2>/dev/null || echo 0)" -gt 500 ]; then
+            tail -n 500 "$PUSH_LOG" > "$PUSH_LOG.tmp" 2>/dev/null && mv "$PUSH_LOG.tmp" "$PUSH_LOG"
+        fi
+    ) </dev/null >/dev/null 2>&1 &
 fi
 
 exit 0

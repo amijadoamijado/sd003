@@ -57,6 +57,21 @@ if ! echo "$TOOL_INPUT" | grep -qE "^git commit|&&\s*git commit|\|\|\s*git commi
   exit 0
 fi
 
+# --- Opt-in gate (default OFF) ---
+# 2026-07-25 B16 fix: このhookは 231aca3 (2026-03-31) 以降ずっと壊れていた。
+#   `codex review --commit <SHA> "<PROMPT>"` は codex CLI が
+#   「--commit と [PROMPT] は同時指定不可」で exit 2 する組合せで、
+#   さらに 2>/dev/null が原因を握り潰していたため、全コミットで
+#   .codex-review-result.md にエラースタブを書くだけの状態だった（16プロジェクトで確認）。
+# 呼び出しは下で正しく直したが、実レビューは 2行diff でも数分かかる（実測 240秒でも未完）。
+# PostToolUse hook は同期実行（settings.json の timeout=600）なので、毎コミット
+# 数分Claude Codeがブロックされる。既定ONにはできない。
+#   → 既定OFF。使うときだけ SD_AUTO_REVIEW=1 で明示的に有効化する。
+#   → 単発レビューは公式プラグイン /codex:review を使う（CLAUDE.md 記載の正規導線）。
+if [ "${SD_AUTO_REVIEW:-0}" != "1" ]; then
+  exit 0
+fi
+
 # --- Check prerequisites ---
 
 # Check if codex is available
@@ -109,24 +124,50 @@ Check: no any type, no console.log, no Node.js APIs in GAS, proper error handlin
 ${DIFF}"
 
 # --- Execute Codex review ---
+# 正準invocation は .claude/skills/codex-dispatch/SKILL.md に従う:
+#   RUST_LOG=error / -c model_reasoning_effort=medium / --sandbox read-only /
+#   -o <最終回答> / 2> <progress.log>（`2>&1` は禁止。stderr にテレメトリが数MB流れる）
+# 進捗ログと中間出力は .git/ 配下に置く（tracked にならず、.gitignore を汚さない）。
 echo "REVIEW: Running Codex auto-review for commit ${COMMIT_HASH}..." >&2
 
 REVIEW_RESULT=""
 REVIEW_EXIT=0
 
-COMMIT_SHA=$(git rev-parse --short HEAD)
-REVIEW_RESULT=$(codex review --commit "$COMMIT_SHA" "$REVIEW_PROMPT" 2>/dev/null) || REVIEW_EXIT=$?
+GIT_DIR_PATH=$(git rev-parse --git-dir 2>/dev/null || echo ".git")
+PROGRESS_LOG="${GIT_DIR_PATH}/codex-review-progress.log"
+CODEX_OUT="${GIT_DIR_PATH}/codex-review-last.md"
+REVIEW_TIMEOUT="${SD_AUTO_REVIEW_TIMEOUT:-300}"
+
+rm -f "$CODEX_OUT"
+RUST_LOG=error timeout "$REVIEW_TIMEOUT" codex exec "$REVIEW_PROMPT" \
+  -c model_reasoning_effort="medium" \
+  --sandbox read-only \
+  -o "$CODEX_OUT" \
+  >/dev/null 2>"$PROGRESS_LOG" || REVIEW_EXIT=$?
+[ -f "$CODEX_OUT" ] && REVIEW_RESULT=$(cat "$CODEX_OUT")
 
 if [ $REVIEW_EXIT -ne 0 ] && [ -z "$REVIEW_RESULT" ]; then
-  echo "REVIEW_ERROR: Codex failed with exit code ${REVIEW_EXIT}" >&2
-  cat <<ERROR_EOF > "$REVIEW_OUTPUT"
-# Auto Code Review - Error
-
-**Commit**: ${COMMIT_HASH} - ${COMMIT_MSG}
-**Error**: Codex CLI exited with code ${REVIEW_EXIT}
-
-Please run manually: \`echo "Review diff" | codex exec --full-auto\`
-ERROR_EOF
+  echo "REVIEW_ERROR: codex exec failed with exit code ${REVIEW_EXIT} (see ${PROGRESS_LOG})" >&2
+  # B16: 旧実装は原因を一切残さず「exit code N」だけ書いていた。
+  # stderr の末尾を必ず添付して、次に見た人が真因を判別できるようにする。
+  {
+    echo "# Auto Code Review - Error"
+    echo ""
+    echo "**Commit**: ${COMMIT_HASH} - ${COMMIT_MSG}"
+    if [ "$REVIEW_EXIT" -eq 124 ]; then
+      echo "**Error**: codex exec timed out after ${REVIEW_TIMEOUT}s (SD_AUTO_REVIEW_TIMEOUT で変更可)"
+    else
+      echo "**Error**: codex exec exited with code ${REVIEW_EXIT}"
+    fi
+    echo ""
+    echo "## stderr (tail)"
+    echo ""
+    echo '```'
+    tail -n 20 "$PROGRESS_LOG" 2>/dev/null || echo "(no progress log)"
+    echo '```'
+    echo ""
+    echo "手動再現: \`RUST_LOG=error codex exec \"<prompt>\" --sandbox read-only -o out.md 2> progress.log\`"
+  } > "$REVIEW_OUTPUT"
   exit 0
 fi
 

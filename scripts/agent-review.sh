@@ -135,7 +135,7 @@ if [ "$DRY_RUN" = true ]; then
     echo "$REQUEST_CONTENT" | head -20
     [ "$(echo "$REQUEST_CONTENT" | wc -l)" -gt 20 ] && echo "... (truncated)"
     echo ""
-    echo -e "${YELLOW}[DRY-RUN] 実行時のコマンド: codex review --commit HEAD <依頼書内容>${NC}"
+    echo -e "${YELLOW}[DRY-RUN] 実行時のコマンド: RUST_LOG=error codex exec <依頼書+HEAD差分レビュー指示> --sandbox read-only -o <out> 2> <progress.log>${NC}"
     exit 0
 fi
 
@@ -145,10 +145,29 @@ echo -e "${BLUE}Codex CLIへレビュー依頼中...${NC}"
 REVIEW_RESULT=""
 REVIEW_EXIT=0
 
-REVIEW_RESULT=$(codex review --commit HEAD "$REQUEST_CONTENT" 2>/dev/null) || REVIEW_EXIT=$?
+# 2026-07-25 B16 fix: `codex review --commit HEAD "<PROMPT>"` は codex CLI が
+# 「--commit と [PROMPT] は同時指定不可」で exit 2 する組合せ（実測・codex-cli 0.145.0）。
+# 依頼書の内容をプロンプトとして渡す必要があるため、正準invocation の codex exec に戻す。
+# 参照: .claude/skills/codex-dispatch/SKILL.md
+CODEX_TMP_OUT="${TMPDIR:-/tmp}/sd-agent-review-$$.md"
+CODEX_PROGRESS="${TMPDIR:-/tmp}/sd-agent-review-$$.log"
+REVIEW_PROMPT="以下の依頼書に従って、直近のコミット (HEAD: ${COMMIT_HASH}) の変更をレビューしてください。
+差分は \`git show HEAD\` / \`git diff HEAD~1 HEAD\` で取得してください。
+
+--- 依頼書 ---
+${REQUEST_CONTENT}"
+
+RUST_LOG=error codex exec "$REVIEW_PROMPT" \
+    -c model_reasoning_effort="medium" \
+    --sandbox read-only \
+    -o "$CODEX_TMP_OUT" \
+    >/dev/null 2>"$CODEX_PROGRESS" || REVIEW_EXIT=$?
+[ -f "$CODEX_TMP_OUT" ] && REVIEW_RESULT=$(cat "$CODEX_TMP_OUT")
 
 if [ $REVIEW_EXIT -ne 0 ] && [ -z "$REVIEW_RESULT" ]; then
     echo -e "${RED}[FAIL] Codex CLIがエラーコード ${REVIEW_EXIT} で終了${NC}"
+    echo -e "${YELLOW}stderr (tail): ${CODEX_PROGRESS}${NC}"
+    tail -n 20 "$CODEX_PROGRESS" 2>/dev/null || true
     {
         echo "# レビュー結果: ${REQUEST_BASENAME}"
         echo ""
@@ -159,6 +178,12 @@ if [ $REVIEW_EXIT -ne 0 ] && [ -z "$REVIEW_RESULT" ]; then
         echo "| レビュー日時 | ${TIMESTAMP} |"
         echo "| レビュアー | Codex CLI (manual) |"
         echo "| ステータス | ERROR (exit code: ${REVIEW_EXIT}) |"
+        echo ""
+        echo "## stderr (tail)"
+        echo ""
+        echo '```'
+        tail -n 20 "$CODEX_PROGRESS" 2>/dev/null || echo "(no progress log)"
+        echo '```'
     } > "$REVIEW_OUTPUT"
     exit 1
 fi
@@ -181,6 +206,8 @@ fi
     echo ""
     echo "$REVIEW_RESULT"
 } > "$REVIEW_OUTPUT"
+
+rm -f "$CODEX_TMP_OUT" "$CODEX_PROGRESS"
 
 echo -e "${GREEN}[OK] Codex レビュー完了${NC}"
 echo -e "レビュー結果: ${GREEN}${REVIEW_OUTPUT}${NC}"

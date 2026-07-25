@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $SD003_VERSION = "3.4.0"
-$FRAMEWORK_VERSION = "2.16.0"
+$FRAMEWORK_VERSION = "2.17.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -692,19 +692,30 @@ if (Test-Kept ".claude/settings.json") {
     Write-Host "  WARN: settings.json.template not found, skipping" -ForegroundColor Yellow
 }
 
-# 5-5b: Ensure .claude/settings.json is in .gitignore (prevents .sd/ disappearance bug)
-# Ref: anthropics/claude-code#34330 - Claude Code runtime refreshes working tree on settings.json git changes
+# 5-5b: Ensure runtime-generated files are in .gitignore
+#   - .claude/settings.json   : prevents .sd/ disappearance bug
+#                               Ref: anthropics/claude-code#34330 (runtime refreshes working tree
+#                               on settings.json git changes)
+#   - .codex-review-result.md : output of .claude/hooks/agent-review.sh. 2026-07-25 B16 で、
+#                               配信先（ob001 実測）に .gitignore 登録が無く、コミット毎に
+#                               未追跡ファイルとして出現していたため追加。
 $gitignorePath = Join-Path $TargetProject ".gitignore"
-$settingsIgnoreLine = ".claude/settings.json"
-if (Test-Path $gitignorePath) {
-    $gitignoreContent = Get-Content $gitignorePath -Raw -Encoding UTF8
-    if ($gitignoreContent -notmatch [regex]::Escape($settingsIgnoreLine)) {
-        Add-Content -Path $gitignorePath -Value "`n# Claude Code settings (must not be git-tracked, causes .sd/ disappearance)`n$settingsIgnoreLine"
-        Write-Host "  [Phase 5-5b] Added .claude/settings.json to .gitignore"
+$ignoreEntries = @(
+    @{ Line = ".claude/settings.json";    Comment = "# Claude Code settings (must not be git-tracked, causes .sd/ disappearance)" },
+    @{ Line = ".codex-review-result.md";  Comment = "# Codex auto-review output (runtime generated)" }
+)
+if (-not (Test-Path $gitignorePath)) {
+    Set-Content -Path $gitignorePath -Value "" -Encoding UTF8
+    Write-Host "  [Phase 5-5b] Created .gitignore"
+}
+$gitignoreContent = Get-Content $gitignorePath -Raw -Encoding UTF8
+if ($null -eq $gitignoreContent) { $gitignoreContent = "" }
+foreach ($entry in $ignoreEntries) {
+    if ($gitignoreContent -notmatch [regex]::Escape($entry.Line)) {
+        Add-Content -Path $gitignorePath -Value "`n$($entry.Comment)`n$($entry.Line)"
+        $gitignoreContent = "$gitignoreContent`n$($entry.Line)"
+        Write-Host "  [Phase 5-5b] Added $($entry.Line) to .gitignore"
     }
-} else {
-    Set-Content -Path $gitignorePath -Value "# Claude Code settings (must not be git-tracked)`n$settingsIgnoreLine`n" -Encoding UTF8
-    Write-Host "  [Phase 5-5b] Created .gitignore with .claude/settings.json exclusion"
 }
 
 # 5-6: .sd/ids/registry.json (skip if exists, use template)
@@ -871,9 +882,9 @@ $verifyResults += Verify-Category -Label "Commands/sd" -SourceRelPath ".claude\c
 $verifyResults += Verify-Category -Label "Rules" -SourceRelPath ".claude\rules" -Filter "*.md" -Recurse
 $verifyResults += Verify-Category -Label "Skills" -SourceRelPath ".claude\skills" -Recurse -Exclude $optionalSkills
 $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" -Recurse
-$verifyResults += Verify-Category -Label "Agents Skills (agy)" -SourceRelPath ".agents\skills" -Recurse
+$verifyResults += Verify-Category -Label "Agents Skills (agy)" -SourceRelPath ".agents\skills" -Recurse -Exclude $optionalSkills
 $verifyResults += Verify-Category -Label "Codex" -SourceRelPath ".codex" -Recurse
-$verifyResults += Verify-Category -Label "Grok" -SourceRelPath ".grok" -Recurse
+$verifyResults += Verify-Category -Label "Grok" -SourceRelPath ".grok" -Recurse -Exclude $optionalSkills
 $verifyResults += Verify-Category -Label "SD Settings" -SourceRelPath ".sd\settings" -Recurse
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
 $verifyResults += Verify-Category -Label "Design" -SourceRelPath ".sd\design" -Recurse
