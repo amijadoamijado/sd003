@@ -1,13 +1,15 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 121
-- **Latest Session**: 2026-07-25
+- **Total Sessions**: 122
+- **Latest Session**: 2026-07-26
 - **Project Start**: 2026-02-15
 
 ---
 
 ## 2026-07
+
+| 07-26 | **Codex・agy共通Skill配置統一と再起動後検証を完了**。`.agents/skills`を正規位置に統一し、旧`.codex/skills`を廃止。ユーザー領域の重複18件はバックアップへ退避。lean版AGENTS、hook parity文書、ガード配布・検証を整備。同期・Python 4件・Jest 96件・build・lint・構文検査成功。Codex再起動後に全45 Skillの認識、旧配置不存在、バックアップ18件、clean、origin同期を実測確認 | 6dc5219, ac1589e | [Details](session-20260726-152455.md) |
 
 | 07-25 | **無音故障2件の修正 → フリート監査 → 一括移行事故の全件復旧**。①Codex自動レビューhookが `231aca3`(03-31)以降**4か月一度も成功していなかった**（`codex review` は `--commit` と `[PROMPT]` が排他で exit 2、`2>/dev/null` が真因を隠蔽）→ 正準 `codex exec` へ復帰・stderr可視化・opt-in化（実レビュー生成を実測確認）。②post-commitの自動pushが結果を破棄していた→`.git/auto-push.log`＋失敗マーカー＋次回コミット冒頭で警告。③監査で**2026-03-28の`.kiro→.sd`一括移行が18PJ・229ファイルの日本語をCP932誤読で焼いていた**ことを発見（ASCII・改行まで欠落＝変換では復元不能）→git親リビジョンから**全件復元・8,872ファイル再走査で残存0**。④復元中にHTTP 408で発覚した**Chromiumバイナリgit混入によるpush恒久不能**（GitHub 100MB上限）をfw003/oc001/ac001で`filter-repo`除去・force push（oc001は19コミット取り残しが解消）。⑤deploy.shに`.gitignore`処理が丸ごと欠けていたparity gapを実装、版数刻印の無音4件を実測値で修復、死んだGrokモデル記述を修正、復活した自動レビューが初日に検出したdeploy.ps1のoptional skills除外不一致を修正。FRAMEWORK_VERSION 2.17.0 | 5e4f5e0, 3f319e0, 1d8b8f0, 3f2029b, b12028c, 8a4a81e, b19cca7 | [Details](session-20260725-170018.md) |
 
