@@ -84,7 +84,7 @@ deploy_dry_run() {
     local diverged=0 kept=0 newc=0 same=0 d f sf projrel tgt
     local DIV=() KEP=()
     local gh gh_name gh_rel gh_tgt
-    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".sd/settings" ".sd/design" ".sd/steering" ".handoff" "docs/troubleshooting" "docs/rules-reference")
+    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".handoff" "docs/troubleshooting" "docs/rules-reference")
     for d in "${scan_dirs[@]}"; do
         [ -d "$SOURCE_DIR/$d" ] || continue
         while IFS= read -r f; do
@@ -176,9 +176,7 @@ DIRS=(
     ".agents/skills"
     ".grok/skills"
     ".sd/specs"
-    ".sd/steering"
     ".sessions"
-    ".sd/settings"
     ".sd/ids"
     ".sd/traceability"
     ".sd/ai-coordination/workflow/templates"
@@ -294,13 +292,12 @@ copy_dir_tree ".codex" "Codex" "*"
 # 4-8: .grok/ (tree) - Grok CLI reads skills here as SKILL.md + GROK_SPEC.md
 copy_dir_tree ".grok" "Grok" "*"
 
-# 4-9: .sd/settings/ (tree)
-copy_dir_tree ".sd/settings" "SD Settings" "*"
+# 4-9: (retired 2026-07-26) .sd/settings was SD002-era legacy (coverage-80 etc.), lost
+# from source by a historic wipe and never git-tracked. Archived at
+# .sd/cleanup/archive/sd002-legacy-20260726/ — no longer distributed.
 
-# 4-9b: .sd/design/ (tree) - design tokens (already scanned by --dry-run; was
-# missing from the real copy path, so a real deploy silently skipped it while
-# dry-run reported it as new/unchanged - parity fix with deploy.ps1's 4-11a)
-copy_dir_tree ".sd/design" "Design Tokens" "*"
+# 4-9b: (retired 2026-07-26) .sd/design is a per-project slot (empty in source);
+# projects manage their own design tokens — no longer distributed.
 
 # 4-9c: docs/rules-reference/ (tree) - lean化(2026-07-26)で.claude/rules/から移設された
 # 参照ドキュメント群。CLAUDE.md の Details: が指すため配布必須（欠けるとdangling）。
@@ -448,8 +445,8 @@ else
     COPY_STATS["AGENTS.md"]=0
 fi
 
-# 4-18: .sd/steering/ (tree)
-copy_dir_tree ".sd/steering" "Steering" "*"
+# 4-18: (retired 2026-07-26) .sd/steering was SD002-era steering docs — archived at
+# .sd/cleanup/archive/sd002-legacy-20260726/, no longer distributed.
 
 # 4-20: tests/gas-fakes/setup.ts (single file - overwrite unless protected by .sd003-keep)
 GAS_FAKES_SRC="$SOURCE_DIR/tests/gas-fakes/setup.ts"
@@ -943,10 +940,7 @@ verify_category "Hooks" ".claude/hooks" ".claude/hooks" "*" "true"
 verify_category "Agents Skills (Codex/agy)" ".agents/skills" ".agents/skills" "*" "true"
 verify_category "Codex" ".codex" ".codex" "*" "true"
 verify_category "Grok" ".grok" ".grok" "*" "true"
-verify_category "SD Settings" ".sd/settings" ".sd/settings" "*" "true"
 verify_category "Handoff" ".handoff" ".handoff" "*" "true"
-verify_category "Design" ".sd/design" ".sd/design" "*" "true"
-verify_category "Steering" ".sd/steering" ".sd/steering" "*" "true"
 # Gas Fakes: only setup.ts is deployed (test files are project-specific)
 if [ -f "$TARGET_PROJECT/tests/gas-fakes/setup.ts" ]; then
     echo "  [PASS] Gas Fakes Setup: 1/1"

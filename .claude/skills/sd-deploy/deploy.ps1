@@ -95,8 +95,8 @@ function Invoke-DeployDryRun {
 
     $scanDirs = @(
         ".claude\commands", ".claude\rules", ".claude\skills", ".claude\hooks",
-        ".agents\skills", ".codex", ".grok", ".sd\settings", ".sd\design",
-        ".sd\steering", ".handoff", "docs\troubleshooting", "docs\rules-reference"
+        ".agents\skills", ".codex", ".grok",
+        ".handoff", "docs\troubleshooting", "docs\rules-reference"
     )
     foreach ($d in $scanDirs) {
         $srcRoot = Join-Path $SOURCE_DIR $d
@@ -213,9 +213,7 @@ $directories = @(
     ".agents/skills",
     ".grok/skills",
     ".sd/specs",
-    ".sd/steering",
     ".sessions",
-    ".sd/settings",
     ".sd/ids",
     ".sd/traceability",
     ".sd/ai-coordination/workflow/templates",
@@ -224,7 +222,6 @@ $directories = @(
     ".sd/ai-coordination/workflow/log",
     ".sd/ai-coordination/handoff",
     ".handoff",
-    ".sd\design",
     "docs/troubleshooting/bug-reports",
     "materials/csv",
     "materials/excel",
@@ -364,8 +361,9 @@ Copy-DirTree -RelPath ".codex" -Label "Codex"
 # 4-8: .grok/ (tree) - Grok CLI reads skills here as SKILL.md + GROK_SPEC.md
 Copy-DirTree -RelPath ".grok" -Label "Grok" -Exclude $optionalSkills
 
-# 4-9: .sd/settings/ (tree)
-Copy-DirTree -RelPath ".sd\settings" -Label "SD Settings"
+# 4-9: (retired 2026-07-26) .sd/settings was SD002-era legacy (coverage-80 etc.), lost
+# from source by a historic wipe and never git-tracked. Archived at
+# .sd/cleanup/archive/sd002-legacy-20260726/ — no longer distributed.
 
 # 4-10: .sessions/templates/ (template files for new projects)
 $sessionTemplatesSrc = Join-Path $SOURCE_DIR ".sessions\templates"
@@ -380,8 +378,8 @@ if (Test-Path $sessionTemplatesSrc) {
     $copyStats["Session Templates"] = 0
 }
 
-# 4-11a: .sd/design/ (tree)
-Copy-DirTree -RelPath ".sd\design" -Label "Design Tokens"
+# 4-11a: (retired 2026-07-26) .sd/design is a per-project slot (empty in source);
+# projects manage their own design tokens — no longer distributed.
 
 # 4-11b: .sd/ai-coordination/workflow/{README,CODEX_GUIDE,GROK_GUIDE,templates/}
 $workflowSrc = Join-Path $SOURCE_DIR ".sd\ai-coordination\workflow"
@@ -545,8 +543,8 @@ if (Test-Kept "AGENTS.md") {
     $copyStats["AGENTS.md"] = 0
 }
 
-# 4-18: .sd/steering/ (tree)
-Copy-DirTree -RelPath ".sd\steering" -Label "Steering"
+# 4-18: (retired 2026-07-26) .sd/steering was SD002-era steering docs — archived at
+# .sd/cleanup/archive/sd002-legacy-20260726/, no longer distributed.
 
 # 4-20: tests/gas-fakes/setup.ts (single file - overwrite unless protected by .sd003-keep)
 $gasFakesSrc = Join-Path $SOURCE_DIR "tests\gas-fakes\setup.ts"
@@ -900,10 +898,7 @@ $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" 
 $verifyResults += Verify-Category -Label "Agents Skills (Codex/agy)" -SourceRelPath ".agents\skills" -Recurse -Exclude $optionalSkills
 $verifyResults += Verify-Category -Label "Codex" -SourceRelPath ".codex" -Recurse
 $verifyResults += Verify-Category -Label "Grok" -SourceRelPath ".grok" -Recurse -Exclude $optionalSkills
-$verifyResults += Verify-Category -Label "SD Settings" -SourceRelPath ".sd\settings" -Recurse
 $verifyResults += Verify-Category -Label "Handoff" -SourceRelPath ".handoff" -Recurse
-$verifyResults += Verify-Category -Label "Design" -SourceRelPath ".sd\design" -Recurse
-$verifyResults += Verify-Category -Label "Steering" -SourceRelPath ".sd\steering" -Recurse
 # Gas Fakes: only verify setup.ts exists (we deploy 1 file, not the whole directory)
 $gasFakesTarget = Join-Path $TargetProject "tests\gas-fakes\setup.ts"
 $gasFakesStatus = if (Test-Path $gasFakesTarget) { "PASS" } else { "FAIL" }
