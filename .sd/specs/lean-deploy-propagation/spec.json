@@ -1,0 +1,7 @@
+{
+  "feature": "lean-deploy-propagation",
+  "created": "2026-07-26",
+  "status": "in-progress",
+  "version": "1.0",
+  "framework_version_target": "2.18.0"
+}
