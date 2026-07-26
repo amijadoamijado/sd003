@@ -8,6 +8,11 @@
 > | Grok | `.grok/GROK_NATIVE.md` |
 > | agy (Antigravity) | `antigravity.md` |
 > | Claude Code | `CLAUDE.md` |
+>
+> **agy必須上書き**（2026-07-26実測: agyが自動で読むのは本ファイルのみ、かつsystem promptは
+> `brain/<会話ID>/` への保存を強制する）: SD003では成果物を**必ずプロジェクト内**へ保存する —
+> ユーザー向け=`materials/`、AI協調文書=`.sd/ai-coordination/`。brain/ にしか無い状態で完了報告
+> しない。詳細: `antigravity.md`。注入マップ: `docs/context-injection-map.md`
 
 ## 目的
 
