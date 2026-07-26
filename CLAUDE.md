@@ -17,20 +17,16 @@ Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
 
 開発順序: 動かす → 実環境で確認 → テスト → 抽象化 → 文書
 
-- コード変更後、必ず実環境（ブラウザ）で動作確認する
-- 「動くはず」は禁止。「動いた」のみが確認
+- コード変更後、必ず実環境（ブラウザ）で動作確認する。「動くはず」は禁止。「動いた」のみが確認
 - 変更前に3点固定: 運用ルール、反映方法、確認対象URL
 - 変更前に仮説明文化: 症状、仮説、確認方法、失敗時の次手
-- 詳細: `.claude/rules/global/work-first.md`
+- 1修正ごとに動作確認。抽象化は同じコードが3回出てから
+- 詳細: `docs/rules-reference/global/work-first.md`
 
 ## Blueprint Gate（設計ゲート）
 
 1時間以上かかるタスク OR ゴールが言語化できない場合 → `/blueprint-gate` 必須。
-ゴール未定義で走り出して修正の嵐になるのは Work First違反。
-
-- 対話でゴール→アウトプット→検証観点→背景→現状を引き出す
-- 承認プロセスなし。動くものが最終判定
-- 詳細: `.claude/skills/blueprint-gate/SKILL.md`
+承認プロセスなし。動くものが最終判定。詳細: `.claude/skills/blueprint-gate/SKILL.md`
 
 ## Build & Test
 
@@ -47,17 +43,17 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 
 - rm禁止（アーカイブ移動）、ユーザー提供ファイル上書き禁止（別名で新規作成）
 - ルート直下への新規ファイル作成禁止
+- 保存先・URLをユーザーに案内するときは絶対パス（フルパス）で表示する
 - 詳細: `.claude/rules/cleanup/file-organization.md`
 
 ## Bash Tool Policy
 
-Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstdin消失、長文コマンド誤動作、ランタイムによるワーキングツリーリフレッシュ）。安定性を優先し、代替手段があればそちらを使う。バグが解消されればBash利用を解禁する。
+Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstdin消失、長文コマンド誤動作、ランタイムによるワーキングツリーリフレッシュ）。安定性を優先し、代替手段があればそちらを使う。
 
 - **ファイル作成・編集**: Write/Edit tool優先。Bashのheredoc/リダイレクトは避ける
-- **.sd/操作**: 変更後は早めにcommit（同一bashが最も安全）。未commitの.sd/変更はwipe時にL4で復元されない。真因はspec-workflow.test.tsの隔離で修正済み（f5f6648）。
+- **.sd/操作**: Bashのみ（Write/Editはhookブロック）。変更後は早めにcommit（未commitはwipe時にL4で復元されない）
 - **git commit**: 短い1行コマンドのみ。heredocでのcommitメッセージは避ける
-- **Bash使用OK**: git status, ls, npm, 短いコマンド
-- **監視対象バグ**: anthropics/claude-code #15599, #24956, #11225, #34330 — 解消時の撤去手順: `docs/bug-workaround-sunset.md`
+- **監視対象バグ**: anthropics/claude-code #15599, #24956, #11225, #34330 — 解消時: `docs/bug-workaround-sunset.md`
 - 詳細: `.claude/rules/git/sd-safe-commit.md`
 
 ---
@@ -66,62 +62,60 @@ Bashツールは便利だが既知バグが多い（heredoc破壊、パイプstd
 
 SD003 の全判断の根拠。詳細: `docs/core-doctrine.md`
 
-- **柱1: Output Primacy** — 「完了」=ユーザーが見る画面・受け取る成果物が存在し検証済み。内部ファイル数は完了指標ではない
+- **柱1: Output Primacy** — 「完了」=ユーザーが見る画面・成果物が存在し検証済み。内部ファイル数は完了指標ではない
 - **柱2: Silent Interior** — 内部は黙って動け。設計の優雅さより動くことが先
 - **柱3: Real Data First** — 実データで動かす。テストのためのテスト禁止。バグ再現時のみ最小テスト
 - **柱4: Segmented Sequencing** — 非ブロッキングを連続実行、ユーザー確認は末端に1回集約
 
 ## Conditional Context
 
-IMPORTANT: When judging "completion" of any task, apply Output Primacy (柱1): completion requires a user-visible artifact (screen/output/deliverable) that exists and is verified. File count, test count, type count do NOT constitute completion. A state with zero screens equals "not started" regardless of other progress. Details: `.claude/rules/global/output-primacy.md`
+IMPORTANT: タスクの「完了」判定は柱1 — ユーザーが見る画面/成果物が存在し検証済みであること。画面ゼロは進捗ゼロ。Details: `docs/rules-reference/global/output-primacy.md`
 
-IMPORTANT: When designing internal architecture (adapter, core, interface, types), apply Silent Interior (柱2): build working output first, then integrate internal patterns only when output is stable. Do not start with types → interface → adapter → core. Do not spend time on internal elegance while output is unmet. Details: `.claude/rules/global/silent-interior.md`
+IMPORTANT: 内部設計（adapter/core/interface/types）は柱2 — 動くアウトプットが先、内部パターンは安定後。types→interface→adapter→core の順で始めない。Details: `docs/rules-reference/global/silent-interior.md`
 
-IMPORTANT: When writing or evaluating tests, apply Real Data First (柱3): never write tests for the sake of tests or coverage targets. Test only to reproduce/fix production bugs. Work with real data (or its copy), not mocks. Forbidden patterns (VTD-001〜005) are auto-detected. Details: `.claude/rules/global/real-data-first.md`
+IMPORTANT: テストは柱3 — 本番バグの再現・固定時のみ、実データ（またはコピー）で書く。モック・カバレッジ目標・テストのためのテストは禁止（VTD-001〜005自動検出）。Adapter層のみ本番データコピーで徹底検証。Details: `docs/rules-reference/global/real-data-first.md`, `.claude/rules/testing/`
 
-IMPORTANT: When sequencing work, apply Segmented Sequencing (柱4): run non-blocking steps (tsc, lint, test, dev server, screenshot) continuously, then gate ONCE with user confirmation (AskUserQuestion) at the end. Never skip user confirmation. Never block every step. Details: `.claude/rules/global/segmented-sequencing.md`
+IMPORTANT: 段取りは柱4 — 非ブロッキング（tsc/lint/test/dev server/スクショ）を連続実行し、ユーザー確認は AskUserQuestion で末端に1回。確認の省略も毎ステップ確認も禁止。Details: `docs/rules-reference/global/segmented-sequencing.md`
 
-IMPORTANT: When starting any task, determine which project branch applies: GAS (Google Apps Script app), Cowork (SD003 framework/AI coordination), or Sukima Digital (IT coordination/business design). If the task can be accomplished by AI direct execution without building anything, don't build. Details: `.claude/rules/global/project-branching.md`, `docs/development-philosophy.md`
+IMPORTANT: タスク開始時に分岐判定 — GAS（Google Workspaceアプリ）/ Cowork（SD003自体）/ Sukima Digital（業務設計）。AI直接実行で済むものは作らない。Details: `docs/rules-reference/global/project-branching.md`, `docs/development-philosophy.md`
 
-IMPORTANT: Before starting non-trivial work — and before declaring completion or labeling confidence — apply 無知の知 (Known Unknowns): declare what you do NOT know BEFORE acting. Do a one-question blindspot pass (read the code/domain, then "what don't I know that could bite this?") to convert Unknown Unknowns → Known Unknowns. GREEN=Known Known (evidence-confirmed), YELLOW=Known Unknown (self-declared → must confirm via 条文/実データ/code before proceeding), RED=Unknown Unknown suspicion (乖離 → /bug-trace). Declaring ignorance is REWARDED, not penalized. No ceremony — no forms or blanket pre-merge quizzes aimed at undetectable Unknown Unknowns (that becomes the next Ralph Loop); the narrow Quiz Gate below is a distinct, separate mechanism for a different target. Remember CLAUDE.md/skills are briefings (maps), not the work itself; strong-model failures are quiet and cumulative, so periodically audit skill packages for weak-model hand-holding and delete it. Details: `.claude/rules/global/known-unknowns.md`
+IMPORTANT: 非自明な作業の着手前・完了宣言前に無知の知（Known Unknowns）— 知らないことを先に宣言する。GREEN=証拠確認済 / YELLOW=要確認（条文・実データ・コードで確認後に昇格）/ RED=想定外乖離→`/bug-trace`。blindspot pass は1問のみ、フォーム化・儀式化は禁止。未知の宣言は報酬であり罰しない。Details: `docs/rules-reference/global/known-unknowns.md`
 
-IMPORTANT: When a Generator (yourself, or agy/Grok acting as implementer) claims a Blueprint-Gate-required implementation (1時間以上 or ゴール未定義だったタスク) is complete, apply the Quiz Gate (8技法⑧): dispatch Codex via `/codex:review` as Evaluator to quiz on the actual diff before treating the completion claim as evidence — self-reported completion without a quiz is zero evidence, same as a Known-Assumed claim. This targets verifiable diffs, not undetectable Unknown Unknowns (see known-unknowns.md above), so it does not reintroduce the banned pre-merge-quiz ceremony. Not applicable to Work First direct-start tasks. Failure is a non-blocking warning (fail-open, same as claim-evidence-stop.sh), never a hard merge block. Details: `.claude/rules/global/quiz-gate.md`
+IMPORTANT: Blueprint Gate必須ライン（1時間超/ゴール未定義）の実装完了主張には Quiz Gate — `/codex:review` で Evaluator が差分に即したクイズを1〜3問出題。自己申告のみは証拠ゼロ。fail-open（警告のみ、マージブロックしない）。Details: `docs/rules-reference/global/quiz-gate.md`
 
-IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. Known constraints (iframe, CORS, @HEAD vs fixed deployment) must be reflected in code immediately. Details: `.claude/rules/gas/env-interface.md`, `.claude/rules/gas/gas-constraints.md`
+IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. iframe/CORS/@HEAD等の既知制約は即コードに反映。Details: `.claude/rules/gas/`
 
-IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Fallback tests (skip on failure) are prohibited. Coverage-only tests are prohibited. The sole purpose of tests is finding production bugs. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
+IMPORTANT: AI協調文書は `.sd/ai-coordination/` へ（`.antigravity/` やルート禁止）。アドホック相談は各AIのディスパッチスキルを使う。Details: `.claude/rules/workflow/ai-coordination.md`
 
-IMPORTANT: When coordinating with other AIs (Codex, Antigravity, Grok), coordination documents go to `.sd/ai-coordination/` (never `.antigravity/` or project root). For ad-hoc consultation/implementation use the per-AI dispatch skills (codex/grok lines below); the old formal 7-stage workflow chain (WORK_ORDER→IMPLEMENT_REQUEST→REVIEW) was removed 2026-07-05 as over-engineering. Details: `.claude/rules/workflow/ai-coordination.md`
+IMPORTANT: Codexへのアドホック相談・レビュー（「codexにレビューさせて」等）は公式プラグインを使う — `/codex:review`（読み取り）/ `/codex:adversarial-review`（批判的）/ `/codex:rescue`（調査・修正委譲）。未セットアップ時は `/codex:setup` を一度実行。
 
-IMPORTANT: When the user asks for a quick Codex consultation or one-off review (e.g. "codexにレビューさせて", "codexに見せて", "codexに相談", "codexに調査させて") use the official plugin commands `/codex:review` (read-only review), `/codex:adversarial-review` (critical review), or `/codex:rescue` (delegate investigation/fix) for ad-hoc consultation. Plugin: `openai/codex-plugin-cc` (already installed user-scope). If `/codex:setup` has not been run yet in this project, run it once first.
+IMPORTANT: Grokは2モード。**Lead mode**（ユーザーがGrok直接起動、「Grok主導で」「grokで進めて」等）→ Claudeはオーケストレーションせずハンドオフ（`.grok/GROK_NATIVE.md`）。**Assist mode**（「grokに相談/依頼/実装」等）→ `grok-dispatch` スキル（`pwsh -File grok-run.ps1 <repo> <out> "<prompt>"`、モデル名は固定せず省略=CLI既定、`--output-format plain`）。Grok=探索実装・独立検証・リサーチ / Codex=正式レビュー / agy=本番E2E。Details: `.claude/rules/workflow/ai-coordination.md`
 
-IMPORTANT: Grok has two modes. **Lead mode**: user opens Grok CLI directly, or says "Grok主導で" / "grokで進めて" / "このセッションはGrok" / "Grokに任せる" → Grok is Session Lead (do NOT force Claude orchestration; point user to Grok or treat as handoff). Native: `.grok/GROK_NATIVE.md`, guide: `.sd/ai-coordination/workflow/GROK_GUIDE.md`. **Assist mode**: user asks Claude to consult/delegate to Grok (e.g. "grokに依頼", "grokに相談", "grokにレビュー", "grokで実装") WITHOUT project ID → use `grok-dispatch` (`.claude/skills/grok-dispatch/`): `pwsh -File grok-run.ps1 <repo> <out> "<prompt>" [model]`, model omitted by default (CLI default; `grok-build` became "unknown model id" on 2026-07-12 — never hardcode a model name, check `grok models`), `--output-format plain`. Ad-hoc stays in conversation; formal docs only with project ID. Grok owns exploration impl / independent verification / research; Codex keeps formal review seal; agy keeps production E2E. Details: `.claude/rules/workflow/ai-coordination.md`
+IMPORTANT: SD003の他プロジェクト展開は `/sd-deploy` のみ。手動デプロイ禁止。Details: `.claude/skills/sd-deploy/SKILL.md`
 
-IMPORTANT: When deploying SD003 to another project, use `/sd-deploy` command only. Manual deploy is prohibited. Details: `.claude/skills/sd-deploy/SKILL.md`
+IMPORTANT: 仕様書は `.sd/specs/{feature}/` のみ、メインは `spec.md`（`design.md` 禁止=Antigravity予約）。hook `enforce-spec-location.sh` が違反書き込みを物理deny。Details: `.claude/rules/specs/spec-driven.md`
 
-IMPORTANT: When creating or modifying spec files (requirements/design/spec/tasks), the canonical location is `.sd/specs/{feature}/`. Never place under `docs/specs/` or any other path. Main spec file is `spec.md` (NOT `design.md` — Google Antigravity reserves `design.md` for UI). Physical guardrail: `.claude/hooks/enforce-spec-location.sh` denies writes outside `.sd/specs/`. Details: `.claude/rules/specs/spec-driven.md`
+IMPORTANT: Excel/CSV/PDF/画像を扱う前に `.claude/skills/` の該当スキルを確認し SKILL.md に正確に従う（cf001データ破損事故の再発防止）。Details: `.claude/rules/skills/skill-check-before-action.md`
 
-IMPORTANT: If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Skipping this check has caused data corruption (cf001 incident). Details: `.claude/rules/skills/skill-check-before-action.md`
+IMPORTANT: デバッグは3階層 — `/bug-quick`（5-15分・フロー照合）→ `/bug-trace`（30-60分・3エージェント並列）→ `/dialogue-resolution`（AI迷走検出・各Step後にAskUserQuestion必須）。同一エラー2回目でエスカレーション。
 
-IMPORTANT: When debugging, use the 3-tier system: `/bug-quick` (5-15min, flow comparison) → `/bug-trace` (30-60min, 3-agent parallel) → `/dialogue-resolution` (AI reasoning check). Escalate on 2nd same error. Details: `.claude/rules/troubleshooting/`
+IMPORTANT: Web UI（HTML/CSS/JS）は8デザイン原則＋デザイントークン適用、視覚品質スコア50/70以上。Details: `.claude/rules/ui/`
 
-IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design principles, apply design tokens, and check visual quality score (50/70 minimum). Details: `.claude/rules/ui/web-design-principles.md`, `.claude/rules/ui/visual-review-checklist.md`
+IMPORTANT: Playwright等のChromiumダウンロードは共有キャッシュ `D:\playwright-browsers` を使う。プロジェクトローカルの `PLAYWRIGHT_BROWSERS_PATH` 設定禁止。Details: `.claude/rules/global/playwright-cache.md`
 
-IMPORTANT: When running Playwright or any tool that downloads Chromium, use the shared cache at `D:\playwright-browsers`. Never set `PLAYWRIGHT_BROWSERS_PATH` to a project-local path. Details: `.claude/rules/global/playwright-cache.md`
+IMPORTANT: 全AI（特にagy）の成果物はプロジェクト内へ保存 — ユーザー向けは `materials/`、協調文書は `.sd/ai-coordination/`、FW文書は `docs/`。agyの `~/.gemini/antigravity-cli/brain/<会話ID>/` に唯一のコピーを残さない（CLIから発見不能=柱1違反）。発見時は `scripts/recover-agy-artifacts.sh` で回収しフルパス提示。Details: `docs/rules-reference/workflow/artifact-output-location.md`
 
-IMPORTANT: When any AI (especially agy/Antigravity) generates a deliverable (report, document, analysis, data), save it INTO the project tree where the user can open it — `materials/` for user-facing deliverables, `.sd/ai-coordination/` for coordination docs, `docs/` for framework docs. NEVER leave the only copy in an AppData hidden dir such as `~/.gemini/antigravity-cli/brain/<conversationID>/` (agy's injected default) — CLI users cannot find it (柱1 Output Primacy violation). agy runs outside Claude's hook system, so this is enforced by rule + the recovery backstop `scripts/recover-agy-artifacts.sh`. When you see an agy deliverable stranded in the brain dir, relocate it into the project and give the user the full path. Details: `.claude/rules/workflow/artifact-output-location.md`
+IMPORTANT: UIをユーザーに見せる前にバックエンド統合・デプロイへ進まない。「動くはず」ではなく「ユーザーが見て承認した」が確認。
 
-IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
+IMPORTANT: 構造化・複数項目の確認事項（計画/マトリクス/レビュー結果/差分要約/進捗）は Artifact で提示（`artifact-design` スキル必読）し、判断は AskUserQuestion で末端集約。単純な二択はインラインのまま（過剰ceremony禁止）。Artifact不可環境はテキストにフォールバック。Details: `docs/rules-reference/global/artifact-confirmation.md`
 
-IMPORTANT: When presenting structured or multi-part confirmation items to the user (plans, matrices, review results, multi-file/multi-project lists, diff summaries, before/after, progress of long multi-step work), render them as an Artifact (claude.ai viewable page) to reduce cognitive load, then gate the decision with AskUserQuestion. Load the `artifact-design` skill first (required). Keep simple binary confirmations inline — do NOT over-ceremony (forcing Artifacts on trivial confirms is itself a Ralph-Loop-style ritual). Claude Code only (Artifact is unavailable to Codex/agy/Grok); fall back to concise text if the Artifact tool is unavailable. Details: `.claude/rules/global/artifact-confirmation.md`
+IMPORTANT: Solo運用 — master/main で直接作業する。ブランチ・PR作成はユーザー指示時のみ（提案は可、無断作成・無断切替・無断削除は禁止）。セッション終了時は commit に加えて `git pull --rebase && git push` まで完了させる（2026-07-26裁定: Beads運用を正とする）。Details: `docs/rules-reference/git/branch-strategy.md`
 
-IMPORTANT: Solo運用 — master/main で直接作業する。ブランチ・PR作成はユーザー指示時のみ（提案は可、無断作成・無断切替・無断削除は禁止）。セッション終了時は commit に加えて `git pull --rebase && git push` まで完了させる（2026-07-26裁定: Beads運用を正とする）。Details: `.claude/rules/git/branch-strategy.md`
+IMPORTANT: 異常・エラー時は根本原因の特定が先 — 1)症状記述 2)自分の直前の行動を列挙 3)自分原因の仮説を最初に（外部要因は最後）4)検証 5)それから修正+登録+commit。「気をつける」は対策ではない。Details: `docs/rules-reference/troubleshooting/root-cause-first.md`
 
-IMPORTANT: When any anomaly or error occurs, do NOT implement fixes before identifying root cause. Follow: 1) describe symptom, 2) list own recent actions, 3) hypothesize own actions as cause FIRST (external factors LAST), 4) verify hypothesis, 5) THEN implement fix + register + commit + package. "Being careful" is not a fix. Details: `.claude/rules/troubleshooting/root-cause-first.md`
+IMPORTANT: 大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ・重複チェック）。Details: `docs/rules-reference/session/memory-nudge.md`
 
-IMPORTANT: After completing a major task (tests pass, implementation done, bug fixed), self-evaluate whether any discoveries or corrections from this session should be persisted to auto-memory or session notes. Non-blocking, non-interactive. Details: `.claude/rules/session/memory-nudge.md`
-
-IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the session record: review user corrections during the session, record them in the notes section, and suggest rule/skill/memory creation if 2+ corrections detected. Non-blocking. Details: `.claude/rules/skills/learning-nudge.md`
+IMPORTANT: `/sessionwrite` 時は学習評価 — セッション中のユーザー修正をレビューし備考に記録、2回以上でルール/スキル/メモリ化を提案（提案のみ・自動作成禁止）。Details: `docs/rules-reference/skills/learning-nudge.md`
 
 ---
 
@@ -136,4 +130,4 @@ IMPORTANT: When running `/sessionwrite`, include a learning evaluation in the se
 | Cleanup | `/cleanup`, `restore`, `history` |
 
 ---
-SD003 v3.4.0 | Updated: 2026-07-06 | Style: `.claude/rules/global/claude-md-style.md`
+SD003 v3.5.0 | Updated: 2026-07-26 (Claude 5世代lean化: 常時ロード121KB→約24KB、詳細ルールはdocs/rules-reference/へ) | Style: `.claude/rules/global/claude-md-style.md`

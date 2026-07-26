@@ -1,3 +1,9 @@
+---
+description: セッション管理（.sessions/ を扱うときのみロード）
+paths:
+  - ".sessions/**"
+---
+
 # Session Management
 
 ## Two-Layer Memory Structure

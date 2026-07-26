@@ -6,135 +6,48 @@ paths:
 
 # .claude/rules/
 
-SD003フレームワークの開発ルール集。Claude Codeが自動読込する。
+SD003 の開発ルール集。**読み込み機構に注意**:
 
-## ルール一覧
+| フロントマター | 挙動 |
+|---------------|------|
+| `paths:` なし | **毎セッション全文が常時ロードされる**（トークン固定費）|
+| `paths:` あり | 該当パスのファイルを扱うときのみロード（条件ロード）|
 
-### グローバル（全ファイル適用）
+> 2026-07-26 Claude 5世代lean化: 常時ロードは要点圧縮した3ファイルのみに削減。
+> ドクトリン・手順の全文は `docs/rules-reference/` へ移設（CLAUDE.md の IMPORTANT 行が要約とパスを保持）。
+> **新規ルールを追加するときは原則 `paths:` を付ける。常時ロード追加は最小限に。**
+
+## 常時ロード（要点のみ・3ファイル）
+
 | ファイル | 内容 |
 |---------|------|
-| `global/work-first.md` | **まず動かす原則（最上位・全ルールに優先）** |
-| `global/known-unknowns.md` | 無知の知（Known Unknowns / 4象限・GREEN/YELLOW/RED・blindspot pass） |
-| `global/quality-standards.md` | 品質基準（TypeScript/テスト/コード品質） |
-| `global/fullpath-display.md` | ファイル保存先のフルパス表示 |
-| `global/artifact-confirmation.md` | 確認事項の Artifact 提示（構造化確認の認知負荷軽減・Claude Code専用） |
+| `cleanup/file-organization.md` | 保存先規約・rm禁止・上書き禁止（hook未整備のため文で維持） |
+| `git/sd-safe-commit.md` | .sd/ 操作規約・L1-L4防御・手動復元手順 |
+| `specs/spec-driven.md` | 仕様書配置 `.sd/specs/`・`spec.md` 命名（hook裏付けあり） |
 
-### ドメイン別
+## 条件ロード（paths: 付き）
 
-#### アーキテクチャ
-| ファイル | 内容 |
-|---------|------|
-| `architecture/adapter-core-pattern.md` | Adapter-Core分離パターン |
+| ファイル | トリガー |
+|---------|---------|
+| `architecture/adapter-core-pattern.md` | アーキテクチャ関連パス |
+| `gas/env-interface.md` / `gas/gas-constraints.md` | GASコード |
+| `global/claude-md-style.md` | CLAUDE.md編集 |
+| `global/playwright-cache.md` | Playwright関連 |
+| `global/quality-standards.md` | ソースコード |
+| `session/session-management.md` | `.sessions/**` |
+| `skills/skill-trust-policy.md` / `skills/skill-check-before-action.md` | スキル関連 |
+| `specs/spec-versioning.md` | 仕様書 |
+| `testing/testing-standards.md` / `testing/production-data-tdd.md` | テストコード |
+| `ui/web-design-principles.md` / `ui/visual-review-checklist.md` | UI関連 |
+| `workflow/ai-coordination.md` | AI協調 |
 
-#### GAS開発
-| ファイル | 内容 |
-|---------|------|
-| `gas/env-interface.md` | Env Interface Pattern |
-| `gas/gas-constraints.md` | GAS環境制約（禁止API等） |
+## 参照文書（常時ロード対象外・docs/rules-reference/）
 
-#### UIデザイン
-| ファイル | 内容 |
-|---------|------|
-| `ui/web-design-principles.md` | Web UIデザイン原則（8原則+禁止事項） |
-| `ui/visual-review-checklist.md` | 視覚的評価チェックリスト（7項目スコアリング） |
+4本柱詳細（output-primacy / silent-interior / real-data-first / segmented-sequencing）、
+work-first、known-unknowns、quiz-gate、project-branching、branch-strategy、
+artifact-confirmation、fullpath-display、artifact-output-location、
+root-cause-first、bug-quick、dialogue-resolution、memory-nudge、learning-nudge、
+および Phase2 圧縮前の原本（*-full.md）。
 
-#### ファイル管理
-| ファイル | 内容 |
-|---------|------|
-| `cleanup/file-organization.md` | ファイル整理・materials・Cleanup Tool |
-
-#### スキル管理
-| ファイル | 内容 |
-|---------|------|
-| `skills/skill-trust-policy.md` | スキル信頼ポリシー（Trusted/Caution） |
-| `skills/skill-check-before-action.md` | ファイル操作前のスキル確認必須ルール |
-
-### フェーズ別
-
-#### 仕様書駆動
-| ファイル | 内容 |
-|---------|------|
-| `specs/spec-driven.md` | 仕様書駆動開発フロー |
-
-#### テスト
-| ファイル | 内容 |
-|---------|------|
-| `testing/testing-standards.md` | テスト基準・カバレッジ要件 |
-| `testing/production-data-tdd.md` | 変則TDD（本番データ駆動） |
-
-#### セッション
-| ファイル | 内容 |
-|---------|------|
-| `session/session-management.md` | セッション管理 |
-
-### システム別
-
-#### AI協調
-| ファイル | 内容 |
-|---------|------|
-| `workflow/ai-coordination.md` | AI協調体制・ワークフロー |
-
-#### 問題解決（3階層デバッグ）
-| ファイル | 内容 |
-|---------|------|
-| `troubleshooting/bug-quick.md` | Bug QUICK（処理フロー照合、5-15分） |
-| `troubleshooting/dialogue-resolution.md` | 対話型解決法（AI思い込み検出） |
-
-## 使い方
-
-### 自動読込
-`.claude/rules/`配下の全`.md`ファイルはClaude Codeが自動で読み込む。
-
-### パス限定ルール（オプション）
-YAMLフロントマターで特定ファイルにのみ適用:
-
-```markdown
----
-paths: src/**/*.ts
----
-
-# このルールはsrc/配下のTypeScriptファイルにのみ適用
-```
-
-### CLAUDE.mdからの参照
-CLAUDE.mdでは短文で方針を示し、詳細はrulesを参照:
-
-```markdown
-## ファイル整理
-詳細: `.claude/rules/cleanup/file-organization.md`
-```
-
-## ディレクトリ構造
-
-```
-.claude/rules/
-├── README.md                    # このファイル
-├── architecture/
-│   └── adapter-core-pattern.md  # Adapter-Core分離
-├── cleanup/
-│   └── file-organization.md     # ファイル整理
-├── gas/
-│   ├── env-interface.md         # Env Interface
-│   └── gas-constraints.md       # GAS制約
-├── global/
-│   ├── quality-standards.md     # 品質基準
-│   └── fullpath-display.md      # フルパス表示
-├── session/
-│   └── session-management.md    # セッション
-├── skills/
-│   ├── skill-trust-policy.md    # スキル信頼ポリシー
-│   └── skill-check-before-action.md  # スキル確認必須
-├── specs/
-│   └── spec-driven.md           # 仕様書駆動
-├── testing/
-│   ├── testing-standards.md     # テスト
-│   └── production-data-tdd.md   # 変則TDD
-├── troubleshooting/
-│   ├── bug-quick.md             # Bug QUICK
-│   └── dialogue-resolution.md   # 対話型解決法
-├── ui/
-│   ├── web-design-principles.md # Web UIデザイン原則
-│   └── visual-review-checklist.md # 視覚的評価チェックリスト
-└── workflow/
-    └── ai-coordination.md       # AI協調
-```
+要約は `CLAUDE.md` の Conditional Context（IMPORTANT 行）が保持し、
+詳細が必要なときに AI が `Details:` パスを読みに行く（progressive disclosure）。
