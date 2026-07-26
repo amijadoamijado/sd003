@@ -262,10 +262,15 @@ if (deployedHooks) {
 }
 
 // ---- C2b: Codex hook config is parseable and its shared Node guard exists
+// Keep-aware (same semantics as C1/C8): a target may protect .codex via .sd003-keep
+// (bespoke Codex wiring, e.g. at002's evidence hooks) — the framework-contract check
+// is meaningless for a file deploy was told never to touch.
 {
   const codexHooksPath = path.join(targetDir, '.codex', 'hooks.json');
   const codexHooks = readJson(codexHooksPath);
-  if (!codexHooks.ok) {
+  if (isKept(keepPatterns, '.codex/hooks.json')) {
+    skip('C2b', '.codex/hooks.json is protected by .sd003-keep (bespoke Codex wiring) - contract check skipped');
+  } else if (!codexHooks.ok) {
     fail('C2b', `Codex hooks unreadable/invalid: ${codexHooksPath} (${codexHooks.error || 'missing'})`);
   } else {
     const serialized = JSON.stringify(codexHooks.value);
@@ -377,10 +382,16 @@ const generatedFiles = [
 }
 
 // ---- C7: Session Lead contract is distributed
+// Keep-aware (same semantics as C1/C8): a bespoke kept CLAUDE.md is not template-
+// generated, so the Lead-mode contract may live in the project's own rules instead.
 {
-  const claude = readText(path.join(targetDir, 'CLAUDE.md'));
-  if (claude === null || !claude.includes('Lead mode')) fail('C7', 'CLAUDE.md is missing Lead mode');
-  else pass('C7', 'CLAUDE.md contains Lead mode');
+  if (isKept(keepPatterns, 'CLAUDE.md')) {
+    skip('C7', 'CLAUDE.md is protected by .sd003-keep (bespoke version) - Lead-mode check skipped');
+  } else {
+    const claude = readText(path.join(targetDir, 'CLAUDE.md'));
+    if (claude === null || !claude.includes('Lead mode')) fail('C7', 'CLAUDE.md is missing Lead mode');
+    else pass('C7', 'CLAUDE.md contains Lead mode');
+  }
 }
 
 // ---- C8: rule-file references in CLAUDE.md resolve on disk.
