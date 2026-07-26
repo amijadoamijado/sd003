@@ -4,7 +4,7 @@
 - **日時**: 2026-07-26（Grok Lead: doc-alignment 実装時点）
 - **プロジェクト**: D:\claudecode\sd003
 - **ブランチ**: master
-- **最新コミット**: （commit 後に確定）docs(grok): align GROK_* model default + AGENTS shared entry + session freshness
+- **最新コミット**: ce70d3f docs(grok): align model default + AGENTS shared entry + session freshness (20260726-grok-doc-alignment)
 
 ## 作業サマリー
 

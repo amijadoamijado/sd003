@@ -13,7 +13,7 @@
 | P1 AGENTS.md 中立化 | 完了（Shared Entry Point + Lead分岐表） |
 | P2 セッション鮮度 | 完了（session-current / TIMELINE 追記） |
 | 触禁違反 | なし（deploy/upgrade/verify / grok-run.ps1 / rules-reference / 12PJ 未変更） |
-| commit + push | 実施（本報告コミットに含む） |
+| commit + push | 実装本体 `ce70d3f` + ハッシュ追記コミット後に push |
 
 ## 2. 変更ファイル
 
