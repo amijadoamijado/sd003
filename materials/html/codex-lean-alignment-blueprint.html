@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codex lean alignment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--accent:#2563eb;--accent-light:#dbeafe;--success:#16a34a;--warning:#ca8a04;--warning-light:#fef9c3;--text:#1e293b;--muted:#64748b;--bg:#fff;--panel:#f8fafc;--border:#e2e8f0;--s2:8px;--s3:12px;--s4:16px;--s6:24px;--s8:32px;--s12:48px;--radius:6px}
+    *{box-sizing:border-box}body{margin:0;font-family:'Noto Sans JP','Hiragino Sans',sans-serif;font-size:16px;line-height:1.7;color:var(--text);background:var(--bg)}
+    header{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:var(--s4);padding:var(--s4) var(--s8);background:var(--bg);border-bottom:2px solid var(--accent)}
+    h1{margin:0;font-size:24px}.badge{padding:4px 12px;border-radius:var(--radius);background:var(--accent);color:#fff;font-size:14px}
+    main{max-width:960px;margin:auto;padding:var(--s8)}section{margin-bottom:var(--s12);scroll-margin-top:80px}
+    h2{font-size:24px;border-bottom:2px solid var(--border);padding-bottom:var(--s3)}h3{font-size:20px;margin-top:var(--s6)}
+    code{background:var(--panel);padding:2px 6px;border-radius:4px}.callout{padding:var(--s4);border-left:4px solid var(--accent);background:var(--accent-light);border-radius:0 var(--radius) var(--radius) 0}.warning{border-color:var(--warning);background:var(--warning-light)}
+    table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:var(--s3);border-bottom:1px solid var(--border);text-align:left;vertical-align:top}th{background:var(--panel)}
+    .checklist{list-style:none;padding:0}.checklist li{padding:var(--s2) 0}.checklist li::before{content:'□';color:var(--success);font-weight:700;margin-right:var(--s3)}
+    button{border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);padding:var(--s2) var(--s4);font:inherit;cursor:pointer}
+    @media(max-width:768px){header{padding:var(--s3) var(--s4);flex-wrap:wrap}main{padding:var(--s4)}table{display:block;overflow-x:auto}}
+    @media print{header{position:static}.actions{display:none}main{padding:0}section{break-inside:avoid}}
+  </style>
+</head>
+<body>
+  <header><div><h1>Codex lean alignment</h1><span class="badge">要件定義書</span> <span>2026-07-26</span></div><div class="actions"><button onclick="window.print()">Print</button><button onclick="copyMarkdown()">Copy as Markdown</button></div></header>
+  <main id="content">
+    <section><h2>1. 背景</h2><p>Claude Code側のlean化後も、CodexにはSkillの最大3重露出と常時指示の矛盾が残っている。</p></section>
+    <section><h2>2. 現状と前提</h2>
+      <table><thead><tr><th>面</th><th>現状</th><th>課題</th></tr></thead><tbody>
+        <tr><td><code>.agents/skills</code></td><td>agy向け生成先</td><td>Codex公式のrepo Skill探索先でもある</td></tr>
+        <tr><td><code>.codex/skills</code></td><td>Codex向け重複生成</td><td>同名Skillが二重露出</td></tr>
+        <tr><td>Codex home</td><td>任意配布先</td><td>repoと合わせて最大三重露出</td></tr>
+        <tr><td><code>AGENTS.md</code></td><td>7,042 bytes</td><td>常時指示に重複と矛盾</td></tr>
+      </tbody></table>
+      <h3>制約</h3><p>手作りSkillを削除せず、authoring sourceを維持し、整理対象は復元可能にする。</p>
+      <div class="callout warning">文字数削減より、正規位置の一本化、矛盾除去、物理guardとの役割分担を優先する。</div>
+    </section>
+    <section><h2>3. ゴール</h2><div class="callout">Codexとagyが同じ<code>.agents/skills</code>を安全に共有し、Skill重複がなく、短いAGENTS、物理guard、必要時参照に役割分担されている。</div></section>
+    <section><h2>4. アウトプット定義</h2><ul><li>同期・配布・upgradeスクリプトとmanifest</li><li>共通Agent Skills</li><li>lean版AGENTSとCodex仕様</li><li>hook差分表</li><li>回帰検証</li></ul></section>
+    <section><h2>5. 要件</h2><ol><li><code>.agents/skills</code>を共通出力にする。</li><li>Codex専用重複配布を廃止する。</li><li>同名未管理Skillとの衝突を事前検出する。</li><li>AGENTSを入口情報へ限定する。</li><li>hook差分と代替策を記録する。</li></ol></section>
+    <section><h2>6. 検証観点</h2><ul class="checklist"><li>Skillが一重に露出する</li><li>同名未管理Skillが保護される</li><li>AGENTSの矛盾が解消される</li><li>hook差分の判断が追跡できる</li><li>sync、build、test、lintが成功する</li></ul></section>
+  </main>
+  <script>function copyMarkdown(){navigator.clipboard.writeText('# Codex lean alignment\n\n'+document.getElementById('content').innerText)}</script>
+</body>
+</html>
