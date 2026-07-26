@@ -13,4 +13,4 @@
 9. [ ] 構文検査（PS parser / bash -n / node --check）
 10. [ ] ミラー同期（python scripts/sync-cli-commands.py）
 11. [ ] 実機 dry-run: deploy→oc001 / upgrade→oc001 / upgrade→at002（keep動作確認）
-12. [ ] commit + 結果提示（Artifact）+ ユーザー承認ゲート（--execute は承認後）
+12. [x] commit + 結果提示（Artifact）+ ユーザー承認ゲート（--execute は承認後）
