@@ -1,13 +1,15 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 122
+- **Total Sessions**: 123
 - **Latest Session**: 2026-07-26
 - **Project Start**: 2026-02-15
 
 ---
 
 ## 2026-07
+
+| 07-26 | **Claude 5世代lean化の全系統完了（本体74%削減→v2.18.0配布→12/12PJ適用→3AIレビュー消化→注入マップ実測）**。公式lean化(80%削減)を一次ソース検証→sd003常時ロード121KB→31KB→配布伝播v2.18.0(rules-reference配布/テンプレv2/lean migration/.sd003-profile/C8)→12/12PJ適用(at002は決定論分離維持・ハッシュ無傷証明)。実害根治: PS5.1 CP932/BOM即死・SD002遺物退役・C2b/C7 keep-aware。**注入マップ実測確立**(agy/Codexの自動注入はAGENTS.md 1枚のみ・agyはbrain/保存強制)→AGENTS.mdへagy必須上書き設置し全PJ配布(fw5yp/sb001の小文字agents.md罠も解決) | 2e5cedd, 38bf5b7, 678b267, befd8c7, 0237e88, 6b79daa | [Details](session-20260726-170848.md) |
 
 | 07-26 | **Codex・agy共通Skill配置統一と再起動後検証を完了**。`.agents/skills`を正規位置に統一し、旧`.codex/skills`を廃止。ユーザー領域の重複18件はバックアップへ退避。lean版AGENTS、hook parity文書、ガード配布・検証を整備。同期・Python 4件・Jest 96件・build・lint・構文検査成功。Codex再起動後に全45 Skillの認識、旧配置不存在、バックアップ18件、clean、origin同期を実測確認 | 6dc5219, ac1589e | [Details](session-20260726-152455.md) |
 
