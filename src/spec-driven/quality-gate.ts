@@ -20,7 +20,7 @@ export interface QualityGateResult {
  * directly by `tests/unit/spec-driven/quality-gate.test.ts`. The REAL, honest gates used
  * by the production `qa:deploy:safe` CLI command (which actually run tsc/eslint/jest via
  * child_process) are wired in `src/cli/commands/qa-deploy-safe.ts`, overwriting these
- * placeholders at command-invocation time. See `.claude/rules/global/real-data-first.md`.
+ * placeholders at command-invocation time. See `docs/rules-reference/global/real-data-first.md`.
  */
 export class QualityGate {
   public static gates: Map<string, (options?: unknown) => Promise<QualityGateResult>> = new Map();

@@ -27,7 +27,7 @@ module.exports = {
       'error',
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' },
     ],
-    // Minimum bar (see .claude/rules/global/silent-interior.md): no lazy `any`,
+    // Minimum bar (see docs/rules-reference/global/silent-interior.md): no lazy `any`,
     // no @ts-ignore/@ts-nocheck escape hatches.
     '@typescript-eslint/no-explicit-any': 'error',
     '@typescript-eslint/ban-ts-comment': 'error',

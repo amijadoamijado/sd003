@@ -19,15 +19,15 @@ SD003 の全判断の根拠。詳細: `docs/core-doctrine.md`
 
 | 柱 | 要点 | 根拠 |
 |----|------|------|
-| 1. Output Primacy | 「完了」=ユーザーが見るものが存在。画面ゼロ=未着手 | `.claude/rules/global/output-primacy.md` |
-| 2. Silent Interior | 内部は黙って動け。設計の優雅さを議論しない | `.claude/rules/global/silent-interior.md` |
-| 3. Real Data First | 実データで動かす。テストのためのテスト禁止 | `.claude/rules/global/real-data-first.md` |
-| 4. Segmented Sequencing | 非ブロッキング連続 → 末端に1回確認。省略禁止 | `.claude/rules/global/segmented-sequencing.md` |
+| 1. Output Primacy | 「完了」=ユーザーが見るものが存在。画面ゼロ=未着手 | `docs/rules-reference/global/output-primacy.md` |
+| 2. Silent Interior | 内部は黙って動け。設計の優雅さを議論しない | `docs/rules-reference/global/silent-interior.md` |
+| 3. Real Data First | 実データで動かす。テストのためのテスト禁止 | `docs/rules-reference/global/real-data-first.md` |
+| 4. Segmented Sequencing | 非ブロッキング連続 → 末端に1回確認。省略禁止 | `docs/rules-reference/global/segmented-sequencing.md` |
 
 ## Work First - まず動かす原則（最上位）
 
 > 動かないソフトウェアに対するテスト・レビュー・文書は無価値。
-> 詳細: `.claude/rules/global/work-first.md`
+> 詳細: `docs/rules-reference/global/work-first.md`
 
 ### 開発順序（厳守）
 1. 最小コードで動かす（50行でいい）
@@ -50,7 +50,7 @@ SD003 の全判断の根拠。詳細: `docs/core-doctrine.md`
 ## 無知の知（Known Unknowns / 4象限）
 
 > 検証前に不確実性を明示する。「知らないことを知らないまま進める」のが最大のリスク。
-> 詳細: `.claude/rules/global/known-unknowns.md`
+> 詳細: `docs/rules-reference/global/known-unknowns.md`
 
 - 着手前に自分の未知を **Known Unknown** の箱へ先回りして移す（blindspot pass・1問・フォーム化しない）。
 - ラベル: **GREEN**=Known Known（証拠あり） / **YELLOW**=Known Unknown（要確認・条文/実データで潰す） / **RED**=Unknown Unknown疑い（乖離→bug-trace）。
@@ -129,7 +129,7 @@ npm run build && npm test && npm run lint
 - [ ] **VTD検証未通過のままテスト完了とする**（`npm run test:validate-data` で確認必須）
 - [ ] **ファイルの直接削除（rm）**（アーカイブフォルダへ移動すること）
 - [ ] **.sd/変更を長時間未commitで放置する**（変更後は早めにcommit。同一bashが最も安全。未commitの.sd/変更はwipe時にL4で復元されない）
-- [ ] **作業前にブランチ／PRを勝手に作る**（一人運用=master/main直接作業。ブランチ／PRはユーザーが指示したときのみ作成。詳細: `.claude/rules/git/branch-strategy.md`）
+- [ ] **作業前にブランチ／PRを勝手に作る**（一人運用=master/main直接作業。ブランチ／PRはユーザーが指示したときのみ作成。詳細: `docs/rules-reference/git/branch-strategy.md`）
 - [ ] **`.claude/settings.json`をgit追跡する**（.gitignoreに入れること。追跡するとランタイムが.sd/を消す）
 - [ ] **ユーザー提供ファイル・成果物の上書き**（元ファイル保持、修正版は別名で新規作成）
 - [ ] **skills/フォルダ未確認でのファイル操作**（該当スキルがあればその手順に厳密に従うこと）
@@ -193,7 +193,7 @@ npm run build && npm test && npm run lint
 
 **agy固有**: agyは既定で `~/.gemini/antigravity-cli/brain/<会話ID>/`（AppData隠しディレクトリ）に
 保存するが、CLIユーザーからは見つけられない。SD003ではこの既定を上書きし、成果物を必ず
-プロジェクト内へ書き出すこと。詳細: `.claude/rules/workflow/artifact-output-location.md`
+プロジェクト内へ書き出すこと。詳細: `docs/rules-reference/workflow/artifact-output-location.md`
 
 ### 配置禁止
 

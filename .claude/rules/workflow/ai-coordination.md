@@ -104,7 +104,7 @@ paths:
 | 禁止 | 理由 |
 |------|------|
 | `.antigravity/` / プロジェクトルートへの依頼書作成 | 散らかる・案件と紐付かない |
-| 成果物をAppData隠しディレクトリに保存 | ユーザーが探せない（詳細: `.claude/rules/workflow/artifact-output-location.md`） |
+| 成果物をAppData隠しディレクトリに保存 | ユーザーが探せない（詳細: `docs/rules-reference/workflow/artifact-output-location.md`） |
 
 ### AI別設定フォルダの用途（依頼書は置かない）
 

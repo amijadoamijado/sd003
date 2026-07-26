@@ -14,7 +14,7 @@ function truncate(text: string): string {
  * Builds a real quality-gate check that runs `command args` as a child process.
  * PASSED/FAILED is determined solely by the process exit code — this replaces the
  * previous mock gates, which returned PASSED unconditionally regardless of project
- * state (Real Data First — `.claude/rules/global/real-data-first.md`).
+ * state (Real Data First — `docs/rules-reference/global/real-data-first.md`).
  */
 function runCheckGate(gateName: string, command: string, args: string[]): () => Promise<QualityGateResult> {
   return async (): Promise<QualityGateResult> => {

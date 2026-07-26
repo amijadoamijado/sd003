@@ -7,7 +7,7 @@
 # recent deliverable files from there into the project so they are visible.
 #
 # NON-DESTRUCTIVE: copies (never moves/deletes). Originals in brain/ are untouched.
-# See .claude/rules/workflow/artifact-output-location.md
+# See docs/rules-reference/workflow/artifact-output-location.md
 #
 # Usage:
 #   bash scripts/recover-agy-artifacts.sh              # last 48h -> materials/_agy-recovered/<date>/

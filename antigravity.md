@@ -45,7 +45,7 @@ Available skills: `sd-deploy`, `session-autosave`, `rollback-guard`, etc.
 
 ## 🚨 CRITICAL: 成果物の保存場所（システム注入の既定を上書きする）
 
-**詳細ルール: `.claude/rules/workflow/artifact-output-location.md`**
+**詳細ルール: `docs/rules-reference/workflow/artifact-output-location.md`**
 
 > agyのシステムには「生成物は `~/.gemini/antigravity-cli/brain/<会話ID>/` に保存する」
 > という既定が注入されている。この隠しディレクトリ（AppData下）は、CLIで作業する
