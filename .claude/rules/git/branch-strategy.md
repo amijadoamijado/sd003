@@ -46,9 +46,10 @@ PR レビューが要る場面（大きな変更・他者レビューを通し�
 
 ## git push / commit との関係
 
-- commit / push は従来どおりユーザーが求めたときに行う。
+- commit は作業完了時に行う。push は**セッション終了時に必ず実行する**
+  （2026-07-26裁定: D:\claudecode の Beads 運用「Session Completion で push 必須」を正とする）。
 - このルールは「どのブランチで作業するか・PR を作るか」のみを定める。
-  コミット粒度・push タイミングは既存ルール（`sd-safe-commit.md` 等）に従う。
+  コミット粒度は既存ルール（`sd-safe-commit.md` 等）に従う。
 
 ## 全AIモデル共通
 
