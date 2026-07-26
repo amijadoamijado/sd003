@@ -240,3 +240,12 @@ find .claude/hooks -type f | wc -l            # Hooks
 ## 詳細手順
 
 README.md を参照。
+
+## Lean配布（2026-07-26 / FRAMEWORK 2.18.0）
+
+Claude 5世代lean化により、旧・常時ロードルール17本は `docs/rules-reference/` へ移設済み。
+
+- deploy は `docs/rules-reference/` をツリー配布する（CLAUDE.md の `Details:` 参照先。欠けると dangling）
+- CLAUDE.md.template v2 は lean構造（Core Doctrine 要約節 + docs/rules-reference/ 参照）
+- 配備先の検証に C8（CLAUDE.md のルール参照パス実在チェック）が追加された
+- 配布先の旧17ファイルの後始末は deploy では行わない（コピーのみ原則を維持）。`/sd-upgrade` の lean migration が担当

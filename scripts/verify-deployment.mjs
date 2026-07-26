@@ -357,6 +357,31 @@ const generatedFiles = [
   else pass('C7', 'CLAUDE.md contains Lead mode');
 }
 
+// ---- C8: rule-file references in CLAUDE.md resolve on disk.
+// Lean migration (2026-07-26) moved 17 rules to docs/rules-reference/; a stale
+// template or a deploy that skips that dir leaves "Details:" paths dangling —
+// a class C1-C7 never see (none of them check link targets). Skipped when
+// CLAUDE.md is bespoke (.sd003-keep), same semantics as C1.
+{
+  if (isKept(keepPatterns, 'CLAUDE.md')) {
+    skip('C8', 'CLAUDE.md is protected by .sd003-keep (bespoke version) - link check skipped');
+  } else {
+    const claude = readText(path.join(targetDir, 'CLAUDE.md'));
+    if (claude === null) {
+      skip('C8', 'CLAUDE.md not found (existence is Phase 6 responsibility)');
+    } else {
+      const re = /(?:\.claude\/rules|docs\/rules-reference)\/[A-Za-z0-9_.\/-]+\.md/g;
+      const refs = new Set(claude.match(re) || []);
+      const dangling = [...refs].filter((r) => !fs.existsSync(path.join(targetDir, r)));
+      if (dangling.length) {
+        fail('C8', `CLAUDE.md references missing rule files: ${dangling.join(', ')}`);
+      } else {
+        pass('C8', `all ${refs.size} rule-file references resolve`);
+      }
+    }
+  }
+}
+
 console.log('');
 if (failures.length) {
   console.log(`Content verification FAILED (${failures.length} issue(s)):`);

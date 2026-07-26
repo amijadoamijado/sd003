@@ -11,8 +11,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 # Configuration
-$SD003_VERSION = "3.4.0"
-$FRAMEWORK_VERSION = "2.17.0"
+$SD003_VERSION = "3.5.0"
+$FRAMEWORK_VERSION = "2.18.0"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -96,7 +96,7 @@ function Invoke-DeployDryRun {
     $scanDirs = @(
         ".claude\commands", ".claude\rules", ".claude\skills", ".claude\hooks",
         ".agents\skills", ".codex", ".grok", ".sd\settings", ".sd\design",
-        ".sd\steering", ".handoff", "docs\troubleshooting"
+        ".sd\steering", ".handoff", "docs\troubleshooting", "docs\rules-reference"
     )
     foreach ($d in $scanDirs) {
         $srcRoot = Join-Path $SOURCE_DIR $d
@@ -410,6 +410,10 @@ $copyStats["AI Coordination"] = $wfCount
 
 # 4-11: docs/troubleshooting/
 Copy-DirTree -RelPath "docs\troubleshooting" -Label "Docs/Troubleshooting"
+
+# 4-11c: docs/rules-reference/ (tree) - lean化(2026-07-26)で.claude/rules/から移設された
+# 参照ドキュメント群。CLAUDE.md の Details: が指すため配布必須（欠けるとdangling）。
+Copy-DirTree -RelPath "docs\rules-reference" -Label "Docs/RulesReference" -Filter "*.md"
 
 # 4-12: docs/quality-gates.md (overwrite unless protected by .sd003-keep)
 $qgSrc = Join-Path $SOURCE_DIR "docs\quality-gates.md"

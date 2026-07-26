@@ -5,8 +5,8 @@
 set -e
 
 # Configuration
-SD003_VERSION="3.4.0"
-FRAMEWORK_VERSION="2.17.0"
+SD003_VERSION="3.5.0"
+FRAMEWORK_VERSION="2.18.0"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
@@ -84,7 +84,7 @@ deploy_dry_run() {
     local diverged=0 kept=0 newc=0 same=0 d f sf projrel tgt
     local DIV=() KEP=()
     local gh gh_name gh_rel gh_tgt
-    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".sd/settings" ".sd/design" ".sd/steering" ".handoff" "docs/troubleshooting")
+    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".sd/settings" ".sd/design" ".sd/steering" ".handoff" "docs/troubleshooting" "docs/rules-reference")
     for d in "${scan_dirs[@]}"; do
         [ -d "$SOURCE_DIR/$d" ] || continue
         while IFS= read -r f; do
@@ -302,6 +302,10 @@ copy_dir_tree ".sd/settings" "SD Settings" "*"
 # missing from the real copy path, so a real deploy silently skipped it while
 # dry-run reported it as new/unchanged - parity fix with deploy.ps1's 4-11a)
 copy_dir_tree ".sd/design" "Design Tokens" "*"
+
+# 4-9c: docs/rules-reference/ (tree) - lean化(2026-07-26)で.claude/rules/から移設された
+# 参照ドキュメント群。CLAUDE.md の Details: が指すため配布必須（欠けるとdangling）。
+copy_dir_tree "docs/rules-reference" "Docs/RulesReference" "*.md"
 
 # 4-10: .sessions/session-template.md
 if [ -f "$SOURCE_DIR/.sessions/session-template.md" ]; then

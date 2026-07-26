@@ -48,6 +48,74 @@ $overengSkillNames = @("context-autonomy","rollback-guard","session-autosave")
 $overengExtra      = @(".claude\hooks\context-monitor-hook.ps1", ".claude\rules\ralph-loop.md", ".claude\rules\refactoring", ".sd\ralph", ".sd\refactor", ".claude\hooks\sd003-stop-hook.sh", ".claude\hooks\sd003-stop-hook.ps1", ".claude\hooks\sd003-stop-hook-endgame.sh", ".claude\hooks\sd003-stop-hook-endgame.ps1", "scripts\deploy-ralph-wiggum.sh")
 
 # ------------------------------------------------------------------
+# Lean migration (2026-07-26): 17 always-loaded rule files were moved to
+# docs/rules-reference/ in SD003 (Claude 5 generation lean-context work).
+# deploy only copies and never prunes, so upgraded projects keep the OLD
+# always-loaded copies and the token cost stays. These are ARCHIVE-MOVED
+# (reversible, into the upgrade backup) unless protected by .sd003-keep or
+# .sd003-profile. Spec: .sd/specs/lean-deploy-propagation/spec.md
+# ------------------------------------------------------------------
+$leanLegacyRules = @(
+    ".claude\rules\git\branch-strategy.md",
+    ".claude\rules\global\artifact-confirmation.md",
+    ".claude\rules\global\fullpath-display.md",
+    ".claude\rules\global\known-unknowns.md",
+    ".claude\rules\global\output-primacy.md",
+    ".claude\rules\global\project-branching.md",
+    ".claude\rules\global\quiz-gate.md",
+    ".claude\rules\global\real-data-first.md",
+    ".claude\rules\global\segmented-sequencing.md",
+    ".claude\rules\global\silent-interior.md",
+    ".claude\rules\global\work-first.md",
+    ".claude\rules\session\memory-nudge.md",
+    ".claude\rules\skills\learning-nudge.md",
+    ".claude\rules\troubleshooting\bug-quick.md",
+    ".claude\rules\troubleshooting\dialogue-resolution.md",
+    ".claude\rules\troubleshooting\root-cause-first.md",
+    ".claude\rules\workflow\artifact-output-location.md"
+)
+
+# .sd003-keep (same semantics as deploy.ps1) - applied to LEAN MIGRATION ONLY.
+# The pre-existing deprecated/overeng removal behavior is intentionally unchanged
+# (past upgrades already ran without keep-awareness there; do not shift ground).
+$KeepPatterns = @()
+$keepFile = Join-Path $TargetProject ".sd003-keep"
+if (Test-Path $keepFile) {
+    $KeepPatterns = @(Get-Content $keepFile -Encoding UTF8 |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -and -not $_.StartsWith('#') } |
+        ForEach-Object { ($_ -replace '\\', '/').TrimEnd('/') })
+}
+function Test-KeptUpgrade {
+    param([string]$RelPath)
+    if ($KeepPatterns.Count -eq 0) { return $false }
+    $rel = ($RelPath -replace '\\', '/').TrimStart('/')
+    foreach ($pat in $KeepPatterns) {
+        if ($rel -eq $pat) { return $true }
+        if ($rel -like "$pat/*") { return $true }
+        if (($pat -match '[\*\?]') -and ($rel -like $pat)) { return $true }
+    }
+    return $false
+}
+
+# .sd003-profile: per-project tuning (plain key=value, '#' comments — same style
+# as .sd003-keep; NOT JSON so the bash twin can parse it identically).
+#   lean-migration = standard | additive | off      (default: standard)
+#   keep-always-loaded = <relpath under .claude/rules/>   (repeatable)
+$LeanMode = "standard"
+$KeepAlwaysLoaded = @()
+$profileFile = Join-Path $TargetProject ".sd003-profile"
+if (Test-Path $profileFile) {
+    foreach ($line in (Get-Content $profileFile -Encoding UTF8)) {
+        $l = $line.Trim()
+        if (-not $l -or $l.StartsWith('#')) { continue }
+        if ($l -match '^lean-migration\s*=\s*(\S+)') { $LeanMode = $Matches[1].ToLower() }
+        elseif ($l -match '^keep-always-loaded\s*=\s*(\S+)') { $KeepAlwaysLoaded += (($Matches[1]) -replace '\\', '/') }
+    }
+    Write-Host "[.sd003-profile] lean-migration=$LeanMode, keep-always-loaded: $($KeepAlwaysLoaded.Count) entries" -ForegroundColor Magenta
+}
+
+# ------------------------------------------------------------------
 # PROTECTED project assets — never deleted (deploy preserves these too).
 # ------------------------------------------------------------------
 $protectedNote = @(
@@ -84,6 +152,21 @@ foreach ($s in $overengSkillNames) { $overengAll += ".claude\skills\$s", ".agent
 $overengAll += $overengExtra
 $delOverengPresent = @($overengAll | Where-Object { Test-Path (Join-Path $TargetProject $_) })
 
+# Lean migration detection (keep/profile-aware; honesty: flag local edits)
+$leanMigrate = @(); $leanKeptRules = @(); $leanCustomized = @()
+if ($LeanMode -ne "off") {
+    foreach ($r in $leanLegacyRules) {
+        $p = Join-Path $TargetProject $r
+        if (-not (Test-Path $p)) { continue }
+        $ruleRel = ($r -replace '\\', '/')
+        $short = $ruleRel -replace '^\.claude/rules/', ''
+        if ((Test-KeptUpgrade $ruleRel) -or ($KeepAlwaysLoaded -contains $short)) { $leanKeptRules += $ruleRel; continue }
+        $leanMigrate += $ruleRel
+        $refPath = Join-Path $SOURCE_DIR ("docs\rules-reference\" + ($short -replace '/', '\'))
+        if ((Test-Path $refPath) -and ((Get-FileHash $p).Hash -ne (Get-FileHash $refPath).Hash)) { $leanCustomized += $ruleRel }
+    }
+}
+
 # claude-mem stub CLAUDE.md files (nested, content-marked), excluding root + vcs/deps
 $stubFiles = @()
 Get-ChildItem -Path $TargetProject -Recurse -File -Filter "CLAUDE.md" -ErrorAction SilentlyContinue | ForEach-Object {
@@ -112,6 +195,27 @@ if ($delDirsPresent.Count -eq 0 -and $delFilesPresent.Count -eq 0 -and $stubFile
     foreach ($f in $delFilesPresent) { Write-Host "  [file] $f" }
     foreach ($s in $stubFiles)       { Write-Host "  [stub] $s" }
     foreach ($o in $delOverengPresent) { Write-Host "  [oeng] $o" }
+}
+Write-Host ""
+Write-Host "[Lean migration] mode=$LeanMode - legacy always-loaded rules (moved to docs/rules-reference/ in SD003 2026-07-26):" -ForegroundColor Cyan
+if ($LeanMode -eq "off") {
+    Write-Host "  (skipped by .sd003-profile: lean-migration = off)" -ForegroundColor Yellow
+} elseif ($leanMigrate.Count -eq 0 -and $leanKeptRules.Count -eq 0) {
+    Write-Host "  (none present - already migrated or never deployed)" -ForegroundColor Green
+} else {
+    foreach ($m in $leanMigrate) {
+        if ($leanCustomized -contains $m) {
+            Write-Host "  [lean] $m  <- LOCAL EDITS (differs from reference copy; preserved in backup)" -ForegroundColor Red
+        } else {
+            Write-Host "  [lean] $m" -ForegroundColor Gray
+        }
+    }
+    foreach ($k in $leanKeptRules) { Write-Host "  [keep] $k (protected via .sd003-keep / keep-always-loaded - left in place)" -ForegroundColor Green }
+    if ($LeanMode -eq "additive" -and $leanMigrate.Count -gt 0) {
+        Write-Host "  mode=additive: files are LEFT IN PLACE (still always-loaded). Set 'lean-migration = standard' in .sd003-profile to archive-move." -ForegroundColor Yellow
+    } elseif ($leanMigrate.Count -gt 0) {
+        Write-Host "  mode=standard: these will be archive-moved to the upgrade backup (reversible)." -ForegroundColor Yellow
+    }
 }
 Write-Host ""
 Write-Host "Will DEPLOY latest framework via deploy.ps1 (overwrites framework, preserves data)." -ForegroundColor Cyan
@@ -153,6 +257,13 @@ foreach ($d in $delDirsPresent)  { Move-ToBackup $d }
 foreach ($f in $delFilesPresent) { Move-ToBackup $f }
 foreach ($s in $stubFiles)       { Move-ToBackup $s }
 foreach ($o in $delOverengPresent) { Move-ToBackup $o }
+
+# Lean migration: archive-move legacy always-loaded rules (standard mode only;
+# additive leaves them in place, off skips entirely; keep-protected already excluded)
+if ($LeanMode -eq "standard" -and $leanMigrate.Count -gt 0) {
+    Write-Host "  [Lean migration] archiving legacy always-loaded rules ..." -ForegroundColor Cyan
+    foreach ($m in $leanMigrate) { Move-ToBackup ($m -replace '/', '\') }
+}
 
 # If .antigravity is now empty, remove it
 $antigravityDir = Join-Path $TargetProject ".antigravity"

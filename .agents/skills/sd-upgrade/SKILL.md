@@ -138,3 +138,26 @@ execute 後は「OVERWROTE local divergence（バックアップ済み）」が�
 - 実行後は target で `npm install`、agy を再起動して `/skills` でコマンド表示を確認する
 - claude-mem スタブは、claude-mem 本体（非公式・global導入）が有効な間はローカルで再生成され得る。
   恒久停止は target 側でも claude-mem のアンインストールが必要（環境横断のためユーザー判断）
+
+## Lean migration（2026-07-26 / FRAMEWORK 2.18.0）
+
+lean化で `docs/rules-reference/` へ移設された旧・常時ロードルール17本を、配布先から
+**archive-move（可逆・`.sd003-upgrade-backup-*/` へ移動）**する。削除はしない。
+
+### プロジェクト別チューニング: `.sd003-profile`（target直下・key=value・`#`コメント）
+
+```
+# 例
+lean-migration = standard        # standard(既定) | additive | off
+keep-always-loaded = global/known-unknowns.md   # 移行対象から除外（繰り返し可）
+```
+
+| モード | 挙動 |
+|--------|------|
+| standard（既定・ファイル無し時） | 17本を archive-move（.sd003-keep / keep-always-loaded 該当は除外） |
+| additive | 移動しない。残留を報告のみ（新配布物は受け取る） |
+| off | lean migration をスキップ |
+
+- `.sd003-keep` は lean migration でも尊重される（at002 の `.claude/rules` ディレクトリ保護で全件skip）
+- ローカル改変があるファイルは dry-run で `LOCAL EDITS` と明示される（reference版とのhash比較）
+- 既存の deprecated/overeng 削除の挙動は従来どおり（keep非適用のまま・過去実績を変えない）
