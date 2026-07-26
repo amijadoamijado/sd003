@@ -1,4 +1,4 @@
-# SD003 Safe Framework Upgrade (PowerShell)
+﻿# SD003 Safe Framework Upgrade (PowerShell)
 # Replaces an OLDER SD003 install with the latest framework, removing deprecated
 # artifacts WITHOUT touching the project's own code/data.
 #
@@ -19,6 +19,10 @@ $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DEPLOY_PS1 = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\deploy.ps1"
 $TIMESTAMP  = Get-Date -Format "yyyyMMdd_HHmmss"
 $Mode = if ($Execute) { "EXECUTE" } else { "DRY-RUN" }
+# pwsh (PS7, UTF-8 default) preferred over Windows PowerShell 5.1: 5.1 reads BOM-less
+# UTF-8 as CP932 and a trailing Japanese-comment byte can swallow the newline,
+# commenting out the next statement (2026-07-26 as001 null-Path incident).
+$PsRunner = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else { "powershell" }
 
 # ------------------------------------------------------------------
 # Deprecated framework artifacts to REMOVE (archive-then-remove).
@@ -231,7 +235,7 @@ if (-not $Execute) {
     Write-Host "[Deploy dry-run] Scanning framework files deploy would write ..." -ForegroundColor Cyan
     $dryArgs = @("-ExecutionPolicy", "Bypass", "-File", $DEPLOY_PS1, $TargetProject, "-DryRun")
     if ($IncludeOptional) { $dryArgs += "-IncludeOptional" }
-    & powershell @dryArgs
+    & $PsRunner @dryArgs
     Write-Host ""
     Write-Host "[DRY-RUN] No changes made. Re-run with -Execute to apply." -ForegroundColor Yellow
     Write-Host "Tip: to preserve bespoke framework files, list them in '$TargetProject\.sd003-keep' BEFORE -Execute." -ForegroundColor Cyan
@@ -277,7 +281,7 @@ Write-Host ""
 Write-Host "[Deploy] Running deploy.ps1 ..." -ForegroundColor Cyan
 $deployArgs = @("-ExecutionPolicy", "Bypass", "-File", $DEPLOY_PS1, $TargetProject)
 if ($IncludeOptional) { $deployArgs += "-IncludeOptional" }
-& powershell @deployArgs
+& $PsRunner @deployArgs
 $deployExitCode = $LASTEXITCODE
 if ($deployExitCode -ne 0) {
     Write-Host ""

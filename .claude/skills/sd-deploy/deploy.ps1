@@ -1,4 +1,4 @@
-# SD003 Framework Deployment Script v3.4.0 (PowerShell)
+﻿# SD003 Framework Deployment Script v3.4.0 (PowerShell)
 # Usage: powershell -ExecutionPolicy Bypass -File deploy.ps1 <target-project-path>
 
 param(
