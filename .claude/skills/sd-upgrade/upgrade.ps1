@@ -22,12 +22,12 @@ $Mode = if ($Execute) { "EXECUTE" } else { "DRY-RUN" }
 
 # ------------------------------------------------------------------
 # Deprecated framework artifacts to REMOVE (archive-then-remove).
-# NOTE: `.agent` (singular, old) is deprecated; `.agents` (plural) is the CURRENT
-# Antigravity/agy skills path and is NEVER listed here.
+# NOTE: `.agent` (singular, old) and `.codex/skills` are deprecated.
+# `.agents/skills` is the shared canonical Codex/agy path and is never listed here.
 # ------------------------------------------------------------------
 $deprecatedDirs = @(
     ".gemini", ".cursor", ".windsurf", ".qwen", ".agent", ".kiro",
-    ".codex\prompts", ".antigravity\commands", ".antigravity\skills"
+    ".codex\prompts", ".codex\skills", ".antigravity\commands", ".antigravity\skills"
 )
 $deprecatedFiles = @(
     "GEMINI.md", "gemini.md",
@@ -40,8 +40,8 @@ $deprecatedFiles = @(
 # system / 7-stage workflow / context-autonomy). Archived out of the framework body, but
 # deploy only COPIES+overwrites and never prunes files gone from source, so without
 # purging these here every upgraded project keeps ORPHANED command/skill/rule files that
-# reference deleted rules. Matched across ALL known roots (.claude, the mirror skill dirs
-# .agents/.codex/.grok, and the .sd generated mirrors). .gemini mirror copies are already
+# reference deleted rules. Matched across generated roots (.claude, .agents, .grok,
+# and the .sd generated mirrors). .gemini mirror copies are already
 # covered by the wholesale .gemini removal above.
 $overengCmdNames   = @("ralph-wiggum-plan","ralph-wiggum-run","ralph-wiggum-status","refactor-batch","refactor-complete","refactor-init","refactor-plan","refactor-rollback","sd003-loop-lint","sd003-loop-test","sd003-loop-type","workflow-init","workflow-order","workflow-request","workflow-review","workflow-status","workflow-test","workflow-impl")
 $overengSkillNames = @("context-autonomy","rollback-guard","session-autosave")
@@ -122,7 +122,7 @@ $protectedNote = @(
     "src/", "tests/ (except framework tests/gas-fakes/setup.ts)",
     ".sd/specs/", ".sd/ai-coordination/", ".sessions/session-*.md", ".sessions/TIMELINE.md",
     "materials/", ".clasp.json", ".git/", "node_modules/", "dist/", ".env*",
-    ".agents/skills/ (CURRENT agy path)"
+    ".agents/skills/ (shared Codex/agy path)"
 )
 
 Write-Host "=== SD003 Safe Upgrade ($Mode) ===" -ForegroundColor Cyan
@@ -147,8 +147,8 @@ $delFilesPresent = @($deprecatedFiles | Where-Object { Test-Path (Join-Path $Tar
 
 # Expand over-engineering artifacts to concrete relative paths across all roots; keep present ones.
 $overengAll = @()
-foreach ($c in $overengCmdNames)   { $overengAll += ".claude\commands\$c.md", ".sd\commands\specs\$c.md", ".agents\skills\$c", ".codex\skills\$c", ".grok\skills\$c" }
-foreach ($s in $overengSkillNames) { $overengAll += ".claude\skills\$s", ".agents\skills\$s", ".codex\skills\$s", ".grok\skills\$s" }
+foreach ($c in $overengCmdNames)   { $overengAll += ".claude\commands\$c.md", ".sd\commands\specs\$c.md", ".agents\skills\$c", ".grok\skills\$c" }
+foreach ($s in $overengSkillNames) { $overengAll += ".claude\skills\$s", ".agents\skills\$s", ".grok\skills\$s" }
 $overengAll += $overengExtra
 $delOverengPresent = @($overengAll | Where-Object { Test-Path (Join-Path $TargetProject $_) })
 

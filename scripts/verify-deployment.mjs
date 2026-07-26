@@ -261,6 +261,32 @@ if (deployedHooks) {
   skip('C2', 'no parseable deployed settings.json (see C1)');
 }
 
+// ---- C2b: Codex hook config is parseable and its shared Node guard exists
+{
+  const codexHooksPath = path.join(targetDir, '.codex', 'hooks.json');
+  const codexHooks = readJson(codexHooksPath);
+  if (!codexHooks.ok) {
+    fail('C2b', `Codex hooks unreadable/invalid: ${codexHooksPath} (${codexHooks.error || 'missing'})`);
+  } else {
+    const serialized = JSON.stringify(codexHooks.value);
+    if (!serialized.includes('orchestrator-guard.js')) {
+      fail('C2b', 'Codex hooks do not reference scripts/orchestrator-guard.js');
+    } else {
+      const targetGuard = path.join(targetDir, 'scripts', 'orchestrator-guard.js');
+      const sourceGuard = path.join(sourceDir, 'scripts', 'orchestrator-guard.js');
+      if (!fs.existsSync(targetGuard)) {
+        fail('C2b', 'Codex shared guard is referenced but missing: scripts/orchestrator-guard.js');
+      } else if (!fs.existsSync(sourceGuard)) {
+        fail('C2b', 'source shared guard is missing');
+      } else if (fs.readFileSync(targetGuard, 'utf8') !== fs.readFileSync(sourceGuard, 'utf8')) {
+        fail('C2b', 'deployed Codex shared guard differs from the framework source');
+      } else {
+        pass('C2b', 'Codex hook config and shared guard are present and synchronized');
+      }
+    }
+  }
+}
+
 // ---- C3: no unsubstituted template variables {{...}} in generated files
 const generatedFiles = [
   'CLAUDE.md',

@@ -3,8 +3,7 @@ slug: cleanup
 source: .claude/commands/cleanup.md
 description: AI judgment-based project cleanup (materials organization + temp file archive)
 claude_command: /src/**,
-codex_skill: cleanup
-antigravity_skill: cleanup/SKILL.md
+agent_skill: cleanup/SKILL.md
 allowed_tools: Task, Read, Write, Bash, Glob, Grep, AskUserQuestion, TodoWrite
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Task, Read, Write, Bash, Glob, Grep, AskUserQuestion, TodoWrite
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # /cleanup

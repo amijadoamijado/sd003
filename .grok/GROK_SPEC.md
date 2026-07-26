@@ -88,4 +88,4 @@ $grok = Join-Path $env:GROK_HOME 'bin\grok.exe'
 python scripts/sync-cli-commands.py --check
 ```
 
-`--check` は、Claude command から生成される `.sd/commands/specs`、`.agents/skills`（agy）、`.codex/skills`、`.grok/skills`（Grok）、および `CODEX_SPEC.md` / `GROK_SPEC.md` / `GROK_NATIVE.md` の存在を確認する。dispatch 系スキル（`DISPATCH_EXCLUDE`）は Grok 生成対象外なので検証もスキップされる。
+`--check` は、Claude command から生成される `.sd/commands/specs`、`.agents/skills`（Codex・agy共通）、`.grok/skills`（Grok）、および `CODEX_SPEC.md` / `GROK_SPEC.md` / `GROK_NATIVE.md` の存在を確認する。旧 `.codex/skills` が残っている場合は重複として失敗する。dispatch 系スキル（`DISPATCH_EXCLUDE`）は Grok 生成対象外なので検証もスキップされる。

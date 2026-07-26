@@ -3,8 +3,7 @@ slug: bug-trace
 source: .claude/commands/bug-trace.md
 description: Bug Trace - 3-Agent parallel investigation for complex bugs
 claude_command: /bug-trace
-codex_skill: bug-trace
-antigravity_skill: bug-trace/SKILL.md
+agent_skill: bug-trace/SKILL.md
 allowed_tools: Read, Glob, Grep, Task, AskUserQuestion, TodoWrite
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Read, Glob, Grep, Task, AskUserQuestion, TodoWrite
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # Bug Trace - 3-Agent Parallel Investigation v2.4

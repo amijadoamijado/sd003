@@ -3,8 +3,7 @@ slug: sd-deploy
 source: .claude/commands/sd-deploy.md
 description: SD003フレームワークを新規プロジェクトに展開
 claude_command: /sd:deploy
-codex_skill: sd-deploy
-antigravity_skill: sd-deploy/SKILL.md
+agent_skill: sd-deploy/SKILL.md
 allowed_tools: Read, Write, Bash, Glob
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Read, Write, Bash, Glob
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # SD003フレームワーク展開 v2.11.0

@@ -11,10 +11,10 @@ Sync command:
 ```bash
 python scripts/sync-cli-commands.py
 python scripts/sync-cli-commands.py --check
-python scripts/sync-cli-commands.py --deploy-codex-home
+python scripts/sync-cli-commands.py --agents-only
 ```
 
-Antigravity CLI auto-discovers the generated `.agents/skills/*/SKILL.md` files at startup (`/skills` to verify). Do not hand-maintain copies.
+Antigravity CLI and Codex discover the generated `.agents/skills/*/SKILL.md` files. Do not hand-maintain provider-specific copies.
 
 ### Skills
 Project-local skills are available in `.agents/skills/` (workspace path agy scans: `<repo>/.agents/skills/{name}/SKILL.md`; global `~/.gemini/antigravity-cli/skills/`; shared `~/.gemini/skills/`).

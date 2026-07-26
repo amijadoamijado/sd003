@@ -3,8 +3,7 @@ slug: sessionhistory
 source: .claude/commands/sessionhistory.md
 description: Show project timeline (long-term session history)
 claude_command: /sessionhistory
-codex_skill: sessionhistory
-antigravity_skill: sessionhistory/SKILL.md
+agent_skill: sessionhistory/SKILL.md
 allowed_tools: Read, Glob
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Read, Glob
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # Session History (Timeline)

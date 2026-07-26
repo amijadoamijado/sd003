@@ -52,7 +52,7 @@ See: [Ralph Wiggum Deployment Guide](docs/ralph-wiggum-deployment.md)
 | CLI | Config Files | Commands / Skills |
 |---------|-------------|----------|
 | Claude Code | CLAUDE.md, .claude/rules/ | .claude/commands/ |
-| Codex CLI | AGENTS.md, `.codex/CODEX_SPEC.md`, `.codex/skills/`, `~/.codex/skills/` | `$skill-name` |
+| Codex CLI | AGENTS.md, `.codex/CODEX_SPEC.md`, `.codex/CODEX_NATIVE.md` | `.agents/skills/*/SKILL.md`（`$skill-name`） |
 | Antigravity CLI (agy) | antigravity.md, AGENTS.md | `.agents/skills/*/SKILL.md`（`/skills` で確認） |
 | Grok CLI | grok.md, `.grok/GROK_SPEC.md`, `.grok/GROK_NATIVE.md`, `.grok/skills/`, `~/.grok/skills/` | `/skill-name`（**Windows + GROK_HOME 必須**）。直接起動=Lead |
 
@@ -63,8 +63,7 @@ SD003 のカスタムコマンドは、以下の流れで Claude / Codex / Antig
 - authoring source: `.claude/commands/**/*.md`
 - canonical spec: `.sd/commands/specs/*.md`
 - generated targets:
-  - `.agents/skills/*/SKILL.md`（Antigravity CLI/agy。agyはAgent Skills=SKILL.md形式のみ読む。`.toml`不可）
-  - `.codex/skills/*/SKILL.md`（Codex）
+  - `.agents/skills/*/SKILL.md`（Codex・Antigravity共通のAgent Skills）
   - `.grok/skills/*/SKILL.md`（Grok CLI。`name`+`description`形式。dispatch系スキルは再帰回避のため除外）
 
 同期コマンド:
@@ -72,7 +71,7 @@ SD003 のカスタムコマンドは、以下の流れで Claude / Codex / Antig
 ```powershell
 python scripts/sync-cli-commands.py
 python scripts/sync-cli-commands.py --check
-python scripts/sync-cli-commands.py --deploy-codex-home
+python scripts/sync-cli-commands.py --agents-only
 ```
 
 Claude 以外の生成物は直接手編集せず、`.claude/commands/` を修正して再同期します。
@@ -82,12 +81,11 @@ Claude 以外の生成物は直接手編集せず、`.claude/commands/` を修�
 Codex CLI v0.117以降、Claude Code の `.claude/commands/*.md` 型 slash command は直接読みません。カスタマイズ方法:
 - **プロジェクト指示**: `AGENTS.md`（従来通り）
 - **Codex追加仕様**: `.codex/CODEX_SPEC.md`
-- **スキル**: `.codex/skills/` または `~/.codex/skills/`（共通正本から自動生成）
-- SD003 のコマンド群は `.codex/skills/` に生成されます。
-- `.agents/skills/` は Antigravity CLI(agy) が起動時にスキャンする正規スキルパスです（コマンド+実スキル）。Codex は `.codex/skills/` を使います。
+- **スキル**: `.agents/skills/`（Codex・agy共通。正本から自動生成）
+- `.codex/skills/`と`~/.codex/skills/`へのSD003重複配布は廃止しました。
 - セッション系の canonical 名は `sessionread` / `sessionwrite` / `sessionhistory` です。
 - 互換 alias として `session-read` / `session-write` も残します。
-- `python scripts/sync-cli-commands.py --deploy-codex-home` で生成済み skill を `~/.codex/skills/` に配布できます。
+- `--codex-only`は`--agents-only`の移行用aliasです。`--deploy-codex-home`は重複防止のためエラー終了します。
 
 ---
 
@@ -133,8 +131,8 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 | 3 | `.claude/rules/` | ツリーコピー |
 | 4 | `.claude/skills/` | ツリーコピー |
 | 5 | `.claude/hooks/` | ツリーコピー |
-| 6 | `.codex/` | ツリーコピー |
-| 7 | `.agents/skills/`（agy） | ツリーコピー |
+| 6 | `.codex/`（仕様・hooks。Skillは含めない） | ツリーコピー |
+| 7 | `.agents/skills/`（Codex・agy共通） | ツリーコピー |
 | 8 | `.grok/`（Grok。コピー後 sync 再生成） | ツリーコピー |
 | 9 | `.sd/settings/` | ツリーコピー |
 | 10 | `.sessions/session-template.md` | 単体コピー |
@@ -194,11 +192,10 @@ bash .claude/skills/sd-deploy/deploy.sh /path/to/your-project
 | Session read | `/sessionread` | `$sessionread` / `$session-read` | `/sessionread` | `/sessionread` |
 | Session write | `/sessionwrite` | `$sessionwrite` / `$session-write` | `/sessionwrite` | `/sessionwrite` |
 | Session history | `/sessionhistory` | `$sessionhistory` | `/sessionhistory` | `/sessionhistory` |
-| Workflow init | `/workflow:init` | `$workflow-init` | `/workflow-init` | `/workflow-init` |
 | Skills find | `/skills:find` | `$skills-find` | `/skills-find` | `/skills-find` |
 | SD deploy | `/sd:deploy` | `$sd-deploy` | `/sd-deploy` | `/sd-deploy` |
 
-> Codex では `.codex/skills/` または `~/.codex/skills/` を使います。Antigravity(agy) では `.agents/skills/*/SKILL.md` を起動時に読み込みます（`/skills` で確認）。
+> CodexとAntigravity(agy)は、同じ`.agents/skills/*/SKILL.md`を利用します。
 
 ---
 
@@ -351,6 +348,6 @@ MIT License
 
 ---
 
-**SD003 Framework v2.15.0** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline (agy/Codex/Grok) + 24-Hour Development + 3-Tier Bug Resolution + Skills Ecosystem
+**SD003 Framework** - Spec-Driven + GAS Local + gas-fakes + 4-Agent Pipeline (Claude/Codex/agy/Grok) + Skills Ecosystem
 # clean state test
 # verify

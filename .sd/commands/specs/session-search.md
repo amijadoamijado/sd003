@@ -3,8 +3,7 @@ slug: session-search
 source: .claude/commands/session-search.md
 description: セッション横断検索（過去セッションからキーワード検索）
 claude_command: /session-search
-codex_skill: session-search
-antigravity_skill: session-search/SKILL.md
+agent_skill: session-search/SKILL.md
 allowed_tools: Grep, Read, Glob
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Grep, Read, Glob
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # セッション横断検索

@@ -3,8 +3,7 @@ slug: bug-quick
 source: .claude/commands/bug-quick.md
 description: Bug QUICK - Processing flow comparison debugging (5-15 min first pass)
 claude_command: /bug-quick
-codex_skill: bug-quick
-antigravity_skill: bug-quick/SKILL.md
+agent_skill: bug-quick/SKILL.md
 allowed_tools: Read, Glob, Grep, AskUserQuestion
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Read, Glob, Grep, AskUserQuestion
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # Bug QUICK - Processing Flow Comparison v1.0

@@ -1,186 +1,57 @@
-# AGENTS.md - Codex CLI Configuration (SD003)
+# AGENTS.md — SD003 Codex Entry Point
 
-## 役割の明確化
+## 目的
 
-このファイルは**Codex CLI全体の設定**を定義します。
+Codexで常時適用する最小ルールと、詳細仕様への入口を定義する。Claude Code固有の操作を複製せず、Codexの通常操作へ変換する。
 
-コードレビュー時の詳細な手順は `.handoff/AGENTS.md` を参照してください。
+| 対象 | 必要時に読む正本 |
+|---|---|
+| Codexの実行モード・引継ぎ・Lead | `.codex/CODEX_NATIVE.md` |
+| Skill生成・同期・配置 | `.codex/CODEX_SPEC.md` |
+| 正式コードレビュー | `.handoff/AGENTS.md` |
+| 成果物配置・共通安全 | `.handoff/RULES.md` |
+| 正式AI協調 | `.claude/rules/workflow/ai-coordination.md` |
+| GAS固有制約 | `.claude/rules/gas/` |
 
-| ファイル | 役割 |
-|---------|------|
-| `AGENTS.md`（このファイル） | Codex全体の設定・AI Coordination・Work Order Review |
-| `.codex/CODEX_SPEC.md` | Codex固有の実行仕様・Claude Code非破壊ルール |
-| `.codex/CODEX_NATIVE.md` | Codex nativeの軽量レビュー・引継ぎ・直接実装ルール |
-| `.grok/GROK_NATIVE.md` | Grok Lead mode（Session Lead）の直接実装・引継ぎルール |
-| `.handoff/AGENTS.md` | コードレビュー専用の4段階手順 |
+## 常時適用
 
----
+- ユーザー向け回答、質問、レビュー、報告は日本語で書く。
+- 相談・診断だけの依頼では、明示されていない編集や外部変更を行わない。実装依頼では対象範囲を限定して完了まで進める。
+- 編集前に`git status --short`を確認する。既存の未コミット変更はユーザーまたは他AIの作業として保護し、明示指示なしに戻さない。
+- 破壊的Git操作、広域stage、ユーザーファイルの削除・上書きを行わない。
+- `.sd/`を破壊しない。変更時は`.claude/rules/git/sd-safe-commit.md`を読み、早めに明示パスでcommitする。
+- WindowsではPowerShellで実行できる手順を優先する。
+- Claude Code用スラッシュコマンド、`Agent(...)`、`AskUserQuestion`を文字通り再帰実行せず、意図をCodexの読取・編集・検証へ変換する。
+- hookが完全に保護すると仮定しない。結論は検証根拠と未検証事項を分ける。
 
-## 言語設定（必須）
+## タスク振り分け
 
-**レビュー報告・ユーザーとのやりとりは全て日本語で対応すること。**
-英語での回答は禁止。コード内のコメントや変数名は英語のままでよいが、
-レビューコメント、報告書、質問への回答など、人間向けのテキストは日本語で出力する。
+- 案件IDや正式依頼書のないレビュー・チェックはFast Reviewとする。差分と関連コードを確認し、重大度順に会話内で報告する。`.sd/ai-coordination/`へ報告書を作らない。
+- 案件IDと正式なレビュー対象が明示された場合だけWorkflow Reviewとし、依頼文書を読んで`.sd/ai-coordination/workflow/review/{案件ID}/`へ保存する。
+- 実装を依頼された場合は、対象範囲を限定して編集し、関連する検証を行う。
+- Codexが直接起動されたセッションのLead手順、引継ぎ、lock取得は`.codex/CODEX_NATIVE.md`に従う。
 
----
+## 作業方針
 
-## Core Principles
-- Always start complex tasks in plan mode. Iterate on the plan until
-  it's solid before executing.
-- After any correction, confirm with user before updating configuration
-  to prevent repetition.
-- Challenge changes: Justify every edit, prove it works, and compare
-  against main/master branch.
-- Use subagents for parallel compute and to keep main context clean.
-  Offload subtasks like verification or cleanup.
+- 複雑な作業は着手前に短い計画を示し、進行に合わせて更新する。Plan mode自体は必須としない。
+- サブエージェント、並列実行、worktree、ブランチ作成・切替は、ユーザーまたは適用ルールが明示した場合だけ行う。既定は現在のブランチでの直接作業とする。
+- 現在の依頼範囲を超える恒久設定変更が必要なら、根拠と影響を示して確認する。明示承認済みの変更を重ねて確認しない。
+- 変更理由を説明できる範囲だけ編集し、関連するテスト・型チェック・lint・実動作確認を選んで実行する。
+- 検証失敗や未実行を理由にレビューを拒否せず、確認できた事実と未確認事項を報告する。
 
-## Workflow Orchestration
-- Run parallel sessions using git worktrees for isolation.
-- For bugs: Provide full context (e.g., logs) and
-  delegate end-to-end.
-- Use reusable skills/commands for daily repeats.
+## GAS・テスト制約
 
-## Environment
-- Environment: Windows 11, UTF-8 (BOM), CRLF.
-- Context management: 10% remaining -> save session, 5% -> emergency save.
+- GASランタイムコードではEnv Interface Patternを使い、`fs`、`path`、`process`などNode.js専用APIを使わない。同期スクリプトやローカル開発ツールまで禁止しない。
+- 既存テストは必要に応じて実行する。新規テストは本番バグの再現・固定または実データ検証に必要な最小範囲とし、カバレッジ目標やモック中心のテストを増やさない。
+- GAS反映は`clasp push`だけを通常許可する。固定deploymentを作成・削除・更新する操作は、ユーザーの明示指示なしに行わない。
 
----
+## 生成物
 
-## CRITICAL: AI Coordination Workflow
+- `.claude/commands/**/*.md`をコマンドのauthoring sourceとする。
+- 生成Skillを直接編集せず、正本または同期アダプタを変更して`python scripts/sync-cli-commands.py`で再生成する。
+- Codex・agy共通のrepo Skill正規位置は`.agents/skills/*/SKILL.md`。配置詳細は`.codex/CODEX_SPEC.md`に一本化し、このファイルに静的Skill一覧を持たない。
+- 正式なAI協調文書だけを案件ID配下へ保存し、プロジェクトルートへ依頼書・報告書を作らない。
 
-**Detailed rules: `.claude/rules/workflow/ai-coordination.md`**
+## 完了報告
 
-### Codex's Role
-| Role | Description |
-|------|-------------|
-| Code Review | Review implementation quality |
-| Work Order Review | Approve/reject work orders |
-| Quality Gate Check | Verify all gates pass |
-| Session Lead | `docs/orchestrator-contract.md` に従い、役割割当・状態遷移・完了判定を統合 |
-
-### Trigger Keywords (AUTO-EXECUTE)
-
-以下はAI Coordination文脈で依頼書・レビュー対象が明示されている場合に適用する。
-一般的な相談や改善提案では、ユーザーが成果物作成を求めていない限りREVIEW_REPORTを作成しない。
-
-案件IDや正式な依頼書がない `review` / `check` / `見て` は `.codex/CODEX_NATIVE.md` の Fast Review として扱う。
-この場合、`.sd/ai-coordination/` へ報告書を作らず、会話内で重大度順に報告する。
-
-| Keyword | Action |
-|---------|--------|
-| "review", "check" | Read request, create REVIEW_REPORT |
-| "approved", "approve" | Create approval report |
-| "request changes" | Create change request report |
-
-### File Location Rules
-
-**ALL documents in `.sd/ai-coordination/`**
-
-| Read From | Write To |
-|-----------|----------|
-| `workflow/spec/{projectID}/` | `workflow/review/{projectID}/` |
-
-**PROHIBITED**: Creating files in project root
-
----
-
-## Task Completion Reporting (MANDATORY)
-
-Every task must end with a report:
-```
-## Task Completion Report
-
-### Summary
-[Completion summary]
-
-### Changes Made
-| File | Action | Description |
-
-### Verification Commands
-npm test && npm run lint
-
-### Next Steps
-- [ ] Next action
-```
-
----
-
-## Development Guidelines
-
-### Core Principles
-1. **Spec-Driven Development**: Requirements -> Design -> Tasks -> Implementation
-2. **Env Interface Pattern**: GAS API abstraction
-3. **8-Stage Quality Gates**: All gates must pass
-
-### Critical Rules
-- No Node.js APIs (`fs`, `path`, `process`)
-- GAS API via Env Interface only
-- Tests only to reproduce production bugs (coverage target abolished; VTD-001〜005 + real-data verification)
-- ESLint errors = 0
-- TypeScript strict mode
-- **.sd/ safe commit**: .sd/変更後は早めにcommit（同一bashが最も安全）。未commitの.sd/変更はwipe時にL4で復元されない。詳細: `.claude/rules/git/sd-safe-commit.md`
-- **settings.json**: `.claude/settings.json`はgit管理外（.gitignore）にすること
-- **Codex追加仕様**: `.codex/CODEX_SPEC.md` を参照すること。Claude Codeの正本仕様を置き換えず、Codex側の実行変換だけを追加する。
-- **Codex native運用**: `.codex/CODEX_NATIVE.md` を参照すること。Codex内で `/codex:*` や `/workflow:*` を再帰実行せず、Codex自身の読取・編集・検証に置き換える。
-- **Grok Lead mode**: `.grok/GROK_NATIVE.md` を参照すること。ユーザーが Grok を直接起動した場合、Session Lead は Grok（Claude 固定ではない）。Assist のみ `grok-dispatch`。
-
-### GASデプロイルール（厳守）
-- **`clasp push` のみ許可。`clasp deploy` / `clasp undeploy` はユーザー明示指示なしに実行禁止**
-- 引数なし `clasp deploy` は新規デプロイメントを作成する（既存URLが増える）
-- `clasp undeploy` は固定URLを消す（復旧不可能）
-- 固定URL更新が必要でも、まずユーザーに確認すること
-- 詳細: `.handoff/RULES.md` / `.claude/rules/gas/gas-constraints.md`
-
----
-
-## Workflow Commands
-
-**注意**: Codex CLI は Claude Code の `.claude/commands/*.md` 型スラッシュコマンドを直接読まない。
-SD003 では `.claude/commands/**/*.md` を authoring source とし、`python scripts/sync-cli-commands.py` で以下を生成する。
-
-- `.sd/commands/specs/*.md`（共通正本）
-- `.codex/skills/*/SKILL.md`（Codex）
-- `.agents/skills/*/SKILL.md`（Antigravity CLI / agy。agyはSKILL.md形式のみ読み込む。`.toml`は不可）
-
-Claude 以外の生成物は直接手編集せず、`.claude/commands/` を修正して再同期すること。
-`.agents/skills/` は agy（Antigravity CLI）が起動時にスキャンする正規スキルパス（コマンド・実スキル両方を配置）。Codex仕様は `.codex/` 配下に置く。
-
-### Available Codex Skills
-```
-$ai-suspect
-$blueprint-gate
-$bug-quick
-$bug-trace
-$cleanup
-$cleanup-history
-$cleanup-restore
-$dialogue-resolution
-$grillme
-$jobs-review
-$sd-deploy
-$session-read
-$session-search
-$session-write
-$sessionread
-$sessionwrite
-$sessionhistory
-$skills-add
-$skills-find
-$skills-list
-$spec-archive
-$spec-history
-```
-
----
-
-## Reference
-- **AI Coordination**: `.claude/rules/workflow/ai-coordination.md`
-- **Codex Spec**: `.codex/CODEX_SPEC.md`
-- **Codex Native**: `.codex/CODEX_NATIVE.md`
-- **Grok Native (Lead)**: `.grok/GROK_NATIVE.md`
-- **Grok Guide**: `.sd/ai-coordination/workflow/GROK_GUIDE.md`
-- **Quality Gates**: `docs/quality-gates.md`
-- **AI協調の依頼・報告**: `.claude/rules/workflow/ai-coordination.md`（正式時のみ `spec/{案件ID}/` 自由形式）
-
----
-SD003 Framework v2.15.0 | Updated: 2026-07-06
+完了時は、結果、変更ファイルと目的、検証結果、未解決事項を簡潔に報告する。読み取りのみの場合は「変更なし」と明記する。

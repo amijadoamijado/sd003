@@ -8,7 +8,7 @@ Claude Code正本を変更せず、Codexが自分の強みを出すための薄�
 1. CodexはClaude Codeのスラッシュコマンドを実行しない。意図を読み、同等の作業を直接行う。
 2. Codex内で `/codex:*` を呼び直さない。レビュー、調査、実装はCodex自身が行う。
 3. 正式Workflowと日常相談を分ける。案件IDがない場合は軽量レビュー・軽量調査として会話内で完結する。
-4. `.claude/` 配下の正本は編集しない。Codex改善は `AGENTS.md`、`.codex/`、Codex生成アダプタに閉じる。
+4. Codex都合だけでClaudeランタイム設定を変えない。共通コマンドやSkillを変更する場合は `.claude/commands` / `.claude/skills` の正本を編集して再同期する。
 5. 既存の未コミット変更は他AIまたはユーザーの作業として扱い、明示指示なしに戻さない。
 
 ## Fast Review
@@ -66,4 +66,4 @@ Codexへ実装が委譲された場合:
 | 独立検証 | Grok |
 | Quiz Gate（CodexがGenerator） | Grokへ出題委譲 |
 
-経過メモは `.sd/ai-coordination/sessions/codex/` に保存する。セッション終了時または大きな区切りで `.codex/skills/sessionwrite` を実行し、session-current.md / TIMELINE.mdを更新する。
+経過メモは `.sd/ai-coordination/sessions/codex/` に保存する。セッション終了時または大きな区切りで `.agents/skills/sessionwrite` 相当を実行し、session-current.md / TIMELINE.mdを更新する。

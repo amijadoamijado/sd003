@@ -121,7 +121,7 @@ AIはこの変換を担う。あみおの入力順序を尊重し、出力時に
 ### Phase 5.5: Blindspot Pass（無知の知・AI自身の未知を洗い出す）
 
 Phase 5 は**人間の**前提を外部化する。Phase 5.5 は**AI自身の**未知を外部化する
-（Unknown Unknown → Known Unknown 変換）。詳細: `.claude/rules/global/known-unknowns.md`。
+（Unknown Unknown → Known Unknown 変換）。詳細: `docs/rules-reference/global/known-unknowns.md`。
 
 AIは関連コード／ドメインを**実際に読んでから**、1回だけ自問する（フォーム化しない・1問）:
 

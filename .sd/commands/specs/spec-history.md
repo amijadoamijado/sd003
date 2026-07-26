@@ -3,8 +3,7 @@ slug: spec-history
 source: .claude/commands/spec-history.md
 description: Show spec version history
 claude_command: /spec:history
-codex_skill: spec-history
-antigravity_skill: spec-history/SKILL.md
+agent_skill: spec-history/SKILL.md
 allowed_tools: Bash, Read, Glob
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Bash, Read, Glob
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # Spec History

@@ -95,7 +95,7 @@ deploy_dry_run() {
             if ! cmp -s "$f" "$tgt"; then DIV+=("$projrel"); diverged=$((diverged+1)); else same=$((same+1)); fi
         done < <(find "$SOURCE_DIR/$d" -type f)
     done
-    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "tests/gas-fakes/setup.ts")
+    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "scripts/orchestrator-guard.js" "tests/gas-fakes/setup.ts")
     for sf in "${scan_files[@]}"; do
         if is_kept "$sf"; then KEP+=("$sf"); kept=$((kept+1)); continue; fi
         [ -f "$SOURCE_DIR/$sf" ] || continue
@@ -173,7 +173,6 @@ DIRS=(
     ".claude/rules"
     ".claude/skills"
     ".claude/hooks"
-    ".codex/skills"
     ".agents/skills"
     ".grok/skills"
     ".sd/specs"
@@ -286,8 +285,8 @@ copy_dir_tree ".claude/skills" "Skills" "*"
 # 4-5: .claude/hooks/ (tree)
 copy_dir_tree ".claude/hooks" "Hooks" "*"
 
-# 4-6: .agents/skills/ (tree) - Antigravity CLI (agy) reads slash commands here as SKILL.md
-copy_dir_tree ".agents/skills" "Agents Skills (agy)" "*"
+# 4-6: .agents/skills/ (tree) - shared canonical skills for Codex and agy
+copy_dir_tree ".agents/skills" "Agents Skills (Codex/agy)" "*"
 
 # 4-7: .codex/ (tree)
 copy_dir_tree ".codex" "Codex" "*"
@@ -400,7 +399,21 @@ else
     COPY_STATS["Verify Deployment (mjs)"]=0
 fi
 
-# 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator - overwrite unless protected by .sd003-keep)
+# 4-15d: scripts/orchestrator-guard.js (shared PreToolUse guard referenced by .codex/hooks.json)
+if is_kept "scripts/orchestrator-guard.js"; then
+    echo "  KEEP: scripts/orchestrator-guard.js preserved via .sd003-keep"
+    echo "scripts/orchestrator-guard.js" >> "$KEPT_LOG"
+    COPY_STATS["Orchestrator Guard"]=0
+elif [ -f "$SOURCE_DIR/scripts/orchestrator-guard.js" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    if [ -f "$TARGET_PROJECT/scripts/orchestrator-guard.js" ] && ! cmp -s "$SOURCE_DIR/scripts/orchestrator-guard.js" "$TARGET_PROJECT/scripts/orchestrator-guard.js"; then echo "scripts/orchestrator-guard.js" >> "$DIVERGED_LOG"; fi
+    cp "$SOURCE_DIR/scripts/orchestrator-guard.js" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Orchestrator Guard"]=1
+else
+    COPY_STATS["Orchestrator Guard"]=0
+fi
+
+# 4-16: scripts/sync-cli-commands.py (shared .agents + Grok skill generator)
 if is_kept "scripts/sync-cli-commands.py"; then
     echo "  KEEP: scripts/sync-cli-commands.py preserved via .sd003-keep"
     echo "scripts/sync-cli-commands.py" >> "$KEPT_LOG"
@@ -410,10 +423,10 @@ elif [ -f "$SOURCE_DIR/scripts/sync-cli-commands.py" ]; then
     if [ -f "$TARGET_PROJECT/scripts/sync-cli-commands.py" ] && ! cmp -s "$SOURCE_DIR/scripts/sync-cli-commands.py" "$TARGET_PROJECT/scripts/sync-cli-commands.py"; then echo "scripts/sync-cli-commands.py" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/scripts/sync-cli-commands.py" "$TARGET_PROJECT/scripts/"
     COPY_STATS["Sync CLI"]=1
-    # Regenerate agy/codex/grok skills in TARGET (copy alone leaves them stale). Guarded.
+    # Regenerate shared .agents and Grok skills in TARGET. Guarded.
     if command -v python >/dev/null 2>&1; then
         ( cd "$TARGET_PROJECT" && python scripts/sync-cli-commands.py >/dev/null 2>&1 ) \
-            && echo "  Regenerated agy/codex/grok skills (sync-cli-commands.py)" \
+            && echo "  Regenerated shared .agents and Grok skills (sync-cli-commands.py)" \
             || echo "  WARN: post-copy sync failed; run 'python scripts/sync-cli-commands.py' in target"
     else
         echo "  NOTE: python not found. Run 'python scripts/sync-cli-commands.py' in target to (re)generate skills."
@@ -927,7 +940,7 @@ verify_category "Commands/sd" ".claude/commands/sd" ".claude/commands/sd" "*.md"
 verify_category "Rules" ".claude/rules" ".claude/rules" "*.md" "true"
 verify_category "Skills" ".claude/skills" ".claude/skills" "*" "true"
 verify_category "Hooks" ".claude/hooks" ".claude/hooks" "*" "true"
-verify_category "Agents Skills (agy)" ".agents/skills" ".agents/skills" "*" "true"
+verify_category "Agents Skills (Codex/agy)" ".agents/skills" ".agents/skills" "*" "true"
 verify_category "Codex" ".codex" ".codex" "*" "true"
 verify_category "Grok" ".grok" ".grok" "*" "true"
 verify_category "SD Settings" ".sd/settings" ".sd/settings" "*" "true"

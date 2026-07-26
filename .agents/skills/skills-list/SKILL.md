@@ -6,17 +6,18 @@ disable-model-invocation: true
 
 # スキル一覧: /skills:list
 
-SD003 custom command `/skills:list` を Antigravity (agy) skill として再現します。
+SD003 custom command `/skills:list` をCodex/agy共通Agent Skillとして再現します。
 
 User-provided arguments (if any): $ARGUMENTS
 
-## Antigravity Runtime Rules
+## Runtime Adaptation Rules
 - `.claude/commands/**/*.md` はauthoring source。直接編集せず、本Skillを実行仕様として扱う。
-- Claude Code固有の `Agent(...)`、`AskUserQuestion`、hook前提の記述は文字通り実行せず、agy の通常手順（ファイル読取・編集・コマンド実行・必要時のユーザー確認）に翻訳する。
-- `/workflow:*` や `/codex:*` など他CLIのスラッシュコマンドは呼ばない。必要な作業はagy自身が直接行う。
+- Claude Code固有の `Agent(...)`、`AskUserQuestion`、hook前提の記述は文字通り実行せず、実行中CLIの通常手順（ファイル読取・編集・検証・必要時のユーザー確認）に翻訳する。
+- `/workflow:*` や `/codex:*` など他CLIのスラッシュコマンドは再帰実行しない。必要な作業は現在のCLIが直接行う。
 - 人間向け出力・報告・質問は日本語で書く。
 - `.sd/ai-coordination/` に書くのは案件IDが明示された正式Workflowの場合のみ。
 - WindowsではPowerShellで実行できるコマンドを優先する。
+- Codex固有の実行優先順位は `.codex/CODEX_NATIVE.md` に従う。
 
 ## Original Command Body
 # スキル一覧: /skills:list

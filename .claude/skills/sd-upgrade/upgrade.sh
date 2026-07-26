@@ -26,9 +26,9 @@ DEPLOY_SH="$SOURCE_DIR/.claude/skills/sd-deploy/deploy.sh"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 MODE=$([ "$EXECUTE" = true ] && echo "EXECUTE" || echo "DRY-RUN")
 
-# Deprecated dirs/files. `.agent` (singular) is deprecated; `.agents` (plural) is
-# the CURRENT agy skills path and is NEVER listed here.
-DEPRECATED_DIRS=(".gemini" ".cursor" ".windsurf" ".qwen" ".agent" ".kiro" ".codex/prompts" ".antigravity/commands" ".antigravity/skills")
+# Deprecated dirs/files. `.agent` (singular) and `.codex/skills` are deprecated;
+# `.agents/skills` is the shared canonical Codex/agy path.
+DEPRECATED_DIRS=(".gemini" ".cursor" ".windsurf" ".qwen" ".agent" ".kiro" ".codex/prompts" ".codex/skills" ".antigravity/commands" ".antigravity/skills")
 DEPRECATED_FILES=("GEMINI.md" "gemini.md" "scripts/sync-gemini-features.js" "scripts/migrate-kiro-to-sd.ps1" ".antigravity/rules.md")
 
 # Over-engineering artifacts removed from SD003 on 2026-07-05 (Ralph Loop / refactor
@@ -36,7 +36,7 @@ DEPRECATED_FILES=("GEMINI.md" "gemini.md" "scripts/sync-gemini-features.js" "scr
 # body, but deploy only COPIES+overwrites — it never prunes files that no longer exist in
 # source. Without purging these here, every upgraded project keeps ORPHANED command/skill/
 # rule files that reference deleted rules. Matched across ALL known roots (.claude, the
-# mirror skill dirs .agents/.codex/.grok, and the .sd generated mirrors). .gemini mirror
+# generated skill dirs .agents/.grok, and the .sd generated mirrors). .gemini mirror
 # copies are already covered by the wholesale .gemini removal above.
 OVERENG_CMD_NAMES=("ralph-wiggum-plan" "ralph-wiggum-run" "ralph-wiggum-status" "refactor-batch" "refactor-complete" "refactor-init" "refactor-plan" "refactor-rollback" "sd003-loop-lint" "sd003-loop-test" "sd003-loop-type" "workflow-impl")
 OVERENG_SKILL_NAMES=("context-autonomy" "rollback-guard" "session-autosave")
@@ -128,10 +128,10 @@ DEL_FILES=(); for f in "${DEPRECATED_FILES[@]}"; do [ -e "$TARGET_PROJECT/$f" ] 
 # Expand over-engineering artifacts to concrete relative paths across all roots; keep present ones.
 OVERENG_ALL=()
 for c in "${OVERENG_CMD_NAMES[@]}"; do
-    OVERENG_ALL+=(".claude/commands/$c.md" ".sd/commands/specs/$c.md" ".agents/skills/$c" ".codex/skills/$c" ".grok/skills/$c")
+    OVERENG_ALL+=(".claude/commands/$c.md" ".sd/commands/specs/$c.md" ".agents/skills/$c" ".grok/skills/$c")
 done
 for s in "${OVERENG_SKILL_NAMES[@]}"; do
-    OVERENG_ALL+=(".claude/skills/$s" ".agents/skills/$s" ".codex/skills/$s" ".grok/skills/$s")
+    OVERENG_ALL+=(".claude/skills/$s" ".agents/skills/$s" ".grok/skills/$s")
 done
 OVERENG_ALL+=("${OVERENG_EXTRA[@]}")
 DEL_OVERENG=(); for p in "${OVERENG_ALL[@]}"; do [ -e "$TARGET_PROJECT/$p" ] && DEL_OVERENG+=("$p"); done
@@ -200,7 +200,7 @@ else
 fi
 echo ""
 echo "Will DEPLOY latest framework via deploy.sh (overwrites framework, preserves data)."
-echo "PROTECTED (never deleted): src/, tests/, .sd/specs/, .sd/ai-coordination/, .sessions history, materials/, .clasp.json, .git/, node_modules/, dist/, .env*, .agents/skills/ (current agy path)"
+echo "PROTECTED (never deleted): src/, tests/, .sd/specs/, .sd/ai-coordination/, .sessions history, materials/, .clasp.json, .git/, node_modules/, dist/, .env*, .agents/skills/ (shared Codex/agy path)"
 echo ""
 
 if [ "$EXECUTE" != true ]; then

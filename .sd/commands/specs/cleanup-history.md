@@ -3,8 +3,7 @@ slug: cleanup-history
 source: .claude/commands/cleanup-history.md
 description: Show cleanup session history
 claude_command: /cleanup:history
-codex_skill: cleanup-history
-antigravity_skill: cleanup-history/SKILL.md
+agent_skill: cleanup-history/SKILL.md
 allowed_tools: Read, Bash, Glob
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Read, Bash, Glob
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # /cleanup:history

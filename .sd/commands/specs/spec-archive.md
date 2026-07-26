@@ -3,8 +3,7 @@ slug: spec-archive
 source: .claude/commands/spec-archive.md
 description: Archive spec files to history folder
 claude_command: /spec:archive
-codex_skill: spec-archive
-antigravity_skill: spec-archive/SKILL.md
+agent_skill: spec-archive/SKILL.md
 allowed_tools: Bash, Write, Read, Edit
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Bash, Write, Read, Edit
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # Spec Archive

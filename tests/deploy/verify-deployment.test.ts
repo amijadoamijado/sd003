@@ -10,6 +10,12 @@ import path from 'node:path';
 const repoRoot = path.resolve(__dirname, '..', '..');
 const verifier = path.join(repoRoot, 'scripts', 'verify-deployment.mjs');
 const brokenFixture = path.join(repoRoot, 'tests', 'fixtures', 'deploy-broken-settings');
+const missingCodexGuardFixture = path.join(
+  repoRoot,
+  'tests',
+  'fixtures',
+  'deploy-missing-codex-guard',
+);
 
 function runVerifier(targetDir: string): { code: number; out: string } {
   try {
@@ -37,5 +43,12 @@ describe('verify-deployment gate', () => {
     const { code, out } = runVerifier(repoRoot);
     expect(code).toBe(0);
     expect(out).toContain('Content verification PASSED');
+  });
+
+  it('hard-fails when Codex hooks reference a missing shared guard', () => {
+    const { code, out } = runVerifier(missingCodexGuardFixture);
+    expect(code).toBe(1);
+    expect(out).toContain('C2b');
+    expect(out).toContain('scripts/orchestrator-guard.js');
   });
 });

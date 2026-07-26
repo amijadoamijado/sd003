@@ -3,8 +3,7 @@ slug: cleanup-restore
 source: .claude/commands/cleanup-restore.md
 description: Restore files from cleanup archive
 claude_command: /cleanup:restore
-codex_skill: cleanup-restore
-antigravity_skill: cleanup-restore/SKILL.md
+agent_skill: cleanup-restore/SKILL.md
 allowed_tools: Read, Write, Bash, Glob, AskUserQuestion
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Read, Write, Bash, Glob, AskUserQuestion
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # /cleanup:restore

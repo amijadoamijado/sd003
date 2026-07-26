@@ -3,8 +3,7 @@ slug: sessionwrite
 source: .claude/commands/sessionwrite.md
 description: Save session handoff and update timeline
 claude_command: /sessionwrite
-codex_skill: sessionwrite
-antigravity_skill: sessionwrite/SKILL.md
+agent_skill: sessionwrite/SKILL.md
 aliases: session-write
 allowed_tools: Bash, Write, Read
 ---
@@ -13,7 +12,7 @@ allowed_tools: Bash, Write, Read
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # セッション保存

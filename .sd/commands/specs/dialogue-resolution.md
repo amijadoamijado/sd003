@@ -3,8 +3,7 @@ slug: dialogue-resolution
 source: .claude/commands/dialogue-resolution.md
 description: 対話型解決法 - AIの迷走時に仕様・実装との差異を段階的に検出
 claude_command: /dialogue-resolution
-codex_skill: dialogue-resolution
-antigravity_skill: dialogue-resolution/SKILL.md
+agent_skill: dialogue-resolution/SKILL.md
 allowed_tools: Read, Glob, Grep, AskUserQuestion
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Read, Glob, Grep, AskUserQuestion
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # 対話型解決法（Dialogue-based Resolution）

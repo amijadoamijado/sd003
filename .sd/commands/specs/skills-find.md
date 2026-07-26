@@ -3,15 +3,14 @@ slug: skills-find
 source: .claude/commands/sd/skills-find.md
 description: スキル検索: /skills:find
 claude_command: /skills:find
-codex_skill: skills-find
-antigravity_skill: skills-find/SKILL.md
+agent_skill: skills-find/SKILL.md
 ---
 
 # スキル検索: /skills:find
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # スキル検索: /skills:find

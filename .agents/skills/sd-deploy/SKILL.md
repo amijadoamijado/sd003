@@ -138,7 +138,7 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 | 3 | `.claude/rules/` | ツリーコピー |
 | 4 | `.claude/skills/` | ツリーコピー |
 | 5 | `.claude/hooks/` | ツリーコピー |
-| 6 | `.agents/skills/`（agy。SKILL.md形式のコマンド+実スキル） | ツリーコピー |
+| 6 | `.agents/skills/`（Codex・agy共通。SKILL.md形式のコマンド+実スキル） | ツリーコピー |
 | 8 | `.sd/settings/` | ツリーコピー |
 | 9 | `.sessions/session-template.md` | 単体コピー |
 | 10 | `.sd/ai-coordination/workflow/{README,CODEX_GUIDE,GROK_GUIDE,templates/}` | 選択コピー |
@@ -235,7 +235,7 @@ find .claude/hooks -type f | wc -l            # Hooks
 | `.claude/rules/` | ファイルを置くだけ |
 | `.claude/skills/` | ディレクトリ+ファイルを作成するだけ |
 | `.claude/hooks/` | ファイルを置くだけ |
-| `.agents/skills/` | `.claude/commands` を直して `python scripts/sync-cli-commands.py`（agyがSKILL.mdを起動時ロード） |
+| `.agents/skills/` | `.claude/commands` を直して `python scripts/sync-cli-commands.py`（Codex・agyが共通のSKILL.mdをロード） |
 
 ## 詳細手順
 

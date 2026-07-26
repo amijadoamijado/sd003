@@ -3,8 +3,7 @@ slug: ai-suspect
 source: .claude/commands/ai-suspect.md
 description: AI挙動不審の追究 - 捏造・過信・ルール不遵守を5Whysで真因特定し決定論ガードレール+bd issueで閉じる
 claude_command: /ai-suspect
-codex_skill: ai-suspect
-antigravity_skill: ai-suspect/SKILL.md
+agent_skill: ai-suspect/SKILL.md
 allowed_tools: Read, Glob, Grep, Bash, AskUserQuestion, Write, Edit
 ---
 
@@ -12,7 +11,7 @@ allowed_tools: Read, Glob, Grep, Bash, AskUserQuestion, Write, Edit
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # /ai-suspect — AI挙動不審の追究（5Why → 決定論ガードレール → bd issue）

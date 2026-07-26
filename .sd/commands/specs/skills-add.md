@@ -3,15 +3,14 @@ slug: skills-add
 source: .claude/commands/sd/skills-add.md
 description: スキルインストール: /skills:add
 claude_command: /skills:add
-codex_skill: skills-add
-antigravity_skill: skills-add/SKILL.md
+agent_skill: skills-add/SKILL.md
 ---
 
 # スキルインストール: /skills:add
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # スキルインストール: /skills:add

@@ -3,15 +3,14 @@ slug: skills-list
 source: .claude/commands/sd/skills-list.md
 description: スキル一覧: /skills:list
 claude_command: /skills:list
-codex_skill: skills-list
-antigravity_skill: skills-list/SKILL.md
+agent_skill: skills-list/SKILL.md
 ---
 
 # スキル一覧: /skills:list
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # スキル一覧: /skills:list

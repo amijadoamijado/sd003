@@ -119,7 +119,7 @@ function Invoke-DeployDryRun {
         "docs\quality-gates.md", "scripts\validate-test-data.ps1",
         "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
         "scripts\verify-deployment.mjs", "scripts\recover-agy-artifacts.sh",
-        "scripts\recover-agy-artifacts.ps1",
+        "scripts\recover-agy-artifacts.ps1", "scripts\orchestrator-guard.js",
         "tests\gas-fakes\setup.ts"
     )
     foreach ($f in $scanFiles) {
@@ -210,7 +210,6 @@ $directories = @(
     ".claude/rules",
     ".claude/skills",
     ".claude/hooks",
-    ".codex/skills",
     ".agents/skills",
     ".grok/skills",
     ".sd/specs",
@@ -353,11 +352,11 @@ Copy-DirTree -RelPath ".claude\skills" -Label "Skills" -Exclude $optionalSkills
 # 4-5: .claude/hooks/ (tree)
 Copy-DirTree -RelPath ".claude\hooks" -Label "Hooks"
 
-# 4-6: .agents/skills/ (tree) - Antigravity CLI (agy) reads slash commands here as SKILL.md
+# 4-6: .agents/skills/ (tree) - shared canonical skills for Codex and agy
 # 2026-07-25 fix: optional skills はミラー側でも除外する。4db367a が Phase 6 の検証側にだけ
 # -Exclude を足したため、コピー側（除外なし＝全件配布）と検証側（除外あり）で対象が食い違い、
 # 必須ファイルが欠落しても件数比較でPASSしうる状態だった。コピーと検証の条件を一致させる。
-Copy-DirTree -RelPath ".agents\skills" -Label "Agents Skills (agy)" -Exclude $optionalSkills
+Copy-DirTree -RelPath ".agents\skills" -Label "Agents Skills (Codex/agy)" -Exclude $optionalSkills
 
 # 4-7: .codex/ (tree)
 Copy-DirTree -RelPath ".codex" -Label "Codex"
@@ -486,12 +485,21 @@ if (Test-Kept "scripts/verify-deployment.mjs") {
     $copyStats["Verify Deployment (mjs)"] = 0
 }
 
-foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1')) {
+foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1','orchestrator-guard.js')) {
     $recoverRel = "scripts/$recoverName"; $recoverSrc = Join-Path $SOURCE_DIR "scripts\$recoverName"; $recoverDst = Join-Path $TargetProject "scripts\$recoverName"
-    if (-not (Test-Kept $recoverRel) -and (Test-Path $recoverSrc)) { New-Item -ItemType Directory -Path (Split-Path $recoverDst) -Force | Out-Null; Copy-Item $recoverSrc $recoverDst -Force; $copyStats[$recoverName] = 1 }
+    if (Test-Kept $recoverRel) {
+        Write-Host "  KEEP: $recoverRel preserved via .sd003-keep" -ForegroundColor Magenta
+        $script:keptFiles += $recoverRel
+        $copyStats[$recoverName] = 0
+    } elseif (Test-Path $recoverSrc) {
+        New-Item -ItemType Directory -Path (Split-Path $recoverDst) -Force | Out-Null
+        if ((Test-Path $recoverDst) -and ((Get-FileHash $recoverSrc).Hash -ne (Get-FileHash $recoverDst).Hash)) { $script:divergedOverwrites += $recoverRel }
+        Copy-Item $recoverSrc $recoverDst -Force
+        $copyStats[$recoverName] = 1
+    }
 }
 
-# 4-16: scripts/sync-cli-commands.py (single file - the agy/codex skill generator - overwrite unless protected by .sd003-keep)
+# 4-16: scripts/sync-cli-commands.py (shared .agents + Grok skill generator)
 $syncCliSrc = Join-Path $SOURCE_DIR "scripts\sync-cli-commands.py"
 $syncCliDst = Join-Path $TargetProject "scripts\sync-cli-commands.py"
 if (Test-Kept "scripts/sync-cli-commands.py") {
@@ -504,14 +512,14 @@ if (Test-Kept "scripts/sync-cli-commands.py") {
     if ((Test-Path $syncCliDst) -and ((Get-FileHash $syncCliSrc).Hash -ne (Get-FileHash $syncCliDst).Hash)) { $script:divergedOverwrites += "scripts/sync-cli-commands.py" }
     Copy-Item $syncCliSrc $syncCliDst -Force
     $copyStats["Sync CLI"] = 1
-    # Regenerate agy/codex/grok skills in the TARGET (copy alone leaves generated
+    # Regenerate shared .agents and Grok skills in the TARGET (copy alone leaves generated
     # skills + manifest stale). Guarded: skip if python is unavailable.
     $py = (Get-Command python -ErrorAction SilentlyContinue)
     if ($py) {
         Push-Location $TargetProject
         try {
             & python "scripts\sync-cli-commands.py" 2>&1 | Out-Null
-            Write-Host "  Regenerated agy/codex/grok skills (sync-cli-commands.py)" -ForegroundColor Green
+            Write-Host "  Regenerated shared .agents and Grok skills (sync-cli-commands.py)" -ForegroundColor Green
         } catch {
             Write-Host "  WARN: post-copy sync failed; run 'python scripts/sync-cli-commands.py' manually in target" -ForegroundColor Yellow
         } finally { Pop-Location }
@@ -889,7 +897,7 @@ $verifyResults += Verify-Category -Label "Commands/sd" -SourceRelPath ".claude\c
 $verifyResults += Verify-Category -Label "Rules" -SourceRelPath ".claude\rules" -Filter "*.md" -Recurse
 $verifyResults += Verify-Category -Label "Skills" -SourceRelPath ".claude\skills" -Recurse -Exclude $optionalSkills
 $verifyResults += Verify-Category -Label "Hooks" -SourceRelPath ".claude\hooks" -Recurse
-$verifyResults += Verify-Category -Label "Agents Skills (agy)" -SourceRelPath ".agents\skills" -Recurse -Exclude $optionalSkills
+$verifyResults += Verify-Category -Label "Agents Skills (Codex/agy)" -SourceRelPath ".agents\skills" -Recurse -Exclude $optionalSkills
 $verifyResults += Verify-Category -Label "Codex" -SourceRelPath ".codex" -Recurse
 $verifyResults += Verify-Category -Label "Grok" -SourceRelPath ".grok" -Recurse -Exclude $optionalSkills
 $verifyResults += Verify-Category -Label "SD Settings" -SourceRelPath ".sd\settings" -Recurse

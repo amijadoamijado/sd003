@@ -3,8 +3,7 @@ slug: sessionread
 source: .claude/commands/sessionread.md
 description: 最新のセッション継続記録を読み込み表示
 claude_command: /sessionread
-codex_skill: sessionread
-antigravity_skill: sessionread/SKILL.md
+agent_skill: sessionread/SKILL.md
 aliases: session-read
 allowed_tools: Read, Bash, Glob, Grep, Agent, AskUserQuestion
 ---
@@ -13,7 +12,7 @@ allowed_tools: Read, Bash, Glob, Grep, Agent, AskUserQuestion
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
-Antigravity(agy) skill と Codex skill はこのファイルから生成します。
+Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
 # セッション読み込み（完全版）

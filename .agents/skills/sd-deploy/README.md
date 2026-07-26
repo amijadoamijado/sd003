@@ -2,7 +2,7 @@
 
 > **⚠️ 正本は `deploy.ps1` / `deploy.sh`（Phase 4の動的コピー）と `SKILL.md`。**
 > 本READMEは旧版の手動手順を含む参考資料。以下は現行仕様と異なる点に注意:
-> - Gemini CLI は廃止。Antigravity CLI(agy) のコマンドは `.agents/skills/{name}/SKILL.md`（Agent Skills形式）。`.gemini/commands/*.toml` は使わない
+> - Gemini CLI は廃止。Codex・Antigravity CLI（agy）の共通コマンドは `.agents/skills/{name}/SKILL.md`（Agent Skills形式）。`.gemini/commands/*.toml` は使わない
 > - `.antigravity/` および `gemini.md` 生成は廃止。agy のルートルールは `antigravity.md` / `AGENTS.md`
 > - コマンド/スキルの正本は `.claude/`、生成は `python scripts/sync-cli-commands.py`
 
@@ -494,7 +494,7 @@ node scripts/verify-deployment.mjs "<target-project>" "<sd003-source>"
 2. YAML frontmatterの形式を確認
 
 ### agy（Antigravity CLI）コマンドが動作しない
-1. `.agents/skills/{name}/SKILL.md` が存在するか確認（agyはSKILL.md形式のみ読む。`.toml`不可）
-2. プロジェクトルートから agy を起動（`.agents/skills/` はCWD直下を見る）
+1. `.agents/skills/{name}/SKILL.md` が存在するか確認（Codex・agy共通。agyは`.toml`不可）
+2. Codexまたはagyをプロジェクトルートから起動（`.agents/skills/` はCWD直下）
 3. agy 再起動後 `/skills` で一覧確認（スキルは起動時スキャン）
 4. 生成は `.claude/commands` を直して `python scripts/sync-cli-commands.py`
