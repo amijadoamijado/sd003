@@ -84,7 +84,7 @@ handoff 時は **repo の同時書き込みを止め**、どちらが lock を�
 |--|-----------|-------------|
 | 起動 | ユーザー直接 / 「Grok主導」 | `grok-dispatch` 等で他AIから |
 | 工程判断 | Grok | 呼び出し元 |
-| モデル | 対話 TUI 優先（実装は `grok-build` 可） | 既定 `grok-build` + `--output-format plain` |
+| モデル | 対話 TUI 優先（省略=CLI既定。必要時のみ `-m`） | 省略=CLI既定 + `--output-format plain` |
 | 詳細 | 本ファイル | `.claude/skills/grok-dispatch/SKILL.md` |
 
 ## Handoff Recovery（他 Lead 停止時）

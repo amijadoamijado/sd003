@@ -1,4 +1,13 @@
-# AGENTS.md — SD003 Codex Entry Point
+# AGENTS.md — SD003 Shared Entry Point
+
+> このファイルは Codex と Grok の両方に常時注入される共有入口。あなたの正本は以下:
+>
+> | Session Lead | 正本 |
+> |---|---|
+> | Codex | `.codex/CODEX_NATIVE.md` |
+> | Grok | `.grok/GROK_NATIVE.md` |
+> | agy (Antigravity) | `antigravity.md` |
+> | Claude Code | `CLAUDE.md` |
 
 ## 目的
 

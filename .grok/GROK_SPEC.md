@@ -63,22 +63,24 @@ $grok = Join-Path $env:GROK_HOME 'bin\grok.exe'
 
 ## モデル使い分け
 
+モデル名は固定しない。**省略=CLI既定**。指定が必要なときのみ `-m <model>`（使用前に `grok models` で実在IDを確認）。
+
 | 用途 | モデル / 形態 |
 |------|----------------|
-| Lead 対話・方針・調査 | 対話 TUI（Session Lead） |
-| 実装・リファクタ・バグ修正（非対話含む） | `-m grok-build` |
-| Assist 非対話ディスパッチ | `grok-build` + `--output-format plain`（既定） |
+| Lead 対話・方針・調査 | 対話 TUI（Session Lead・CLI既定） |
+| 実装・リファクタ・バグ修正（非対話含む） | 省略（CLI既定）。必要時のみ `-m <model>` |
+| Assist 非対話ディスパッチ | 省略（CLI既定）+ `--output-format plain` |
 
-## 非対話ディスパッチの正準形（Assist・実測 2026-06-28）
+## 非対話ディスパッチの正準形（Assist・実測 2026-06-28 / モデル既定は 2026-07-26 整合）
 
 ```powershell
-& $grok --prompt-file <in.txt> -m grok-build --output-format plain > <out.txt> 2> <progress.log>
+& $grok --prompt-file <in.txt> --output-format plain > <out.txt> 2> <progress.log>
 ```
 
 - `--output-format` の有効値は `plain | json | streaming-json`（`text` は無効）。
 - 最終回答は stdout（plain）、進捗・DEBUG は stderr。`> out 2> progress.log` で分離。
-- `grok build` はサブコマンドではない。コーディング特化モデルは `-m grok-build`。
-- ラッパー: `pwsh -File .claude/skills/grok-dispatch/grok-run.ps1 <repo> <out> "<prompt>" [model]`
+- `grok build` はサブコマンドではない。モデル指定は任意。指定時は `grok models` で実在確認（歴史注記: `grok-build` は 2026-07-12 に unknown model id 化した前例あり。固定既定にするとラインナップ変更で dispatch が丸ごと死ぬ）。
+- ラッパー: `pwsh -File .claude/skills/grok-dispatch/grok-run.ps1 <repo> <out> "<prompt>" [model]`（model 省略時は `-m` を渡さない＝正）
 
 ## 同期検証
 
