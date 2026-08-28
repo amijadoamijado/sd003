@@ -1,9 +1,17 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 123
-- **Latest Session**: 2026-07-26
+- **Total Sessions**: 124
+- **Latest Session**: 2026-08-28
 - **Project Start**: 2026-02-15
+
+---
+
+## 2026-08
+
+| Date | Main Work | Commit | Details |
+|------|-----------|--------|---------|
+| 08-28 | **Codex公式プラグイン構成の実測検証＋Codex既定モデルを luna/max へ変更**。ユーザー提示の外部情報（Claude Code×OpenAI公式Codexプラグイン×GPT-5.6）を推測でなくディスク実測で裏取り→`codex@openai-codex` v1.0.6 は**2026-03-31に導入済み**（codex-cli 0.150.1・auth.jsonは`OPENAI_API_KEY=null`+ChatGPTトークン＝API課金なし）と確定し、「これから組む」前提のみが実態とズレていたと判明。ユーザー指示で `~/.codex/config.toml` を `gpt-5.6-sol`/`low` → **`gpt-5.6-luna`/`max`** へ変更（変更前バックアップ取得・ASCII/BOM無し/LF確認後に編集）、`codex exec --sandbox read-only` 実走で **rc=0・ログ内 `gpt-5.6-luna` 143件 / `effort=max` 49件**を実測確認。`codex.exe` 文字列から有効スラッグ（luna/terra/sol/pro）と effort 有効値（minimal〜max/**ultra**）も裏取り。既定はグローバルのため `/codex:*` と `codex-dispatch` 全体に波及する点を備考に記録。新規発見: 出所不明の `codex-security` スキル3ミラーが未コミット | (sd003本体変更なし・グローバル`~/.codex`設定) | [Details](session-20260828-215433.md) |
 
 ---
 
