@@ -1,11 +1,17 @@
-# SD003 Project Timeline
+﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 124
-- **Latest Session**: 2026-08-28
+- **Total Sessions**: 125
+- **Latest Session**: 2026-09-05
 - **Project Start**: 2026-02-15
 
 ---
+
+## 2026-09
+
+| 日付 | 主な作業 | コミット | 詳細 |
+|---|---|---|---|
+| 09-05 | Codex手順簡素化・配付版2.19.1完成・27プロジェクト反映・スキル説明短縮警告の説明 | 78df469～49b04ab | [記録](session-20260905-162646.md) |
 
 ## 2026-08
 
