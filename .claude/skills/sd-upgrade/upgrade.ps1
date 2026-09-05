@@ -79,9 +79,8 @@ $leanLegacyRules = @(
     ".claude\rules\workflow\artifact-output-location.md"
 )
 
-# .sd003-keep (same semantics as deploy.ps1) - applied to LEAN MIGRATION ONLY.
-# The pre-existing deprecated/overeng removal behavior is intentionally unchanged
-# (past upgrades already ran without keep-awareness there; do not shift ground).
+# .sd003-keep protects every archive move, including deprecated artifacts.
+# A directory containing a protected descendant must also remain in place.
 $KeepPatterns = @()
 $keepFile = Join-Path $TargetProject ".sd003-keep"
 if (Test-Path $keepFile) {
@@ -98,6 +97,23 @@ function Test-KeptUpgrade {
         if ($rel -eq $pat) { return $true }
         if ($rel -like "$pat/*") { return $true }
         if (($pat -match '[\*\?]') -and ($rel -like $pat)) { return $true }
+    }
+    return $false
+}
+
+function Test-KeptUpgradeMove {
+    param([string]$RelPath)
+    if (Test-KeptUpgrade $RelPath) { return $true }
+    $rel = ($RelPath -replace '\\', '/').Trim('/')
+    $path = Join-Path $TargetProject $RelPath
+    if (Test-Path -LiteralPath $path -PathType Container) {
+        foreach ($pat in $KeepPatterns) {
+            if ($pat.StartsWith("$rel/", [StringComparison]::OrdinalIgnoreCase)) { return $true }
+        }
+        foreach ($child in (Get-ChildItem -LiteralPath $path -Recurse -Force)) {
+            $childRel = "$rel/" + $child.FullName.Substring($path.TrimEnd('\', '/').Length + 1)
+            if (Test-KeptUpgrade $childRel) { return $true }
+        }
     }
     return $false
 }
@@ -146,15 +162,15 @@ if (-not (Test-Path $DEPLOY_PS1)) {
 }
 
 # Phase 2: detect deprecated artifacts present
-$delDirsPresent  = @($deprecatedDirs  | Where-Object { Test-Path (Join-Path $TargetProject $_) })
-$delFilesPresent = @($deprecatedFiles | Where-Object { Test-Path (Join-Path $TargetProject $_) })
+$delDirsPresent  = @($deprecatedDirs  | Where-Object { (Test-Path (Join-Path $TargetProject $_)) -and -not (Test-KeptUpgradeMove $_) })
+$delFilesPresent = @($deprecatedFiles | Where-Object { (Test-Path (Join-Path $TargetProject $_)) -and -not (Test-KeptUpgradeMove $_) })
 
 # Expand over-engineering artifacts to concrete relative paths across all roots; keep present ones.
 $overengAll = @()
 foreach ($c in $overengCmdNames)   { $overengAll += ".claude\commands\$c.md", ".sd\commands\specs\$c.md", ".agents\skills\$c", ".grok\skills\$c" }
 foreach ($s in $overengSkillNames) { $overengAll += ".claude\skills\$s", ".agents\skills\$s", ".grok\skills\$s" }
 $overengAll += $overengExtra
-$delOverengPresent = @($overengAll | Where-Object { Test-Path (Join-Path $TargetProject $_) })
+$delOverengPresent = @($overengAll | Where-Object { (Test-Path (Join-Path $TargetProject $_)) -and -not (Test-KeptUpgradeMove $_) })
 
 # Lean migration detection (keep/profile-aware; honesty: flag local edits)
 $leanMigrate = @(); $leanKeptRules = @(); $leanCustomized = @()
@@ -177,6 +193,7 @@ Get-ChildItem -Path $TargetProject -Recurse -File -Filter "CLAUDE.md" -ErrorActi
     $rel = $_.FullName.Substring($TargetProject.TrimEnd('\').Length + 1)
     if ($rel -eq "CLAUDE.md") { return }                       # keep real root CLAUDE.md
     if ($rel -match '(^|\\)(\.git|node_modules|\.sd003-backup[^\\]*|\.sd003-upgrade-backup[^\\]*)(\\|$)') { return }
+    if (Test-KeptUpgradeMove $rel) { return }
     $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
     if ($content -match '<claude-mem-context>') { $stubFiles += $rel }
 }
@@ -248,9 +265,14 @@ New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
 Write-Host "[Backup] $BackupDir" -ForegroundColor Green
 
 function Move-ToBackup([string]$rel) {
+    if (Test-KeptUpgradeMove $rel) { Write-Host "  KEEP: $rel (protected archive move)"; return }
     $srcPath = Join-Path $TargetProject $rel
     if (-not (Test-Path $srcPath)) { return }
     $destPath = Join-Path $BackupDir $rel
+    $targetRoot = [IO.Path]::GetFullPath($TargetProject).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    $backupRoot = [IO.Path]::GetFullPath($BackupDir).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+    if (-not ([IO.Path]::GetFullPath($srcPath).StartsWith($targetRoot, [StringComparison]::OrdinalIgnoreCase)) -or
+        -not ([IO.Path]::GetFullPath($destPath).StartsWith($backupRoot, [StringComparison]::OrdinalIgnoreCase))) { throw "Archive path escapes target: $rel" }
     $destParent = Split-Path $destPath -Parent
     if (-not (Test-Path $destParent)) { New-Item -ItemType Directory -Path $destParent -Force | Out-Null }
     Move-Item -LiteralPath $srcPath -Destination $destPath -Force
@@ -271,7 +293,7 @@ if ($LeanMode -eq "standard" -and $leanMigrate.Count -gt 0) {
 
 # If .antigravity is now empty, remove it
 $antigravityDir = Join-Path $TargetProject ".antigravity"
-if ((Test-Path $antigravityDir) -and -not (Get-ChildItem $antigravityDir -Force -ErrorAction SilentlyContinue)) {
+if (-not (Test-KeptUpgradeMove ".antigravity") -and (Test-Path $antigravityDir) -and -not (Get-ChildItem $antigravityDir -Force -ErrorAction SilentlyContinue)) {
     Remove-Item $antigravityDir -Force
     Write-Host "  removed empty .antigravity/"
 }

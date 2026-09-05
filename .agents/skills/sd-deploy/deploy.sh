@@ -72,6 +72,25 @@ is_kept() {
     return 1
 }
 
+# Sync ignores the keep manifest; conservatively protect overlapping output trees.
+sync_output_is_kept() {
+    local pat pat_lc prefix root
+    for pat in "${KEEP_PATTERNS[@]}"; do
+        pat_lc="$(printf '%s' "$pat" | tr '[:upper:]' '[:lower:]')"
+        prefix="${pat_lc%%[\*\?]*}"
+        prefix="${prefix%/}"
+        for root in .agents/skills .grok/skills .sd/commands; do
+            is_kept "$root" && return 0
+            case "$pat_lc" in "$root"/*) return 0 ;; esac
+            case "$pat_lc" in *[\*\?]*)
+                case "$root" in "$prefix"*) return 0 ;; esac
+                case "$prefix" in "$root"*) return 0 ;; esac ;;
+            esac
+        done
+    done
+    return 1
+}
+
 KEPT_LOG="$(mktemp)"; DIVERGED_LOG="$(mktemp)"
 
 # ============================================================
@@ -84,7 +103,7 @@ deploy_dry_run() {
     local diverged=0 kept=0 newc=0 same=0 d f sf projrel tgt
     local DIV=() KEP=()
     local gh gh_name gh_rel gh_tgt
-    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".handoff" "docs/troubleshooting" "docs/rules-reference")
+    local scan_dirs=(".claude/commands" ".claude/rules" ".claude/skills" ".claude/hooks" ".agents/skills" ".codex" ".grok" ".handoff" "docs/troubleshooting" "docs/rules-reference" ".sessions/templates" ".sd/ai-coordination/workflow/templates")
     for d in "${scan_dirs[@]}"; do
         [ -d "$SOURCE_DIR/$d" ] || continue
         while IFS= read -r f; do
@@ -95,7 +114,7 @@ deploy_dry_run() {
             if ! cmp -s "$f" "$tgt"; then DIV+=("$projrel"); diverged=$((diverged+1)); else same=$((same+1)); fi
         done < <(find "$SOURCE_DIR/$d" -type f)
     done
-    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "scripts/orchestrator-guard.js" "tests/gas-fakes/setup.ts")
+    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "scripts/orchestrator-guard.js" "scripts/lead-lock.ps1" "tests/gas-fakes/setup.ts" ".sessions/session-template.md" ".sd/ai-coordination/workflow/README.md" ".sd/ai-coordination/workflow/CODEX_GUIDE.md" ".sd/ai-coordination/workflow/GROK_GUIDE.md")
     for sf in "${scan_files[@]}"; do
         if is_kept "$sf"; then KEP+=("$sf"); kept=$((kept+1)); continue; fi
         [ -f "$SOURCE_DIR/$sf" ] || continue
@@ -243,7 +262,7 @@ copy_dir_tree() {
 copy_flat_dir() {
     local rel_path="$1"
     local label="$2"
-    local ext="${3:-.md}"
+    local ext="${3-.md}"
     local src="$SOURCE_DIR/$rel_path"
     local dst="$TARGET_PROJECT/$rel_path"
     local count=0
@@ -303,8 +322,13 @@ copy_dir_tree ".grok" "Grok" "*"
 # 参照ドキュメント群。CLAUDE.md の Details: が指すため配布必須（欠けるとdangling）。
 copy_dir_tree "docs/rules-reference" "Docs/RulesReference" "*.md"
 
-# 4-10: .sessions/session-template.md
-if [ -f "$SOURCE_DIR/.sessions/session-template.md" ]; then
+# 4-10: session templates (honor per-project protection)
+copy_flat_dir ".sessions/templates" "Session Templates" ""
+if is_kept ".sessions/session-template.md"; then
+    echo ".sessions/session-template.md" >> "$KEPT_LOG"
+    COPY_STATS["Session Template"]=0
+elif [ -f "$SOURCE_DIR/.sessions/session-template.md" ]; then
+    if [ -f "$TARGET_PROJECT/.sessions/session-template.md" ] && ! cmp -s "$SOURCE_DIR/.sessions/session-template.md" "$TARGET_PROJECT/.sessions/session-template.md"; then echo ".sessions/session-template.md" >> "$DIVERGED_LOG"; fi
     cp "$SOURCE_DIR/.sessions/session-template.md" "$TARGET_PROJECT/.sessions/"
     COPY_STATS["Session Template"]=1
 else
@@ -318,18 +342,16 @@ WF_DST="$TARGET_PROJECT/.sd/ai-coordination/workflow"
 wf_count=0
 
 for f in README.md CODEX_GUIDE.md GROK_GUIDE.md; do
+    projrel=".sd/ai-coordination/workflow/$f"
+    if is_kept "$projrel"; then echo "$projrel" >> "$KEPT_LOG"; continue; fi
     if [ -f "$WF_SRC/$f" ]; then
+        if [ -f "$WF_DST/$f" ] && ! cmp -s "$WF_SRC/$f" "$WF_DST/$f"; then echo "$projrel" >> "$DIVERGED_LOG"; fi
         cp "$WF_SRC/$f" "$WF_DST/"
         wf_count=$((wf_count + 1))
     fi
 done
 
-if [ -d "$WF_SRC/templates" ]; then
-    mkdir -p "$WF_DST/templates"
-    for f in "$WF_SRC/templates"/*; do
-        [ -f "$f" ] && cp "$f" "$WF_DST/templates/" && wf_count=$((wf_count + 1))
-    done
-fi
+copy_flat_dir ".sd/ai-coordination/workflow/templates" "AI Coordination Templates" ""
 COPY_STATS["AI Coordination"]=$wf_count
 
 # 4-11: docs/troubleshooting/
@@ -410,6 +432,20 @@ else
     COPY_STATS["Orchestrator Guard"]=0
 fi
 
+# 4-15e: scripts/lead-lock.ps1 (referenced by Codex Native Lead mode)
+if is_kept "scripts/lead-lock.ps1"; then
+    echo "  KEEP: scripts/lead-lock.ps1 preserved via .sd003-keep"
+    echo "scripts/lead-lock.ps1" >> "$KEPT_LOG"
+    COPY_STATS["Lead Lock"]=0
+elif [ -f "$SOURCE_DIR/scripts/lead-lock.ps1" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    if [ -f "$TARGET_PROJECT/scripts/lead-lock.ps1" ] && ! cmp -s "$SOURCE_DIR/scripts/lead-lock.ps1" "$TARGET_PROJECT/scripts/lead-lock.ps1"; then echo "scripts/lead-lock.ps1" >> "$DIVERGED_LOG"; fi
+    cp "$SOURCE_DIR/scripts/lead-lock.ps1" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Lead Lock"]=1
+else
+    COPY_STATS["Lead Lock"]=0
+fi
+
 # 4-16: scripts/sync-cli-commands.py (shared .agents + Grok skill generator)
 if is_kept "scripts/sync-cli-commands.py"; then
     echo "  KEEP: scripts/sync-cli-commands.py preserved via .sd003-keep"
@@ -421,7 +457,9 @@ elif [ -f "$SOURCE_DIR/scripts/sync-cli-commands.py" ]; then
     cp "$SOURCE_DIR/scripts/sync-cli-commands.py" "$TARGET_PROJECT/scripts/"
     COPY_STATS["Sync CLI"]=1
     # Regenerate shared .agents and Grok skills in TARGET. Guarded.
-    if command -v python >/dev/null 2>&1; then
+    if sync_output_is_kept; then
+        echo "  KEEP: post-copy sync skipped; .sd003-keep protects generated output trees"
+    elif command -v python >/dev/null 2>&1; then
         ( cd "$TARGET_PROJECT" && python scripts/sync-cli-commands.py >/dev/null 2>&1 ) \
             && echo "  Regenerated shared .agents and Grok skills (sync-cli-commands.py)" \
             || echo "  WARN: post-copy sync failed; run 'python scripts/sync-cli-commands.py' in target"

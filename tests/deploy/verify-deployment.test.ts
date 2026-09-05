@@ -1,5 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
+import fs from 'node:fs';
+import os from 'node:os';
 
 // Regression coverage for the deploy content-verification gate.
 // Reproduces commit 9f14984 (settings.json shipped with guardrails wired to Stop
@@ -30,6 +32,19 @@ function runVerifier(targetDir: string): { code: number; out: string } {
 }
 
 describe('verify-deployment gate', () => {
+  it('detects the missing lead-lock dependency observed in a real release deployment', () => {
+    const target = fs.mkdtempSync(path.join(os.tmpdir(), 'sd003-native-dependency-'));
+    try {
+      fs.mkdirSync(path.join(target, '.codex'));
+      fs.copyFileSync(path.join(repoRoot, '.codex', 'CODEX_NATIVE.md'), path.join(target, '.codex', 'CODEX_NATIVE.md'));
+      expect(runVerifier(target).out).toContain('[FAIL] C2c');
+      fs.mkdirSync(path.join(target, 'scripts'));
+      fs.copyFileSync(path.join(repoRoot, 'scripts', 'lead-lock.ps1'), path.join(target, 'scripts', 'lead-lock.ps1'));
+      expect(runVerifier(target).out).toContain('[PASS] C2c');
+    } finally {
+      fs.rmSync(target, { recursive: true, force: true });
+    }
+  });
   it('hard-fails on a Stop-only settings.json (9f14984 reproduction)', () => {
     const { code, out } = runVerifier(brokenFixture);
     expect(code).toBe(1);

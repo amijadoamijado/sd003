@@ -63,6 +63,19 @@ function Test-Kept {
     return $false
 }
 
+# Sync regenerates these trees without reading .sd003-keep. Skip it when a
+# protected path can overlap an output tree (glob prefixes are conservative).
+function Test-SyncOutputKept {
+    foreach ($pat in $KeepPatterns) {
+        $prefix = ($pat -split '[\*\?]', 2)[0].TrimEnd('/')
+        foreach ($root in @('.agents/skills', '.grok/skills', '.sd/commands')) {
+            if ((Test-Kept $root) -or $pat.StartsWith("$root/", [StringComparison]::OrdinalIgnoreCase)) { return $true }
+            if (($pat -match '[\*\?]') -and ($root.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) -or $prefix.StartsWith($root, [StringComparison]::OrdinalIgnoreCase))) { return $true }
+        }
+    }
+    return $false
+}
+
 # Honest-reporting trackers (populated by the real copy path below)
 $script:keptFiles = @()
 $script:divergedOverwrites = @()
@@ -96,7 +109,8 @@ function Invoke-DeployDryRun {
     $scanDirs = @(
         ".claude\commands", ".claude\rules", ".claude\skills", ".claude\hooks",
         ".agents\skills", ".codex", ".grok",
-        ".handoff", "docs\troubleshooting", "docs\rules-reference"
+        ".handoff", "docs\troubleshooting", "docs\rules-reference",
+        ".sessions\templates", ".sd\ai-coordination\workflow\templates"
     )
     foreach ($d in $scanDirs) {
         $srcRoot = Join-Path $SOURCE_DIR $d
@@ -120,7 +134,9 @@ function Invoke-DeployDryRun {
         "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
         "scripts\verify-deployment.mjs", "scripts\recover-agy-artifacts.sh",
         "scripts\recover-agy-artifacts.ps1", "scripts\orchestrator-guard.js",
-        "tests\gas-fakes\setup.ts"
+        "tests\gas-fakes\setup.ts", "scripts\lead-lock.ps1",
+        ".sd\ai-coordination\workflow\README.md", ".sd\ai-coordination\workflow\CODEX_GUIDE.md",
+        ".sd\ai-coordination\workflow\GROK_GUIDE.md"
     )
     foreach ($f in $scanFiles) {
         if (Test-Kept $f) { $kept += ($f -replace '\\', '/'); continue }
@@ -366,17 +382,7 @@ Copy-DirTree -RelPath ".grok" -Label "Grok" -Exclude $optionalSkills
 # .sd/cleanup/archive/sd002-legacy-20260726/ — no longer distributed.
 
 # 4-10: .sessions/templates/ (template files for new projects)
-$sessionTemplatesSrc = Join-Path $SOURCE_DIR ".sessions\templates"
-if (Test-Path $sessionTemplatesSrc) {
-    $targetTemplatesDir = Join-Path $TargetProject ".sessions\templates"
-    if (!(Test-Path $targetTemplatesDir)) { New-Item -ItemType Directory -Path $targetTemplatesDir -Force | Out-Null }
-    Copy-Item "$sessionTemplatesSrc\*" $targetTemplatesDir -Force
-    $templateCount = (Get-ChildItem $targetTemplatesDir -File).Count
-    $copyStats["Session Templates"] = $templateCount
-} else {
-    Write-Host "  WARN: .sessions/templates/ not found" -ForegroundColor Yellow
-    $copyStats["Session Templates"] = 0
-}
+Copy-FlatDir -RelPath ".sessions\templates" -Label "Session Templates" -Extension ""
 
 # 4-11a: (retired 2026-07-26) .sd/design is a per-project slot (empty in source);
 # projects manage their own design tokens — no longer distributed.
@@ -388,21 +394,17 @@ $wfCount = 0
 
 foreach ($f in @("README.md", "CODEX_GUIDE.md", "GROK_GUIDE.md")) {
     $src = Join-Path $workflowSrc $f
+    $projRel = ".sd/ai-coordination/workflow/$f"
+    if (Test-Kept $projRel) { $script:keptFiles += $projRel; continue }
     if (Test-Path $src) {
-        Copy-Item $src (Join-Path $workflowDst $f) -Force
+        $dest = Join-Path $workflowDst $f
+        if ((Test-Path $dest) -and ((Get-FileHash $src).Hash -ne (Get-FileHash $dest).Hash)) { $script:divergedOverwrites += $projRel }
+        Copy-Item $src $dest -Force
         $wfCount++
     }
 }
 
-$templatesSrc = Join-Path $workflowSrc "templates"
-$templatesDst = Join-Path $workflowDst "templates"
-if (Test-Path $templatesSrc -PathType Container) {
-    $items = Get-ChildItem -Path $templatesSrc -File
-    foreach ($item in $items) {
-        Copy-Item $item.FullName (Join-Path $templatesDst $item.Name) -Force
-        $wfCount++
-    }
-}
+Copy-FlatDir -RelPath ".sd\ai-coordination\workflow\templates" -Label "AI Coordination Templates" -Extension ""
 $copyStats["AI Coordination"] = $wfCount
 
 # 4-11: docs/troubleshooting/
@@ -483,7 +485,7 @@ if (Test-Kept "scripts/verify-deployment.mjs") {
     $copyStats["Verify Deployment (mjs)"] = 0
 }
 
-foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1','orchestrator-guard.js')) {
+foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1','orchestrator-guard.js','lead-lock.ps1')) {
     $recoverRel = "scripts/$recoverName"; $recoverSrc = Join-Path $SOURCE_DIR "scripts\$recoverName"; $recoverDst = Join-Path $TargetProject "scripts\$recoverName"
     if (Test-Kept $recoverRel) {
         Write-Host "  KEEP: $recoverRel preserved via .sd003-keep" -ForegroundColor Magenta
@@ -513,7 +515,9 @@ if (Test-Kept "scripts/sync-cli-commands.py") {
     # Regenerate shared .agents and Grok skills in the TARGET (copy alone leaves generated
     # skills + manifest stale). Guarded: skip if python is unavailable.
     $py = (Get-Command python -ErrorAction SilentlyContinue)
-    if ($py) {
+    if (Test-SyncOutputKept) {
+        Write-Host "  KEEP: post-copy sync skipped; .sd003-keep protects generated output trees" -ForegroundColor Magenta
+    } elseif ($py) {
         Push-Location $TargetProject
         try {
             & python "scripts\sync-cli-commands.py" 2>&1 | Out-Null

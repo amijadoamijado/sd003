@@ -65,8 +65,8 @@ LEAN_LEGACY_RULES=(
     ".claude/rules/workflow/artifact-output-location.md"
 )
 
-# .sd003-keep (same semantics as deploy.sh, incl. BOM strip) - lean migration ONLY;
-# pre-existing deprecated/overeng removal behavior intentionally unchanged.
+# .sd003-keep protects every archive move, including deprecated artifacts.
+# A directory containing a protected descendant must also remain in place.
 UP_KEEP_PATTERNS=()
 if [ -f "$TARGET_PROJECT/.sd003-keep" ]; then
     up_first=true
@@ -88,6 +88,23 @@ up_is_kept() {
         case "$rel_lc" in "$pat_lc"/*) return 0 ;; esac
         case "$pat_lc" in *[\*\?]*) case "$rel_lc" in $pat_lc) return 0 ;; esac ;; esac
     done
+    return 1
+}
+
+up_is_kept_move() {
+    local rel="${1#/}" pat child child_rel rel_lc pat_lc
+    up_is_kept "$rel" && return 0
+    if [ -d "$TARGET_PROJECT/$rel" ]; then
+        rel_lc="$(printf '%s' "$rel" | tr '[:upper:]' '[:lower:]')"
+        for pat in "${UP_KEEP_PATTERNS[@]}"; do
+            pat_lc="$(printf '%s' "$pat" | tr '[:upper:]' '[:lower:]')"
+            case "$pat_lc" in "$rel_lc"/*) return 0 ;; esac
+        done
+        while IFS= read -r -d '' child; do
+            child_rel="${child#"$TARGET_PROJECT"/}"
+            up_is_kept "$child_rel" && return 0
+        done < <(find "$TARGET_PROJECT/$rel" -mindepth 1 -print0)
+    fi
     return 1
 }
 
@@ -122,8 +139,8 @@ echo ""
 [ ! -f "$DEPLOY_SH" ] && { echo "Error: deploy.sh not found at $DEPLOY_SH"; exit 1; }
 
 # Phase 2: detect
-DEL_DIRS=(); for d in "${DEPRECATED_DIRS[@]}"; do [ -e "$TARGET_PROJECT/$d" ] && DEL_DIRS+=("$d"); done
-DEL_FILES=(); for f in "${DEPRECATED_FILES[@]}"; do [ -e "$TARGET_PROJECT/$f" ] && DEL_FILES+=("$f"); done
+DEL_DIRS=(); for d in "${DEPRECATED_DIRS[@]}"; do [ -e "$TARGET_PROJECT/$d" ] && ! up_is_kept_move "$d" && DEL_DIRS+=("$d"); done
+DEL_FILES=(); for f in "${DEPRECATED_FILES[@]}"; do [ -e "$TARGET_PROJECT/$f" ] && ! up_is_kept_move "$f" && DEL_FILES+=("$f"); done
 
 # Expand over-engineering artifacts to concrete relative paths across all roots; keep present ones.
 OVERENG_ALL=()
@@ -134,7 +151,7 @@ for s in "${OVERENG_SKILL_NAMES[@]}"; do
     OVERENG_ALL+=(".claude/skills/$s" ".agents/skills/$s" ".grok/skills/$s")
 done
 OVERENG_ALL+=("${OVERENG_EXTRA[@]}")
-DEL_OVERENG=(); for p in "${OVERENG_ALL[@]}"; do [ -e "$TARGET_PROJECT/$p" ] && DEL_OVERENG+=("$p"); done
+DEL_OVERENG=(); for p in "${OVERENG_ALL[@]}"; do [ -e "$TARGET_PROJECT/$p" ] && ! up_is_kept_move "$p" && DEL_OVERENG+=("$p"); done
 
 # Lean migration detection (keep/profile-aware; honesty: flag local edits)
 LEAN_MIGRATE=(); LEAN_KEPT=(); LEAN_CUSTOMIZED=()
@@ -158,6 +175,7 @@ while IFS= read -r file; do
     rel="${file#"$TARGET_PROJECT"/}"
     [ "$rel" = "CLAUDE.md" ] && continue
     case "$rel" in .git/*|*/.git/*|node_modules/*|*/node_modules/*|.sd003-backup*|*/.sd003-backup*|.sd003-upgrade-backup*|*/.sd003-upgrade-backup*) continue ;; esac
+    up_is_kept_move "$rel" && continue
     if grep -q '<claude-mem-context>' "$file" 2>/dev/null; then STUBS+=("$rel"); fi
 done < <(find "$TARGET_PROJECT" -type f -name "CLAUDE.md" 2>/dev/null)
 
@@ -222,6 +240,7 @@ echo "[Backup] $BACKUP_DIR"
 
 move_to_backup() {
     local rel="$1"
+    if up_is_kept_move "$rel"; then echo "  KEEP: $rel (protected archive move)"; return 0; fi
     local src="$TARGET_PROJECT/$rel"
     [ ! -e "$src" ] && return
     local dest="$BACKUP_DIR/$rel"
@@ -242,7 +261,7 @@ if [ "$LEAN_MODE" = "standard" ] && [ ${#LEAN_MIGRATE[@]} -gt 0 ]; then
 fi
 
 # Remove .antigravity if now empty
-if [ -d "$TARGET_PROJECT/.antigravity" ] && [ -z "$(ls -A "$TARGET_PROJECT/.antigravity" 2>/dev/null)" ]; then
+if ! up_is_kept_move ".antigravity" && [ -d "$TARGET_PROJECT/.antigravity" ] && [ -z "$(ls -A "$TARGET_PROJECT/.antigravity" 2>/dev/null)" ]; then
     rmdir "$TARGET_PROJECT/.antigravity"
     echo "  removed empty .antigravity/"
 fi

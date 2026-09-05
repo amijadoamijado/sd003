@@ -292,6 +292,18 @@ if (deployedHooks) {
   }
 }
 
+// ---- C2c: the Codex entry point must be executable after deployment.
+{
+  const nativePath = path.join(targetDir, '.codex', 'CODEX_NATIVE.md');
+  if (fs.existsSync(nativePath) && fs.readFileSync(nativePath, 'utf8').includes('scripts/lead-lock.ps1')) {
+    if (!fs.existsSync(path.join(targetDir, 'scripts', 'lead-lock.ps1'))) {
+      fail('C2c', 'Codex Native references missing scripts/lead-lock.ps1');
+    } else {
+      pass('C2c', 'Codex Native lead-lock dependency is present');
+    }
+  }
+}
+
 // ---- C3: no unsubstituted template variables {{...}} in generated files
 const generatedFiles = [
   'CLAUDE.md',

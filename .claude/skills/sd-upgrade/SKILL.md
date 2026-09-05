@@ -28,7 +28,7 @@ allowed-tools: Read, Write, Bash, Glob
 スクリプト直接実行:
 ```powershell
 # Windows（推奨）。-Execute なしは dry-run
-powershell -ExecutionPolicy Bypass -File .claude/skills/sd-upgrade/upgrade.ps1 <target> [-Execute] [-IncludeOptional]
+pwsh -NoProfile -File .claude/skills/sd-upgrade/upgrade.ps1 <target> [-Execute] [-IncludeOptional]
 ```
 ```bash
 # Linux/Mac。--execute なしは dry-run
@@ -44,7 +44,7 @@ bash .claude/skills/sd-upgrade/upgrade.sh <target> [--execute] [--include-option
 | 3 Backup | `.sd003-upgrade-backup-YYYYMMDD_HHMMSS/` に削除対象を**移動退避**（archive-then-remove。hard rm しない） |
 | 4 Deploy | `sd-deploy` の deploy スクリプトを呼び最新FWを配備（上書き＝FW、skip＝データ） |
 | 5 Verify | `.agents/skills` 配備・廃止物消失を確認して報告 |
-| 6 Prune（必須） | `.sd003-backup-*` / `.sd003-upgrade-backup-*` / `.sd002-backup-*` が2個以上あれば、最新1個を残し残りを `<project>/.sd/cleanup/archive/<YYYYMMDD>/` へ**移動**（削除禁止） |
+| 6 Prune（必須） | `.sd003-backup-*` / `.sd003-upgrade-backup-*` / `.sd002-backup-*` が2個以上あれば、最新1個を残し残りを `<project>/.sd003-archive/<YYYYMMDD>/` へ**移動**（削除禁止） |
 
 **実行は必ず `--execute`/`-Execute` 明示時のみ。** 既定は dry-run。
 
@@ -80,6 +80,8 @@ bash .claude/skills/sd-upgrade/upgrade.sh <target> [--execute] [--include-option
 
 - 配置: `<target>/.sd003-keep`（1行1パス、`#`コメント可、`*`/`?`グロブ・ディレクトリ接頭辞対応）
 - `.sd003-keep` が無ければ全ガードは no-op（従来挙動と同一）
+- 保護は上書きと廃止物の退避に適用する。保護対象を子に含むディレクトリも退避しない。
+- `.agents/skills`、`.grok/skills`、`.sd/commands`など同期出力への保護指定があれば、配布後の一括再生成を省略してログに理由を残す。
 
 ```
 # 例: 会計事務所スキル等を固有化したプロジェクト
