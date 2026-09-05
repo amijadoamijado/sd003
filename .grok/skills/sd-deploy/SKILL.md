@@ -5,11 +5,11 @@ description: |
   Use when: ユーザーが「SD003導入」「フレームワーク展開」「deploy」と言及した場合。
 ---
 
-# SD003フレームワーク展開スキル v3.4.0
+# SD003フレームワーク展開スキル（deploy v3.5.0）
 
 ## 概要
 
-SD003フレームワーク（v2.15.0）を新規プロジェクトに展開する。
+SD003フレームワーク（v2.19.0）を新規プロジェクトに展開する。配布版番号の正本はdeploy.ps1 / deploy.shのFRAMEWORK_VERSION。deployツールの版番号とは区別する。
 **ディレクトリ単位の動的コピー**により、ファイル追加時にスクリプト修正は不要。
 
 ## 上書きポリシー（必須）
@@ -126,7 +126,7 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 
 **手動実行**: `node scripts/verify-deployment.mjs <targetDir> [sourceDir]`（全PASSでexit 0、1件でもFAILでexit 1）。
 **deny-list の調整（C4）**: 環境変数 `SD003_DEPRECATED_TOKENS="tok1,tok2"`（既定 `.kiro`）。誤検知でゲート信頼を損なわないよう最小限に保つ。
-**既存デプロイ先の落とし穴**: deploy は既存 `settings.json` を上書きしない（SKIP）。古い配信先は壊れた配線のまま固着するため、Phase 6b が FAIL したら `settings.json` を削除して再deployするか手動で再配線する。
+**既存デプロイ先の確認**: `settings.json`は`.sd003-keep`で保護されていなければ更新される。保護されている場合は固有設定を維持し、検証失敗の原因を確認する。検証を通すためだけに保護を解除・削除しない。
 
 ## 動的コピー対象
 

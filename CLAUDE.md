@@ -130,4 +130,4 @@ IMPORTANT: `/sessionwrite` 時は学習評価 — セッション中のユーザ
 | Cleanup | `/cleanup`, `restore`, `history` |
 
 ---
-SD003 v3.5.0 | Updated: 2026-07-26 (Claude 5世代lean化: 常時ロード121KB→約24KB、詳細ルールはdocs/rules-reference/へ) | Style: `.claude/rules/global/claude-md-style.md`
+SD003 Framework v2.19.0 | deploy v3.5.0 | Updated: 2026-09-05 (Codex実行手順とsessionreadの整理) | Style: `.claude/rules/global/claude-md-style.md`
