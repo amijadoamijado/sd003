@@ -1,9 +1,9 @@
 ---
 name: sessionread
-description: "最新のセッション継続記録を読み込み表示 (Use when the user runs /sessionread.)"
+description: "最新の引継ぎと現在のGit状態を確認する (Use when the user runs /sessionread.)"
 ---
 
-# セッション読み込み（完全版）
+# セッション読み込み
 
 SD003 custom command `/sessionread` を Grok skill として再現します。
 
@@ -18,190 +18,29 @@ User-provided arguments (if any): $ARGUMENTS
 - WindowsではPowerShellで実行できるコマンドを優先する。
 
 ## Original Command Body
-# セッション読み込み（完全版）
+# セッション読み込み
 
-セッション開始時に必要な全ファイルを読み込みます。
+最新の引継ぎと現在の状態を照合し、次の作業に必要な情報を短く報告する。読み込みだけの依頼では、残タスクの実装や設定変更を開始しない。
 
-## 読み込み順序（必須）
+## 読み込み
 
-| 順序 | ファイル | 目的 |
-|------|---------|------|
-| 1 | `D:\claudecode\CLAUDE.md` | グローバル設定（UTF-8制約等） |
-| 2 | `./CLAUDE.md` | プロジェクト設定（SD003ルール） |
-| 3 | `.sessions/session-current.md` | 現在のセッション（短期記憶） |
-| 4 | `.sessions/TIMELINE.md` | プロジェクト履歴（長期記憶） |
+1. 対象プロジェクトの絶対パスを固定する。シェルのプロファイルによる作業ディレクトリ変更を避け、Windowsでは`pwsh -NoProfile`と明示した作業ディレクトリを使う。
+2. 実行中CLIの入口設定を確認する。Codexは`AGENTS.md`と`.codex/CODEX_NATIVE.md`、Grokは`.grok/GROK_NATIVE.md`、agyは`antigravity.md`、Claude Codeは`CLAUDE.md`に従う。すでに読んだ設定は再読しない。
+3. `.sessions/session-current.md`、`git status --short`、現在のブランチ、直近コミットを確認する。
+4. `.handoff/DONE.md`が存在し、session-currentより新しい場合は併読する。
+5. 過去の経緯が必要な場合だけ`.sessions/TIMELINE.md`をキーワード検索し、関連する記録を読む。他CLIのグローバル設定や全履歴の読み込みは不要。
 
-## 実行手順
+記録内のモデル・設定・未解決事項は過去時点の情報として扱う。今回確認できた状態と異なる場合は、その差を示す。設定内容や認証情報を確認する際は秘密の値を出力しない。
 
-### Step 1: グローバル CLAUDE.md
-```
-Read: D:\claudecode\CLAUDE.md
-```
-- UTF-8境界エラー防止ルール
-- 日本語ファイル操作制約
-- セッション開始プロトコル
+## 報告
 
-### Step 2: プロジェクト CLAUDE.md
-```
-Read: ./CLAUDE.md
-```
-- SD003フレームワーク設定
-- 技術スタック
-- AI協調ワークフロー
+- 前回日時と主な完了事項
+- 現在のブランチ・コミット・未コミット変更
+- 次の優先事項と未検証事項
+- 引継ぎと現状の差（ある場合）
 
-### Step 3: session-current.md
-```
-Read: .sessions/session-current.md
-```
-- 前回の作業状況
-- 進行中タスク
-- P0/P1/P2 優先タスク
+ファイルがない場合は「引継ぎ記録なし」「履歴なし」等と伝え、確認できる範囲を報告する。読み取りのみなら「変更なし」と明記する。
 
-### Step 4: TIMELINE.md
-```
-Read: .sessions/TIMELINE.md
-```
-- プロジェクト全体の履歴
-- 過去セッションの概要
-- 長期的なコンテキスト
+## 保守作業
 
-`.handoff/DONE.md` が `.sessions/session-current.md` より新しい場合は併読し、差分をユーザーへ通知する。
-
-## 表示フォーマット
-
-全ファイル読み込み後、以下の形式で要約を表示:
-
-```
-📚 セッション読み込み完了
-
-## 1. グローバル設定
-✅ CLAUDE.md (グローバル) 読み込み完了
-   - UTF-8制約ルール確認
-
-## 2. プロジェクト設定
-✅ CLAUDE.md (プロジェクト) 読み込み完了
-   - SD003 v[バージョン]
-   - 🔄 SD003アップデートあり: v[ローカル] → v[現行]（該当時のみ表示。Step 6参照）
-
-## 3. 現在セッション
-📅 前回: [日時]
-🌿 ブランチ: [ブランチ名]
-📝 コミット: [最新コミット]
-
-### 作業状況
-✅ 完了: [N]件
-🔄 進行中: [N]件
-🔴 未解決: [N]件
-
-### 次回優先 (P0)
-[P0タスクリスト]
-
-## 4. プロジェクト履歴
-📊 総セッション数: [N]
-📆 期間: [開始日] ~ [最終日]
-🔧 直近の作業: [概要]
-
----
-🚀 セッション開始準備完了
-```
-
-## エラーハンドリング
-
-| ファイル | 存在しない場合 |
-|---------|---------------|
-| グローバル CLAUDE.md | 警告表示、続行 |
-| プロジェクト CLAUDE.md | 警告表示、続行 |
-| session-current.md | 「新規セッション」として扱う |
-| TIMELINE.md | 「履歴なし」として扱う |
-| SD003アップデートチェック（Step 6） | 作業ディレクトリが `D:\claudecode\sd003` 自身、または `./CLAUDE.md` に `SD003 v` 表記なし → スキップ（無音） |
-
-## 関連コマンド
-
-| コマンド | 目的 |
-|---------|------|
-| `/sessionwrite` | セッション保存（終了時） |
-| `/sessionhistory` | 履歴のみ表示 |
-| `/sd-upgrade` | SD003フレームワークの安全アップグレード（Step 6から誘導） |
-
----
-
-## Step 5: セッションアーカイブ（バックグラウンド）
-
-**4ファイル読み込みと並行して**、以下のAgentをバックグラウンドで起動する:
-
-```
-Agent(run_in_background=true):
-  description: "archive old sessions"
-  prompt: |
-    古いClaude Codeセッションのアーカイブ状況を確認します。以下を実行してください:
-    1. bash ~/.claude/scripts/archive-sessions.sh 7 preview でプレビュー
-    2. 対象が0件なら「アーカイブ対象なし」と報告して終了
-    3. 対象がある場合は件数とサイズを報告（実行はしない）
-    4. 「/archive-sessions --execute で実行できます」と案内
-```
-
-**重要**: このAgentはバックグラウンドで実行し、メインの作業をブロックしない。
-完了通知が届いたら結果を簡潔にユーザーに伝える。
-
----
-
-## Step 6: SD003アップデートチェック（デプロイ先プロジェクトのみ）
-
-Step 2（プロジェクト CLAUDE.md）読み込み後、非ブロッキングで以下を確認する。
-**このプロジェクトが SD003 本体（`D:\claudecode\sd003`）自身の場合は完全にスキップする**（無音）。
-
-### 6-1: バージョン検出
-
-1. `Grep pattern:"SD003 v[0-9.]+" path:"./CLAUDE.md"` でローカルバージョンを取得。
-   マッチしなければ「このプロジェクトはSD003未デプロイ」としてスキップ（無音・以降の手順は実行しない）。
-2. `Grep pattern:"FRAMEWORK_VERSION = " path:"D:/claudecode/sd003/.claude/skills/sd-deploy/deploy.ps1"`
-   で現行バージョン（`$FRAMEWORK_VERSION`）を取得する。
-   - 注意: SD003本体の `CLAUDE.md` 末尾表記（例: `SD003 v3.4.0`）とはズレがあり得る
-     （deployスクリプト自体のバージョンと、実際にデプロイ先へ書き込まれるテンプレートの
-     バージョンが別管理のため）。**比較には必ず `deploy.ps1` の `$FRAMEWORK_VERSION` を使う**
-     （それが実際にプロジェクトへ配布される値だから）。
-3. ドット区切りで数値比較（例: `2.15.0` vs `2.16.0` → 各セグメントを左から数値比較）。
-   ローカル < 現行 の場合のみ「アップデートあり」。同じかローカルの方が新しければ何もしない（無音）。
-
-### 6-2: 非ブロッキング通知
-
-「アップデートあり」の場合のみ、表示フォーマットの「## 2. プロジェクト設定」の下に
-`🔄 SD003アップデートあり: v[ローカル] → v[現行]` の1行を追記する（表示フォーマット節を参照）。
-ここまでは通常の要約表示の一部であり、ユーザーへの質問は発生しない。
-
-### 6-3: 確認ゲート（アップデートありの場合のみ、1回だけ）
-
-4ファイルの要約表示が終わった最後に、`AskUserQuestion` で一度だけ確認する:
-
-> SD003アップデートがあります（v[ローカル] → v[現行]）。今すぐ更新しますか？
-
-選択肢:
-- **dry-run確認→実行（推奨）**
-- 後で（`/sd-upgrade .` で自分で実行できることを案内して終了）
-- 今回はスキップ
-
-### 6-4: 「dry-run確認→実行」選択時の実行手順
-
-1. dry-run:
-   ```
-   pwsh -File "D:\claudecode\sd003\.claude\skills\sd-upgrade\upgrade.ps1" "<このプロジェクトの絶対パス>"
-   ```
-   - 必ずSD003本体側の絶対パスのスクリプトを呼ぶこと（`$PSScriptRoot`基準でsourceを解決するため、
-     デプロイ先にコピーされた同名スクリプトをそのcwdで実行すると誤動作する）
-   - CP932文字化け回避のため `powershell` ではなく `pwsh` を使う（グローバルCLAUDE.md既存ルール）
-2. dry-run結果（`WILL OVERWRITE - LOCAL CUSTOMIZATION WILL BE LOST` 等）をユーザーに提示する。
-   固有化ファイルが上書き対象に含まれ、かつ `<target>/.sd003-keep` が無い/不十分な場合は
-   追記を促す（`.claude/skills/sd-upgrade/SKILL.md` の `.sd003-keep` 節を参照）。
-3. 再度 `AskUserQuestion` で `--execute` で実行してよいか確認する（2段目のゲート。
-   破壊的操作のため dry-run結果を見せずに実行しない）。
-4. 承認後のみ実行:
-   ```
-   pwsh -File "D:\claudecode\sd003\.claude\skills\sd-upgrade\upgrade.ps1" "<このプロジェクトの絶対パス>" -Execute
-   ```
-5. 完了後、`npm install` の実行と（agy利用時は）agy再起動を推奨する旨を案内する
-   （`.claude/skills/sd-upgrade/SKILL.md` の「注意」節に準拠）。
-
----
-
-**実行開始**: 上記4ファイルを順番に読み込み（Step 1-4）、同時にStep 5のAgentをバックグラウンドで起動し、
-Step 6のSD003アップデートチェックを非ブロッキングで実行した上で、要約を表示してください。
+セッションアーカイブ、フレームワーク更新、モデル変更は、読み込みのたびに起動しない。必要になった時点で対応する。SD003更新を依頼された場合は`sd-upgrade`の手順に従う。
