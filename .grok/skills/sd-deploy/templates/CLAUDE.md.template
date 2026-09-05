@@ -94,4 +94,4 @@ IMPORTANT: `/sessionwrite` 時は学習評価 — ユーザー修正2回以上�
 | Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
 
 ---
-SD003 v2.19.0 | Deployed: {{DATE}} | Style: `.claude/rules/global/claude-md-style.md`
+SD003 v2.19.1 | Deployed: {{DATE}} | Style: `.claude/rules/global/claude-md-style.md`

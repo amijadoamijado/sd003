@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $SD003_VERSION = "3.5.0"
-$FRAMEWORK_VERSION = "2.19.0"
+$FRAMEWORK_VERSION = "2.19.1"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -203,6 +203,7 @@ New-Item -ItemType Directory -Path $BackupDir -Force | Out-Null
 
 $backupTargets = @("CLAUDE.md", "AGENTS.md", "antigravity.md", "grok.md")
 foreach ($f in $backupTargets) {
+    if (Test-Kept $f) { Write-Host "  KEEP: backup skipped for protected $f (not overwritten)" -ForegroundColor Magenta; continue }
     $path = Join-Path $TargetProject $f
     if (Test-Path $path) {
         Copy-Item $path $BackupDir -Force
@@ -211,6 +212,7 @@ foreach ($f in $backupTargets) {
 
 $backupDirs = @(".claude", ".codex", ".agents", ".grok", ".sd")
 foreach ($d in $backupDirs) {
+    if (Test-Kept $d) { Write-Host "  KEEP: backup skipped for protected $d (not overwritten)" -ForegroundColor Magenta; continue }
     $path = Join-Path $TargetProject $d
     if (Test-Path $path -PathType Container) {
         Copy-Item $path $BackupDir -Recurse -Force

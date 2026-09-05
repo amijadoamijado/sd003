@@ -6,7 +6,7 @@ set -e
 
 # Configuration
 SD003_VERSION="3.5.0"
-FRAMEWORK_VERSION="2.19.0"
+FRAMEWORK_VERSION="2.19.1"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)
@@ -176,10 +176,12 @@ BACKUP_DIR="$TARGET_PROJECT/.sd003-backup-$TIMESTAMP"
 mkdir -p "$BACKUP_DIR"
 
 for f in CLAUDE.md AGENTS.md antigravity.md grok.md; do
+    if is_kept "$f"; then echo "  KEEP: backup skipped for protected $f (not overwritten)"; continue; fi
     [ -f "$TARGET_PROJECT/$f" ] && cp "$TARGET_PROJECT/$f" "$BACKUP_DIR/" 2>/dev/null || true
 done
 
 for d in .claude .codex .agents .grok .sd; do
+    if is_kept "$d"; then echo "  KEEP: backup skipped for protected $d (not overwritten)"; continue; fi
     [ -d "$TARGET_PROJECT/$d" ] && cp -r "$TARGET_PROJECT/$d" "$BACKUP_DIR/" 2>/dev/null || true
 done
 echo "[Phase 2/7] Backup created: $BACKUP_DIR"
