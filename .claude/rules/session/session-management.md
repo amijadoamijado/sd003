@@ -17,22 +17,26 @@ paths:
 
 | Command | Description |
 |---------|-------------|
-| `/sessionread` | **Full session load** (4 files) |
+| `/sessionread` | 引継ぎ・Git状態の確認＋起動時の点検（読み取りのみ） |
 | `/sessionwrite` | Save session (history + current + timeline) |
 | `/sessionhistory` | View timeline only |
 
-## /sessionread - Complete Session Load
+## /sessionread - セッション読み込み
 
-**Reads 4 files in order:**
+正本は `.claude/commands/sessionread.md`。`.agents/skills/sessionread/SKILL.md`・
+`.grok/skills/sessionread/SKILL.md`・`.sd/commands/specs/sessionread.md` は
+`python scripts/sync-cli-commands.py` の生成物なので直接編集しない（`--check` で差分検知）。
 
-| Order | File | Purpose |
-|-------|------|---------|
-| 1 | `D:\claudecode\CLAUDE.md` | Global settings (UTF-8 constraints) |
-| 2 | `./CLAUDE.md` | Project settings |
-| 3 | `.sessions/session-current.md` | Current session (short-term) |
-| 4 | `.sessions/TIMELINE.md` | Project history (long-term) |
+| 対象 | 扱い |
+|------|------|
+| `CLAUDE.md`（グローバル・プロジェクト） | 実行中CLIが自動注入済み。読んだ設定は再読しない |
+| `.sessions/session-current.md` | 毎回読む |
+| `.handoff/DONE.md` | session-current より新しい場合のみ併読 |
+| `.sessions/TIMELINE.md` | 過去の経緯が必要なときだけキーワード検索 |
+| `git status --short`・ブランチ・直近コミット | 毎回確認 |
 
-**Use at session start to load all context automatically.**
+加えて、セッション1回だけ**起動時の点検**（SD003版・会話ログ退避候補）を行う。
+点検は読み取りのみでファイルを更新も移動もせず、差が無ければ無音（下記2節）。
 
 ## File Locations
 
@@ -141,32 +145,53 @@ SD003を新規プロジェクトに展開する際、セッション管理は**�
 
 詳細手順: `.claude/skills/sd-deploy/README.md`
 
-## SD003 Update Check（sessionread拡張）
+## 起動時の点検1: SD003の版（sessionread拡張）
 
-デプロイ先プロジェクト（SD003本体 `D:\claudecode\sd003` 以外）で `/sessionread` を実行すると、
-Step 2（プロジェクトCLAUDE.md読み込み）の直後に、SD003本体に対して自分が古くないかを
-非ブロッキングで自動チェックする（`.claude/commands/sessionread.md` Step 6）。
+`/sessionread` はセッション1回だけ、導入先が更新元より古くないかを確認する。読み取りのみ。
 
-### バージョン比較の正
+### 比較の正
 
-- 比較対象は `D:\claudecode\sd003\.claude\skills\sd-deploy\deploy.ps1` の `$FRAMEWORK_VERSION`
-  （実際にデプロイ先CLAUDE.mdへ書き込まれる値）。
-- **既知の注意**: SD003本体の `CLAUDE.md` 末尾表記（例: `SD003 v3.4.0`）と、deployスクリプトの
-  `$SD003_VERSION`（deployツール自体のバージョン、2026-07-06に3.4.0へ再同期済み）・`$FRAMEWORK_VERSION`
-  （配布されるテンプレートバージョン、現在2.15.0）は別々に管理されている。本チェックは必ず
-  `$FRAMEWORK_VERSION` を「現行版」として扱う。3値の完全統一（reconcile）は別問題として扱う。
-- デプロイ先プロジェクトのCLAUDE.md本文に残る `SD003 v[数値]` の文字列のみが唯一のローカル
-  バージョン痕跡（専用のバージョンファイル・manifestは存在しない）。
+| 経路 | 方法 |
+|------|------|
+| 標準 | `python .codex/check-framework-version.py`（更新元指定は `--source <絶対パス>` か `SD003_SOURCE`） |
+| フォールバック | 上記スクリプトが無い旧い導入先では、導入先と更新元の `.claude/skills/sd-deploy/deploy.ps1` の `$FRAMEWORK_VERSION` を直接比較 |
 
-### 検知後の扱い（確認ゲート必須）
+- スクリプトは導入先と更新元の `deploy.ps1` / `deploy.sh` の `$FRAMEWORK_VERSION` を照合し、
+  `update_available` / `current` / `ahead` / `unknown` を JSON で返す。参照不能は未確認として扱う。
+- **`CLAUDE.md` 末尾の `SD003 v[数値]` 表記は比較に使わない**。deployツール版・テンプレート版とは
+  別管理でズレるため（実測: at002 は表記 2.18.0・deploy.ps1 は 2.19.1）。表記は目安であって根拠ではない。
+- 版の一致はファイル内容の一致を保証しない。`.sd003-keep` で保護したファイルは更新されないため、
+  実際の適用状況は差分と検証で判断する。
 
-「アップデートあり」と判定された場合でも、**自動でアップグレードを実行しない**。
-非ブロッキングな通知（表示フォーマットへの追記）のみ行い、実行するかどうかは
-`AskUserQuestion` による1回の確認ゲートを経てから判断する（柱4 Segmented Sequencing、
-および破壊的操作は確認を挟むという全体方針に整合）。
+### 検知後の扱い
 
-実行する場合は既存の `/sd-upgrade` 機構（dry-run既定・`.sd003-keep`による固有化ファイル保護・
-`--execute`明示時のみ実行）をそのまま再利用する。詳細: `.claude/skills/sd-upgrade/SKILL.md`。
+自動でアップグレードしない。導入版・更新元版と「`/sd-upgrade .` で更新できる」ことを1行伝えるだけで、
+実行はユーザーの指示があってから。実行時は既存の `/sd-upgrade` 機構（dry-run既定・`.sd003-keep` 保護・
+`--execute` 明示時のみ実行）をそのまま使う。詳細: `.claude/skills/sd-upgrade/SKILL.md`。
+
+### ブートストラップ上の制約
+
+この仕組み自体が `sessionread.md` / 本ファイル / `.codex/` の更新として配布されるため、既存の導入先は
+次に `/sd-upgrade` を一度実行するまで新しい起動手順を受け取らない（`.codex/` は deploy がツリーごと配布）。
+それまでの間は上記フォールバックが効く。
+
+## 起動時の点検2: 会話ログの退避候補
+
+`/sessionread` はセッション1回だけ、`~/.claude/scripts/archive-sessions.sh` があれば
+`bash ~/.claude/scripts/archive-sessions.sh 7 preview` で退避候補を数える。
+
+- **preview は数えるだけで移動しない**。候補があれば件数・容量と
+  `bash ~/.claude/scripts/archive-sessions.sh 7 execute` で退避できることを1行伝える。0件なら無音
+- 既定の基準は**7日**（第1引数で変更可）。退避先は `G:/マイドライブ/claude-sessions-archive`、
+  execute 時のみ Drive 到達性を確認し、`.jsonl` と同名フォルダを移動してインデックスを再構築する
+- 対象は `~/.claude/projects/*/*.jsonl` のみ。`~/.claude/state/` 配下のスキル読取ログ等は対象外
+
+### この2点を簡素化で削らない理由
+
+2026-09-05 の簡素化（78df469）でこの2点を削除し、9月6日に復旧した。どちらも**読み取りのみで
+副作用が無く、差が無ければ無音**の観測処理であり、削減対象の「過剰な読み込み・毎回の確認」ではない。
+削除中は at002 の版ズレも退避候補315件（123MB）も誰にも見えていなかった。
+簡素化する場合は、削除前後の機能を突き合わせて欠落が無いことを確認してから削る。
 
 ### ブートストラップ上の制約
 
