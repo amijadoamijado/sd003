@@ -6,7 +6,7 @@ set -e
 
 # Configuration
 SD003_VERSION="3.5.0"
-FRAMEWORK_VERSION="2.19.1"
+FRAMEWORK_VERSION="2.19.2"
 SOURCE_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 TARGET_PROJECT="${1:?Error: Target project path required}"
 DATE=$(date +%Y-%m-%d)

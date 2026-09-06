@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 
 # Configuration
 $SD003_VERSION = "3.5.0"
-$FRAMEWORK_VERSION = "2.19.1"
+$FRAMEWORK_VERSION = "2.19.2"
 $SOURCE_DIR = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..")).Path
 $DATE = Get-Date -Format "yyyy-MM-dd"
 $TIMESTAMP = Get-Date -Format "yyyyMMdd_HHmmss"
@@ -620,11 +620,8 @@ if (Test-Kept "CLAUDE.md") {
     Write-Host "  KEEP: CLAUDE.md preserved via .sd003-keep (bespoke version kept)" -ForegroundColor Magenta
     $script:keptFiles += "CLAUDE.md"
 } elseif (Test-Path $claudeTemplate) {
-    # NOTE: the template stamps "SD003 v3.2.0" (not "v2.3.0" - that token never
-    # existed in the template, so this substitution was previously dead code and
-    # every deployed CLAUDE.md kept the hardcoded v3.2.0 forever, breaking the
-    # sessionread Update-Check which treats $FRAMEWORK_VERSION as canonical).
-    # Match the real token "SD003 v<version>" so the stamp becomes $FRAMEWORK_VERSION.
+    # Keep the display stamp aligned with the canonical FRAMEWORK_VERSION.
+    # Startup checks read the deploy scripts, not a potentially protected CLAUDE.md.
     $content = Get-Content $claudeTemplate -Raw -Encoding UTF8
     $content = $content -replace '\{\{PROJECT_NAME\}\}', $ProjectName
     $content = $content -replace '\{\{DATE\}\}', $DATE
