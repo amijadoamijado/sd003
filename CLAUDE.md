@@ -115,7 +115,7 @@ IMPORTANT: 異常・エラー時は根本原因の特定が先 — 1)症状記�
 
 IMPORTANT: 大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ・重複チェック）。Details: `docs/rules-reference/session/memory-nudge.md`
 
-IMPORTANT: 外の世界の知識（顧客・法人・人・税制改正・弥生/PCA/達人/TKC等のツール仕様変化・記事・発信者の発言）が要るとき、または記録すべき観測が出たときは kb001 の司書に聞く／入れる — `cd /d/claudecode/kb001 && claude -p "<自然文>"`。SD003内部の知識（手順・真因・規範）は対象外で既存層のまま。Details: `D:\claudecode\kb001\CLAUDE.md`
+IMPORTANT: このrepo外の対象（顧客・法人・人・製品/ツール・税制や制度・記事・発信者）について答える前、および調べ直す前に、まず kb001 の司書に聞く — `cd /d/claudecode/kb001 && claude -p "<自然文>"`。Web検索・原典の再読はその後（司書が「無い」と言ってから）。新しく分かった事実・実測は同じ経路で入れる。SD003内部の知識（手順・真因・規範）は対象外で既存層のまま。Details: `D:\claudecode\kb001\CLAUDE.md`
 
 IMPORTANT: `/sessionwrite` 時は学習評価 — セッション中のユーザー修正をレビューし備考に記録、2回以上でルール/スキル/メモリ化を提案（提案のみ・自動作成禁止）。Details: `docs/rules-reference/skills/learning-nudge.md`
 
