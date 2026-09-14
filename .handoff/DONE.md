@@ -1,7 +1,7 @@
 # DONE.md - 完了報告
 
-**日時**: 2026-09-15 06:05
-**セッション記録**: `.sessions/session-20260915-060556.md`
+**日時**: 2026-09-15 08:43
+**セッション記録**: `.sessions/session-20260915-084329.md`
 
 ---
 
@@ -11,18 +11,21 @@
 
 | ファイル | 変更内容 |
 |---------|----------|
-| `D:\claudecode\kb001\`（新規プロジェクト） | llm-wiki v4 を配置。115ファイル・commits 15・**remote なし** |
-| `D:\claudecode\kb001\.gitattributes` | 新規。`* -text`（`eol=lf` は CRLF 試験体 `e1-crlf` を壊すため不可） |
-| `D:\claudecode\kb001\CLAUDE.md` | Windows 固有節を追加（LF/BOM 禁止・remote なし・rg の2つの罠） |
-| `D:\claudecode\kb001\scripts\hook-lint.sh` | Windows パス正規化。hook 2本の無症状スキップを修正（`77736af`） |
-| `D:\claudecode\sd003\CLAUDE.md` | Conditional Context に kb001 ルーティング1行（135行・上限200以内） |
-| `D:\claudecode\PROJECT_REGISTRY.md` | kb001 をツール/実験系へ登録 |
+| `docs/rules-reference/session/memory-layers.md` | 新規・正本。記憶8層の境界表・判断フロー・昇格・衝突時の優先 |
+| `docs/rules-reference/session/memory-nudge.md` | 保存先表を境界表へ委譲（「全PJで使える→auto-memory」の逆転を修正） |
+| `CLAUDE.md` | 116行目に判断フロー1行（135行維持） |
+| `.claude/rules/session/session-management.md`, `.claude/rules/README.md` | 境界表へのポインタ |
+| `.claude/skills/sd-upgrade/upgrade.ps1` / `upgrade.sh` | DELETE list に `notebooklm-memory` 3ミラーを追加 |
+| `.claude/commands/sessionwrite.md` ＋ 生成ミラー | Step 8 NotebookLM 撤去 |
+| 削除: `.claude/.agents/.grok/skills/notebooklm-memory/`, `.sessions/bash-test.txt` | `.sd/cleanup/archive/20260915-memory-layers/` に保管 |
+| `D:\claudecode\CLAUDE.md`（親・`512e7b7`） | 「記憶の置き場（2026-09-15裁定）」1節。beads 生成ブロック外に追記 |
+| auto-memory（36件） | claude-mem 現状化・`.kiro` 残存修正・重複2件＋スタブ撤去・索引同期 |
 
 **変更内容の要約**
 
-SD003 に欠けていた「外の世界の知識」層を、別 repo（kb001 = llm-wiki）として設置した。
-SD003 からは CLAUDE.md の1行だけで司書に到達する。SD003 内部の知識（手順・真因・規範）は
-llm-wiki の `BRIEF.md §3` の境界に従い kb001 に入れない。
+内部知識4層（規範 / `bd remember` / auto-memory / `.sessions`）の境界が未定義で、親 CLAUDE.md の
+「MEMORY.md を使うな」と実態（auto-memory 39件が主力）が割れていた。境界表を1枚作って正とし、
+親 CLAUDE.md に裁定を明記、休眠の notebooklm-memory を退役、会話ログ150件を退避した。
 
 ---
 
@@ -31,26 +34,25 @@ llm-wiki の `BRIEF.md §3` の境界に従い kb001 に入れない。
 **実行したコマンド**
 
 ```bash
-node scripts/wiki lint --all          # kb001
-cd /d/claudecode/kb001 && claude -p "…"   # headless 司書（投入・読み出し・庭師）
-cd /d/claudecode/sd003 && claude -p "…"   # ルーティング検証
+bash ~/.claude/scripts/archive-sessions.sh 7 execute   # 150件 32MB → G:
+python scripts/sync-cli-commands.py --check            # SYNC CHECK OK (20 commands)
+cd /d/claudecode/sd003 && claude -p "保存先はどこか×3問"   # 白紙セッション検証
 ```
 
 **結果**
 
 ```
-lint --all: E0 / X0 (exit 0) · 114ファイル 0.144秒
-kb001: entities 27 / records 16 / 未commit 0 / remote 0
-sd003, D:\claudecode: push 済み (ahead 0)
+白紙セッション: 3/3 正答（bd remember / kb001 / bd issue）・根拠 memory-layers.md
+auto-memory: 索引とファイルの不一致 0件（36件）
+sd003 5d3c3bb / 親 512e7b7: origin 同期済み
 ```
 
 **動作確認**
 
-- [x] P0 器の設置 — lint E0/X0、CRLF/BOM の持ち込みなし、上流無改変版を `7d2f73a` に保存
-- [x] P1 投入4件 → 白紙セッションがパス無しで全件を根拠パス付きで読み出し
-- [x] P2 SD003 から指示なしで kb001 に到達（初版は失敗 → 順序の規則に書き換えて通過）
-- [x] P3 庭師1周（修理1件・残件列挙・再訪3件・unresolved 滞留0）
-- [x] hook 修正が実セッションで効くことを、同一セッション内の台帳生成で実測確認
+- [x] 白紙セッションが指示なしで境界表に到達し、昇格規則まで自発適用
+- [x] sd003 CLAUDE.md 135行・BOM/EOL 無変更（diff 1行）
+- [x] 退避先 G: に実ファイル着地を抜き取り確認、ローカル 7日超 0件
+- [x] 退役スキルの archive 保管と git rm、DELETE list 登録
 
 ---
 
@@ -58,19 +60,16 @@ sd003, D:\claudecode: push 済み (ahead 0)
 
 **未完了タスク**
 
-- [ ] 関与先 entity を1件作る（事実を持っていないため未着手。ユーザーが題材を出す必要あり）
-- [ ] hook パス正規化をまさお氏（上流）へ連絡
-- [ ] 庭師の残件（W5 空の器8件 / W2 孤児1件）の可否をユーザー確認
-- [ ] 2週間の運用評価（「入れたのに引けなかった」0件か）
+- [ ] `~/.claude-mem/` 28MB の削除（ユーザー判断。`pwsh -Command "Remove-Item -Recurse -Force ~/.claude-mem"`）
+- [ ] 配信先46PJ の notebooklm-memory は次回 `/sd-upgrade` で消える（bd issue P3）
+- [ ] 関与先 entity を1件作る（kb001・題材待ち）／ hook パス正規化を上流へ連絡（前回持ち越し）
 
-**注意（バグとして追わないこと）**
+**注意**
 
-- kb001 の `wiki save` / `sync` が出す push 失敗警告は**正常**。remote を意図的に付けていない
-- kb001 の司書は `cd /d/claudecode/kb001 && claude -p "<自然文>"` で呼ぶ。
-  SD003 側から直接ファイルを触っても司書ハーネスは効かない
+- 記憶の保存先は `memory-layers.md` の判断フローで上から1か所だけ。横断的な環境事実は `bd remember`
+- 親 CLAUDE.md の beads ブロック内は bd が hash 管理。編集せず外に足す
 
 **関連ファイル**
 
-- 設計案（Artifact）: https://claude.ai/code/artifact/a1d69e84-fed5-4ea3-97c8-e2e2f03367cd
-- 配置元: `C:\Users\a-odajima\Downloads\llm-wiki-main.zip`
-- セッション記録: `D:\claudecode\sd003\.sessions\session-20260915-060556.md`
+- 正本: `D:\claudecode\sd003\docs\rules-reference\session\memory-layers.md`
+- セッション記録: `D:\claudecode\sd003\.sessions\session-20260915-084329.md`
