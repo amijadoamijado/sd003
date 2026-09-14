@@ -31,7 +31,9 @@ $PsRunner = if (Get-Command pwsh -ErrorAction SilentlyContinue) { "pwsh" } else 
 # ------------------------------------------------------------------
 $deprecatedDirs = @(
     ".gemini", ".cursor", ".windsurf", ".qwen", ".agent", ".kiro",
-    ".codex\prompts", ".codex\skills", ".antigravity\commands", ".antigravity\skills"
+    ".codex\prompts", ".codex\skills", ".antigravity\commands", ".antigravity\skills",
+    # notebooklm-memory retired 2026-09-15 (never configured in any project; see docs/rules-reference/session/memory-layers.md)
+    ".claude\skills\notebooklm-memory", ".agents\skills\notebooklm-memory", ".grok\skills\notebooklm-memory"
 )
 $deprecatedFiles = @(
     "GEMINI.md", "gemini.md",

@@ -113,7 +113,7 @@ IMPORTANT: Solo運用 — master/main で直接作業する。ブランチ・PR�
 
 IMPORTANT: 異常・エラー時は根本原因の特定が先 — 1)症状記述 2)自分の直前の行動を列挙 3)自分原因の仮説を最初に（外部要因は最後）4)検証 5)それから修正+登録+commit。「気をつける」は対策ではない。Details: `docs/rules-reference/troubleshooting/root-cause-first.md`
 
-IMPORTANT: 大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ・重複チェック）。Details: `docs/rules-reference/session/memory-nudge.md`
+IMPORTANT: 大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ・重複チェック）。保存先は層境界表の判断フローで1か所に決める（repo外の事実→kb001 / やること→bd issue / 守らせる行動→規範 / 他PJ・他CLIでも効く→`bd remember` / このPJでClaude Codeが次回も使う→auto-memory / 経緯→.sessions / どれでもない→書かない）。Details: `docs/rules-reference/session/memory-nudge.md`, `docs/rules-reference/session/memory-layers.md`
 
 IMPORTANT: このrepo外の対象（顧客・法人・人・製品/ツール・税制や制度・記事・発信者）について答える前、および調べ直す前に、まず kb001 の司書に聞く — `cd /d/claudecode/kb001 && claude -p "<自然文>"`。Web検索・原典の再読はその後（司書が「無い」と言ってから）。新しく分かった事実・実測は同じ経路で入れる。SD003内部の知識（手順・真因・規範）は対象外で既存層のまま。Details: `D:\claudecode\kb001\CLAUDE.md`
 

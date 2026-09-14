@@ -619,6 +619,19 @@ $claudeTemplate = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\CLAU
 if (Test-Kept "CLAUDE.md") {
     Write-Host "  KEEP: CLAUDE.md preserved via .sd003-keep (bespoke version kept)" -ForegroundColor Magenta
     $script:keptFiles += "CLAUDE.md"
+    # A protected CLAUDE.md keeps its bespoke content, but its version stamp must
+    # not lie. Refreshing it was previously a note telling the operator to edit the
+    # line by hand, and that note failed every time: at002 sat at "SD003 v2.15.0",
+    # then "SD003 v2.18.0", while its actual framework was 2.19.1. Rewrite only the
+    # stamp token in place - no template content, no other line is touched.
+    if (Test-Path $claudeMdPath) {
+        $keptContent = Get-Content $claudeMdPath -Raw -Encoding UTF8
+        $stamped = $keptContent -replace 'SD003 v[0-9]+\.[0-9]+\.[0-9]+', "SD003 v$FRAMEWORK_VERSION"
+        if ($stamped -ne $keptContent) {
+            Set-Content -Path $claudeMdPath -Value $stamped -Encoding UTF8 -NoNewline
+            Write-Host "    version stamp refreshed -> SD003 v$FRAMEWORK_VERSION" -ForegroundColor DarkGray
+        }
+    }
 } elseif (Test-Path $claudeTemplate) {
     # Keep the display stamp aligned with the canonical FRAMEWORK_VERSION.
     # Startup checks read the deploy scripts, not a potentially protected CLAUDE.md.

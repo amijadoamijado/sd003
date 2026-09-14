@@ -37,11 +37,19 @@ SD003ではClaude Codeのルールとして、タスク完了時に自己評価�
 
 ## 保存先の判断基準
 
-| 条件 | 保存先 | 方法 |
-|------|--------|------|
-| 今後の全プロジェクトで使える | auto-memory | `~/.claude/projects/*/memory/` にWrite |
-| SD003プロジェクトのみで有用 | sessionwrite備考 | `/sessionwrite` の備考セクションに記載 |
-| 一時的な作業メモ | 保存不要 | 記録しない |
+置き場は `memory-layers.md` の判断フローで1か所に決める（上から最初に当たった所）:
+
+| 条件 | 保存先 |
+|------|--------|
+| repo外の事実（顧客・制度・ツール仕様・記事・人） | kb001 の司書 |
+| 「やること」 | `bd` issue |
+| 守らせたい行動（事故の再発防止） | 規範（CLAUDE.md 1行 + rules-reference + ガードレール） |
+| 他PJ・他CLIでも効く環境事実 | `bd remember` |
+| このPJで Claude Code が次回も使う | auto-memory（`~/.claude/projects/<PJ>/memory/`） |
+| いつ・何をした・何が未検証か | `/sessionwrite` の備考 |
+| 一時的な作業メモ | 記録しない |
+
+詳細（層の一覧・昇格・衝突時の優先）: `docs/rules-reference/session/memory-layers.md`
 
 ## learning-nudgeとの責務分担
 

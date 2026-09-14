@@ -13,6 +13,10 @@ paths:
 | Long-term | `.sessions/TIMELINE.md` | Project history (timeline) |
 | Short-term | `.sessions/session-current.md` | Current session details |
 
+`.sessions/` は記憶8層のうち「経緯」の層（いつ・何をした・何が未検証か）。
+規範 / `bd remember` / auto-memory / kb001 との境界と保存先の判断フロー:
+`docs/rules-reference/session/memory-layers.md`
+
 ## Commands
 
 | Command | Description |

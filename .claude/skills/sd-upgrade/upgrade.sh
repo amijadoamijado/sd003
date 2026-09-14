@@ -28,7 +28,7 @@ MODE=$([ "$EXECUTE" = true ] && echo "EXECUTE" || echo "DRY-RUN")
 
 # Deprecated dirs/files. `.agent` (singular) and `.codex/skills` are deprecated;
 # `.agents/skills` is the shared canonical Codex/agy path.
-DEPRECATED_DIRS=(".gemini" ".cursor" ".windsurf" ".qwen" ".agent" ".kiro" ".codex/prompts" ".codex/skills" ".antigravity/commands" ".antigravity/skills")
+DEPRECATED_DIRS=(".gemini" ".cursor" ".windsurf" ".qwen" ".agent" ".kiro" ".codex/prompts" ".codex/skills" ".antigravity/commands" ".antigravity/skills" ".claude/skills/notebooklm-memory" ".agents/skills/notebooklm-memory" ".grok/skills/notebooklm-memory")
 DEPRECATED_FILES=("GEMINI.md" "gemini.md" "scripts/sync-gemini-features.js" "scripts/migrate-kiro-to-sd.ps1" ".antigravity/rules.md")
 
 # Over-engineering artifacts removed from SD003 on 2026-07-05 (Ralph Loop / refactor

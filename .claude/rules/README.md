@@ -46,7 +46,7 @@ SD003 の開発ルール集。**読み込み機構に注意**:
 4本柱詳細（output-primacy / silent-interior / real-data-first / segmented-sequencing）、
 work-first、known-unknowns、quiz-gate、project-branching、branch-strategy、
 artifact-confirmation、fullpath-display、artifact-output-location、
-root-cause-first、bug-quick、dialogue-resolution、memory-nudge、learning-nudge、
+root-cause-first、bug-quick、dialogue-resolution、memory-nudge、memory-layers、learning-nudge、
 および Phase2 圧縮前の原本（*-full.md）。
 
 要約は `CLAUDE.md` の Conditional Context（IMPORTANT 行）が保持し、
