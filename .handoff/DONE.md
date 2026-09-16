@@ -1,6 +1,8 @@
 # DONE.md - 完了報告
 
-日時: 2026-09-16 09:26:32 ／ プロジェクト: D:\claudecode\sd003（展開先 D:\claudecode\aa001）
+日時: 2026-09-16 10:20:36 ／ プロジェクト: D:\claudecode\sd003
+対象: D:\claudecode\aa001（新規展開先）／ D:\claudecode（親repo・台帳）
+セッション記録: `.sessions/session-20260916-102036.md`
 
 ---
 
@@ -10,15 +12,17 @@
 
 | ファイル | 変更内容 |
 |---------|----------|
-| `D:\claudecode\aa001\`（608ファイル） | SD003 v2.19.2 を新規展開（deploy v3.5.0） |
-| `D:\claudecode\aa001\.git\` | `git init -b master` で独立リポジトリ化＋初回コミット |
-| `D:\claudecode\PROJECT_REGISTRY.md` | aa001 を1行登録、最終更新日を 2026-09-16 へ |
-| `.sessions/session-20260916-092632.md` | セッション記録（新規） |
-| `.sessions/session-current.md` / `.sessions/TIMELINE.md` | 更新 |
+| `.claude/skills/sd-deploy/deploy.ps1` | Phase 1b（gitリポジトリ判定）/ Phase 1c（ソース未コミット警告）を新設 |
+| `.claude/skills/sd-deploy/deploy.sh` | 同上 + settings.json を heredoc からテンプレート配布へ統一（既存バグ修正） |
+| `.claude/skills/sd-deploy/SKILL.md` | Phase 1b/1c の仕様、Windowsパスの要クォートを明文化 |
+| `.gitignore` | `materials/releases/`（691MB・関与先データzip）を除外 |
+| `.claude/skills/codex-security/` ほか計6件 | 未コミットだったフレームワーク実体を新規commit |
+| `D:\claudecode\aa001\`（608ファイル） | SD003 v2.19.2 を新規展開＋独立リポジトリ化＋private remote |
+| `D:\claudecode\PROJECT_REGISTRY.md` | aa001 を登録（会計自動化ツール・active） |
 
 **変更内容の要約**
 
-空フォルダだった aa001 に SD003 フレームワークを展開した。deploy は展開先を git リポジトリ化しないまま `.git/hooks/` だけを置く穴があったため、兄弟プロジェクトの構成に揃えて `git init` し、SD003 のフックが実際に発火することを確認したうえで初回コミットした。展開後に判明した用途（会計自動化ツール）で台帳登録まで完了。
+空フォルダだった aa001 に SD003 を展開し、独立 git リポジトリ化して private remote へ push、台帳登録まで完了した。その過程で見つかった deploy の欠陥2件（①展開先をリポジトリ化しないままフックだけ置く ②deploy.sh の settings.json 正本が二重化しフック2本が欠落）を deploy.ps1 / deploy.sh 両方で修正し、実測で検証した。
 
 ---
 
@@ -27,53 +31,49 @@
 **実行したコマンド**
 
 ```bash
-pwsh -File .claude/skills/sd-deploy/deploy.ps1 'D:\claudecode\aa001' -DryRun
-pwsh -File .claude/skills/sd-deploy/deploy.ps1 'D:\claudecode\aa001'
-git -C D:/claudecode/aa001 init -b master
-git -C D:/claudecode/aa001 commit   # 628 files
+pwsh -File .claude/skills/sd-deploy/deploy.ps1 'D:\claudecode\aa001' [-DryRun]
+bash  .claude/skills/sd-deploy/deploy.sh  <scratch-target>            # 3レイアウト × dry-run / 実run
+gh repo create amijadoamijado/aa001 --private --source=. --remote=origin
+git -C D:/claudecode/aa001 init -b master && git push -u origin master
 ```
 
 **結果**
 
 ```
-dry-run : 0 diverged, 0 kept, 603 new, 0 unchanged
-deploy  : Files copied 600 / generated 8 -> Result: ALL PASSED
-Phase 6 : Commands 17/17, Rules 19/19, Skills 119/119, Hooks 27/27,
-          .agents/skills 179/179, Codex 5/5, Grok 174/174, Handoff 6/6 -> 全PASS
-Phase 6b: C1,C2,C2b,C2c,C3,C4,C5,C6,C7,C8 -> Content verification PASSED
-commit  : d6f6a0c (628 files) / pre-commit が .sd/ を自動ステージして発火
+aa001 deploy : copied 600 / generated 8 -> ALL PASSED
+               Phase 6 件数10項目 全PASS / Phase 6b C1〜C8 全PASS
+Phase 1b 検証: 3レイアウト（リポジトリ外 / 親がignore / 親が追跡）を ps1・sh 双方で実測
+               -> init / init / 警告のみ と期待どおり分岐
+ps1 実run    : git init -> SD003フック残存 -> commit時 pre-commit 実発火（.sd/ 32件 自動ステージ）
+sh 実run     : 修正前 [FAIL] C1 -> 修正後 Content verification PASSED / ALL PASSED / EXIT=0
+               生成 settings.json に orchestrator-guard(PreToolUse) と prune-skill-state(SessionStart) を確認
+配線の欠落   : 旧heredoc 17本 ⊂ テンプレ 19本（差分は上記2本の追加のみ＝失われる配線ゼロ）
+最終状態     : sd003 / aa001 / 親repo すべて master...origin/master 同期、テストプロセス残骸0
 ```
 
 **動作確認**
 
-- [x] dry-run で失われる固有化がゼロであることを事前確認
-- [x] Phase 6b 内容検証（hook配線・dangling・文字化け・参照パス）が全PASS
-- [x] `git init` 後も SD003 の pre-commit / post-commit が残存
-- [x] commit 実行時に pre-commit が実際に発火（`.sd/` 自動ステージのログを確認）
-- [x] `PROJECT_REGISTRY.md` に aa001 の行が存在
+- [x] dry-run で失われる固有化がゼロであることを事前確認してから本実行
+- [x] Phase 6b 内容検証が全PASS（aa001 / ps1テスト標的 / sh修正後標的）
+- [x] auto-init 後に pre-commit が**実際に発火**することを確認（推測ではない）
+- [x] Phase 1b の3分岐が ps1・sh 双方で一致
+- [x] settings.json テンプレ統一で失われる配線がゼロであることを集合突合で確認
+- [x] aa001 remote が PRIVATE であることを `gh repo view` で確認
 
 ---
 
 ## 残っていること
 
-**解決済み（ユーザー指示「解決してくれ」による後始末）**
-
-- [x] aa001 の remote → **private で確定**。`gh repo view` で at002/iv001/ta001/oc001 が全て PRIVATE と実測し、それに倣って `amijadoamijado/aa001` を private 作成・push・upstream 設定
-- [x] aa001 の `.tmp/`（SQLite・WAL・ロック 50ファイル2.9MB）を `.gitignore` に追加しコミット（`2462fa2`）
-- [x] deploy の穴 → **Phase 1b（gitリポジトリ判定）/ Phase 1c（ソース未コミット警告）を ps1・sh 両方に新設**。3レイアウトで実測検証済み
-- [x] 未コミット untracked → framework実体（codex-security 3ミラー・source-command 2件・.codex/config.toml）は **commit**、`materials/releases/`（691MB・最大380MB・public repoに関与先データzip）は **gitignore**
-- [x] パス渡しの罠を SKILL.md に明文化
-- [x] **副産物**: deploy.sh の既存バグを修正 — settings.json を heredoc にハードコードしており正本が二重化、テンプレより `orchestrator-guard.js`（PreToolUse）と `prune-skill-state.sh`（SessionStart）の2本が欠落＝Linux/Mac配布はガード不活性。テンプレ配布に統一（配線の増減を突合し欠落ゼロを確認）
-
 **未完了タスク**
 
-- [ ] aa001 の `npm install` 未実行（`@mcpher/gas-fakes` 注入済み。aa001 は GAS ではなく Chrome から使うツールなので、そもそも不要の可能性。実装方針が固まってから）
-- [ ] `D:\claudecode\aa001\.sd003-backup-20260916_080708`（空フォルダ）の後始末。rm禁止ルールに従い残置中
+- [ ] **既存デプロイ先への Phase 1b/1c 伝播**。修正は展開元のみで、各PJは `/sd-upgrade` を1回走らせるまで受け取らない。特に Linux/Mac 経由の配布先は settings.json に `orchestrator-guard.js`（PreToolUse）が入っていない可能性がある
+- [ ] aa001 の `npm install` / gas-fakes の要否判断（aa001 は GAS ではないため不要の可能性が高い。別セッションの実装方針待ち）
+- [ ] `D:\claudecode\aa001\.sd003-backup-20260916_080708`（空フォルダ）の整理方針。rm禁止ルールに従い残置中
 
 **次の手順**
 
-- 次のタスク: aa001 の remote 方針決定 → 以降 aa001 側セッションが要件定義v0.2から実装へ
-- 依存関係: aa001 の実装着手は要件定義書・仕様書のユーザーレビュー完了が前提
+- 次のタスク: 配布先の洗い出しと `/sd-upgrade` 適用の要否判断
+- 依存関係: aa001 の実装は別セッションが進行中。`src/` `scripts/accounting/` `tests/accounting/` は未コミットのまま**触らないこと**
 
 ---
 
@@ -83,22 +83,25 @@ commit  : d6f6a0c (628 files) / pre-commit が .sd/ を自動ステージして�
 
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| aa001 を親リポジトリ配下のまま / 独立リポジトリ化 | 独立リポジトリ化 | 兄弟5PJ全てが自前リポジトリ、親の `.gitignore` が直下を `/*` 全除外。このままだと SD003 フックが機能しない |
-| deploy.ps1 を直す / 今回は手当てのみ | 今回は手当て、修正はP1で起票 | セッションの依頼は「aa001へ導入」。FW修正は別タスクとして次回タスクへ記録 |
-| 空バックアップフォルダを削除 / 残置 | 残置 | `rm` 禁止ルール。deploy 生成物だが独断で消さない |
-| 台帳の用途を推測で記入 / 実物から特定 | 実物から特定 | `docs/要件定義書.md` を読んで確定（推測での登録は避けた） |
+| 非リポジトリを常に `git init` / 条件付き | **条件付き（4分岐）** | 無条件だと monorepo のサブパッケージに勝手な入れ子リポジトリを作る。親が ignore していれば「親が管理を放棄」と確定できるので init、追跡していれば警告のみ |
+| aa001 remote: private GitHub / ローカルのみ | **private GitHub** | at002・iv001・ta001・oc001 が全て PRIVATE と実測。顧客データ案件は非公開repoが確立パターン |
+| deploy.sh の settings.json: heredoc 修正 / テンプレ統一 | **テンプレ統一** | heredoc を直しても正本が2つのままで同じ取り残しが再発する。正本を1つにするのが真因対処 |
+| `materials/releases/`: commit / gitignore | **gitignore** | 691MB・最大380MB。GitHub 100MB上限は履歴書き換えなしに解除不能。かつ sd003 は public repo で中身は関与先データzip |
+| `codex-security` 等: commit / 退避 | **commit** | `.sd003-managed` 付き・sync check OK の正規SD003スキル。既に全配布先へ渡っており、commit しないと配布が再現不能 |
 
 **採用しなかった案と理由**
 
-- deploy 実行前にユーザーへ用途を質問: 空フォルダで用途不明だったが、展開自体はブロックされない作業のため先に完了させ、台帳登録の段で確認する方針とした（結果、別セッションの成果物から特定でき質問不要になった）
+- deploy.sh の settings.json 欠落を「C1 が指摘した1本だけ」直す: 集合突合で2本目（PreToolUse の orchestrator-guard）が見つかった。エラーメッセージの範囲で直すと防御不活性が残る
+- aa001 の `src/` 等を一緒にコミット: 別セッションが実装中のため、作業を横取りしない
 
 ---
 
 ## 追加情報
 
-- **Bashから deploy.ps1 へ Windows パスを渡すときはシングルクォート必須**。裸の `D:\claudecode\aa001` はバックスラッシュが食われ `D:claudecodeaa001` になり Phase 1 で停止する
-- **`git add -A` は sd003 のフックが `BLOCKED: repository-wide staging is prohibited` で弾く**。明示パス列挙でステージすること
-- **配布元の未コミット状態はそのまま配布先へ複製される**。deploy は `.claude/skills/` 等をディレクトリ単位でコピーするため、git 管理外のファイルも展開先へ渡る
-- **aa001 は並行して別セッションが動いている**。aa001 に触れる前に `git log` で他セッションの進捗を確認すること
+- **deploy.ps1 は UTF-8 BOM + CRLF 必須**（PS5.1 の CP932 誤読対策）。python で編集するときは**読み書き両方に `newline=''`** を指定すること（片方だけだと CRLF→LF に潰れる。本セッションで一度壊して復旧した）。deploy.sh は逆に BOM厳禁・LF
+- **PowerShell から native git**: `$ErrorActionPreference='Stop'` 下では PS7.4+ が失敗を終了エラー化するため `$PSNativeCommandUseErrorActionPreference=$false` を関数スコープで設定。また `-C` を裸で渡すと PowerShell がパラメータ名と解釈するので git 引数は配列で渡す
+- **deploy.sh は MSYS2 の fork コストで数分かかる**。Bashツールの120秒制限を超えるのでログへリダイレクト＋バックグラウンド実行。`run_in_background` とパイプの組み合わせは結果を取りこぼすことがある
+- **aa001 は並行セッションが動いている**。触る前に `git log` / `git status` で進捗確認
+- **sd003 は public repo**。コミット前に関与先データの混入を毎回確認
 
 ---
