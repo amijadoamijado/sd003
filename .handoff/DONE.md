@@ -56,12 +56,19 @@ commit  : d6f6a0c (628 files) / pre-commit が .sd/ を自動ステージして�
 
 ## 残っていること
 
+**解決済み（ユーザー指示「解決してくれ」による後始末）**
+
+- [x] aa001 の remote → **private で確定**。`gh repo view` で at002/iv001/ta001/oc001 が全て PRIVATE と実測し、それに倣って `amijadoamijado/aa001` を private 作成・push・upstream 設定
+- [x] aa001 の `.tmp/`（SQLite・WAL・ロック 50ファイル2.9MB）を `.gitignore` に追加しコミット（`2462fa2`）
+- [x] deploy の穴 → **Phase 1b（gitリポジトリ判定）/ Phase 1c（ソース未コミット警告）を ps1・sh 両方に新設**。3レイアウトで実測検証済み
+- [x] 未コミット untracked → framework実体（codex-security 3ミラー・source-command 2件・.codex/config.toml）は **commit**、`materials/releases/`（691MB・最大380MB・public repoに関与先データzip）は **gitignore**
+- [x] パス渡しの罠を SKILL.md に明文化
+- [x] **副産物**: deploy.sh の既存バグを修正 — settings.json を heredoc にハードコードしており正本が二重化、テンプレより `orchestrator-guard.js`（PreToolUse）と `prune-skill-state.sh`（SessionStart）の2本が欠落＝Linux/Mac配布はガード不活性。テンプレ配布に統一（配線の増減を突合し欠落ゼロを確認）
+
 **未完了タスク**
 
-- [ ] aa001 の git remote 未設定（`amijadoamijado/aa001` を作るか、kb001 同様ローカルのみか **ユーザー判断待ち**）。決まるまで aa001 の作業は push されない
-- [ ] aa001 の `npm install` 未実行（`@mcpher/gas-fakes` 注入済み。GAS用途が確定してから）
+- [ ] aa001 の `npm install` 未実行（`@mcpher/gas-fakes` 注入済み。aa001 は GAS ではなく Chrome から使うツールなので、そもそも不要の可能性。実装方針が固まってから）
 - [ ] `D:\claudecode\aa001\.sd003-backup-20260916_080708`（空フォルダ）の後始末。rm禁止ルールに従い残置中
-- [ ] sd003 の未コミット untracked（`codex-security` 3ミラー等）の扱いを決める
 
 **次の手順**
 

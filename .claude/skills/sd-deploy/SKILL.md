@@ -86,19 +86,26 @@ dry-run は以下を一覧表示する（無変更）:
 
 ### Windows（推奨）
 ```powershell
-powershell -ExecutionPolicy Bypass -File .claude/skills/sd-deploy/deploy.ps1 <target-project-path>
+pwsh -ExecutionPolicy Bypass -File .claude/skills/sd-deploy/deploy.ps1 'D:\path\to\target'
 ```
+
+> **ターゲットパスは必ずクォートする。** Bashツールから起動する場合、裸の
+> `D:\claudecode\aa001` はバックスラッシュがエスケープとして食われ
+> `D:claudecodeaa001` になり、Phase 1 で `Target project not found` で停止する
+> （2026-09-16 実測）。シングルクォートで囲むこと。
 
 ### Linux/Mac
 ```bash
 bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 ```
 
-## スクリプトの7フェーズ
+## スクリプトのフェーズ
 
 | Phase | 内容 |
 |-------|------|
 | 1 | ターゲット存在確認 |
+| 1b | **gitリポジトリ判定**（必要なら `git init`／不可なら警告） |
+| 1c | ソース側の未コミットファイル警告（報告のみ・ブロックしない） |
 | 2 | 既存設定のバックアップ |
 | 3 | ディレクトリ構造作成 |
 | 4 | **動的コピー**（ディレクトリ単位、ハードコードなし） |
@@ -106,6 +113,41 @@ bash .claude/skills/sd-deploy/deploy.sh <target-project-path>
 | 6 | 検証（ソースvsターゲットのファイル数比較） |
 | 6b | **内容検証ゲート**（`node scripts/verify-deployment.mjs`。hard-fail） |
 | 7 | レポート出力 |
+
+### Phase 1b: gitリポジトリ判定（フックを死なせない）
+
+`.sd/` 自動ステージ・L4スナップショット復元・自動pushは全て
+`<target>/.git/hooks` に置かれる。git がこのフックを実行するのは
+**ターゲットがリポジトリのルートであるときだけ**。リポジトリでない場所や、
+親リポジトリの単なるサブディレクトリにフックを置いても**絶対に発火しない**。
+
+> 事故（2026-09-16 / aa001）: deploy が HEAD も config も無い `.git/hooks/` を作成。
+> ファイル一覧にも件数検証にもフックは「存在」として出るため Phase 6 は全PASSし、
+> `.sd/` 保護は不活性のまま出荷された。手動で `git rev-parse --show-toplevel` を
+> 叩くまで誰も気づけなかった。
+
+判定と動作（`git init` は**衝突しえない場合に限定**）:
+
+| 状態 | 動作 |
+|------|------|
+| ターゲットがリポジトリのルート | 何もしない |
+| どのリポジトリにも属さない | `git init -b master`（他に所有者がいない） |
+| 親リポジトリが当該パスを**ignore**している | `git init -b master`（親が管理を放棄している。例: `D:\claudecode/.gitignore` の `/*`） |
+| 親リポジトリが当該パスを**追跡している** | **警告のみ**（monorepoのサブパッケージ。勝手に入れ子リポジトリを作らない） |
+
+- 作成したリポジトリに remote は設定しない。`git push` は remote 追加まで失敗する（レポートに明示）
+- dry-run では「何をするか」を表示するだけで init しない
+- `git` が PATH に無い場合は検証不能として警告（黙ってスキップしない）
+
+### Phase 1c: ソース側の未コミット警告
+
+Phase 4 はディレクトリ単位でコピーするため、**ソースの作業ツリーにあるものが
+そのまま配布先に入る**。commit 済みかどうかは問わない。ソースで未コミットの
+スキルは、ソースの履歴には存在しないまま全配布先に複製される
+（2026-09-16: sd003 で 2026-08-28 から未コミットだった `codex-security` 3ミラーが
+aa001 に渡っていた）。
+
+報告のみでブロックはしない。ソースの git 状態はユーザーの判断に属する。
 
 ### Phase 6b: 内容検証ゲート（hard-fail）
 

@@ -1,0 +1,58 @@
+---
+name: "source-command-sessionhistory"
+description: "Show project timeline (long-term session history)"
+---
+
+# source-command-sessionhistory
+
+Use this skill when the user asks to run the migrated source command `sessionhistory`.
+
+## Command Template
+
+# Session History (Timeline)
+
+Display the project timeline - a chronological overview of all development sessions.
+
+## Purpose
+
+- **Long-term memory**: Overview of project evolution
+- **Quick context**: What was done when
+- **Navigation**: Links to detailed session records
+
+## Files
+
+| File | Role |
+|------|------|
+| `.sessions/TIMELINE.md` | Timeline (long-term memory) |
+| `.sessions/session-current.md` | Current session (short-term) |
+
+## Execution
+
+1. Read `.sessions/TIMELINE.md`
+2. Display full timeline content
+3. Show summary statistics
+
+## Output Format
+
+```
+## Project Timeline
+
+[Full TIMELINE.md content]
+
+---
+## Summary
+- Total Sessions: N
+- Date Range: YYYY-MM-DD ~ YYYY-MM-DD
+- Latest Work: [description]
+```
+
+## Related Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/sessionread` | Read current session details |
+| `/sessionwrite` | Save session (updates timeline) |
+
+---
+
+**Execute**: Read and display `.sessions/TIMELINE.md`

@@ -125,3 +125,11 @@ terminals/
 # rapid-test-3
 # rapid-test-4
 # rapid-test-5
+
+# リリース検証のエビデンス（2.19.0 で 691MB・単一ファイル最大380MB）。
+# sd003 は public repo で、中身は各PJの .sd003-keep 保護前バックアップzip
+# （at002-protected-before.zip 等＝関与先データを含む）。100MB超は GitHub が
+# 恒久的に push を拒否し、履歴書き換えなしには戻せない（2026-07-25 の
+# Chromium バイナリ混入で fw003/oc001/ac001 が push 不能になった事故と同型）。
+# 手元の証跡として残し、リポジトリには入れない。
+materials/releases/

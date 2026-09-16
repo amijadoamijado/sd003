@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Security"
+  short_description: "リポジトリの脅威分析・脆弱性検証・安全な修正を一貫支援"
+  default_prompt: "Use $codex-security to run a scoped security review of this repository."
