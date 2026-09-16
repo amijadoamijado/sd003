@@ -1,7 +1,6 @@
 # DONE.md - 完了報告
 
-**日時**: 2026-09-15 08:43
-**セッション記録**: `.sessions/session-20260915-084329.md`
+日時: 2026-09-16 09:26:32 ／ プロジェクト: D:\claudecode\sd003（展開先 D:\claudecode\aa001）
 
 ---
 
@@ -11,21 +10,15 @@
 
 | ファイル | 変更内容 |
 |---------|----------|
-| `docs/rules-reference/session/memory-layers.md` | 新規・正本。記憶8層の境界表・判断フロー・昇格・衝突時の優先 |
-| `docs/rules-reference/session/memory-nudge.md` | 保存先表を境界表へ委譲（「全PJで使える→auto-memory」の逆転を修正） |
-| `CLAUDE.md` | 116行目に判断フロー1行（135行維持） |
-| `.claude/rules/session/session-management.md`, `.claude/rules/README.md` | 境界表へのポインタ |
-| `.claude/skills/sd-upgrade/upgrade.ps1` / `upgrade.sh` | DELETE list に `notebooklm-memory` 3ミラーを追加 |
-| `.claude/commands/sessionwrite.md` ＋ 生成ミラー | Step 8 NotebookLM 撤去 |
-| 削除: `.claude/.agents/.grok/skills/notebooklm-memory/`, `.sessions/bash-test.txt` | `.sd/cleanup/archive/20260915-memory-layers/` に保管 |
-| `D:\claudecode\CLAUDE.md`（親・`512e7b7`） | 「記憶の置き場（2026-09-15裁定）」1節。beads 生成ブロック外に追記 |
-| auto-memory（36件） | claude-mem 現状化・`.kiro` 残存修正・重複2件＋スタブ撤去・索引同期 |
+| `D:\claudecode\aa001\`（608ファイル） | SD003 v2.19.2 を新規展開（deploy v3.5.0） |
+| `D:\claudecode\aa001\.git\` | `git init -b master` で独立リポジトリ化＋初回コミット |
+| `D:\claudecode\PROJECT_REGISTRY.md` | aa001 を1行登録、最終更新日を 2026-09-16 へ |
+| `.sessions/session-20260916-092632.md` | セッション記録（新規） |
+| `.sessions/session-current.md` / `.sessions/TIMELINE.md` | 更新 |
 
 **変更内容の要約**
 
-内部知識4層（規範 / `bd remember` / auto-memory / `.sessions`）の境界が未定義で、親 CLAUDE.md の
-「MEMORY.md を使うな」と実態（auto-memory 39件が主力）が割れていた。境界表を1枚作って正とし、
-親 CLAUDE.md に裁定を明記、休眠の notebooklm-memory を退役、会話ログ150件を退避した。
+空フォルダだった aa001 に SD003 フレームワークを展開した。deploy は展開先を git リポジトリ化しないまま `.git/hooks/` だけを置く穴があったため、兄弟プロジェクトの構成に揃えて `git init` し、SD003 のフックが実際に発火することを確認したうえで初回コミットした。展開後に判明した用途（会計自動化ツール）で台帳登録まで完了。
 
 ---
 
@@ -34,25 +27,30 @@
 **実行したコマンド**
 
 ```bash
-bash ~/.claude/scripts/archive-sessions.sh 7 execute   # 150件 32MB → G:
-python scripts/sync-cli-commands.py --check            # SYNC CHECK OK (20 commands)
-cd /d/claudecode/sd003 && claude -p "保存先はどこか×3問"   # 白紙セッション検証
+pwsh -File .claude/skills/sd-deploy/deploy.ps1 'D:\claudecode\aa001' -DryRun
+pwsh -File .claude/skills/sd-deploy/deploy.ps1 'D:\claudecode\aa001'
+git -C D:/claudecode/aa001 init -b master
+git -C D:/claudecode/aa001 commit   # 628 files
 ```
 
 **結果**
 
 ```
-白紙セッション: 3/3 正答（bd remember / kb001 / bd issue）・根拠 memory-layers.md
-auto-memory: 索引とファイルの不一致 0件（36件）
-sd003 5d3c3bb / 親 512e7b7: origin 同期済み
+dry-run : 0 diverged, 0 kept, 603 new, 0 unchanged
+deploy  : Files copied 600 / generated 8 -> Result: ALL PASSED
+Phase 6 : Commands 17/17, Rules 19/19, Skills 119/119, Hooks 27/27,
+          .agents/skills 179/179, Codex 5/5, Grok 174/174, Handoff 6/6 -> 全PASS
+Phase 6b: C1,C2,C2b,C2c,C3,C4,C5,C6,C7,C8 -> Content verification PASSED
+commit  : d6f6a0c (628 files) / pre-commit が .sd/ を自動ステージして発火
 ```
 
 **動作確認**
 
-- [x] 白紙セッションが指示なしで境界表に到達し、昇格規則まで自発適用
-- [x] sd003 CLAUDE.md 135行・BOM/EOL 無変更（diff 1行）
-- [x] 退避先 G: に実ファイル着地を抜き取り確認、ローカル 7日超 0件
-- [x] 退役スキルの archive 保管と git rm、DELETE list 登録
+- [x] dry-run で失われる固有化がゼロであることを事前確認
+- [x] Phase 6b 内容検証（hook配線・dangling・文字化け・参照パス）が全PASS
+- [x] `git init` 後も SD003 の pre-commit / post-commit が残存
+- [x] commit 実行時に pre-commit が実際に発火（`.sd/` 自動ステージのログを確認）
+- [x] `PROJECT_REGISTRY.md` に aa001 の行が存在
 
 ---
 
@@ -60,16 +58,40 @@ sd003 5d3c3bb / 親 512e7b7: origin 同期済み
 
 **未完了タスク**
 
-- [ ] `~/.claude-mem/` 28MB の削除（ユーザー判断。`pwsh -Command "Remove-Item -Recurse -Force ~/.claude-mem"`）
-- [ ] 配信先46PJ の notebooklm-memory は次回 `/sd-upgrade` で消える（bd issue P3）
-- [ ] 関与先 entity を1件作る（kb001・題材待ち）／ hook パス正規化を上流へ連絡（前回持ち越し）
+- [ ] aa001 の git remote 未設定（`amijadoamijado/aa001` を作るか、kb001 同様ローカルのみか **ユーザー判断待ち**）。決まるまで aa001 の作業は push されない
+- [ ] aa001 の `npm install` 未実行（`@mcpher/gas-fakes` 注入済み。GAS用途が確定してから）
+- [ ] `D:\claudecode\aa001\.sd003-backup-20260916_080708`（空フォルダ）の後始末。rm禁止ルールに従い残置中
+- [ ] sd003 の未コミット untracked（`codex-security` 3ミラー等）の扱いを決める
 
-**注意**
+**次の手順**
 
-- 記憶の保存先は `memory-layers.md` の判断フローで上から1か所だけ。横断的な環境事実は `bd remember`
-- 親 CLAUDE.md の beads ブロック内は bd が hash 管理。編集せず外に足す
+- 次のタスク: aa001 の remote 方針決定 → 以降 aa001 側セッションが要件定義v0.2から実装へ
+- 依存関係: aa001 の実装着手は要件定義書・仕様書のユーザーレビュー完了が前提
 
-**関連ファイル**
+---
 
-- 正本: `D:\claudecode\sd003\docs\rules-reference\session\memory-layers.md`
-- セッション記録: `D:\claudecode\sd003\.sessions\session-20260915-084329.md`
+## 判断したこと
+
+**設計上の選択**
+
+| 選択肢 | 採用 | 理由 |
+|--------|------|------|
+| aa001 を親リポジトリ配下のまま / 独立リポジトリ化 | 独立リポジトリ化 | 兄弟5PJ全てが自前リポジトリ、親の `.gitignore` が直下を `/*` 全除外。このままだと SD003 フックが機能しない |
+| deploy.ps1 を直す / 今回は手当てのみ | 今回は手当て、修正はP1で起票 | セッションの依頼は「aa001へ導入」。FW修正は別タスクとして次回タスクへ記録 |
+| 空バックアップフォルダを削除 / 残置 | 残置 | `rm` 禁止ルール。deploy 生成物だが独断で消さない |
+| 台帳の用途を推測で記入 / 実物から特定 | 実物から特定 | `docs/要件定義書.md` を読んで確定（推測での登録は避けた） |
+
+**採用しなかった案と理由**
+
+- deploy 実行前にユーザーへ用途を質問: 空フォルダで用途不明だったが、展開自体はブロックされない作業のため先に完了させ、台帳登録の段で確認する方針とした（結果、別セッションの成果物から特定でき質問不要になった）
+
+---
+
+## 追加情報
+
+- **Bashから deploy.ps1 へ Windows パスを渡すときはシングルクォート必須**。裸の `D:\claudecode\aa001` はバックスラッシュが食われ `D:claudecodeaa001` になり Phase 1 で停止する
+- **`git add -A` は sd003 のフックが `BLOCKED: repository-wide staging is prohibited` で弾く**。明示パス列挙でステージすること
+- **配布元の未コミット状態はそのまま配布先へ複製される**。deploy は `.claude/skills/` 等をディレクトリ単位でコピーするため、git 管理外のファイルも展開先へ渡る
+- **aa001 は並行して別セッションが動いている**。aa001 に触れる前に `git log` で他セッションの進捗を確認すること
+
+---
