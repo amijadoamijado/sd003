@@ -457,27 +457,19 @@ def fetch_agy_status() -> dict:
 
 
 GROK_STATE_FILE = Path("D:/grok/usage_status.json")
+SCRIPT_PATH = Path(__file__).resolve()
 
 
 def fetch_grok_status() -> dict:
-    res = {
-        "status": "ok",
-        "email": "amijadoamijado@yahoo.co.jp",
-        "plan": "SuperGrok",
-        "used_percent": 100.0,
-        "remaining_percent": 0.0,
-        "reset_at_str": "09/20 17:16 JST",
-        "remaining_desc": "枠リセット待ち",
-        "grok_build_used": 88,
-        "imagine_used": 12,
-        "extra_credits": "$0.00",
-    }
-    # If state file exists, read it
+    """D:/grok/usage_status.json の値だけを使う。無ければ取得不能として扱い、推測値は出さない。"""
+    res = {"status": "unavailable", "email": "不明", "plan": "不明"}
     if GROK_STATE_FILE.exists():
         try:
             with open(GROK_STATE_FILE, "r", encoding="utf-8") as f:
                 d = json.load(f)
+            if "remaining_percent" in d:
                 res.update(d)
+                res["status"] = "ok"
         except Exception:
             pass
 
@@ -491,19 +483,6 @@ def fetch_grok_status() -> dict:
             res["email"] = entry.get("email", res["email"])
         except Exception:
             pass
-
-    # Calculate remaining time until reset
-    try:
-        # Default reset is 2026-09-20 17:16 JST
-        now_jst = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
-        target_jst = datetime.datetime(2026, 9, 20, 17, 16, tzinfo=datetime.timezone(datetime.timedelta(hours=9)))
-        diff = int((target_jst - now_jst).total_seconds())
-        if diff > 0:
-            res["remaining_desc"] = f"あと {format_remaining_seconds(diff).replace('あと ', '')}"
-        else:
-            res["remaining_desc"] = "回復済み"
-    except Exception:
-        pass
 
     return res
 
@@ -590,14 +569,17 @@ def print_dashboard():
     email = grok.get("email", "不明")
     plan = grok.get("plan", "SuperGrok")
     print(f"  アカウント : {email} ({plan})")
-    bar = get_progress_bar(grok["remaining_percent"])
-    print(f"  週間枠     : 残り {bar}  | 期限: {grok['reset_at_str']} ({grok['remaining_desc']})")
-    print(f"  内訳       : Grok Build {grok.get('grok_build_used')}% │ Imagine {grok.get('imagine_used')}% │ 追加クレジット: {grok.get('extra_credits')}")
+    if grok["status"] != "ok":
+        print(f"  週間枠     : 取得できません（{GROK_STATE_FILE} がありません）")
+    else:
+        bar = get_progress_bar(grok["remaining_percent"])
+        print(f"  週間枠     : 残り {bar}  | 期限: {grok.get('reset_at_str', '不明')} ({grok.get('remaining_desc', '不明')})")
+        print(f"  内訳       : Grok Build {grok.get('grok_build_used', '-')}% │ Imagine {grok.get('imagine_used', '-')}% │ 追加クレジット: {grok.get('extra_credits', '-')}")
 
     print("\n" + "-" * 64)
     print(" 💡 Codex アカウントの切替 (番号選択):")
-    print("   ・メニューを開く : python scripts/ai-usage-monitor.py --switch")
-    print("   ・現在アカウント保存: python scripts/ai-usage-monitor.py --save-codex <名前>")
+    print(f"   ・メニューを開く : python {SCRIPT_PATH} --switch")
+    print(f"   ・現在アカウント保存: python {SCRIPT_PATH} --save-codex <名前>")
     print("=" * 64 + "\n")
 
 

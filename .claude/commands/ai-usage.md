@@ -1,5 +1,5 @@
 ---
-description: Claude Code、Codex (4アカウント)、Grok、Antigravity の残量クォータと次回リセット時刻を一目で表示
+description: Claude Code、Codex (複数アカウント)、Grok、Antigravity の残量クォータと次回リセット時刻を一目で表示（どのプロジェクトからでも可）
 allowed-tools: Bash, Read
 ---
 
@@ -7,27 +7,26 @@ allowed-tools: Bash, Read
 
 Claude Code、OpenAI Codex（複数アカウント）、Antigravity (agy)、Grok の現在の利用枠・残量パーセント・次回リセット時刻を一目で確認します。
 
+スクリプト実体は `D:\claudecode\sd003\scripts\ai-usage-monitor.py` の1か所のみ（各プロジェクトへコピーしない）。
+どのプロジェクトから呼んでも、必ず絶対パスで実行すること。
+
 ## 実行手順
 
-PowerShell または Bash で以下を実行してください:
-
 ```bash
-python scripts/ai-usage-monitor.py
+python D:/claudecode/sd003/scripts/ai-usage-monitor.py
 ```
 
 ## Codex アカウントの管理手順
 
-Codexで別のアカウントに切り替えた際は、以下のコマンドでスナップショット保存しておくことで、以降は再ログイン不要で残量確認および切り替えができます:
-
 - **現在のアカウントを保存**:
   ```bash
-  python scripts/ai-usage-monitor.py --save-codex acc2
+  python D:/claudecode/sd003/scripts/ai-usage-monitor.py --save-codex <名前>
   ```
-- **アカウントのワンタッチ切り替え**:
+- **アカウント切り替え**（`--switch` 番号選択メニューは対話入力のため、ユーザーに `! python D:/claudecode/sd003/scripts/ai-usage-monitor.py --switch` で実行してもらう）:
   ```bash
-  python scripts/ai-usage-monitor.py --switch-codex acc2
+  python D:/claudecode/sd003/scripts/ai-usage-monitor.py --switch-codex <名前>
   ```
 - **保存済みアカウント一覧**:
   ```bash
-  python scripts/ai-usage-monitor.py --list-codex
+  python D:/claudecode/sd003/scripts/ai-usage-monitor.py --list-codex
   ```
