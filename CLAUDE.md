@@ -132,4 +132,4 @@ IMPORTANT: `/sessionwrite` 時は学習評価 — セッション中のユーザ
 | Cleanup | `/cleanup`, `restore`, `history` |
 
 ---
-SD003 Framework v2.19.2 | deploy v3.5.0 | Updated: 2026-09-06 (Codex自律実行・並列作業・起動時の版確認) | Style: `.claude/rules/global/claude-md-style.md`
+SD003 Framework v2.19.3 | deploy v3.5.0 | Updated: 2026-09-19 (Windowsフック: Git Bash判定・打ち切り) | Style: `.claude/rules/global/claude-md-style.md`
