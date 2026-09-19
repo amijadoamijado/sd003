@@ -25,7 +25,7 @@
     {
       "slug": "ai-usage",
       "source": ".claude/commands/ai-usage.md",
-      "description": "Claude Code、Codex (4アカウント)、Grok、Antigravity の残量クォータと次回リセット時刻を一目で表示",
+      "description": "Claude Code、Codex (複数アカウント)、Grok、Antigravity の残量クォータと次回リセット時刻を一目で表示（どのプロジェクトからでも可）",
       "claude_command": "/ai-usage",
       "agent_skill": "ai-usage/SKILL.md",
       "grok_skill": "ai-usage/SKILL.md",

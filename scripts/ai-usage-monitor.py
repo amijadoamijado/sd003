@@ -15,6 +15,7 @@ Usage:
 """
 
 import argparse
+import base64
 import datetime
 import glob
 import json
@@ -28,8 +29,9 @@ from pathlib import Path
 
 
 HOME = Path(os.path.expanduser("~"))
-CODEX_AUTH_FILE = HOME / ".codex" / "auth.json"
-CODEX_PROFILES_DIR = HOME / ".codex" / "profiles_auth"
+CODEX_CONFIG_DIR = Path(os.environ.get("CODEX_HOME") or HOME / ".codex")
+CODEX_AUTH_FILE = CODEX_CONFIG_DIR / "auth.json"
+CODEX_PROFILES_DIR = CODEX_CONFIG_DIR / "profiles_auth"
 CLAUDE_CREDS_FILE = HOME / ".claude" / ".credentials.json"
 AGY_SETTINGS_FILE = HOME / ".gemini" / "antigravity-cli" / "settings.json"
 GROK_SETTINGS_FILE = HOME / ".grokbot" / "settings.json"
@@ -172,13 +174,37 @@ def fetch_claude_usage() -> dict:
 # ==============================================================================
 # 2. Codex Usage Fetcher (Active & Saved Profiles)
 # ==============================================================================
+def codex_identity(auth_data: dict) -> dict:
+    """Read local identity for display only; JWT claims are not verified here."""
+    auth_data = auth_data.get("auth_data", auth_data)
+    tokens = auth_data.get("tokens", {})
+    claims = {}
+    try:
+        payload = tokens.get("id_token", "").split(".")[1]
+        claims = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4)))
+        if not isinstance(claims, dict):
+            claims = {}
+    except (ValueError, IndexError, TypeError):
+        pass
+    return {"email": claims.get("email") or "不明",
+            "account_id": tokens.get("account_id") or ""}
+
+
+def codex_account_tag(acc: dict) -> str:
+    email = acc.get("email", "不明")
+    alias = ACCOUNT_ALIASES.get(acc.get("account_id"), ACCOUNT_ALIASES.get(email))
+    return f"{email} / {alias}" if alias and alias != email else email
+
+
 def fetch_codex_usage_from_auth_data(auth_data: dict) -> dict:
+    auth_data = auth_data.get("auth_data", auth_data)
+    identity = codex_identity(auth_data)
     tokens = auth_data.get("tokens", {})
     access_token = tokens.get("access_token")
     account_id = tokens.get("account_id")
 
     if not access_token:
-        return {"status": "error", "error": "access_token なし"}
+        return {**identity, "status": "error", "error": "access_token なし"}
 
     headers = {
         "Authorization": f"Bearer {access_token}",
@@ -197,6 +223,8 @@ def fetch_codex_usage_from_auth_data(auth_data: dict) -> dict:
             rate_limit = data.get("rate_limit", {})
             pw = rate_limit.get("primary_window") or {}
             sw = rate_limit.get("secondary_window") or {}
+            if pw.get("used_percent") is None:
+                return {**identity, "status": "error", "error": "残量APIに主枠の使用率がありません"}
 
             # Primary window
             pw_used = pw.get("used_percent", 0)
@@ -212,8 +240,8 @@ def fetch_codex_usage_from_auth_data(auth_data: dict) -> dict:
 
             return {
                 "status": "ok",
-                "email": data.get("email", "不明"),
-                "account_id": data.get("account_id", ""),
+                "email": data.get("email") or identity["email"],
+                "account_id": data.get("account_id") or identity["account_id"],
                 "plan_type": data.get("plan_type", "不明"),
                 "allowed": rate_limit.get("allowed", True),
                 "limit_reached": rate_limit.get("limit_reached", False),
@@ -232,28 +260,27 @@ def fetch_codex_usage_from_auth_data(auth_data: dict) -> dict:
                     "limit_window_seconds": sw_window_sec,
                     "remaining_desc": format_remaining_seconds(sw_reset_sec) if sw_reset_sec else "",
                     "resets_at_str": format_epoch_jst(sw_reset_at) if sw_reset_at else "不明",
-                } if sw else None,
+                } if sw_used is not None else None,
             }
     except urllib.error.HTTPError as e:
-        return {"status": "error", "error": f"HTTP {e.code}"}
+        return {**identity, "status": "error", "error": f"HTTP {e.code}"}
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        return {**identity, "status": "error", "error": type(e).__name__}
 
 
 def get_all_codex_accounts() -> list:
     accounts = []
-    CODEX_PROFILES_DIR.mkdir(parents=True, exist_ok=True)
 
     # Active auth
-    active_email = None
+    active_account_id = None
     if CODEX_AUTH_FILE.exists():
         try:
             with open(CODEX_AUTH_FILE, "r", encoding="utf-8") as f:
                 active_auth = json.load(f)
             u = fetch_codex_usage_from_auth_data(active_auth)
-            active_email = u.get("email")
+            active_account_id = codex_identity(active_auth)["account_id"]
             u["is_active"] = True
-            u["label"] = "現在のログイン (Active)"
+            u["label"] = "ローカル認証 (Active)"
             accounts.append(u)
         except Exception as e:
             accounts.append({"status": "error", "label": "Active", "is_active": True, "error": str(e)})
@@ -273,13 +300,17 @@ def get_all_codex_accounts() -> list:
             u = fetch_codex_usage_from_auth_data(auth_data)
 
             # If token expired (401/403) or failed, fall back to saved snapshot
-            if u.get("status") != "ok" and saved_snapshot:
+            if u.get("status") != "ok" and saved_snapshot and saved_snapshot.get("status") == "ok":
                 u = dict(saved_snapshot)
+                for window in ("primary", "secondary"):
+                    if u.get(window):
+                        u[window] = {**u[window], "remaining_desc": "保存時の値・現在残量は未確認"}
                 u["is_snapshot"] = True
                 u["snapshot_time"] = saved_at_str
 
             # Check if this profile is already the active one
-            if active_email and u.get("email") == active_email and u.get("account_id") == active_auth.get("tokens", {}).get("account_id"):
+            saved_account_id = codex_identity(auth_data)["account_id"] or u.get("account_id")
+            if active_account_id and saved_account_id == active_account_id:
                 continue
 
             u["is_active"] = False
@@ -329,8 +360,14 @@ def switch_codex(label: str):
         sys.exit(1)
     # Backup current active to .codex/auth.json.bak
     if CODEX_AUTH_FILE.exists():
-        shutil.copy2(CODEX_AUTH_FILE, HOME / ".codex" / "auth.json.bak")
-    shutil.copy2(target, CODEX_AUTH_FILE)
+        shutil.copy2(CODEX_AUTH_FILE, CODEX_AUTH_FILE.with_suffix(".json.bak"))
+    with open(target, "r", encoding="utf-8") as f:
+        profile = json.load(f)
+    auth_data = profile.get("auth_data", profile)
+    if not isinstance(auth_data.get("tokens"), dict):
+        raise ValueError("保存済み認証情報に tokens がありません")
+    with open(CODEX_AUTH_FILE, "w", encoding="utf-8") as f:
+        json.dump(auth_data, f, ensure_ascii=False, indent=2)
     print(f"✔ Codexのアカウントを '{label}' に切り替えました。")
     with open(CODEX_AUTH_FILE, "r", encoding="utf-8") as f:
         d = json.load(f)
@@ -359,7 +396,7 @@ def interactive_switch_codex():
             email = u.get("email", "不明")
             acc_id = u.get("account_id", "")
             alias = ACCOUNT_ALIASES.get(acc_id, ACCOUNT_ALIASES.get(email, p.stem))
-            status_text = "有効" if u.get("status") == "ok" else "要再ログイン"
+            status_text = "残量取得成功" if u.get("status") == "ok" else f"残量未取得: {u.get('error')}"
             print(f"  [{idx}] {alias} ({email}) - [{status_text}]")
         except Exception:
             print(f"  [{idx}] {p.stem}")
@@ -393,7 +430,13 @@ def list_saved_codex():
             with open(p, "r", encoding="utf-8") as f:
                 d = json.load(f)
             u = fetch_codex_usage_from_auth_data(d)
-            print(f"  - [{p.stem}]: {u.get('email', '不明')} - 残り {u.get('remaining_percent', 0):.1f}%")
+            print(f"  - [{p.stem}]: {codex_account_tag(u)}")
+            if u.get("status") != "ok":
+                print(f"      残量未取得: {u.get('error')}")
+            else:
+                for key, title in (("primary", "主枠"), ("secondary", "副枠")):
+                    if u.get(key):
+                        print(f"      {title}: 残り {u[key]['remaining_percent']:.1f}%")
         except Exception as e:
             print(f"  - [{p.stem}]: 読み込みエラー ({e})")
     print()
@@ -405,7 +448,7 @@ def list_saved_codex():
 def fetch_agy_status() -> dict:
     res = {
         "status": "ok",
-        "model": "Gemini 3.8 Flash (Low)",
+        "model": "不明",
         "email": "Google Cloud/Vertex AI",
         "five_hour": None,
         "seven_day": None,
@@ -442,17 +485,10 @@ def fetch_agy_status() -> dict:
         except Exception:
             pass
 
-    # Free tier / quota simulation / limit window display
-    res["five_hour"] = {
-        "remaining_percent": max(0.0, 100.0 - (five_hr_turns * 2.0)),
-        "resets_at_str": (now_utc + datetime.timedelta(hours=5)).astimezone(datetime.timezone(datetime.timedelta(hours=9))).strftime("%m/%d %H:%M JST"),
-        "remaining_desc": f"直近5時間消費: {five_hr_turns}ターン",
-    }
-    res["seven_day"] = {
-        "remaining_percent": max(0.0, 100.0 - (seven_day_turns * 0.8)),
-        "resets_at_str": (now_utc + datetime.timedelta(days=7)).astimezone(datetime.timezone(datetime.timedelta(hours=9))).strftime("%m/%d %H:%M JST"),
-        "remaining_desc": f"直近7日間消費: {seven_day_turns}ターン",
-    }
+    # Local history is not a provider quota or a reset schedule.
+    res["status"] = "unavailable"
+    res["local_history"] = {"five_hour_turns": five_hr_turns,
+                            "seven_day_turns": seven_day_turns} if hist_file.exists() else None
     return res
 
 
@@ -548,7 +584,8 @@ def print_dashboard():
         print(f"  取得エラー : {claude.get('error')}")
 
     # 2. Codex Accounts
-    print("\n[ 2. OpenAI Codex (4アカウント) ]")
+    print("\n[ 2. OpenAI Codex (ローカル認証・保存済みアカウント) ]")
+    print(f"  認証参照先: {CODEX_AUTH_FILE}（このアプリのログインとの一致は未確認）")
     codex_accs = get_all_codex_accounts()
     if not codex_accs:
         print("  Codex の認証情報が見つかりません。")
@@ -565,7 +602,7 @@ def print_dashboard():
                 sec = acc.get("secondary")
                 is_snap = acc.get("is_snapshot", False)
                 snap_time = acc.get("snapshot_time", "")
-                suffix = f" (ログアウト記録: {snap_time})" if is_snap and snap_time else ""
+                suffix = f" (保存値・現在残量は未確認 / 保存日時: {snap_time or '不明'})" if is_snap else ""
 
                 pri_win_sec = pri.get("limit_window_seconds", 0) if pri else 0
                 pri_reset_sec = pri.get("reset_after_seconds", 0) if pri else 0
@@ -585,12 +622,16 @@ def print_dashboard():
                     bar2 = get_progress_bar(sec["remaining_percent"])
                     print(f"       週間枠  : 残り {bar2} | 期限: {sec['resets_at_str']} ({sec['remaining_desc']})")
             else:
-                print(f"  {active_marker} {label}: 取得エラー ({acc.get('error')})")
+                print(f"  {active_marker} {label} ({codex_account_tag(acc)}): 残量取得エラー ({acc.get('error')})")
 
     # 3. Antigravity (agy)
     print("\n[ 3. Google Antigravity (agy) ]")
     agy = fetch_agy_status()
     print(f"  モデル    : {agy.get('model')}")
+    print("  残量・リセット時刻: 未取得（ローカル履歴からは算出できません）")
+    history = agy.get("local_history")
+    if history:
+        print(f"  ローカル履歴: 直近5時間 {history['five_hour_turns']}件 / 直近7日 {history['seven_day_turns']}件（利用枠ではありません）")
     afh = agy.get("five_hour")
     if afh:
         bar = get_progress_bar(afh["remaining_percent"])

@@ -1,6 +1,6 @@
 ---
 name: ai-usage
-description: "Claude Code、Codex (4アカウント)、Grok、Antigravity の残量クォータと次回リセット時刻を一目で表示 (Use when the user runs /ai-usage.)"
+description: "Claude Code、Codex (複数アカウント)、Grok、Antigravity の残量クォータと次回リセット時刻を一目で表示（どのプロジェクトからでも可） (Use when the user runs /ai-usage.)"
 ---
 
 # AI Usage & Quota Monitor
@@ -22,27 +22,34 @@ User-provided arguments (if any): $ARGUMENTS
 
 Claude Code、OpenAI Codex（複数アカウント）、Antigravity (agy)、Grok の現在の利用枠・残量パーセント・次回リセット時刻を一目で確認します。
 
+スクリプト実体は `D:\claudecode\sd003\scripts\ai-usage-monitor.py` の1か所のみ（各プロジェクトへコピーしない）。
+どのプロジェクトから呼んでも、必ず絶対パスで実行すること。
+
 ## 実行手順
 
-PowerShell または Bash で以下を実行してください:
-
 ```bash
-python scripts/ai-usage-monitor.py
+python -X utf8 D:/claudecode/sd003/scripts/ai-usage-monitor.py
 ```
 
-## Codex アカウントの管理手順
+## 結果の扱い
 
-Codexで別のアカウントに切り替えた際は、以下のコマンドでスナップショット保存しておくことで、以降は再ログイン不要で残量確認および切り替えができます:
+- Codexのローカル認証情報（`CODEX_HOME`、未設定なら `~/.codex/auth.json`）から分かるアカウントと、残量APIの取得成否を分けて報告する。403だけでログイン不明・期限切れと断定しない。
+- ローカル認証ファイルと実行中アプリのログインが同じとは断定しない。JWTの参照は表示用であり、認証の有効性を証明しない。トークン本文を表示しない。
+- 保存値は保存日時とともに明示し、現在残量や現在からの残り時間として扱わない。保存日時をログアウト日時と呼ばない。
+- Antigravityの履歴件数は利用枠ではない。固定係数で残量やリセット時刻を推定しない。取得できない項目は未取得と報告する。
+- 通常の残量確認では認証ファイルの保存・切替を行わない。管理コマンドはその操作を依頼された場合だけ使う。
+
+## 管理コマンド
 
 - **現在のアカウントを保存**:
   ```bash
-  python scripts/ai-usage-monitor.py --save-codex acc2
+  python D:/claudecode/sd003/scripts/ai-usage-monitor.py --save-codex <名前>
   ```
-- **アカウントのワンタッチ切り替え**:
+- **アカウント切り替え**（`--switch` 番号選択メニューは対話入力のため、ユーザーに `! python D:/claudecode/sd003/scripts/ai-usage-monitor.py --switch` で実行してもらう）:
   ```bash
-  python scripts/ai-usage-monitor.py --switch-codex acc2
+  python D:/claudecode/sd003/scripts/ai-usage-monitor.py --switch-codex <名前>
   ```
 - **保存済みアカウント一覧**:
   ```bash
-  python scripts/ai-usage-monitor.py --list-codex
+  python D:/claudecode/sd003/scripts/ai-usage-monitor.py --list-codex
   ```
