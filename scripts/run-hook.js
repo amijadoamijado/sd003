@@ -32,10 +32,28 @@ function isWslStub(p) {
   return n.endsWith('/system32/bash.exe') || n.endsWith('/syswow64/bash.exe');
 }
 
+// A candidate is usable only if it actually starts. On some PCs a Git Bash
+// found first exists on disk but dies at startup (e.g. "Top-level not found"),
+// so existence alone is not enough. Results are remembered for this process.
+const launchable = new Map();
+function usable(p) {
+  if (!exists(p) || isWslStub(p)) return false;
+  if (launchable.has(p)) return launchable.get(p);
+  let ok = false;
+  try {
+    execFileSync(p, ['-c', 'exit 0'], { timeout: 5000, windowsHide: true, stdio: 'ignore' });
+    ok = true;
+  } catch {
+    ok = false;
+  }
+  launchable.set(p, ok);
+  return ok;
+}
+
 function bashFromGit(gitPath) {
   if (!gitPath) return null;
   const bash = path.join(path.dirname(path.dirname(gitPath)), 'bin', 'bash.exe');
-  return exists(bash) && !isWslStub(bash) ? bash : null;
+  return usable(bash) ? bash : null;
 }
 
 function resolveBash() {
@@ -45,7 +63,7 @@ function resolveBash() {
     process.env.GIT_BASH
   ];
   for (const c of envCandidates) {
-    if (exists(c) && !isWslStub(c)) return c;
+    if (usable(c)) return c;
   }
 
   if (process.platform !== 'win32') return 'bash';
@@ -60,7 +78,7 @@ function resolveBash() {
     path.join(local, 'Programs', 'Git', 'bin', 'bash.exe')
   ];
   for (const c of winCandidates) {
-    if (exists(c) && !isWslStub(c)) return c;
+    if (usable(c)) return c;
   }
 
   try {
@@ -80,7 +98,7 @@ function resolveBash() {
   const dirs = String(process.env.PATH || '').split(path.delimiter);
   for (const dir of dirs) {
     const candidate = path.join(dir, 'bash.exe');
-    if (exists(candidate) && !isWslStub(candidate)) return candidate;
+    if (usable(candidate)) return candidate;
   }
   return null;
 }
@@ -122,11 +140,33 @@ function run(payload) {
     windowsHide: true,
     env: process.env
   });
+
+  // Stop the whole tree ourselves before the caller's hook timeout. When Claude Code
+  // kills this node process on Windows, bash and its children (e.g. `npm test`) keep
+  // running and keep the inherited stdout/stderr open, so the tool call waits for them
+  // long after the configured timeout. Fail open on the deadline, like a missing bash.
+  const deadlineMs = Number(process.env.SD003_HOOK_DEADLINE_MS) || 100000;
+  const watchdog = setTimeout(() => {
+    process.stderr.write('run-hook.js: hook exceeded ' + deadlineMs + 'ms and was stopped (not enforced): ' + script + '\n');
+    try {
+      if (process.platform === 'win32') {
+        execFileSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true, timeout: 10000 });
+      } else {
+        child.kill('SIGKILL');
+      }
+    } catch {
+      // ignore: the tree may already be gone
+    }
+    process.exit(0);
+  }, deadlineMs);
+
   child.on('error', (err) => {
+    clearTimeout(watchdog);
     process.stderr.write('run-hook.js: failed to spawn bash: ' + err.message + '\n');
     process.exit(0);
   });
   child.on('exit', (code) => {
+    clearTimeout(watchdog);
     process.exit(code == null ? 0 : code);
   });
   child.stdin.write(payload);
