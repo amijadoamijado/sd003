@@ -1,7 +1,7 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 135
+- **Total Sessions**: 136
 - **Latest Session**: 2026-09-19
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | 日付 | 主な作業 | コミット | 詳細 |
 |---|---|---|---|
+| 09-19 | **`/ai-usage` をどのプロジェクトからでも使えるようにし、Grok 欄を実値化**。個人用コマンド `~/.claude/commands/ai-usage.md` を新設（スクリプト実体は sd003 の1か所・絶対パス呼び出し）、at002 から実行確認。Grok 欄は存在しない `usage_status.json` の代わりに直書き値を表示していたため撤去し、Grok CLI が起動時に `D:\grok\logs\unified.jsonl` へ書く課金情報（消費率・期間・プラン）の最新1件を記録時刻付きで表示。別セッションが同スクリプトを 71cb683 で並行変更していたことを発見 | b48b56d, bc5a8f6 | [記録](session-20260919-235133.md) |
 | 09-19 | **AI クォータ・利用量モニター（`scripts/ai-usage-monitor.py`）の実装とCodex 4アカウント対応**。Claude Code、Codex（4アカウント）、Antigravity、Grokの一元表示モニターを開発。Codexの複数アカウントスナップショット保持・対話切替（`--switch`）に対応し、欠落していた `3s` プロファイルを登録して全4アカウント表示を達成。proliteの週間枠仕様を正しく判定・表示するロジックへ修正 | （本セッションでcommit） | [記録](session-20260919-231034.md) |
 | 09-19 | **Claude Code制限時の最大5時間ピンチヒッターとして `claude-gpt` を実測評価し、Proxyをv0.1.40へ更新**。ログ276要求を集計して成功256・429失敗20を確認し、単独対話なら採用可・常時並列は不向きと判定。SHA256照合付き更新、`--doctor`、実GPT応答 `CLAUDE_GPT_OK` が成功。新版は次回起動から適用 | （本セッションでcommit） | [記録](session-20260919-193518.md) |
 | 09-19 | **aa001 の Claude Code で commit 時に PreToolUse が数分止まる件を解消し、SD003 2.19.3 をリリース**。遅いのは commit ゲートの `npm test` だけ（run-hook.js で初めて実際に動いた）。aa001 のテスト1件のときどき落ちる不具合（同期 Excel 生成中に keep-alive 接続が閉じる）を非同期化で解消（3回 73 pass）。`run-hook.js` に Git Bash 起動試験の取込と100秒のツリー打ち切りを追加。PowerShell の `bash` が WSL スタブになる件は sessionread 手順書5か所に明記 | sd003:4f25e1d/721a21f/709caaf, aa001:47e1d0c/f66bd8e | [記録](session-20260919-190329.md) |
