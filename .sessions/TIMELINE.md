@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 132
+- **Total Sessions**: 133
 - **Latest Session**: 2026-09-19
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | 日付 | 主な作業 | コミット | 詳細 |
 |---|---|---|---|
+| 09-19 | **aa001 の Claude Code で commit 時に PreToolUse が数分止まる件を解消し、SD003 2.19.3 をリリース**。遅いのは commit ゲートの `npm test` だけ（run-hook.js で初めて実際に動いた）。aa001 のテスト1件のときどき落ちる不具合（同期 Excel 生成中に keep-alive 接続が閉じる）を非同期化で解消（3回 73 pass）。`run-hook.js` に Git Bash 起動試験の取込と100秒のツリー打ち切りを追加。PowerShell の `bash` が WSL スタブになる件は sessionread 手順書5か所に明記 | sd003:4f25e1d/721a21f/709caaf, aa001:47e1d0c/f66bd8e | [記録](session-20260919-190329.md) |
 | 09-19 | **aa001 へ最新 SD003 を upgrade**（新規 deploy ではない）。dry-run で divergence 7 を確認し、D-04 作業記録 `.handoff/DONE.md` だけ `.sd003-keep` で保護。`-Execute` は copied 600 / generated 8、Phase 6・Phase 6b C1〜C8 全 PASS（C2a `run-hook.js` 含む）。aa001 の settings は裸 bash フック 0・run-hook 21。会計 `src/` は未変更。空バックアップは archive へ移動。**aa001 は D-04 の stage 済み実装と混在するため commit していない** | sd003:eafde38（前半のフック修正）。aa001 未 commit | [記録](session-20260919-164101.md) |
 | 09-19 | **Grok の PreToolUse が毎ツール exit 1 になる障害を、WSL なしの Windows だけで直した**。真因は PATH 先頭の `C:\WINDOWS\system32\bash.exe`（WSL 未導入スタブ）と、User PATH に `Git\cmd` だけで `Git\bin` が無いこと。Grok は `compat.claude.hooks` 既定 true で `.claude/settings.json` の `bash "...hooks/*.sh"` を実行していた。対策: `scripts/run-hook.js`（スタブ禁止・Git Bash フルパス・Grok JSON を `tool_input` に正規化）、settings 正本と live 配線を node ランチャー経由へ、deploy がランチャーを配布、verify C2a。User PATH 先頭に `d:\Program Files\Git\bin` を追加。ランチャー単体は Git Bash (msys)・deny 動作・C1〜C8 PASS を実測。**この Grok 窓は起動時キャッシュのため失敗表示が残る。効果確認は再起動後** | （本セッションで commit） | [記録](session-20260919-163416.md) |
 | 09-16 | **aa001（会計自動化ツール）へSD003 v2.19.2を展開し、deployの穴を1件埋めた**。dry-run（603 new / 0 diverged）→本実行で copied 600 / generated 8、Phase 6 件数10項目・Phase 6b 内容検証 C1〜C8 が全PASS。**deployの穴**: Phase 21 は `.git/hooks/`（pre-commit / post-commit）だけを置くため、展開先がリポジトリでない場合 HEAD も config も無く `.sd/` 自動ステージとL4スナップショット復元が死ぬ。兄弟5PJ（at002/oc001/kb001/iv001/ta001）が全て自前リポジトリ・親 `D:\claudecode` の `.gitignore` が直下を `/*` 全除外である実測に揃えて `git init -b master`、フック2本の残存と pre-commit の実発火（`.sd/` 自動ステージ）を確認のうえ628ファイルを初回コミット。展開後に aa001 側で別セッションが要件定義v0.2まで進めていた（3コミット）ことを `git log` で発見し、`docs/要件定義書.md` から用途を特定して `PROJECT_REGISTRY.md` へ登録（登録完了までデプロイ完了としない規定）。副次の実測: Bashから deploy.ps1 へ渡す Windows パスは要シングルクォート（裸だと `D:claudecodeaa001` になりPhase 1で停止）、sd003の未コミットuntracked（codex-security 3ミラー等）はそのまま展開先へ複製される。**後半（ユーザー「解決してくれ」）で残件4件を全消化＋既存バグ1件を発見・修正**: ①aa001 remoteは`gh repo view`でat002/iv001/ta001/oc001が全PRIVATEと実測し倣ってprivate作成・push（`.tmp/`のsqlite/WALも除外）②**Phase 1b（gitリポジトリ判定）/ Phase 1c（ソース未コミット警告）をps1・sh両方へ新設** — `git init`は衝突しえない場合に限定する4分岐（ルート=無処理/リポジトリ外=init/親がignore=init/親が追跡=警告のみ）。3レイアウトをスクラッチパッドに作り両スクリプトで実測、ps1実runでは init→フック残存→**commit時pre-commit実発火（.sd/ 32件自動ステージ）**まで確認。`sd-upgrade`はdeployへ委譲のため自動継承③untrackedは framework実体をcommit・`materials/releases/`（**691MB・最大380MB・public repoに関与先データzip**）をgitignore④パス要クォートをSKILL.mdへ明文化。**副産物**: sh検証中に既存バグ発見 — deploy.shはsettings.jsonをheredocにハードコードしており正本が二重化、テンプレより**orchestrator-guard.js（PreToolUse）とprune-skill-state.sh（SessionStart）の2本が欠落**＝Linux/Mac配布はガード不活性でPhase 6b C1ハードフォール。テンプレ配布に統一して解消（配線の増減をdiffで突合し欠落ゼロを確認） | sd003:3afbebb, aa001:d6f6a0c/2462fa2, 台帳:c378634 | [記録](session-20260916-102036.md) |
