@@ -1,54 +1,25 @@
-# DONE.md - 完了報告（2026-09-19 23:51）
+﻿# 完了報告（2026-09-20）
 
 ## やったこと
-
-**変更したファイル**
-| ファイル | 変更内容 |
-|---------|----------|
-| `scripts/ai-usage-monitor.py` | Grok 直書き値を撤去し、Grok CLI ログ（`D:\grok\logs\unified.jsonl`）の最新課金情報を表示。切替案内を絶対パス化 |
-| `.claude/commands/ai-usage.md` | スクリプトを絶対パスで呼ぶ形に変更 |
-| `C:\Users\a-odajima\.claude\commands\ai-usage.md` | 個人用コマンドを新設（どのPJからでも `/ai-usage`） |
-
-**変更内容の要約**
-`/ai-usage` をどのプロジェクトからでも使えるようにし、Grok 欄を直書きの値から Grok 自身のログの実値へ切り替えた。
-
----
+ai-usageのアカウント識別と残量取得を分離し、現在アカウントは公式CLI経由に変更。保存値の鮮度、認証切替形式、欠損値を修正。Antigravityの架空残量を撤去。
 
 ## 確認結果
-
-**実行したコマンド**
-```bash
-cd /d/claudecode/at002 && python D:/claudecode/sd003/scripts/ai-usage-monitor.py
-python D:/claudecode/sd003/scripts/ai-usage-monitor.py
-```
-
-**動作確認**
-- [x] at002 から実行して4サービスとも表示
-- [x] Grok: SuperGrok・残り0%・期限 09/20 17:16 JST・記録時刻 09/19 17:41 JST を表示
-- [x] 別セッションのコミット 71cb683 後も Grok 表示が動作
-
----
+- 回帰テスト9件合格、同期検証21コマンド合格、差分検査合格。
+- 公式CLIで3回連続取得成功。検証時点で3s短時間0%、週間84%。
+- 実装コミット：71cb683、2f9adeb。push到達は未検証。
 
 ## 残っていること
+旧直接HTTPの403拒否理由は未特定。取得経路変更後は再現なし。保存済み認証の欠損とAntigravity公式残量取得は別途。ログイン切替は実施していない。
 
-**未完了タスク**
-- [ ] Grok は起動時点の値のみ（起動後の消費は反映されない）
-- [ ] 個人用と sd003 のコマンド定義が二重管理（sd003 更新時は個人用へコピー）
-
-**次の手順**
-- 71cb683 を入れた別セッションがどのCLIか確認（同じスクリプトを並行編集している）
-
----
+## 次の手順
+通常のai-usageで最新値を取得する。再発時は公式CLIの失敗条件を調査する。
 
 ## 判断したこと
+独自HTTP処理より公式 account/rateLimits/read を優先。ログイン変更やモデル実行なし。
 
-| 選択肢 | 採用 | 理由 |
-|--------|------|------|
-| スクリプトを各PJへ配る | 不採用 | 修正時に古いコピーが残る |
-| 取得できない値を直書きで補う | 不採用 | 実データと見分けがつかない |
-| Grok ログの課金行を読む | 採用 | Grok が起動時に実値を記録している |
-
----
-
-## 追加情報
-- 詳細記録: `D:\claudecode\sd003\.sessions\session-20260919-235133.md`
+## 関連ファイル
+- scripts/ai-usage-monitor.py
+- tests/scripts/test_ai_usage_monitor.py
+- .claude/commands/ai-usage.md
+- .sessions/session-20260920-000124.md
+- 別セッションのGrok実値化・グローバル化記録：.sessions/session-20260919-235133.md

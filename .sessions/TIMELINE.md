@@ -1,8 +1,8 @@
-# SD003 Project Timeline
+﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 136
-- **Latest Session**: 2026-09-19
+- **Total Sessions**: 137
+- **Latest Session**: 2026-09-20
 - **Project Start**: 2026-02-15
 
 ---
@@ -11,6 +11,7 @@
 
 | 日付 | 主な作業 | コミット | 詳細 |
 |---|---|---|---|
+| 09-20 | ai-usageの認証表示・保存値・架空残量を修正。403対策として公式CLIへ移行、9テスト・同期検証・3回連続取得成功 | 71cb683, 2f9adeb | [記録](session-20260920-000124.md) |
 | 09-19 | **`/ai-usage` をどのプロジェクトからでも使えるようにし、Grok 欄を実値化**。個人用コマンド `~/.claude/commands/ai-usage.md` を新設（スクリプト実体は sd003 の1か所・絶対パス呼び出し）、at002 から実行確認。Grok 欄は存在しない `usage_status.json` の代わりに直書き値を表示していたため撤去し、Grok CLI が起動時に `D:\grok\logs\unified.jsonl` へ書く課金情報（消費率・期間・プラン）の最新1件を記録時刻付きで表示。別セッションが同スクリプトを 71cb683 で並行変更していたことを発見 | b48b56d, bc5a8f6 | [記録](session-20260919-235133.md) |
 | 09-19 | **AI クォータ・利用量モニター（`scripts/ai-usage-monitor.py`）の実装とCodex 4アカウント対応**。Claude Code、Codex（4アカウント）、Antigravity、Grokの一元表示モニターを開発。Codexの複数アカウントスナップショット保持・対話切替（`--switch`）に対応し、欠落していた `3s` プロファイルを登録して全4アカウント表示を達成。proliteの週間枠仕様を正しく判定・表示するロジックへ修正 | （本セッションでcommit） | [記録](session-20260919-231034.md) |
 | 09-19 | **Claude Code制限時の最大5時間ピンチヒッターとして `claude-gpt` を実測評価し、Proxyをv0.1.40へ更新**。ログ276要求を集計して成功256・429失敗20を確認し、単独対話なら採用可・常時並列は不向きと判定。SHA256照合付き更新、`--doctor`、実GPT応答 `CLAUDE_GPT_OK` が成功。新版は次回起動から適用 | （本セッションでcommit） | [記録](session-20260919-193518.md) |
