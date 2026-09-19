@@ -456,22 +456,59 @@ def fetch_agy_status() -> dict:
     return res
 
 
-GROK_STATE_FILE = Path("D:/grok/usage_status.json")
+GROK_LOG_FILE = Path("D:/grok/logs/unified.jsonl")
+GROK_BILLING_MSG = "billing: fetched credits config"
 SCRIPT_PATH = Path(__file__).resolve()
 
 
+def _find_last_grok_billing_entry() -> dict | None:
+    """Grok CLI が起動時にログへ書く課金情報のうち、最新の1件を末尾から探す。"""
+    if not GROK_LOG_FILE.exists():
+        return None
+    chunk = 1024 * 1024
+    with open(GROK_LOG_FILE, "rb") as f:
+        f.seek(0, os.SEEK_END)
+        pos = f.tell()
+        tail = b""
+        while pos > 0:
+            step = min(chunk, pos)
+            pos -= step
+            f.seek(pos)
+            buf = f.read(step) + tail
+            lines = buf.split(b"\n")
+            tail = lines[0] if pos > 0 else b""
+            body = lines[1:] if pos > 0 else lines
+            for line in reversed(body):
+                if GROK_BILLING_MSG.encode() in line:
+                    try:
+                        return json.loads(line.decode("utf-8"))
+                    except Exception:
+                        continue
+    return None
+
+
 def fetch_grok_status() -> dict:
-    """D:/grok/usage_status.json の値だけを使う。無ければ取得不能として扱い、推測値は出さない。"""
+    """Grok CLI のログに残る最新の課金情報（起動時に記録）を読む。無ければ取得不能として扱う。"""
     res = {"status": "unavailable", "email": "不明", "plan": "不明"}
-    if GROK_STATE_FILE.exists():
-        try:
-            with open(GROK_STATE_FILE, "r", encoding="utf-8") as f:
-                d = json.load(f)
-            if "remaining_percent" in d:
-                res.update(d)
-                res["status"] = "ok"
-        except Exception:
-            pass
+    try:
+        entry = _find_last_grok_billing_entry()
+    except Exception:
+        entry = None
+    if entry:
+        ctx = entry.get("ctx", {})
+        cfg = ctx.get("config", {})
+        used = cfg.get("creditUsagePercent")
+        end_iso = cfg.get("currentPeriod", {}).get("end") or cfg.get("billingPeriodEnd")
+        if used is not None and end_iso:
+            res["status"] = "ok"
+            res["plan"] = ctx.get("subscriptionTier") or "不明"
+            res["remaining_percent"] = max(0.0, 100.0 - float(used))
+            res["reset_at_str"] = format_iso_jst(end_iso)
+            res["recorded_at_str"] = format_iso_jst(entry.get("ts", ""))
+            end_dt = datetime.datetime.fromisoformat(end_iso.replace("Z", "+00:00"))
+            diff = int((end_dt - datetime.datetime.now(datetime.timezone.utc)).total_seconds())
+            res["period_ended"] = diff <= 0
+            res["remaining_desc"] = format_remaining_seconds(diff) if diff > 0 else "リセット済み"
 
     # Read email from D:/grok/auth.json
     grok_auth = Path("D:/grok/auth.json")
@@ -479,8 +516,8 @@ def fetch_grok_status() -> dict:
         try:
             with open(grok_auth, "r", encoding="utf-8") as f:
                 d = json.load(f)
-            entry = list(d.values())[0]
-            res["email"] = entry.get("email", res["email"])
+            auth_entry = list(d.values())[0]
+            res["email"] = auth_entry.get("email", res["email"])
         except Exception:
             pass
 
@@ -570,11 +607,14 @@ def print_dashboard():
     plan = grok.get("plan", "SuperGrok")
     print(f"  アカウント : {email} ({plan})")
     if grok["status"] != "ok":
-        print(f"  週間枠     : 取得できません（{GROK_STATE_FILE} がありません）")
+        print(f"  週間枠     : 取得できません（{GROK_LOG_FILE} に課金情報の記録がありません）")
+    elif grok["period_ended"]:
+        print(f"  週間枠     : {grok['reset_at_str']} にリセット済み（新しい残量は Grok を一度起動すると記録されます）")
     else:
         bar = get_progress_bar(grok["remaining_percent"])
-        print(f"  週間枠     : 残り {bar}  | 期限: {grok.get('reset_at_str', '不明')} ({grok.get('remaining_desc', '不明')})")
-        print(f"  内訳       : Grok Build {grok.get('grok_build_used', '-')}% │ Imagine {grok.get('imagine_used', '-')}% │ 追加クレジット: {grok.get('extra_credits', '-')}")
+        print(f"  週間枠     : 残り {bar}  | 期限: {grok['reset_at_str']} ({grok['remaining_desc']})")
+    if grok["status"] == "ok":
+        print(f"  記録時刻   : {grok['recorded_at_str']}（Grok 起動時点の値。以降の消費は反映されません）")
 
     print("\n" + "-" * 64)
     print(" 💡 Codex アカウントの切替 (番号選択):")
