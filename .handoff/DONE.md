@@ -1,31 +1,22 @@
 ﻿# 完了報告（2026-09-20）
 
 ## やったこと
-ai-usageのアカウント識別と残量取得を分離し、現在アカウントは公式CLI経由に変更。保存値の鮮度、認証切替形式、欠損値を修正。Antigravityの架空残量を撤去。
+at002 会計スキルへのリンクを全体共通 `~/.claude/skills/` から at002 の `.claude/skills/` へ移した（at002 0e4897ac）。旧リンク201件は `C:\Users-odajima\.claude\.archive\skills-at002-links-20260920\` に退避。配布ルール `skill-trust-policy.md` に「配置スコープ」節を足し、SD003 2.19.4 をリリース（249dc01）。
 
 ## 確認結果
-- 回帰テスト9件合格、同期検証21コマンド合格、差分検査合格。
-- 公式CLIで3回連続取得成功。検証時点で3s短時間0%、週間84%。
-- 実装コミット：71cb683、2f9adeb。push到達は未検証。
+- `claude -p`: at002 では会計スキルあり、sd003 ではなし
+- `check-framework-version.py`: current 2.19.4 / `sync-cli-commands.py --check`: OK（21件）
+- スクラッチパッドへの試験 deploy: 新しい節と v2.19.4 を確認
 
-## 残っていること
-旧直接HTTPの403拒否理由は未特定。取得経路変更後は再現なし。保存済み認証の欠損とAntigravity公式残量取得は別途。ログイン切替は実施していない。
+## 未完了
+- 各プロジェクトへの 2.19.4 反映（`/sd-upgrade .`）はユーザー判断待ち
 
-## 次の手順
-通常のai-usageで最新値を取得する。再発時は公式CLIの失敗条件を調査する。
-
-## 判断したこと
-独自HTTP処理より公式 account/rateLimits/read を優先。ログイン変更やモデル実行なし。
+## 次のステップ
+- 反映するなら各PJで `/sd-upgrade .`
+- 全体側に残った9件のスキルの扱いを検討
 
 ## 関連ファイル
-- scripts/ai-usage-monitor.py
-- tests/scripts/test_ai_usage_monitor.py
-- .claude/commands/ai-usage.md
-- .sessions/session-20260920-000124.md
-- 別セッションのGrok実値化・グローバル化記録：.sessions/session-20260919-235133.md
-
-## 最新の引継ぎ保存
-- 保存日時：2026-09-20 00:03:23
-- 記録：.sessions/session-20260920-000323.md
-- 追加実装なし。保存前の作業ツリーは変更なし。検証結果は前回実施時点。
-
+- `D:\claudecode\sd003\.claudeules\skills\skill-trust-policy.md`
+- `D:\claudecode\sd003\docseleases.19.4.md`
+- `D:\claudecodet002\skills\scripts\sync-at002-skills.ps1`
+- `D:\claudecode\sd003\.sessions\session-20260920-014111.md`
