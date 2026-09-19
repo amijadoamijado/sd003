@@ -223,7 +223,7 @@ deploy_dry_run() {
             if ! cmp -s "$f" "$tgt"; then DIV+=("$projrel"); diverged=$((diverged+1)); else same=$((same+1)); fi
         done < <(find "$SOURCE_DIR/$d" -type f)
     done
-    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "scripts/orchestrator-guard.js" "scripts/lead-lock.ps1" "tests/gas-fakes/setup.ts" ".sessions/session-template.md" ".sd/ai-coordination/workflow/README.md" ".sd/ai-coordination/workflow/CODEX_GUIDE.md" ".sd/ai-coordination/workflow/GROK_GUIDE.md")
+    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "scripts/orchestrator-guard.js" "scripts/run-hook.js" "scripts/lead-lock.ps1" "tests/gas-fakes/setup.ts" ".sessions/session-template.md" ".sd/ai-coordination/workflow/README.md" ".sd/ai-coordination/workflow/CODEX_GUIDE.md" ".sd/ai-coordination/workflow/GROK_GUIDE.md")
     for sf in "${scan_files[@]}"; do
         if is_kept "$sf"; then KEP+=("$sf"); kept=$((kept+1)); continue; fi
         [ -f "$SOURCE_DIR/$sf" ] || continue
@@ -571,6 +571,20 @@ elif [ -f "$SOURCE_DIR/scripts/orchestrator-guard.js" ]; then
     COPY_STATS["Orchestrator Guard"]=1
 else
     COPY_STATS["Orchestrator Guard"]=0
+fi
+
+# 4-15d2: scripts/run-hook.js (Windows-safe bash launcher for Claude-format hooks)
+if is_kept "scripts/run-hook.js"; then
+    echo "  KEEP: scripts/run-hook.js preserved via .sd003-keep"
+    echo "scripts/run-hook.js" >> "$KEPT_LOG"
+    COPY_STATS["Run Hook"]=0
+elif [ -f "$SOURCE_DIR/scripts/run-hook.js" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    if [ -f "$TARGET_PROJECT/scripts/run-hook.js" ] && ! cmp -s "$SOURCE_DIR/scripts/run-hook.js" "$TARGET_PROJECT/scripts/run-hook.js"; then echo "scripts/run-hook.js" >> "$DIVERGED_LOG"; fi
+    cp "$SOURCE_DIR/scripts/run-hook.js" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Run Hook"]=1
+else
+    COPY_STATS["Run Hook"]=0
 fi
 
 # 4-15e: scripts/lead-lock.ps1 (referenced by Codex Native Lead mode)

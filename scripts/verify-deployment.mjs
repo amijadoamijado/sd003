@@ -261,6 +261,27 @@ if (deployedHooks) {
   skip('C2', 'no parseable deployed settings.json (see C1)');
 }
 
+// ---- C2a: settings.json that routes hooks through run-hook.js must ship the launcher
+if (deployedHooks) {
+  const cmds = collectCommands(deployedHooks);
+  const usesRunHook = cmds.some((c) => c.includes('run-hook.js'));
+  if (!usesRunHook) {
+    skip('C2a', 'deployed settings.json does not reference scripts/run-hook.js');
+  } else {
+    const targetLauncher = path.join(targetDir, 'scripts', 'run-hook.js');
+    const sourceLauncher = path.join(sourceDir, 'scripts', 'run-hook.js');
+    if (!fs.existsSync(targetLauncher)) {
+      fail('C2a', 'settings.json references scripts/run-hook.js but the file is missing');
+    } else if (!fs.existsSync(sourceLauncher)) {
+      fail('C2a', 'source scripts/run-hook.js is missing');
+    } else if (fs.readFileSync(targetLauncher, 'utf8') !== fs.readFileSync(sourceLauncher, 'utf8')) {
+      fail('C2a', 'deployed scripts/run-hook.js differs from the framework source');
+    } else {
+      pass('C2a', 'run-hook.js launcher is present and synchronized');
+    }
+  }
+}
+
 // ---- C2b: Codex hook config is parseable and its shared Node guard exists
 // Keep-aware (same semantics as C1/C8): a target may protect .codex via .sd003-keep
 // (bespoke Codex wiring, e.g. at002's evidence hooks) — the framework-contract check

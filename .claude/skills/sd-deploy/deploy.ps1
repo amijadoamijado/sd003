@@ -261,6 +261,7 @@ function Invoke-DeployDryRun {
         "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
         "scripts\verify-deployment.mjs", "scripts\recover-agy-artifacts.sh",
         "scripts\recover-agy-artifacts.ps1", "scripts\orchestrator-guard.js",
+        "scripts\run-hook.js",
         "tests\gas-fakes\setup.ts", "scripts\lead-lock.ps1",
         ".sd\ai-coordination\workflow\README.md", ".sd\ai-coordination\workflow\CODEX_GUIDE.md",
         ".sd\ai-coordination\workflow\GROK_GUIDE.md"
@@ -642,7 +643,7 @@ if (Test-Kept "scripts/verify-deployment.mjs") {
     $copyStats["Verify Deployment (mjs)"] = 0
 }
 
-foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1','orchestrator-guard.js','lead-lock.ps1')) {
+foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1','orchestrator-guard.js','run-hook.js','lead-lock.ps1')) {
     $recoverRel = "scripts/$recoverName"; $recoverSrc = Join-Path $SOURCE_DIR "scripts\$recoverName"; $recoverDst = Join-Path $TargetProject "scripts\$recoverName"
     if (Test-Kept $recoverRel) {
         Write-Host "  KEEP: $recoverRel preserved via .sd003-keep" -ForegroundColor Magenta
