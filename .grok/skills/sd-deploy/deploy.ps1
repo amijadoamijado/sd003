@@ -33,6 +33,133 @@ if (-not (Test-Path $TargetProject -PathType Container)) {
 Write-Host "[Phase 1/7] Target validated" -ForegroundColor Green
 
 # ============================================================
+# Phase 1b: Git repository guard
+# ------------------------------------------------------------
+# The framework's .sd/ protection (pre-commit auto-stage, L4 snapshot/restore)
+# and auto-push all live in <target>/.git/hooks, installed by 4-21 below.
+# Git runs those hooks ONLY when <target> is a repository ROOT. Installing them
+# into a non-repo - or into a plain subdirectory of an enclosing repo - ships
+# files that can never fire: a silent, invisible failure.
+#
+# Incident 2026-09-16 (aa001): deploy created .git/hooks/ with no HEAD and no
+# config. The hooks were present in every file listing and every count check,
+# .sd/ protection was inert, and nothing surfaced it until a manual
+# `git rev-parse --show-toplevel` was run by hand after the fact.
+#
+# Auto-init is deliberately limited to cases where it cannot conflict with an
+# enclosing repository:
+#   root          -> nothing to do
+#   no repo       -> git init (no other repo can own this directory)
+#   ignored child -> git init (the enclosing repo explicitly disowns the path;
+#                    e.g. D:\claudecode/.gitignore excludes children with "/*")
+#   tracked child -> WARN only (monorepo sub-package: initing would create a
+#                    nested repo the user never asked for)
+# ============================================================
+
+# Native git calls must not be turned into terminating errors by the script's
+# $ErrorActionPreference='Stop' (PowerShell 7.4+ honors it for native commands
+# via $PSNativeCommandUseErrorActionPreference). Both preferences are set
+# function-locally here, so they revert automatically on return.
+function Invoke-GitSafe {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$GitArgs)
+    $ErrorActionPreference = 'Continue'
+    $PSNativeCommandUseErrorActionPreference = $false
+    $out = & git @GitArgs 2>&1
+    return [pscustomobject]@{ Output = ($out | Out-String).Trim(); Code = $LASTEXITCODE }
+}
+
+$script:gitGuardAction = "ok"   # ok | init | warn | nogit
+$script:gitGuardDetail = ""
+$targetFull = [System.IO.Path]::GetFullPath($TargetProject).TrimEnd('\')
+
+if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+    $script:gitGuardAction = "nogit"
+    $script:gitGuardDetail = "git not found on PATH - repo state unverifiable, hooks may be inert"
+} else {
+    # Args are passed as one array: a bare -C would be parsed by PowerShell as a
+    # parameter name of Invoke-GitSafe, not as an argument to git.
+    $topRes = Invoke-GitSafe @('-C', $targetFull, 'rev-parse', '--show-toplevel')
+    if ($topRes.Code -ne 0 -or [string]::IsNullOrWhiteSpace($topRes.Output)) {
+        $script:gitGuardAction = "init"
+        $script:gitGuardDetail = "target is not inside any git repository"
+    } else {
+        $topLevel = [System.IO.Path]::GetFullPath(($topRes.Output -replace '/', '\')).TrimEnd('\')
+        if ($topLevel -ieq $targetFull) {
+            $script:gitGuardAction = "ok"
+            $script:gitGuardDetail = "target is a git repository root"
+        } else {
+            $ignoreRes = Invoke-GitSafe @('-C', $topLevel, 'check-ignore', '-q', '--', $targetFull)
+            if ($ignoreRes.Code -eq 0) {
+                $script:gitGuardAction = "init"
+                $script:gitGuardDetail = "enclosing repo '$topLevel' ignores this path"
+            } else {
+                $script:gitGuardAction = "warn"
+                $script:gitGuardDetail = "inside repo '$topLevel', which tracks this path"
+            }
+        }
+    }
+}
+
+if (-not $DryRun) {
+    switch ($script:gitGuardAction) {
+        "init" {
+            $initRes = Invoke-GitSafe @('-C', $targetFull, 'init', '-b', 'master')
+            if ($initRes.Code -eq 0) {
+                Write-Host "  [Phase 1b] git init -b master ($($script:gitGuardDetail))" -ForegroundColor Cyan
+            } else {
+                $script:gitGuardAction = "warn"
+                $script:gitGuardDetail = "git init FAILED: $($initRes.Output)"
+                Write-Host "  [Phase 1b] ERROR: $($script:gitGuardDetail)" -ForegroundColor Red
+                Write-Host "             .git/hooks installed below will NEVER run." -ForegroundColor Red
+            }
+        }
+        "warn" {
+            Write-Host "  [Phase 1b] WARN: target is NOT a git repository root" -ForegroundColor Red
+            Write-Host "             ($($script:gitGuardDetail))" -ForegroundColor Red
+            Write-Host "             .git/hooks installed below will NEVER run:" -ForegroundColor Red
+            Write-Host "             .sd/ auto-stage, L4 snapshot restore and auto-push stay inert." -ForegroundColor Red
+            Write-Host "             Run 'git init' in the target if it should be its own repository." -ForegroundColor Red
+        }
+        "nogit" {
+            Write-Host "  [Phase 1b] WARN: $($script:gitGuardDetail)" -ForegroundColor Yellow
+        }
+        default {
+            Write-Host "  [Phase 1b] git repository root confirmed" -ForegroundColor Green
+        }
+    }
+}
+
+# ============================================================
+# Phase 1c: Uncommitted source warning
+# ------------------------------------------------------------
+# Phase 4 copies whole directories, so whatever sits in the SOURCE working tree
+# is what lands in the target - committed or not. An untracked skill in the
+# source is silently reproduced in every project deployed from it, while being
+# absent from the source's own history (2026-09-16: aa001 received three
+# codex-security mirrors that had been untracked in sd003 since 2026-08-28).
+# This only reports; it never blocks. The source's git state is the user's call.
+# ============================================================
+$script:untrackedSource = @()
+if ($script:gitGuardAction -ne "nogit") {
+    $distributedPaths = @(
+        ".claude/commands", ".claude/rules", ".claude/skills", ".claude/hooks",
+        ".agents/skills", ".codex", ".grok/skills",
+        ".sd/settings", ".sd/steering", ".handoff",
+        "docs/rules-reference", "docs/troubleshooting", "scripts"
+    )
+    $untrackedRes = Invoke-GitSafe (@('-C', $SOURCE_DIR, 'ls-files', '--others', '--exclude-standard', '--') + $distributedPaths)
+    if ($untrackedRes.Code -eq 0 -and -not [string]::IsNullOrWhiteSpace($untrackedRes.Output)) {
+        $script:untrackedSource = @($untrackedRes.Output -split "`r?`n" | Where-Object { $_.Trim() -ne "" })
+    }
+}
+if ($script:untrackedSource.Count -gt 0 -and -not $DryRun) {
+    Write-Host "  [Phase 1c] WARN: $($script:untrackedSource.Count) uncommitted file(s) in the source will be copied to the target" -ForegroundColor Yellow
+    foreach ($p in ($script:untrackedSource | Select-Object -First 10)) { Write-Host "             ? $p" -ForegroundColor Yellow }
+    if ($script:untrackedSource.Count -gt 10) { Write-Host "             ... and $($script:untrackedSource.Count - 10) more" -ForegroundColor Yellow }
+    Write-Host "             Commit or remove them in the source to keep deployments reproducible." -ForegroundColor Yellow
+}
+
+# ============================================================
 # Opt-out manifest (.sd003-keep): framework files this project has
 # INTENTIONALLY customized. deploy/upgrade must NOT overwrite them.
 # Format: one relative path per line. Supports exact paths, directory
@@ -134,6 +261,7 @@ function Invoke-DeployDryRun {
         "scripts\validate-test-data.sh", "scripts\sync-cli-commands.py",
         "scripts\verify-deployment.mjs", "scripts\recover-agy-artifacts.sh",
         "scripts\recover-agy-artifacts.ps1", "scripts\orchestrator-guard.js",
+        "scripts\run-hook.js",
         "tests\gas-fakes\setup.ts", "scripts\lead-lock.ps1",
         ".sd\ai-coordination\workflow\README.md", ".sd\ai-coordination\workflow\CODEX_GUIDE.md",
         ".sd\ai-coordination\workflow\GROK_GUIDE.md"
@@ -180,6 +308,34 @@ function Invoke-DeployDryRun {
         foreach ($p in ($kept | Sort-Object -Unique)) { Write-Host "  = $p" -ForegroundColor Green }
         Write-Host ""
     }
+    # Phase 1b decision, surfaced before anything is written (see Phase 1b above).
+    switch ($script:gitGuardAction) {
+        "init" {
+            Write-Host "GIT REPOSITORY - will run 'git init -b master':" -ForegroundColor Yellow
+            Write-Host "  + $($script:gitGuardDetail)" -ForegroundColor Yellow
+            Write-Host "    (without a repo root, .git/hooks would be installed but never run)" -ForegroundColor DarkYellow
+            Write-Host ""
+        }
+        "warn" {
+            Write-Host "GIT REPOSITORY - NOT a repository root, hooks will be INERT:" -ForegroundColor Red
+            Write-Host "  ! $($script:gitGuardDetail)" -ForegroundColor Red
+            Write-Host "    .sd/ auto-stage, L4 snapshot restore and auto-push will not run." -ForegroundColor Red
+            Write-Host "    No auto-init here: that would nest a repo inside one that tracks this path." -ForegroundColor DarkYellow
+            Write-Host ""
+        }
+        "nogit" {
+            Write-Host "GIT REPOSITORY - unverifiable: $($script:gitGuardDetail)" -ForegroundColor Yellow
+            Write-Host ""
+        }
+    }
+
+    if ($script:untrackedSource.Count -gt 0) {
+        Write-Host "UNCOMMITTED IN SOURCE - will be copied anyway ($($script:untrackedSource.Count)):" -ForegroundColor Yellow
+        foreach ($p in ($script:untrackedSource | Select-Object -First 10)) { Write-Host "  ? $p" -ForegroundColor Yellow }
+        if ($script:untrackedSource.Count -gt 10) { Write-Host "  ... and $($script:untrackedSource.Count - 10) more" -ForegroundColor Yellow }
+        Write-Host ""
+    }
+
     Write-Host "Summary: $($diverged.Count) diverged, $(($kept | Sort-Object -Unique).Count) kept, $newCount new, $sameCount unchanged" -ForegroundColor Cyan
     if ($diverged.Count -gt 0) {
         Write-Host ""
@@ -487,7 +643,7 @@ if (Test-Kept "scripts/verify-deployment.mjs") {
     $copyStats["Verify Deployment (mjs)"] = 0
 }
 
-foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1','orchestrator-guard.js','lead-lock.ps1')) {
+foreach ($recoverName in @('recover-agy-artifacts.sh','recover-agy-artifacts.ps1','orchestrator-guard.js','run-hook.js','lead-lock.ps1')) {
     $recoverRel = "scripts/$recoverName"; $recoverSrc = Join-Path $SOURCE_DIR "scripts\$recoverName"; $recoverDst = Join-Path $TargetProject "scripts\$recoverName"
     if (Test-Kept $recoverRel) {
         Write-Host "  KEEP: $recoverRel preserved via .sd003-keep" -ForegroundColor Magenta
@@ -1005,6 +1161,26 @@ if ($df.Count -gt 0) {
     foreach ($p in $df) { Write-Host "    ! $p" -ForegroundColor Yellow }
     Write-Host "  -> If any were intentional customizations, restore from backup and add them to .sd003-keep." -ForegroundColor Yellow
     Write-Host ""
+}
+
+# Git hook viability (Phase 1b). Reported here because "hooks installed" in the
+# copy stats says nothing about whether git will ever run them.
+switch ($script:gitGuardAction) {
+    "init" {
+        Write-Host "  Git: initialized a repository here ($($script:gitGuardDetail))" -ForegroundColor Cyan
+        Write-Host "       .git/hooks are live. No remote is configured yet - 'git push' will fail until one is added." -ForegroundColor Cyan
+        Write-Host ""
+    }
+    "warn" {
+        Write-Host "  Git: NOT a repository root - .git/hooks are INERT" -ForegroundColor Red
+        Write-Host "       $($script:gitGuardDetail)" -ForegroundColor Red
+        Write-Host "       .sd/ auto-stage, L4 snapshot restore and auto-push will not run here." -ForegroundColor Red
+        Write-Host ""
+    }
+    "nogit" {
+        Write-Host "  Git: unverified - $($script:gitGuardDetail)" -ForegroundColor Yellow
+        Write-Host ""
+    }
 }
 
 if ($allPassed) {

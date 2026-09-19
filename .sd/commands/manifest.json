@@ -23,6 +23,15 @@
       "aliases": []
     },
     {
+      "slug": "ai-usage",
+      "source": ".claude/commands/ai-usage.md",
+      "description": "Claude Code、Codex (4アカウント)、Grok、Antigravity の残量クォータと次回リセット時刻を一目で表示",
+      "claude_command": "/ai-usage",
+      "agent_skill": "ai-usage/SKILL.md",
+      "grok_skill": "ai-usage/SKILL.md",
+      "aliases": []
+    },
+    {
       "slug": "blueprint-gate",
       "source": ".claude/commands/blueprint-gate.md",
       "description": "要件定義 - ゴールと検証観点を対話で整理し要件定義書を生成",

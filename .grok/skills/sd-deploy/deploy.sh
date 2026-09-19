@@ -32,6 +32,115 @@ fi
 echo "[Phase 1/7] Target validated"
 
 # ============================================================
+# Phase 1b: Git repository guard
+# ------------------------------------------------------------
+# The framework's .sd/ protection (pre-commit auto-stage, L4 snapshot/restore)
+# and auto-push all live in <target>/.git/hooks, installed by 4-21 below.
+# Git runs those hooks ONLY when <target> is a repository ROOT. Installing them
+# into a non-repo - or into a plain subdirectory of an enclosing repo - ships
+# files that can never fire: a silent, invisible failure.
+#
+# Incident 2026-09-16 (aa001): deploy created .git/hooks/ with no HEAD and no
+# config. The hooks were present in every file listing and every count check,
+# .sd/ protection was inert, and nothing surfaced it until a manual
+# `git rev-parse --show-toplevel` was run by hand after the fact.
+#
+# Auto-init is deliberately limited to cases where it cannot conflict with an
+# enclosing repository:
+#   root          -> nothing to do
+#   no repo       -> git init (no other repo can own this directory)
+#   ignored child -> git init (the enclosing repo explicitly disowns the path;
+#                    e.g. D:\claudecode/.gitignore excludes children with "/*")
+#   tracked child -> WARN only (monorepo sub-package: initing would create a
+#                    nested repo the user never asked for)
+# ============================================================
+GIT_GUARD_ACTION="ok"   # ok | init | warn | nogit
+GIT_GUARD_DETAIL=""
+
+norm_path() { (cd "$1" 2>/dev/null && pwd -P) || echo "$1"; }
+
+if ! command -v git >/dev/null 2>&1; then
+    GIT_GUARD_ACTION="nogit"
+    GIT_GUARD_DETAIL="git not found on PATH - repo state unverifiable, hooks may be inert"
+else
+    TARGET_FULL="$(norm_path "$TARGET_PROJECT")"
+    if TOP_RAW="$(git -C "$TARGET_FULL" rev-parse --show-toplevel 2>/dev/null)" && [ -n "$TOP_RAW" ]; then
+        TOP_FULL="$(norm_path "$TOP_RAW")"
+        if [ "$TOP_FULL" = "$TARGET_FULL" ]; then
+            GIT_GUARD_ACTION="ok"
+            GIT_GUARD_DETAIL="target is a git repository root"
+        elif git -C "$TOP_FULL" check-ignore -q -- "$TARGET_FULL" 2>/dev/null; then
+            GIT_GUARD_ACTION="init"
+            GIT_GUARD_DETAIL="enclosing repo '$TOP_FULL' ignores this path"
+        else
+            GIT_GUARD_ACTION="warn"
+            GIT_GUARD_DETAIL="inside repo '$TOP_FULL', which tracks this path"
+        fi
+    else
+        GIT_GUARD_ACTION="init"
+        GIT_GUARD_DETAIL="target is not inside any git repository"
+    fi
+fi
+
+if [ "$DRY_RUN" != true ]; then
+    case "$GIT_GUARD_ACTION" in
+        init)
+            if git -C "$TARGET_PROJECT" init -b master >/dev/null 2>&1; then
+                echo "  [Phase 1b] git init -b master ($GIT_GUARD_DETAIL)"
+            else
+                GIT_GUARD_ACTION="warn"
+                GIT_GUARD_DETAIL="git init FAILED - hooks installed below will never run"
+                echo "  [Phase 1b] ERROR: $GIT_GUARD_DETAIL"
+            fi
+            ;;
+        warn)
+            echo "  [Phase 1b] WARN: target is NOT a git repository root"
+            echo "             ($GIT_GUARD_DETAIL)"
+            echo "             .git/hooks installed below will NEVER run:"
+            echo "             .sd/ auto-stage, L4 snapshot restore and auto-push stay inert."
+            echo "             Run 'git init' in the target if it should be its own repository."
+            ;;
+        nogit)
+            echo "  [Phase 1b] WARN: $GIT_GUARD_DETAIL"
+            ;;
+        *)
+            echo "  [Phase 1b] git repository root confirmed"
+            ;;
+    esac
+fi
+
+# ============================================================
+# Phase 1c: Uncommitted source warning
+# ------------------------------------------------------------
+# Phase 4 copies whole directories, so whatever sits in the SOURCE working tree
+# is what lands in the target - committed or not. An untracked skill in the
+# source is silently reproduced in every project deployed from it, while being
+# absent from the source's own history (2026-09-16: aa001 received three
+# codex-security mirrors that had been untracked in sd003 since 2026-08-28).
+# This only reports; it never blocks. The source's git state is the user's call.
+# ============================================================
+UNTRACKED_SOURCE=""
+UNTRACKED_COUNT=0
+if [ "$GIT_GUARD_ACTION" != "nogit" ]; then
+    UNTRACKED_SOURCE="$(git -C "$SOURCE_DIR" ls-files --others --exclude-standard -- \
+        .claude/commands .claude/rules .claude/skills .claude/hooks \
+        .agents/skills .codex .grok/skills \
+        .sd/settings .sd/steering .handoff \
+        docs/rules-reference docs/troubleshooting scripts 2>/dev/null || true)"
+    if [ -n "$UNTRACKED_SOURCE" ]; then
+        UNTRACKED_COUNT=$(printf '%s\n' "$UNTRACKED_SOURCE" | wc -l | tr -d ' ')
+    fi
+fi
+if [ "$UNTRACKED_COUNT" -gt 0 ] && [ "$DRY_RUN" != true ]; then
+    echo "  [Phase 1c] WARN: $UNTRACKED_COUNT uncommitted file(s) in the source will be copied to the target"
+    printf '%s\n' "$UNTRACKED_SOURCE" | head -10 | sed 's/^/             ? /'
+    if [ "$UNTRACKED_COUNT" -gt 10 ]; then
+        echo "             ... and $((UNTRACKED_COUNT - 10)) more"
+    fi
+    echo "             Commit or remove them in the source to keep deployments reproducible."
+fi
+
+# ============================================================
 # Opt-out manifest (.sd003-keep): framework files this project has
 # INTENTIONALLY customized. deploy must NOT overwrite them.
 # One relative path per line; supports exact paths, directory prefixes, and globs.
@@ -114,7 +223,7 @@ deploy_dry_run() {
             if ! cmp -s "$f" "$tgt"; then DIV+=("$projrel"); diverged=$((diverged+1)); else same=$((same+1)); fi
         done < <(find "$SOURCE_DIR/$d" -type f)
     done
-    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "scripts/orchestrator-guard.js" "scripts/lead-lock.ps1" "tests/gas-fakes/setup.ts" ".sessions/session-template.md" ".sd/ai-coordination/workflow/README.md" ".sd/ai-coordination/workflow/CODEX_GUIDE.md" ".sd/ai-coordination/workflow/GROK_GUIDE.md")
+    local scan_files=("antigravity.md" "AGENTS.md" "grok.md" ".claude/settings.json" "docs/quality-gates.md" "scripts/validate-test-data.ps1" "scripts/validate-test-data.sh" "scripts/sync-cli-commands.py" "scripts/verify-deployment.mjs" "scripts/orchestrator-guard.js" "scripts/run-hook.js" "scripts/lead-lock.ps1" "tests/gas-fakes/setup.ts" ".sessions/session-template.md" ".sd/ai-coordination/workflow/README.md" ".sd/ai-coordination/workflow/CODEX_GUIDE.md" ".sd/ai-coordination/workflow/GROK_GUIDE.md")
     for sf in "${scan_files[@]}"; do
         if is_kept "$sf"; then KEP+=("$sf"); kept=$((kept+1)); continue; fi
         [ -f "$SOURCE_DIR/$sf" ] || continue
@@ -153,6 +262,36 @@ deploy_dry_run() {
         printf '%s\n' "${KEP[@]}" | sort -u | sed 's/^/  = /'
         echo ""
     fi
+    # Phase 1b decision, surfaced before anything is written (see Phase 1b above).
+    case "$GIT_GUARD_ACTION" in
+        init)
+            echo "GIT REPOSITORY - will run 'git init -b master':"
+            echo "  + $GIT_GUARD_DETAIL"
+            echo "    (without a repo root, .git/hooks would be installed but never run)"
+            echo ""
+            ;;
+        warn)
+            echo "GIT REPOSITORY - NOT a repository root, hooks will be INERT:"
+            echo "  ! $GIT_GUARD_DETAIL"
+            echo "    .sd/ auto-stage, L4 snapshot restore and auto-push will not run."
+            echo "    No auto-init here: that would nest a repo inside one that tracks this path."
+            echo ""
+            ;;
+        nogit)
+            echo "GIT REPOSITORY - unverifiable: $GIT_GUARD_DETAIL"
+            echo ""
+            ;;
+    esac
+
+    if [ "$UNTRACKED_COUNT" -gt 0 ]; then
+        echo "UNCOMMITTED IN SOURCE - will be copied anyway ($UNTRACKED_COUNT):"
+        printf '%s\n' "$UNTRACKED_SOURCE" | head -10 | sed 's/^/  ? /'
+        if [ "$UNTRACKED_COUNT" -gt 10 ]; then
+            echo "  ... and $((UNTRACKED_COUNT - 10)) more"
+        fi
+        echo ""
+    fi
+
     echo "Summary: $diverged diverged, $kept kept, $newc new, $same unchanged"
     if [ $diverged -gt 0 ]; then
         echo ""
@@ -434,6 +573,20 @@ else
     COPY_STATS["Orchestrator Guard"]=0
 fi
 
+# 4-15d2: scripts/run-hook.js (Windows-safe bash launcher for Claude-format hooks)
+if is_kept "scripts/run-hook.js"; then
+    echo "  KEEP: scripts/run-hook.js preserved via .sd003-keep"
+    echo "scripts/run-hook.js" >> "$KEPT_LOG"
+    COPY_STATS["Run Hook"]=0
+elif [ -f "$SOURCE_DIR/scripts/run-hook.js" ]; then
+    mkdir -p "$TARGET_PROJECT/scripts"
+    if [ -f "$TARGET_PROJECT/scripts/run-hook.js" ] && ! cmp -s "$SOURCE_DIR/scripts/run-hook.js" "$TARGET_PROJECT/scripts/run-hook.js"; then echo "scripts/run-hook.js" >> "$DIVERGED_LOG"; fi
+    cp "$SOURCE_DIR/scripts/run-hook.js" "$TARGET_PROJECT/scripts/"
+    COPY_STATS["Run Hook"]=1
+else
+    COPY_STATS["Run Hook"]=0
+fi
+
 # 4-15e: scripts/lead-lock.ps1 (referenced by Codex Native Lead mode)
 if is_kept "scripts/lead-lock.ps1"; then
     echo "  KEEP: scripts/lead-lock.ps1 preserved via .sd003-keep"
@@ -666,190 +819,24 @@ if is_kept ".claude/settings.json"; then
     echo "  KEEP: .claude/settings.json preserved via .sd003-keep"
     echo ".claude/settings.json" >> "$KEPT_LOG"
 else
-    SETTINGS_TMP="$(mktemp)"
-    cat > "$SETTINGS_TMP" << EOF
-{
-  "env": {
-    "ENABLE_TOOL_SEARCH": "true"
-  },
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/claim-evidence-stop.sh\"",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-check-stop.sh\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-sd-destructive.sh\"",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
-            "timeout": 120
-          },
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
-            "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/workflow-gate.sh\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/block-edit-write-on-sd.sh\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Bash|Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-skill-read.sh\"",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-spec-location.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/sd-watchdog.sh\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Edit",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Write",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Bash",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/deploy-package-reminder.sh\"",
-            "timeout": 10
-          },
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/agent-review.sh\"",
-            "timeout": 600
-          },
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/workflow-state-tracker.sh\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Read",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/track-skill-read.sh\"",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "SessionStart": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"\$CLAUDE_PROJECT_DIR/.claude/hooks/session-skill-suggest.sh\"",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  }
-}
-EOF
-    if [ -f "$TARGET_PROJECT/.claude/settings.json" ] && ! cmp -s "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"; then
-        echo ".claude/settings.json" >> "$DIVERGED_LOG"
+    # settings.json is copied from templates/settings.json.template - the SAME
+    # single source deploy.ps1 uses. It used to be a hardcoded heredoc here, which
+    # silently fell behind every time a hook was added to the template: as of
+    # 2026-09-14 the heredoc was missing the SessionStart prune-skill-state.sh
+    # wiring, so every deploy.sh run hard-failed Phase 6b check C1. Two copies of
+    # the same wiring is the defect - do not reintroduce one.
+    SETTINGS_TEMPLATE="$SOURCE_DIR/.claude/skills/sd-deploy/templates/settings.json.template"
+    if [ ! -f "$SETTINGS_TEMPLATE" ]; then
+        echo "  WARN: settings.json.template not found, skipping"
+    else
+        SETTINGS_TMP="$(mktemp)"
+        cp "$SETTINGS_TEMPLATE" "$SETTINGS_TMP"
+        if [ -f "$TARGET_PROJECT/.claude/settings.json" ] && ! cmp -s "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"; then
+            echo ".claude/settings.json" >> "$DIVERGED_LOG"
+        fi
+        mv "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"
+        echo "  UPDATE: .claude/settings.json (latest guardrail wiring applied)"
     fi
-    mv "$SETTINGS_TMP" "$TARGET_PROJECT/.claude/settings.json"
-    echo "  UPDATE: .claude/settings.json (latest guardrail wiring applied)"
 fi
 
 # 5-5b: Ensure runtime-generated files are in .gitignore
@@ -1082,6 +1069,26 @@ if [ -n "$DIV_UNIQ" ]; then
     echo ""
 fi
 rm -f "$KEPT_LOG" "$DIVERGED_LOG"
+
+# Git hook viability (Phase 1b). Reported here because "hooks installed" in the
+# copy stats says nothing about whether git will ever run them.
+case "$GIT_GUARD_ACTION" in
+    init)
+        echo "  Git: initialized a repository here ($GIT_GUARD_DETAIL)"
+        echo "       .git/hooks are live. No remote is configured yet - 'git push' will fail until one is added."
+        echo ""
+        ;;
+    warn)
+        echo "  Git: NOT a repository root - .git/hooks are INERT"
+        echo "       $GIT_GUARD_DETAIL"
+        echo "       .sd/ auto-stage, L4 snapshot restore and auto-push will not run here."
+        echo ""
+        ;;
+    nogit)
+        echo "  Git: unverified - $GIT_GUARD_DETAIL"
+        echo ""
+        ;;
+esac
 
 if [ "$ALL_PASSED" = true ]; then
     echo "  Result: ALL PASSED"
