@@ -182,7 +182,7 @@ SD003を新規プロジェクトに展開する際、セッション管理は**�
 ## 起動時の点検2: 会話ログの退避候補
 
 `/sessionread` はセッション1回だけ、`~/.claude/scripts/archive-sessions.sh` があれば
-`bash ~/.claude/scripts/archive-sessions.sh 7 preview` で退避候補を数える。
+`bash ~/.claude/scripts/archive-sessions.sh 7 preview` で退避候補を数える（Bash ツール＝Git Bash で実行する。PowerShell の `bash` は WSL の空の bash.exe を拾って失敗する）。
 
 - **preview は数えるだけで移動しない**。候補があれば件数・容量と
   `bash ~/.claude/scripts/archive-sessions.sh 7 execute` で退避できることを1行伝える。0件なら無音

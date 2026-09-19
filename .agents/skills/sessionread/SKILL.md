@@ -40,7 +40,7 @@ User-provided arguments (if any): $ARGUMENTS
 
 **SD003の版**: `.codex/check-framework-version.py`があれば`python .codex/check-framework-version.py`で更新元と比較する（更新元の指定は`--source <絶対パス>`または`SD003_SOURCE`）。スクリプトが無い旧い導入先では、導入先と更新元の`.claude/skills/sd-deploy/deploy.ps1`から`$FRAMEWORK_VERSION`を読んで直接比較する（`CLAUDE.md`末尾の版表記は別管理でズレるため比較に使わない）。更新があれば導入版・更新元版と、`/sd-upgrade .`で更新できることを1行で伝える。参照不能は未確認として扱う。
 
-**会話ログの退避候補**: `~/.claude/scripts/archive-sessions.sh`があれば`bash ~/.claude/scripts/archive-sessions.sh 7 preview`で候補を数える。previewは数えるだけで移動しない。候補があれば件数・容量と、`bash ~/.claude/scripts/archive-sessions.sh 7 execute`で退避できることを1行で伝える。0件なら報告しない。
+**会話ログの退避候補**: `~/.claude/scripts/archive-sessions.sh`があれば`bash ~/.claude/scripts/archive-sessions.sh 7 preview`で候補を数える（Bash ツール＝Git Bash で実行する。PowerShell の `bash` は WSL の空の bash.exe を拾って失敗する）。previewは数えるだけで移動しない。候補があれば件数・容量と、`bash ~/.claude/scripts/archive-sessions.sh 7 execute`で退避できることを1行で伝える。0件なら報告しない。
 
 ## 報告
 
