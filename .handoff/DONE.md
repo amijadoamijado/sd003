@@ -1,33 +1,62 @@
-# DONE.md - 完了報告（2026-09-19 19:03 Claude Code）
+# DONE.md - 完了報告（2026-09-19 19:35）
 
 ## やったこと
 
 **変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `scripts/run-hook.js` | Git Bash 候補を起動試験で選ぶ（aa001 02dfd4f 取込）＋100秒でツリーを taskkill する打ち切り |
-| sessionread 手順書5か所 | `archive-sessions.sh` は Bash ツール（Git Bash）で実行と明記 |
-| sd-deploy 3系統・CLAUDE.md | 版 2.19.2 → 2.19.3 |
-| `docs/releases/2.19.3.md` | リリースノート新設 |
-| aa001 `tests/accounting/onboarding.test.mjs` | Excel 生成を非同期化し、並列実行時の `fetch failed` を解消 |
+| プロジェクト外 `claude-gpt/launcher.json` | Proxy版を `v0.1.40` へ更新 |
+| プロジェクト外 `claude-gpt/versions/v0.1.40/` | 検証済みProxy実行ファイルを追加 |
+| `.sessions/` | 調査・更新結果と次回運用条件を記録 |
+| `.handoff/DONE.md` | 本引き継ぎへ更新 |
 
 **変更内容の要約**
-aa001 の Claude Code で `git commit` 時に PreToolUse が数分止まる問題を、テストのときどき落ちる不具合の修正とフック打ち切りで解消した。PowerShell の `bash` が WSL スタブになる件は手順書で回避し、SD003 2.19.3 としてリリースした。
+Claude Codeのレート制限時に最大5時間使うピンチヒッターとして、`claude-gpt` の耐久性を実ログと実装から評価した。利用上限時の挙動と長い要求への対応が改善されたProxy `v0.1.40` へ更新した。
 
 ## 確認結果
 
-- aa001 `npm test` 3回: 73 pass / 0 fail
-- 打ち切り: 3秒設定で約3.9秒で停止、子プロセス残存0。通常フック約1.3秒
-- sd003: `sync-cli-commands.py --check` OK、版チェック current（2.19.3）、jest deploy と版チェック 17件合格、`git diff --check` OK
+**実行したコマンド**
+```powershell
+claude-gpt --update
+claude-gpt --doctor
+claude-gpt --smoke-test
+```
 
-## 未完了・次のステップ
+**結果**
+```text
+更新: v0.1.39 -> v0.1.40
+ローカル診断: 正常
+GPT実応答: CLAUDE_GPT_OK
+```
 
-- aa001 の Claude Code を開き直して commit 時のフック所要時間を確認（未確認）
-- aa001 の版表記は 2.19.2 のまま。`/sd-upgrade .` はユーザー判断待ち
-- 他の Windows PJ へ 2.19.3 を `/sd-upgrade` で配る
+**動作確認**
+- [x] 配布ZIPのSHA256照合
+- [x] Proxy `v0.1.40` のローカル起動
+- [x] Sol/Lunaモデル登録
+- [x] 実際のGPT応答
+- [x] 旧版・旧設定バックアップ保持
 
-## 関連
+## 残っていること
 
-- sd003: 4f25e1d, 721a21f, 709caaf
-- aa001: 47e1d0c, f66bd8e
-- 記録: `D:\claudecode\sd003\.sessions\session-20260919-190329.md`
+**未完了タスク**
+- [ ] 実際の5時間連続利用による耐久確認
+- [ ] 自動圧縮、認証自動更新、クラッシュ後再開の実測
+
+**次の手順**
+- 次回は `claude-gpt` を新規起動し、`v0.1.40` を適用する
+- 5時間の退避運用では1セッションを基本とし、サブエージェント常時並列を避ける
+- 429発生時は連続再試行せず、利用枠回復または別経路への切替を待つ
+
+## 判断したこと
+
+**設計上の選択**
+| 選択肢 | 採用 | 理由 |
+|--------|------|------|
+| 常用基盤 | 不採用 | 自動復旧・長時間連続試験・再開対応が不足 |
+| 最大5時間のピンチヒッター | 採用 | 単独の対話型作業では基本機能と実応答を確認済み |
+| 複数エージェント常時並列 | 不採用 | ChatGPT側の利用枠を急速に消費するため |
+
+## 追加情報
+
+- 現在開いているセッションは更新前のProxyプロセスを使用している。新版は次回起動時に適用される。
+- 詳細記録: `D:\claudecode\sd003\.sessions\session-20260919-193518.md`

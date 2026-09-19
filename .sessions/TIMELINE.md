@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 133
+- **Total Sessions**: 134
 - **Latest Session**: 2026-09-19
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | 日付 | 主な作業 | コミット | 詳細 |
 |---|---|---|---|
+| 09-19 | **Claude Code制限時の最大5時間ピンチヒッターとして `claude-gpt` を実測評価し、Proxyをv0.1.40へ更新**。ログ276要求を集計して成功256・429失敗20を確認し、単独対話なら採用可・常時並列は不向きと判定。SHA256照合付き更新、`--doctor`、実GPT応答 `CLAUDE_GPT_OK` が成功。新版は次回起動から適用 | （本セッションでcommit） | [記録](session-20260919-193518.md) |
 | 09-19 | **aa001 の Claude Code で commit 時に PreToolUse が数分止まる件を解消し、SD003 2.19.3 をリリース**。遅いのは commit ゲートの `npm test` だけ（run-hook.js で初めて実際に動いた）。aa001 のテスト1件のときどき落ちる不具合（同期 Excel 生成中に keep-alive 接続が閉じる）を非同期化で解消（3回 73 pass）。`run-hook.js` に Git Bash 起動試験の取込と100秒のツリー打ち切りを追加。PowerShell の `bash` が WSL スタブになる件は sessionread 手順書5か所に明記 | sd003:4f25e1d/721a21f/709caaf, aa001:47e1d0c/f66bd8e | [記録](session-20260919-190329.md) |
 | 09-19 | **aa001 へ最新 SD003 を upgrade**（新規 deploy ではない）。dry-run で divergence 7 を確認し、D-04 作業記録 `.handoff/DONE.md` だけ `.sd003-keep` で保護。`-Execute` は copied 600 / generated 8、Phase 6・Phase 6b C1〜C8 全 PASS（C2a `run-hook.js` 含む）。aa001 の settings は裸 bash フック 0・run-hook 21。会計 `src/` は未変更。空バックアップは archive へ移動。**aa001 は D-04 の stage 済み実装と混在するため commit していない** | sd003:eafde38（前半のフック修正）。aa001 未 commit | [記録](session-20260919-164101.md) |
 | 09-19 | **Grok の PreToolUse が毎ツール exit 1 になる障害を、WSL なしの Windows だけで直した**。真因は PATH 先頭の `C:\WINDOWS\system32\bash.exe`（WSL 未導入スタブ）と、User PATH に `Git\cmd` だけで `Git\bin` が無いこと。Grok は `compat.claude.hooks` 既定 true で `.claude/settings.json` の `bash "...hooks/*.sh"` を実行していた。対策: `scripts/run-hook.js`（スタブ禁止・Git Bash フルパス・Grok JSON を `tool_input` に正規化）、settings 正本と live 配線を node ランチャー経由へ、deploy がランチャーを配布、verify C2a。User PATH 先頭に `d:\Program Files\Git\bin` を追加。ランチャー単体は Git Bash (msys)・deny 動作・C1〜C8 PASS を実測。**この Grok 窓は起動時キャッシュのため失敗表示が残る。効果確認は再起動後** | （本セッションで commit） | [記録](session-20260919-163416.md) |
