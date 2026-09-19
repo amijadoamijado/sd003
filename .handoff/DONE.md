@@ -1,22 +1,23 @@
-﻿# 完了報告（2026-09-20）
+﻿# 完了報告
 
 ## やったこと
-at002 会計スキルへのリンクを全体共通 `~/.claude/skills/` から at002 の `.claude/skills/` へ移した（at002 0e4897ac）。旧リンク201件は `C:\Users\a-odajima\.claude\.archive\skills-at002-links-20260920\` に退避。配布ルール `skill-trust-policy.md` に「配置スコープ」節を足し、SD003 2.19.4 をリリース（249dc01）。
+- Astra利用枠の節約方法を公式・GitHubで調査した。
+- ユーザーの明示承認で C:\Users\a-odajima\.codex\AGENTS.md を変更。子エージェントは明示依頼時のみ、通常は単一エージェントとした。
+- 引継ぎ履歴・最新版・タイムラインを保存した。
 
 ## 確認結果
-- `claude -p`: at002 では会計スキルあり、sd003 ではなし
-- `check-framework-version.py`: current 2.19.4 / `sync-cli-commands.py --check`: OK（21件）
-- スクラッチパッドへの試験 deploy: 新しい節と v2.19.4 を確認
+- 共通AGENTS.mdは書込後の全文一致を確認。UTF-8 BOM・CRLF。
+- 保存前の作業ツリーは変更なし。SD003は2.19.4。
+- 詳細と参照元は .sessions/session-current.md。
 
-## 未完了
-- 各プロジェクトへの 2.19.4 反映（`/sd-upgrade .`）はユーザー判断待ち
+## 残っていること
+- 消費削減率、新規会話での動作、実際のFast適用は未検証。
+- config.tomlはlow/defaultだが会話環境にpriority指定あり。実課金は未確認。
 
-## 次のステップ
-- 反映するなら各PJで `/sd-upgrade .`
-- 全体側に残った9件のスキルの扱いを検討
+## 判断したこと
+- 子エージェントの機能を無効化せず、明示依頼時のみ利用する共通指示を保存。
+- 独立した検索・コマンドの並列実行は許可。モデル設定やMCPは変更していない。
 
-## 関連ファイル
-- `D:\claudecode\sd003\.claudeules\skills\skill-trust-policy.md`
-- `D:\claudecode\sd003\docseleases.19.4.md`
-- `D:\claudecodet002\skills\scripts\sync-at002-skills.ps1`
-- `D:\claudecode\sd003\.sessions\session-20260920-014111.md`
+## 追加情報
+- 共通AGENTS.mdはリポジトリ外なので今回のGit保存には含まれない。
+- 以前の作業は .sessions/session-20260920-014111.md を参照。
