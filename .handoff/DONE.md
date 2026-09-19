@@ -1,7 +1,7 @@
 ﻿# 完了報告（2026-09-20）
 
 ## やったこと
-at002 会計スキルへのリンクを全体共通 `~/.claude/skills/` から at002 の `.claude/skills/` へ移した（at002 0e4897ac）。旧リンク201件は `C:\Users-odajima\.claude\.archive\skills-at002-links-20260920\` に退避。配布ルール `skill-trust-policy.md` に「配置スコープ」節を足し、SD003 2.19.4 をリリース（249dc01）。
+at002 会計スキルへのリンクを全体共通 `~/.claude/skills/` から at002 の `.claude/skills/` へ移した（at002 0e4897ac）。旧リンク201件は `C:\Users\a-odajima\.claude\.archive\skills-at002-links-20260920\` に退避。配布ルール `skill-trust-policy.md` に「配置スコープ」節を足し、SD003 2.19.4 をリリース（249dc01）。
 
 ## 確認結果
 - `claude -p`: at002 では会計スキルあり、sd003 ではなし
