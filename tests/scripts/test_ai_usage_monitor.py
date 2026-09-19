@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import urllib.error
 
 SPEC = importlib.util.spec_from_file_location(
@@ -22,6 +22,39 @@ def auth():
 
 
 class UsageRegression(unittest.TestCase):
+    def test_official_cli_protocol_and_quota(self):
+        replies = [
+            {"id": 1, "result": {}},
+            {"id": 2, "result": {"account": {"email": "example@example.com"}}},
+            {"id": 3, "result": {"rateLimits": {"primary": {"usedPercent": 24, "windowDurationMins": 300, "resetsAt": 2000000000}}}},
+        ]
+        process = MagicMock()
+        process.stdout = io.StringIO("\n".join(json.dumps(reply) for reply in replies))
+        process.poll.return_value = 0
+        with patch.object(monitor.shutil, "which", return_value="codex"), patch.object(monitor.subprocess, "Popen", return_value=process):
+            result = monitor.fetch_active_codex_usage(auth())
+        self.assertEqual(result["status"], "ok")
+        self.assertEqual(result["source"], "Codex CLI")
+        self.assertEqual(result["primary"]["remaining_percent"], 76)
+        self.assertEqual(result["primary"]["limit_window_seconds"], 18000)
+        requests = [json.loads(call.args[0]) for call in process.stdin.write.call_args_list]
+        self.assertEqual([request["method"] for request in requests], ["initialize", "initialized", "account/read", "account/rateLimits/read"])
+
+    def test_cli_errors_do_not_expose_backend_body(self):
+        process = MagicMock()
+        process.stdout = io.StringIO(json.dumps({"id": 1, "error": {"message": "secret-response"}}))
+        process.poll.return_value = 0
+        with patch.object(monitor.shutil, "which", return_value="codex"), patch.object(monitor.subprocess, "Popen", return_value=process):
+            result = monitor.fetch_active_codex_usage(auth())
+        self.assertEqual(result["status"], "error")
+        self.assertNotIn("secret-response", result["error"])
+
+    def test_cli_unavailable_keeps_identity(self):
+        with patch.object(monitor.shutil, "which", return_value=None):
+            result = monitor.fetch_active_codex_usage(auth())
+        self.assertEqual(result["status"], "error")
+        self.assertEqual(result["email"], "example@example.com")
+
     def test_identity_survives_403_and_wrapped_profile(self):
         error = urllib.error.HTTPError("https://example.com", 403, "Forbidden", {}, None)
         with patch.object(monitor.urllib.request, "urlopen", side_effect=error):
@@ -70,7 +103,7 @@ class UsageRegression(unittest.TestCase):
             snapshot = {"status": "ok", "primary": {"remaining_desc": "あと5時間", "remaining_percent": 76}}
             (profiles / "other.json").write_text(json.dumps({"auth_data": other, "last_snapshot": snapshot}), encoding="utf-8")
             error = urllib.error.HTTPError("https://example.com", 403, "Forbidden", {}, None)
-            with patch.object(monitor, "CODEX_AUTH_FILE", target), patch.object(monitor, "CODEX_PROFILES_DIR", profiles), patch.object(monitor.urllib.request, "urlopen", side_effect=error):
+            with patch.object(monitor, "CODEX_AUTH_FILE", target), patch.object(monitor, "CODEX_PROFILES_DIR", profiles), patch.object(monitor, "fetch_active_codex_usage", return_value={"status": "error", "account_id": "test-account"}), patch.object(monitor.urllib.request, "urlopen", side_effect=error):
                 results = monitor.get_all_codex_accounts()
             self.assertEqual(len(results), 2)
             self.assertTrue(results[1]["is_snapshot"])

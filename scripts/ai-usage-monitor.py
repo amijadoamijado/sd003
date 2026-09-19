@@ -16,13 +16,18 @@ Usage:
 
 import argparse
 import base64
+import contextlib
 import datetime
 import glob
 import json
 import os
+import queue
 import shutil
 import ssl
+import subprocess
 import sys
+import threading
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -196,6 +201,107 @@ def codex_account_tag(acc: dict) -> str:
     return f"{email} / {alias}" if alias and alias != email else email
 
 
+def fetch_active_codex_usage(auth_data: dict) -> dict:
+    """Use the official CLI's read-only RPC; never start a model turn or login."""
+    identity = codex_identity(auth_data)
+    executable = shutil.which("codex.exe") or shutil.which("codex.cmd") or shutil.which("codex")
+    if not executable:
+        return {**identity, "status": "error", "error": "Codex CLI が見つかりません"}
+    messages = queue.Queue()
+    process = None
+    reader = None
+    flags = subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0
+    try:
+        process = subprocess.Popen(
+            [executable, "app-server", "--listen", "stdio://"],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            text=True, encoding="utf-8", creationflags=flags)
+
+        def read_messages():
+            try:
+                for line in process.stdout:
+                    try:
+                        messages.put(json.loads(line))
+                    except ValueError:
+                        continue
+            finally:
+                messages.put(None)
+
+        reader = threading.Thread(target=read_messages, daemon=True)
+        reader.start()
+        deadline = time.monotonic() + 25
+
+        def send(message):
+            process.stdin.write(json.dumps(message) + "\n")
+            process.stdin.flush()
+
+        def rpc(request_id, method, params=None):
+            send({"id": request_id, "method": method, "params": params})
+            while True:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise queue.Empty
+                message = messages.get(timeout=remaining)
+                if message is None:
+                    raise RuntimeError("Codex CLI が応答前に終了しました")
+                if message.get("id") == request_id:
+                    if "error" in message:
+                        # Do not echo backend messages: they can contain response bodies.
+                        raise RuntimeError(f"Codex CLI {method} 取得失敗")
+                    return message["result"]
+
+        rpc(1, "initialize", {"clientInfo": {"name": "sd003_usage_monitor", "version": "1.0"}})
+        send({"method": "initialized"})
+        account = rpc(2, "account/read", {"refreshToken": False}).get("account") or {}
+        if account.get("email"):
+            identity["email"] = account["email"]
+        result = rpc(3, "account/rateLimits/read")
+        rates = (result.get("rateLimitsByLimitId") or {}).get("codex") or result.get("rateLimits") or {}
+        windows = {}
+        for key in ("primary", "secondary"):
+            window = rates.get(key) or {}
+            used = window.get("usedPercent")
+            if used is None:
+                windows[key] = None
+                continue
+            reset_at = window.get("resetsAt")
+            remaining = max(0, int(reset_at - time.time())) if reset_at else 0
+            windows[key] = {
+                "used_percent": used, "remaining_percent": max(0.0, 100.0 - float(used)),
+                "reset_after_seconds": remaining,
+                "limit_window_seconds": (window.get("windowDurationMins") or 0) * 60,
+                "remaining_desc": format_remaining_seconds(remaining) if reset_at else "不明",
+                "resets_at_str": format_epoch_jst(reset_at) if reset_at else "不明"}
+        if not any(windows.values()):
+            raise RuntimeError("Codex CLI に残量情報がありません")
+        return {**identity, **windows, "status": "ok", "source": "Codex CLI", "plan_type": rates.get("planType")}
+    except queue.Empty:
+        return {**identity, "status": "error", "error": "Codex CLI 残量取得が25秒でタイムアウト"}
+    except Exception as error:
+        return {**identity, "status": "error", "error": str(error) if isinstance(error, RuntimeError) else type(error).__name__}
+    finally:
+        if process is not None:
+            if process.poll() is None:
+                with contextlib.suppress(OSError, subprocess.SubprocessError):
+                    if os.name == "nt":
+                        subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                                       creationflags=flags, timeout=5)
+                    else:
+                        process.terminate()
+                if process.poll() is None:
+                    with contextlib.suppress(OSError):
+                        process.kill()
+            with contextlib.suppress(OSError, subprocess.SubprocessError):
+                process.wait(timeout=5)
+            with contextlib.suppress(OSError):
+                process.stdin.close()
+            if reader is not None:
+                reader.join(timeout=1)
+            if reader is None or not reader.is_alive():
+                process.stdout.close()
+
+
 def fetch_codex_usage_from_auth_data(auth_data: dict) -> dict:
     auth_data = auth_data.get("auth_data", auth_data)
     identity = codex_identity(auth_data)
@@ -214,7 +320,7 @@ def fetch_codex_usage_from_auth_data(auth_data: dict) -> dict:
         headers["chatgpt-account-id"] = account_id
 
     req = urllib.request.Request(
-        "https://chatgpt.com/backend-api/codex/usage",
+        "https://chatgpt.com/backend-api/wham/usage",
         headers=headers,
     )
     try:
@@ -277,7 +383,7 @@ def get_all_codex_accounts() -> list:
         try:
             with open(CODEX_AUTH_FILE, "r", encoding="utf-8") as f:
                 active_auth = json.load(f)
-            u = fetch_codex_usage_from_auth_data(active_auth)
+            u = fetch_active_codex_usage(active_auth)
             active_account_id = codex_identity(active_auth)["account_id"]
             u["is_active"] = True
             u["label"] = "ローカル認証 (Active)"
