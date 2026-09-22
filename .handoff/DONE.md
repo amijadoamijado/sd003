@@ -1,23 +1,21 @@
 ﻿# 完了報告
 
 ## やったこと
-- Astra利用枠の節約方法を公式・GitHubで調査した。
-- ユーザーの明示承認で C:\Users\a-odajima\.codex\AGENTS.md を変更。子エージェントは明示依頼時のみ、通常は単一エージェントとした。
+- `claude-gpt` の6 Sol／6 Lunaへの変更を試し、配布済みプロキシと開発版を調べた。
+- 両モデルが未登録のため、利用設定を元の v0.1.40、5.6 Sol／5.6 Luna に復元した。
 - 引継ぎ履歴・最新版・タイムラインを保存した。
 
 ## 確認結果
-- 共通AGENTS.mdは書込後の全文一致を確認。UTF-8 BOM・CRLF。
-- 保存前の作業ツリーは変更なし。SD003は2.19.4。
-- 詳細と参照元は .sessions/session-current.md。
+- v0.1.41の `--doctor` は6 Sol未登録で失敗。`--smoke-test` も `Unknown model` で失敗。
+- 復元後の v0.1.40 `--doctor` は成功。復元後の実応答は未検証。
 
 ## 残っていること
-- 消費削減率、新規会話での動作、実際のFast適用は未検証。
-- config.tomlはlow/defaultだが会話環境にpriority指定あり。実課金は未確認。
+- 6 Sol／6 Luna の正式登録後に切替と実応答を再検証する。
+- 調査用の v0.1.41 と一時ファイルが残る。削除は自動承認で拒否された。
 
-## 判断したこと
-- 子エージェントの機能を無効化せず、明示依頼時のみ利用する共通指示を保存。
-- 独立した検索・コマンドの並列実行は許可。モデル設定やMCPは変更していない。
+## 関連ファイル
+- `.sessions/session-current.md`、`.sessions/TIMELINE.md`
+- `C:\Users\a-odajima\Documents\Codex\Tools\claude-gpt\launcher.json`
 
-## 追加情報
-- 共通AGENTS.mdはリポジトリ外なので今回のGit保存には含まれない。
-- 以前の作業は .sessions/session-20260920-014111.md を参照。
+## 備考
+- `scripts/ai-usage-monitor.py` の既存の未コミット変更には触れていない。
