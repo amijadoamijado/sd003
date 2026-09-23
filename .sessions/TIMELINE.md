@@ -1,7 +1,7 @@
 ﻿# SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 144
+- **Total Sessions**: 145
 - **Latest Session**: 2026-09-23
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | 日付 | 主な作業 | コミット | 詳細 |
 |---|---|---|---|
+| 09-23 | **公式 Opus 5.5 プロンプトガイドと照合し SD003 2.19.5 をリリース**。bug-trace の ultrathink 必須を削除、parallel-subagents の積極活用原則を削除（検証委譲を禁止）、UI 禁止事項に既定スタイル5つを追加、配布テンプレートの旧条項（plan mode・thinking 必須・検証委譲）を削除。~/.claude/settings.json に Opus 5.5=medium を追加（効くかは未確認） | 0d12d9a, 7ee8c64 | [記録](session-20260923-194213.md) |
 | 09-23 | claude-gptをv0.1.42へ更新し、6 Sol／6 Lunaの実応答をそれぞれ確認 | 7ee8c64（保存前） | [記録](session-20260923-193835.md) |
 | 09-23 | 引き継ぎの再保存。追加作業なし（前回 09:20 保存以降、別セッションの 9ae4058 のみ） | （本保存でcommit） | [記録](session-20260923-093059.md) |
 | 09-23 | aa001のフック「7/8」停止を調査（並列8本・timeout5秒が際どい、孫プロセスがパイプを握る仮説。aa001側で解決の連絡で打切り）。pm002へSD003 2.19.4を展開しpush（9/5未コミット分込み、Codex件数FAILはconfig.toml配置で解消、残留index.lockを退避）。bd claudecode-fyx登録 | pm002:3415356 | [記録](session-20260923-092033.md) |
