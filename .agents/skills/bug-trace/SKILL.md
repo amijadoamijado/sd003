@@ -34,7 +34,7 @@ You are a **Bug Investigation Specialist** with expertise in:
 
 ## Overview
 
-This command orchestrates **3 specialized agents** to investigate complex bugs in parallel, followed by **Ultrathink synthesis** and **visual flow diagrams**:
+This command orchestrates **3 specialized agents** to investigate complex bugs in parallel, followed by **synthesis** and **visual flow diagrams**:
 
 ### Investigation Pipeline
 ```
@@ -42,7 +42,7 @@ Step 1: Error Collection + Past Bug Search
     ↓
 Step 2: 3-Agent Parallel Investigation
     ↓
-Step 2.5: Ultrathink Synthesis + Divergence Classification  ← NEW in v2.4
+Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
     ↓
     ├─ Code Defect → Step 3: Visual Flow Diagrams
     │                    ↓
@@ -64,7 +64,7 @@ Step 2.5: Ultrathink Synthesis + Divergence Classification  ← NEW in v2.4
 | **Solution Agent** | Solution Architect | Hypothesis formation, resolution strategies |
 
 ### New in v2.0
-- **Ultrathink Synthesis**: Deep analysis of 3-agent findings with cross-referencing
+- **Synthesis**: Deep analysis of 3-agent findings with cross-referencing
 - **ASCII Flow Diagrams**: Visual representation of error flow (Input → Process → Error)
 - **Reverse Trace Diagrams**: Error backtracking visualization
 - **Divergence Analysis Box**: Side-by-side Expected vs Actual comparison
@@ -73,7 +73,7 @@ Step 2.5: Ultrathink Synthesis + Divergence Classification  ← NEW in v2.4
 - **Japanese Explanations**: Each diagram now includes mandatory Japanese explanations below the ASCII art
 
 ### New in v2.2
-- **Ultrathink Synthesis Japanese Explanation**: Root Cause section now includes detailed Japanese explanation
+- **Synthesis Japanese Explanation**: Root Cause section now includes detailed Japanese explanation
 
 ### New in v2.3
 - **Mandatory Output Requirements**: Japanese explanations are now mandatory (skip = step incomplete)
@@ -104,7 +104,7 @@ Step 2.5: Ultrathink Synthesis + Divergence Classification  ← NEW in v2.4
 
 | Step | Section | Required Output |
 |------|---------|-----------------|
-| Step 2.5 | Ultrathink Synthesis | `📝 **統合分析解説**` |
+| Step 2.5 | Synthesis | `📝 **統合分析解説**` |
 | Step 3 | Error Flow Diagram | `📝 **フロー解説**` |
 | Step 3 | Reverse Trace | `📝 **逆追跡解説**` |
 | Step 3 | Divergence Analysis | `📝 **乖離分析解説**` |
@@ -223,14 +223,14 @@ For each hypothesis:
 
 ---
 
-## Step 2.5: Ultrathink Synthesis (MANDATORY)
+## Step 2.5: Synthesis (MANDATORY)
 
 **After all 3 agents complete, perform deep synthesis analysis:**
 
 ### Synthesis Protocol
 
 1. **Receive all 3 agent reports**
-2. **Use extended thinking (ultrathink)** to:
+2. **Cross-check the reports** (depth of analysis is set by the session effort level, not by prompt wording) to:
    - Cross-reference findings between agents
    - Identify contradictions or gaps
    - Synthesize a unified understanding
@@ -239,7 +239,7 @@ For each hypothesis:
 ### Synthesis Output Format
 
 ```markdown
-## Ultrathink Synthesis Report
+## Synthesis Report
 
 ### Agent Findings Summary
 | Agent | Key Finding | Confidence |
@@ -261,7 +261,7 @@ For each hypothesis:
 ### Investigation Confidence: [High/Medium/Low]
 ```
 
-#### 日本語解説（Ultrathink Synthesis）
+#### 日本語解説（Synthesis）
 
 **必ず統合分析の後に以下の形式で日本語解説を追加すること：**
 
@@ -332,7 +332,7 @@ For each hypothesis:
 **Use AskUserQuestion:**
 
 ```
-Question: Ultrathink synthesis complete. Divergence classified as: [Classification Result]
+Question: Synthesis complete. Divergence classified as: [Classification Result]
 Options:
 - Proceed with [Code Fix / Spec Update] (based on classification)
 - Override: This is actually a [Code/Spec] defect
@@ -744,7 +744,7 @@ Options:
 | Code Agent | [content] | High/Medium/Low |
 | Solution Agent | [content] | High/Medium/Low |
 
-## Ultrathink Synthesis
+## Synthesis
 [📝 統合分析解説 content]
 
 ## Error Flow Diagram
@@ -808,7 +808,7 @@ Record in `docs/troubleshooting/BUG_TRACE_LOG.md`:
 | Code  | [finding] | High/Medium/Low |
 | Solution | [finding] | High/Medium/Low |
 
-### Ultrathink Synthesis
+### Synthesis
 - **Alignment**: [where agents agreed]
 - **Key Insight**: [synthesis conclusion]
 

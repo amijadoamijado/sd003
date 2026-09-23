@@ -194,7 +194,7 @@ cat .claude/settings.json | jq '.hooks'
 
 ## Bug Trace v2.0配置（v2.6.0強化）
 
-3エージェント並列調査 + Ultrathink統合分析 + ASCII図式化によるバグ原因分析機能。
+3エージェント並列調査 + 統合分析 + ASCII図式化によるバグ原因分析機能。
 
 ### 配置ファイル
 | ファイル | 用途 |
@@ -217,7 +217,7 @@ cat .claude/settings.json | jq '.hooks'
 ### v2.0新機能
 | 機能 | 説明 |
 |------|------|
-| Ultrathink Synthesis | 3エージェント報告の深層分析・クロスリファレンス |
+| Synthesis | 3エージェント報告の深層分析・クロスリファレンス |
 | ASCII Flow Diagrams | エラーフローの視覚的図式化（入力→処理→エラー） |
 | Reverse Trace Diagrams | エラー→根本原因の逆追跡図 |
 | Divergence Analysis Box | 期待値 vs 実際の並列比較表示 |
