@@ -1,14 +1,10 @@
 # CLAUDE.md - Project Guidelines for Claude Code
 
 ## Core Principles
-- Always start complex tasks in plan mode. Iterate on the plan until
-  it's solid before executing.
 - After any correction, confirm with user before updating CLAUDE.md
   to prevent repetition.
-- Challenge changes: Justify every edit, prove it works, and compare
-  against main/master branch.
-- Use subagents for parallel compute and to keep main context clean.
-  Offload subtasks like verification or cleanup.
+- 造語（AIが独自に作った用語）を使う場合は、初出時に必ず注釈を入れる。
+  注釈なしで造語を既知の用語のように使ってはならない。
 
 ## Workflow Orchestration
 - Run parallel sessions using git worktrees for isolation.
@@ -16,16 +12,19 @@
   delegate end-to-end.
 - Use reusable skills/commands for daily repeats,
   stored in .claude/commands/.
+- 1時間以上かかるタスク・ゴールが言語化できないタスクは、着手前に
+  要件を固める（SD003プロジェクトでは /blueprint-gate）。
 
 ## Memory and Learning
 - This is a living document: Ruthlessly edit to reduce mistake
   rate over time.
 
 ## Environment Optimization
-- Model preference: Opus with thinking mode for all coding
-  (higher quality outweighs speed).
 - Environment: Windows 11, UTF-8 (BOM), CRLF. See global CLAUDE.md for details.
 - Permissions: Pre-allow safe permissions in .claude/settings.local.json
   to minimize interruptions.
 - Context management: 10% remaining -> save session, 5% -> emergency save.
   See global CLAUDE.md for full rules.
+- 思考量は settings.json の effortLevel / modelSettings で調整する。
+  「よく考えて」「再確認せよ」「検証をサブエージェントに任せよ」のような
+  指示は書かない（Claude 5 世代は自分で考え・検証する。公式 Prompting Claude Opus 5 / 5.5）。
