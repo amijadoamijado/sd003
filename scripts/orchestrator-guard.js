@@ -9,7 +9,7 @@ process.stdin.on('end', () => {
 
   const toolName = String(payload.tool_name || payload.toolName || payload.name || '');
   const toolInput = payload.tool_input || payload.toolInput || payload.input || {};
-  const command = String(toolInput.command || payload.command || '');
+  const command = String(toolInput.command || toolInput.cmd || payload.command || payload.cmd || '');
   const filePath = String(toolInput.file_path || toolInput.filePath || payload.file_path || '');
   const normalized = `${command}\n${filePath}`.replace(/\\/g, '/');
 
