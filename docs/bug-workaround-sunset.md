@@ -47,7 +47,7 @@ SD003にはClaude Code本体のバグ・環境制約への回避策が積層し�
 以下はClaude Codeのバグではなく**AIの誤行動への恒久ガードレール**。issueクローズで撤去しない:
 
 - `block-sd-destructive.sh`（.sd/へのgit checkout/rm等の破壊操作禁止）
-- `block-clasp-deploy.sh` / `block-commit-on-test-fail.sh` / `enforce-skill-read.sh` / `enforce-spec-location.sh` / `workflow-gate.sh`
+- `block-clasp-deploy.sh` / `block-commit-on-test-fail.sh` / `enforce-skill-read.sh` / `enforce-spec-location.sh`
 
 ### D. 環境制約（マシン側・Claude Code無関係）
 

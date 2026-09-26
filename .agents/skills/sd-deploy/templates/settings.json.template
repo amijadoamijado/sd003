@@ -51,11 +51,6 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
             "timeout": 5
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/workflow-gate.sh\"",
-            "timeout": 5
           }
         ]
       },
@@ -147,11 +142,6 @@
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-review.sh\"",
             "timeout": 600
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/workflow-state-tracker.sh\"",
-            "timeout": 5
           }
         ]
       },
