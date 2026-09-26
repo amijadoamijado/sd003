@@ -272,6 +272,8 @@ if (deployedHooks) {
     const sourceLauncher = path.join(sourceDir, 'scripts', 'run-hook.js');
     if (!fs.existsSync(targetLauncher)) {
       fail('C2a', 'settings.json references scripts/run-hook.js but the file is missing');
+    } else if (isKept(keepPatterns, 'scripts/run-hook.js')) {
+      skip('C2a', 'scripts/run-hook.js is protected by .sd003-keep (bespoke launcher) - source-equality check skipped');
     } else if (!fs.existsSync(sourceLauncher)) {
       fail('C2a', 'source scripts/run-hook.js is missing');
     } else if (fs.readFileSync(targetLauncher, 'utf8') !== fs.readFileSync(sourceLauncher, 'utf8')) {
