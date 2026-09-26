@@ -1,0 +1,1198 @@
+diff --git a/.claude/commands/ai-suspect.md b/.claude/commands/ai-suspect.md
+index 4d31e36..0809362 100644
+--- a/.claude/commands/ai-suspect.md
++++ b/.claude/commands/ai-suspect.md
+@@ -260,8 +260,7 @@ bd create "<ガードレール名>" \
+ 
+ ### 7-3. auto-memory（該当時のみ）
+ 
+-全プロジェクト共通の知見なら `~/.claude/projects/*/memory/feedback-*.md` に記録（**dedup確認必須**）。
+-SD003限定なら `/sessionwrite` 備考へ。一時的メモなら記録しない。
++保存先は `docs/rules-reference/session/memory-layers.md` の判断フローで1か所に決める（他PJ・他CLIでも効く → `bd remember` / このPJでClaude Codeだけが使う → auto-memory）。既存と重複しないか確認する。一時的メモなら記録しない。
+ 
+ ---
+ 
+@@ -280,33 +279,11 @@ SD003限定なら `/sessionwrite` 備考へ。一時的メモなら記録しな
+ 
+ ---
+ 
+-## 参考: 模範5Why（at002 2026-06-13 — このレベルと構造を目指す）
+-
+-> **問題**: 最初から決定論（既存スキル `journal-builder` + `yayoi-csv-format`）で弥生CSVを書かず、自分で `csv.writer` を手書きした。結果、引用の有無・髙のバイト形・経過措置など現場固有の落とし穴を全部踏み、**ユーザーに4回もエラーログを取らせた**。
+-
+-| | Why | 答え |
+-|---|-----|------|
+-| Why1 | なぜ決定論（既存スキル）を使わなかったか | 弥生CSV書き出しの共通スキル `skills/common/yayoi-csv-format.js` の存在を着手時に確認せず、`csv.writer` で自作した |
+-| Why2 | なぜ確認しなかったか | 「25列に値を並べるだけの単純作業」とみなし `skills/` を探索しなかった。本当の難所（弥生が受理する書式の固有知）を見落とした |
+-| Why3 | なぜ単純作業とみなしたか | 弥生フォーマットを「知っている」という確信。validate が0エラーで通ったことで**「動いた」と誤認**し、実機取込前に完成扱い（Work First違反：検証通過≠実データ完走） |
+-| Why4 | なぜ一般知識を一次情報にし、原典を下に置いたか | 「引用が要る／髙はNEC形だと弾かれる／経過措置は二重控除」は一般的な弥生知識に無い、**事故からしか得られない固有知**。その層が自分に欠けていることに気づけなかった（unknown unknown）。`taka.txt` という最高の原典をもらってもなお自作理論を上に置いた |
+-| **Why5（真因）** | なぜ過信が起きたか | **優先順位の逆転**。私の中で「自分の一般知識 ＞ スキル ＞ 実物の証拠」になっていた。正しくは「**実物の証拠 ＞ スキル（固有知の結晶）＞ 自分の知識**」 |
+-
+-**真因の正体**: 会計の決定論（1円も狂わせない）は機械＝スキルの領域なのに、非決定論＝自分の推測・理論でやろうとした。[[at002-llm-self-driving]]（決定論への収束）と真逆で、CLAUDE.md 冒頭「スキル至上主義＝自分の知識でスキルを代替するな（全違反の真因＝過信）」そのもの。「弥生公式」の捏造も同根＝原典を確認せず手元の紙を権威化した。**原典照合の欠如という単一の真因**。
+-
+-**対策（「気をつける」は対策にあらず＝機構で固める）**:
+-1. 弥生CSVの書き出しは `yayoi-csv-format.js` 経由を唯一の正準とし、手書き `csv.writer` を禁止 → 評価器が「自作書き出しでないか」を判定
+-2. `ref-弥生仕訳ルール` に「書き出し器の正準＝`yayoi-csv-format.js`」を明記し、弥生CSV生成前に force-read
+-3. 「公式」と言う前に原典（URL／実機エクスポート）を必ず提示。出せないものを「公式」と呼ばない
+-4. **実物 ＞ スキル ＞ 自分の知識** を固定し、実物と自分の理論が食い違ったら無条件で実物を採る
+-
+----
+-
+ ## 関連
+ 
+-- ルール: `.claude/rules/troubleshooting/root-cause-first.md`（6ステップ＋8段仮説優先順位）
+-- ルール: `.claude/rules/global/work-first.md`（検証通過≠実データ完走）
+-- ルール: `.claude/rules/global/output-primacy.md`（「完了」の定義）
++- ルール: `docs/rules-reference/troubleshooting/root-cause-first.md`（6ステップ＋8段仮説優先順位）
++- ルール: `docs/rules-reference/global/work-first.md`（検証通過≠実データ完走）
++- ルール: `docs/rules-reference/global/output-primacy.md`（「完了」の定義）
+ - ドクトリン: `docs/core-doctrine.md`（柱2 Silent Interior / 柱3 Real Data First / 柱4 Segmented Sequencing）
+ - コマンド: `/dialogue-resolution`（AI迷走時）, `/grillme`（説明再分解）, `/bug-trace`（コードのバグ）
+ 
+diff --git a/.claude/commands/bug-quick.md b/.claude/commands/bug-quick.md
+index 9b44acb..dc7bb01 100644
+--- a/.claude/commands/bug-quick.md
++++ b/.claude/commands/bug-quick.md
+@@ -42,7 +42,7 @@ Bug QUICK (5-15 min) <-- THIS TOOL
+     |
+     +-- Complex --> Bug Trace (30-60 min)
+                         |
+-                        +-- Unresolved --> Bug Dialog
++                        +-- Unresolved --> /dialogue-resolution
+ ```
+ 
+ ---
+@@ -303,7 +303,7 @@ Options:
+ - Code behavior seems inconsistent with itself
+ - Performance or timing issues involved
+ 
+-**When to recommend Bug Dialog:**
++**When to recommend /dialogue-resolution:**
+ 
+ - AI keeps misunderstanding the same point
+ - Circular reasoning detected
+diff --git a/.claude/commands/bug-trace.md b/.claude/commands/bug-trace.md
+index 8205e81..5037005 100644
+--- a/.claude/commands/bug-trace.md
++++ b/.claude/commands/bug-trace.md
+@@ -1,6 +1,6 @@
+ ---
+ description: Bug Trace - 3-Agent parallel investigation for complex bugs
+-allowed-tools: Read, Glob, Grep, Task, AskUserQuestion, TodoWrite
++allowed-tools: Read, Glob, Grep, Task, AskUserQuestion
+ ---
+ 
+ # Bug Trace - 3-Agent Parallel Investigation v2.4
+@@ -25,7 +25,7 @@ Step 1: Error Collection + Past Bug Search
+     ↓
+ Step 2: 3-Agent Parallel Investigation
+     ↓
+-Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
++Step 2.5: Synthesis + Divergence Classification
+     ↓
+     ├─ Code Defect → Step 3: Visual Flow Diagrams
+     │                    ↓
+@@ -33,7 +33,7 @@ Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
+     │                    ↓
+     │               Step 8: Bug Report Generation
+     │
+-    └─ Spec Defect → Step 2.6: Spec Update Proposal  ← NEW in v2.4
++    └─ Spec Defect → Step 2.6: Spec Update Proposal
+                          ↓
+                     Spec Updated → End
+ ```
+@@ -46,28 +46,6 @@ Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
+ | **Code Agent** | Code Investigator | Implementation, data flow, state transitions |
+ | **Solution Agent** | Solution Architect | Hypothesis formation, resolution strategies |
+ 
+-### New in v2.0
+-- **Synthesis**: Deep analysis of 3-agent findings with cross-referencing
+-- **ASCII Flow Diagrams**: Visual representation of error flow (Input → Process → Error)
+-- **Reverse Trace Diagrams**: Error backtracking visualization
+-- **Divergence Analysis Box**: Side-by-side Expected vs Actual comparison
+-
+-### New in v2.1
+-- **Japanese Explanations**: Each diagram now includes mandatory Japanese explanations below the ASCII art
+-
+-### New in v2.2
+-- **Synthesis Japanese Explanation**: Root Cause section now includes detailed Japanese explanation
+-
+-### New in v2.3
+-- **Mandatory Output Requirements**: Japanese explanations are now mandatory (skip = step incomplete)
+-- **Bug Report Management**: Numbered reports saved for future reference
+-- **Past Bug Search**: Check for similar past bugs before investigation
+-
+-### New in v2.4
+-- **Divergence Classification**: Categorize issues as Code Defect, Spec Defect, Both, or Ambiguous
+-- **Step 2.6 Spec Update Proposal**: New flow for handling Spec Defects
+-- **Smart Next Action**: Classification determines whether to fix code or update specs
+-
+ ---
+ 
+ ## Prohibited Actions
+@@ -79,11 +57,9 @@ Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
+ 
+ ---
+ 
+-## MANDATORY OUTPUT REQUIREMENTS
+-
+-**The following outputs are REQUIRED. DO NOT skip or omit them.**
++## Japanese Explanations
+ 
+-### Japanese Explanations (4 locations)
++Put a Japanese explanation under each of these four outputs. The user reads the explanation, not the ASCII art, so a diagram without one is not finished.
+ 
+ | Step | Section | Required Output |
+ |------|---------|-----------------|
+@@ -92,12 +68,7 @@ Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
+ | Step 3 | Reverse Trace | `📝 **逆追跡解説**` |
+ | Step 3 | Divergence Analysis | `📝 **乖離分析解説**` |
+ 
+-**RULE: A Step is NOT complete until its Japanese explanation is output.**
+-
+-Before proceeding to the next step, verify:
+-- [ ] ASCII diagram generated
+-- [ ] Japanese explanation output below the diagram
+-- [ ] All template fields filled (no placeholders like `[xxx]`)
++Fill every template field; leave no `[xxx]` placeholders.
+ 
+ ---
+ 
+diff --git a/.claude/commands/cleanup-restore.md b/.claude/commands/cleanup-restore.md
+index 658814f..4ca556a 100644
+--- a/.claude/commands/cleanup-restore.md
++++ b/.claude/commands/cleanup-restore.md
+@@ -3,17 +3,17 @@ description: Restore files from cleanup archive
+ allowed-tools: Read, Write, Bash, Glob, AskUserQuestion
+ ---
+ 
+-# /cleanup:restore
++# /cleanup-restore
+ 
+ アーカイブされたファイルを元の場所に復元する。
+ 
+ ## Usage
+ 
+ ```
+-/cleanup:restore                    # セッション選択UI
+-/cleanup:restore {session-id}       # 特定セッションを復元
+-/cleanup:restore --all              # 全ファイル復元
+-/cleanup:restore --select           # ファイル個別選択
++/cleanup-restore                    # セッション選択UI
++/cleanup-restore {session-id}       # 特定セッションを復元
++/cleanup-restore --all              # 全ファイル復元
++/cleanup-restore --select           # ファイル個別選択
+ ```
+ 
+ ## Execution Flow
+diff --git a/.claude/commands/cleanup.md b/.claude/commands/cleanup.md
+index e89357c..89b65fb 100644
+--- a/.claude/commands/cleanup.md
++++ b/.claude/commands/cleanup.md
+@@ -1,6 +1,6 @@
+ ---
+ description: AI judgment-based project cleanup (materials organization + temp file archive)
+-allowed-tools: Task, Read, Write, Bash, Glob, Grep, AskUserQuestion, TodoWrite
++allowed-tools: Task, Read, Write, Bash, Glob, Grep, AskUserQuestion
+ ---
+ 
+ # /cleanup
+@@ -184,7 +184,7 @@ mv test_parser.js "${ARCHIVE_DIR}/files/"
+ - Size: 45.2KB
+ 
+ ### 復元方法
+-/cleanup:restore cleanup-20260102-150000
++/cleanup-restore cleanup-20260102-150000
+ ```
+ 
+ ## Safety Mechanisms
+@@ -195,19 +195,5 @@ gitで変更中のファイルは絶対に移動しない。
+ ### エラー時ロールバック
+ 途中エラー時は実行済み移動を元に戻す。
+ 
+-### タイムアウト
+-- 処理全体: 5分
+-- AI判断: 60秒（タイムアウト時は保守的に移動拒否）
+-
+-## Output Markers
+-
+-| Marker | Meaning |
+-|--------|---------|
+-| `CLEANUP_SCAN_COMPLETE` | スキャン完了 |
+-| `CLEANUP_ANALYSIS_COMPLETE` | AI分析完了 |
+-| `CLEANUP_EXECUTED` | 整理実行完了 |
+-| `CLEANUP_CANCELLED` | キャンセル |
+-| `CLEANUP_ERROR` | エラー発生 |
+-
+ ## Arguments
+ $ARGUMENTS
+diff --git a/.claude/commands/sd-deploy.md b/.claude/commands/sd-deploy.md
+index 7f759c7..1bd4bdd 100644
+--- a/.claude/commands/sd-deploy.md
++++ b/.claude/commands/sd-deploy.md
+@@ -1,362 +1,13 @@
+ ---
+ description: SD003フレームワークを新規プロジェクトに展開
+-allowed-tools: Read, Write, Bash, Glob
++allowed-tools: Read, Bash, Glob
+ ---
+ 
+-# SD003フレームワーク展開 v2.11.0
++# /sd-deploy
+ 
+-## 使用方法
+-
+-```
+-/sd:deploy <target-project-path>
+-```
++`.claude/skills/sd-deploy/SKILL.md` に従って展開する。コピーは `deploy.ps1` / `deploy.sh` が行い、手作業でファイルをコピーしない。
++先に dry-run で上書き対象（`WILL OVERWRITE`）を確認し、固有化ファイルは `.sd003-keep` で保護してから本実行する。
+ 
+ ## 入力
+ 
+ $ARGUMENTS
+-
+----
+-
+-## 🚨 重要: 選択的コピー禁止
+-
+-**絶対にファイルを選別してコピーしない。以下のリスト通りに全ファイルをコピーする。**
+-
+----
+-
+-## 実行手順（AIが自動実行）
+-
+-### Phase 1: 検証
+-
+-1. 対象プロジェクトパスの存在確認
+-2. 既存ファイルの有無確認
+-3. **ソースパス確認**: `D:\claudecode\sd003`
+-
+-### Phase 2: ディレクトリ作成
+-
+-```bash
+-# 全ディレクトリを作成
+-mkdir -p <target>/.claude/commands/sd
+-mkdir -p <target>/.claude/rules/global
+-mkdir -p <target>/.claude/rules/troubleshooting
+-mkdir -p <target>/.claude/rules/session
+-mkdir -p <target>/.claude/rules/workflow
+-mkdir -p <target>/.claude/rules/refactoring
+-mkdir -p <target>/.claude/rules/cleanup
+-mkdir -p <target>/.claude/rules/specs
+-mkdir -p <target>/.claude/rules/testing
+-mkdir -p <target>/.claude/rules/architecture
+-mkdir -p <target>/.claude/skills/dialogue-resolution
+-mkdir -p <target>/.claude/skills/dialogue-trigger
+-mkdir -p <target>/.claude/skills/context-autonomy
+-mkdir -p <target>/.claude/skills/session-autosave
+-mkdir -p <target>/.claude/skills/rollback-guard
+-mkdir -p <target>/.claude/skills/sd-deploy
+-mkdir -p <target>/.sd/specs
+-mkdir -p <target>/.sd/steering
+-mkdir -p <target>/.sessions
+-mkdir -p <target>/.sd/settings/templates
+-mkdir -p <target>/.sd/settings/rules
+-mkdir -p <target>/.sd/ai-coordination/workflow/templates
+-mkdir -p <target>/.sd/ai-coordination/workflow/spec
+-mkdir -p <target>/.sd/ai-coordination/workflow/review
+-mkdir -p <target>/.sd/ai-coordination/handoff
+-mkdir -p <target>/.sd/ids
+-mkdir -p <target>/docs/troubleshooting/bug-reports
+-mkdir -p <target>/materials/csv
+-mkdir -p <target>/materials/excel
+-mkdir -p <target>/materials/pdf
+-mkdir -p <target>/materials/images
+-mkdir -p <target>/materials/text
+-```
+-
+-### Phase 3: ファイルコピー（🚨 省略禁止）
+-
+-**ソース**: `D:\claudecode\sd003`
+-
+----
+-
+-#### 3-1. Commands直下（27ファイル）
+-
+-| # | ファイル | 必須 |
+-|---|---------|------|
+-| 1 | sessionread.md | 🚨 |
+-| 2 | sessionwrite.md | 🚨 |
+-| 3 | sessionhistory.md | 🚨 |
+-| 4 | bug-quick.md | 🚨 |
+-| 5 | bug-trace.md | 🚨 |
+-| 6 | dialogue-resolution.md | 🚨 |
+-| 7 | workflow-init.md | ✓ |
+-| 8 | workflow-order.md | ✓ |
+-| 9 | workflow-request.md | ✓ |
+-| 10 | workflow-status.md | ✓ |
+-| 11 | sd003-loop-test.md | ✓ |
+-| 12 | sd003-loop-lint.md | ✓ |
+-| 13 | sd003-loop-type.md | ✓ |
+-| 14 | ralph-wiggum-run.md | ✓ |
+-| 15 | ralph-wiggum-status.md | ✓ |
+-| 16 | ralph-wiggum-plan.md | ✓ |
+-| 17 | refactor-init.md | ✓ |
+-| 18 | refactor-plan.md | ✓ |
+-| 19 | refactor-batch.md | ✓ |
+-| 20 | refactor-rollback.md | ✓ |
+-| 21 | refactor-complete.md | ✓ |
+-| 22 | cleanup.md | ✓ |
+-| 23 | cleanup-restore.md | ✓ |
+-| 24 | cleanup-history.md | ✓ |
+-| 25 | spec-archive.md | ✓ |
+-| 26 | spec-history.md | ✓ |
+-| 27 | sd-deploy.md | ✓ |
+-
+----
+-
+-#### 3-2. Commands/sd/（15ファイル）
+-
+-| # | ファイル |
+-|---|---------|
+-| 1 | spec-init.md |
+-| 2 | spec-requirements.md |
+-| 3 | spec-design.md |
+-| 4 | spec-tasks.md |
+-| 5 | spec-impl.md |
+-| 6 | spec-status.md |
+-| 7 | spec-quick.md |
+-| 8 | validate-design.md |
+-| 9 | validate-gap.md |
+-| 10 | validate-impl.md |
+-| 11 | ai-request.md |
+-| 12 | ai-report.md |
+-| 13 | steering.md |
+-| 14 | steering-custom.md |
+-| 15 | deploy.md |
+-
+----
+-
+-#### 3-3. Rules（10ディレクトリ）
+-
+-| ディレクトリ | ファイル |
+-|-------------|----------|
+-| (root) | ralph-loop.md, README.md |
+-| global/ | quality-standards.md |
+-| troubleshooting/ | dialogue-resolution.md, bug-quick.md |
+-| session/ | session-management.md |
+-| workflow/ | ai-coordination.md |
+-| refactoring/ | refactoring-system.md |
+-| cleanup/ | file-organization.md |
+-| specs/ | spec-driven.md, spec-versioning.md |
+-| testing/ | testing-standards.md, production-data-tdd.md |
+-| architecture/ | adapter-core-pattern.md |
+-
+----
+-
+-#### 3-4. Skills（6フォルダ）
+-
+-| スキル | ファイル |
+-|--------|---------|
+-| dialogue-resolution/ | SKILL.md |
+-| dialogue-trigger/ | SKILL.md |
+-| context-autonomy/ | SKILL.md |
+-| session-autosave/ | SKILL.md |
+-| rollback-guard/ | SKILL.md |
+-| sd-deploy/ | SKILL.md, README.md |
+-
+----
+-
+-#### 3-5. Sessions（3ファイル）
+-
+-| ファイル | 処理 |
+-|---------|------|
+-| session-template.md | コピー |
+-| session-current.md | **新規作成**（下記テンプレート使用） |
+-| TIMELINE.md | **新規作成**（下記テンプレート使用） |
+-
+-**session-current.md テンプレート**:
+-```markdown
+-# Session Record
+-
+-## Session Info
+-- **Date**: [YYYY-MM-DD HH:MM:SS]
+-- **Project**: {PROJECT_NAME}
+-- **Branch**: main
+-- **Latest Commit**: (初期化時点)
+-
+-## Progress Summary
+-
+-### Completed
+-- SD003フレームワーク展開完了
+-
+-### In Progress
+-- (なし)
+-
+-### Unresolved Issues
+-- (なし)
+-
+-### Created/Modified Files
+-- SD003フレームワークファイル群
+-
+-### Next Session Tasks
+-- P0 (Urgent): なし
+-- P1 (Important): /sessionread で動作確認
+-- P2 (Normal): なし
+-
+-### Notes
+-SD003 v2.11.0 で初期化。
+-```
+-
+-**TIMELINE.md テンプレート**:
+-```markdown
+-# {PROJECT_NAME} - Project Timeline
+-
+-## Overview
+-- **Project**: {PROJECT_NAME}
+-- **Created**: {TIMESTAMP}
+-- **Framework**: SD003 v2.11.0
+-
+----
+-
+-## Timeline
+-
+-### {DATE} - Project Initialized
+-- SD003フレームワーク展開
+-- 初期セッション作成
+-```
+-
+----
+-
+-#### 3-6. Docs（4ファイル）
+-
+-| ファイル |
+-|---------|
+-| troubleshooting/RESOLUTION_LOG.md |
+-| troubleshooting/BUG_TRACE_LOG.md |
+-| troubleshooting/bug-quick-patterns.md |
+-| troubleshooting/bug-reports/BUG_INDEX.md |
+-
+----
+-
+-#### 3-7. AI-Coordination Templates（6ファイル）
+-
+-| ファイル |
+-|---------|
+-| workflow/templates/WORK_ORDER.md |
+-| workflow/templates/IMPLEMENT_REQUEST.md |
+-| workflow/templates/REVIEW_REPORT.md |
+-| workflow/templates/PROJECT_STATUS.md |
+-| workflow/templates/TEST_REQUEST.md |
+-| workflow/templates/TEST_REPORT.md |
+-| workflow/README.md |
+-| workflow/CODEX_GUIDE.md |
+-
+----
+-
+-### Phase 4: 検証（🚨 全項目確認必須）
+-
+-```bash
+-# === 必須ファイル確認 ===
+-
+-# Commands直下（6個の必須ファイル）
+-[ -f ".claude/commands/sessionread.md" ] && echo "✅ sessionread.md" || echo "❌ sessionread.md"
+-[ -f ".claude/commands/sessionwrite.md" ] && echo "✅ sessionwrite.md" || echo "❌ sessionwrite.md"
+-[ -f ".claude/commands/sessionhistory.md" ] && echo "✅ sessionhistory.md" || echo "❌ sessionhistory.md"
+-[ -f ".claude/commands/bug-quick.md" ] && echo "✅ bug-quick.md" || echo "❌ bug-quick.md"
+-[ -f ".claude/commands/bug-trace.md" ] && echo "✅ bug-trace.md" || echo "❌ bug-trace.md"
+-[ -f ".claude/commands/dialogue-resolution.md" ] && echo "✅ dialogue-resolution.md" || echo "❌ dialogue-resolution.md"
+-
+-# Commands/sd（3個サンプル確認）
+-[ -f ".claude/commands/sd/spec-init.md" ] && echo "✅ sd/spec-init.md" || echo "❌ sd/spec-init.md"
+-[ -f ".claude/commands/sd/deploy.md" ] && echo "✅ sd/deploy.md" || echo "❌ sd/deploy.md"
+-[ -f ".claude/commands/sd/steering.md" ] && echo "✅ sd/steering.md" || echo "❌ sd/steering.md"
+-
+-# Sessions（必須）
+-[ -f ".sessions/session-current.md" ] && echo "✅ session-current.md" || echo "❌ session-current.md"
+-[ -f ".sessions/TIMELINE.md" ] && echo "✅ TIMELINE.md" || echo "❌ TIMELINE.md"
+-
+-# ファイル数カウント
+-echo "--- File Counts ---"
+-echo "Commands直下: $(ls -1 .claude/commands/*.md 2>/dev/null | wc -l) files"
+-echo "Commands/sd: $(ls -1 .claude/commands/sd/*.md 2>/dev/null | wc -l) files"
+-echo "Rules: $(find .claude/rules -name '*.md' 2>/dev/null | wc -l) files"
+-echo "Skills: $(find .claude/skills -name '*.md' 2>/dev/null | wc -l) files"
+-```
+-
+-**期待値**:
+-| カテゴリ | 期待ファイル数 |
+-|---------|---------------|
+-| Commands直下 | 27 |
+-| Commands/sd | 15 |
+-| Rules | 14 |
+-| Skills | 7 |
+-
+-**❌が1つでもある場合は展開失敗 → 再実行**
+-
+----
+-
+-### Phase 5: レポート出力
+-
+-```
+-=== SD003展開完了 ===
+-
+-対象: {PROJECT_PATH}
+-バージョン: v2.11.0
+-日時: {TIMESTAMP}
+-
+-【コピーしたファイル数】
+-- Commands直下: 27個
+-- Commands/sd: 15個
+-- Rules: 14個
+-- Skills: 7個
+-- Docs: 4個
+-- Sessions: 3個（1コピー + 2新規作成）
+-- AI-Coordination: 8個
+-
+-合計: 78ファイル
+-
+-【検証結果】
+-✅ 全必須ファイル存在確認
+-✅ ファイル数一致確認
+-
+-【次のステップ】
+-1. 対象プロジェクトで /sessionread を実行
+-2. 動作確認
+-```
+-
+----
+-
+-## 注意事項
+-
+-### 🚨 絶対禁止事項
+-
+-1. **選択的コピー禁止** - 「これは不要そう」という判断をしない
+-2. **ディレクトリ省略禁止** - sd/サブフォルダを忘れない
+-3. **検証省略禁止** - Phase 4を必ず実行
+-
+-### 既存ファイルの扱い
+-
+-- 既存ファイルは上書きしない（バックアップ推奨）
+-- 上書きが必要な場合はユーザーに確認
+-
+-### session-current.md と TIMELINE.md
+-
+-- **新規作成する**（sd003からコピーしない）
+-- プロジェクト固有の初期内容を記載
+-
+----
+-
+-## トラブルシューティング
+-
+-### コマンドが認識されない
+-
+-1. `/sessionread` 実行
+-2. `.claude/commands/` 配下のファイル確認
+-3. 漏れがあれば手動コピー
+-
+-### 検証で❌が出た
+-
+-1. ソースパス `D:\claudecode\sd003` を確認
+-2. 該当ファイルを手動コピー
+-3. 再検証
+-
+----
+-
+-## 詳細ドキュメント
+-
+-`.claude/skills/sd-deploy/README.md`
+diff --git a/.claude/commands/sessionwrite.md b/.claude/commands/sessionwrite.md
+index 019bfb9..aaa55a0 100644
+--- a/.claude/commands/sessionwrite.md
++++ b/.claude/commands/sessionwrite.md
+@@ -125,7 +125,7 @@ $ARGUMENTS
+ 3. 完了メッセージ（Step 7）の末尾に1行で提案を追記
+ 
+ **ルール**: 非対話・非ブロッキング。AskUserQuestion禁止。保存フローを中断しない。
+-**詳細**: `.claude/rules/skills/learning-nudge.md`
++**詳細**: `docs/rules-reference/skills/learning-nudge.md`
+ 
+ ## Codex Handoff（並行保存）
+ 
+@@ -149,12 +149,11 @@ $ARGUMENTS
+ 
+ ```bash
+ git add .sessions/ .handoff/DONE.md
+-git commit -m "session: [1行サマリー]
+-
+-Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
++git commit -m "session: [1行サマリー]" -m "<system-reminder が指定する帰属行>"
++git pull --rebase && git push && git status
+ ```
+ 
+-post-commit hookが非同期pushを自動実行。
++帰属行はモデル名を固定せず、そのセッションの指示に従う。post-commit hook の自動pushは失敗が次のcommitまで見えないため、`git status` で up to date を確認する。
+ 
+ ---
+ 
+diff --git a/.claude/rules/cleanup/file-organization.md b/.claude/rules/cleanup/file-organization.md
+index dd812a1..e4852f6 100644
+--- a/.claude/rules/cleanup/file-organization.md
++++ b/.claude/rules/cleanup/file-organization.md
+@@ -10,7 +10,7 @@
+ 
+ ## ファイル保護（hook未整備のため文で維持・削減対象外）
+ 
+-- **rm 禁止**: 不要ファイルは `.sd/cleanup/archive/` へ移動（`/cleanup` 整理・`/cleanup:restore` 復元・`/cleanup:history` 履歴）
++- **rm 禁止**: 不要ファイルは `.sd/cleanup/archive/` へ移動（`/cleanup` 整理・`/cleanup-restore` 復元・`/cleanup-history` 履歴）
+ - **上書き禁止**: ユーザー提供ファイル・`materials/` 成果物・`.sd/ai-coordination/` 文書・`.sessions/` 記録は
+   上書きせず別名で新規作成（`_v2` 等）。スクリプト再生成時は事前にアーカイブへバックアップ
+   （背景: Excel上書きでレイアウト崩壊事故）
+diff --git a/.claude/rules/global/claude-md-style.md b/.claude/rules/global/claude-md-style.md
+index 2f1f191..462e906 100644
+--- a/.claude/rules/global/claude-md-style.md
++++ b/.claude/rules/global/claude-md-style.md
+@@ -9,7 +9,7 @@ paths:
+ 
+ ## 原則
+ 
+-CLAUDE.mdは**200行以下**に保ち、条件付きブロック（IMPORTANT IF/When）で文脈を制御する。
++CLAUDE.mdは**200行以下**に保ち、条件付きブロック（When {条件}）で文脈を制御する。
+ 詳細は `.claude/rules/` に委譲し、CLAUDE.mdは方針とルーティングのみを担う。
+ 
+ ## 構造
+@@ -25,8 +25,8 @@ CLAUDE.mdは**200行以下**に保ち、条件付きブロック（IMPORTANT IF/
+   - ファイル安全ルール
+ 
+ ## Conditional Context（条件付き・~80行）
+-  IMPORTANT: When {条件}, {ルール要約}. Details: {rules/パス}
+-  IMPORTANT: When {条件}, {ルール要約}. Details: {rules/パス}
++  When {条件}, {ルール要約}. Details: {rules/パス}
++  When {条件}, {ルール要約}. Details: {rules/パス}
+   ...
+ 
+ ## Quick Command Reference（参照・~20行）
+@@ -39,20 +39,26 @@ CLAUDE.mdは**200行以下**に保ち、条件付きブロック（IMPORTANT IF/
+ 
+ ### 構文
+ ```
+-IMPORTANT: When {具体的な条件}, {守るべきルール}. Details: {詳細ファイルパス}
++When {具体的な条件}, {守るべきルール}. Details: {詳細ファイルパス}
++```
++
++`IMPORTANT:` 等の強調は付けない。全ブロックに付けると強調が情報を失い、現行モデルでは過剰適用を招く。
++強調は、実測で守られなかった1ルールに限って理由と一緒に付ける。
++
++```
+ ```
+ 
+ ### 良い例（条件が狭く具体的）
+ ```
+-IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern.
+-IMPORTANT: When coordinating with other AIs, all documents go to `.sd/ai-coordination/`.
+-IMPORTANT: If a file operation involves Excel/CSV/PDF, check `.claude/skills/` first.
++When writing or modifying GAS code, use Env Interface Pattern.
++When coordinating with other AIs, all documents go to `.sd/ai-coordination/`.
++If a file operation involves Excel/CSV/PDF, check `.claude/skills/` first.
+ ```
+ 
+ ### 悪い例（条件が広すぎて常時発火 = 効果なし）
+ ```
+-IMPORTANT: When you are writing code, follow best practices.
+-IMPORTANT: When working on this project, be careful.
++When you are writing code, follow best practices.
++When working on this project, be careful.
+ ```
+ 
+ ## ルール
+@@ -67,5 +73,5 @@ IMPORTANT: When working on this project, be careful.
+ 
+ ## デプロイ時の適用
+ 
+-`/sd:deploy` でCLAUDE.mdテンプレートを生成する際、この規約に従う。
++`/sd-deploy` でCLAUDE.mdテンプレートを生成する際、この規約に従う。
+ deploy.ps1のPhase 5でテンプレートから生成されるCLAUDE.mdは200行以下であること。
+diff --git a/.claude/rules/global/quality-standards.md b/.claude/rules/global/quality-standards.md
+index b78b3da..61a0c5a 100644
+--- a/.claude/rules/global/quality-standards.md
++++ b/.claude/rules/global/quality-standards.md
+@@ -12,7 +12,7 @@ paths:
+ **全ての品質基準は「動くソフトウェア」が存在することが前提。**
+ 動かないソフトウェアに品質基準を適用しても意味がない。
+ 
+-詳細: `.claude/rules/global/work-first.md`
++詳細: `docs/rules-reference/global/work-first.md`
+ 
+ ## TypeScript
+ - strict mode必須
+@@ -21,8 +21,6 @@ paths:
+ 
+ ## テスト
+ - **前提: 対象ソフトウェアが実環境で動作確認済みであること**
+-- カバレッジ80%以上（動いてから計測）
+-- ユニット/統合/E2E全層
+ - **テストの唯一の目的は本番エラーの発見と修正**（詳細: `.claude/rules/testing/testing-standards.md`）
+ - テストデータ品質の自動検証: `npm run test:validate-data`（VTD-001〜005）
+ 
+diff --git a/.claude/rules/skills/skill-trust-policy.md b/.claude/rules/skills/skill-trust-policy.md
+index c899956..80d8b2a 100644
+--- a/.claude/rules/skills/skill-trust-policy.md
++++ b/.claude/rules/skills/skill-trust-policy.md
+@@ -58,9 +58,9 @@ Cautionレベルのスキルをインストールする前に以下を確認:
+ 
+ | コマンド | 説明 |
+ |---------|------|
+-| `/skills:find {query}` | スキル検索 |
+-| `/skills:add {owner/repo}` | スキルインストール |
+-| `/skills:list` | インストール済み一覧 |
++| `/sd:skills-find {query}` | スキル検索 |
++| `/sd:skills-add {owner/repo}` | スキルインストール |
++| `/sd:skills-list` | インストール済み一覧 |
+ 
+ ## 全AIモデル共通
+ 
+diff --git a/.claude/rules/specs/spec-driven.md b/.claude/rules/specs/spec-driven.md
+index deb914d..370b853 100644
+--- a/.claude/rules/specs/spec-driven.md
++++ b/.claude/rules/specs/spec-driven.md
+@@ -10,10 +10,9 @@ description: 仕様書駆動開発（常時適用 / paths制約なし）
+ | メイン仕様 | `spec.md`（**`design.md` 禁止** — Google Antigravity が UI 設計用に予約済み） |
+ | 構成 | spec.json / requirements.md / spec.md / tasks.md / implementation-notes.md（逸脱発生時のみ）/ history/ |
+ | tasks.md | 変わりやすい判断（データモデル・型・ユーザー可視部分）を先頭に並べる |
+-| バージョン | 最新は単一ファイル。履歴は `/spec:archive {feature}` で history/ へ |
++| バージョン | 最新は単一ファイル。履歴は `/spec-archive {feature}` で history/ へ |
+ 
+ - 仕様書なしの実装・仕様書の無断変更は禁止。変更時は影響分析必須
+ - implementation-notes.md は Unknown-Undetected の事後回収先を兼ねる
+-- 検証: `/sd:spec-status` `/sd:validate-gap` `/sd:validate-spec`
+ 
+ 詳細・経緯（at001-v1事故 2026-05-07）: `docs/rules-reference/specs/spec-driven-full.md`
+diff --git a/.claude/rules/specs/spec-versioning.md b/.claude/rules/specs/spec-versioning.md
+index 2eb3ce4..4b6c18f 100644
+--- a/.claude/rules/specs/spec-versioning.md
++++ b/.claude/rules/specs/spec-versioning.md
+@@ -41,9 +41,9 @@ paths:
+ 
+ | タイミング | 説明 | コマンド |
+ |------------|------|----------|
+-| 仕様変更前 | 大きな変更を加える前 | `/spec:archive {feature} {file}` |
+-| マイルストーン完了 | フェーズ完了時 | `/spec:archive {feature}` |
+-| 手動トリガー | 明示的な保存 | `/spec:archive {feature}` |
++| 仕様変更前 | 大きな変更を加える前 | `/spec-archive {feature} {file}` |
++| マイルストーン完了 | フェーズ完了時 | `/spec-archive {feature}` |
++| 手動トリガー | 明示的な保存 | `/spec-archive {feature}` |
+ 
+ ## spec.json履歴セクション
+ 
+@@ -99,8 +99,8 @@ paths:
+ 
+ | コマンド | 説明 |
+ |----------|------|
+-| `/spec:archive {feature} [file]` | 履歴保存（fileなしで全ファイル） |
+-| `/spec:history {feature}` | 履歴一覧表示 |
++| `/spec-archive {feature} [file]` | 履歴保存（fileなしで全ファイル） |
++| `/spec-history {feature}` | 履歴一覧表示 |
+ 
+ ## 関連ルール
+ 
+diff --git a/.claude/rules/testing/testing-standards.md b/.claude/rules/testing/testing-standards.md
+index 809c1a7..50e5162 100644
+--- a/.claude/rules/testing/testing-standards.md
++++ b/.claude/rules/testing/testing-standards.md
+@@ -56,10 +56,8 @@ describe('対象', () => {
+ - 本番/ステージング環境でのUI確認
+ - **`gas-e2e` スキル（`.claude/skills/gas-e2e/`）を使用すること**
+ - 初回セットアップ: `npm run e2e:setup`（Playwrightブラウザ + E2Eプロファイル作成）
+-- **GAS Web App → Mode 1 (claude-in-chrome) を最優先**（認証済み、セットアップ不要）
+-- スクリプト制御が必要な場合 → Mode 2 (connect_over_cdp)
+-- CI/CD環境 → Mode 3 (persistent_context)
+-- `/workflow:test` で TEST_REQUEST を作成し、Antigravityに委譲も可能
++- モード選択は `gas-e2e` スキルに従う（iframe内操作 → Mode 2 chrome-devtools-mcp / 外観確認のみ → Mode 1 claude-in-chrome / Playwright制御 → Mode 3 connect_over_cdp / CI → Mode 4 persistent_context）
++- Antigravity に委譲する場合は `agy-dispatch` スキルを使う
+ - ローカルWeb Appのテストには `webapp-testing` スキルを使用（Anthropic公式）
+ 
+ ### Tier選択基準
+@@ -68,7 +66,7 @@ describe('対象', () => {
+ | Core ビジネスロジック | Tier-1 | Claude Code |
+ | GAS API統合（Properties, Cache） | Tier-2 | Claude Code |
+ | GAS API統合（Sheets, Drive） | Tier-2（GCP認証時）/ Tier-3 | Claude Code / Antigravity |
+-| UI・フロー確認 | Tier-3 | **Antigravity**（`/workflow:test`） |
++| UI・フロー確認 | Tier-3 | **Antigravity**（`agy-dispatch`） |
+ | ローカルWeb App | `webapp-testing` スキル | Claude Code |
+ 
+ ## ⛔ テストの前提条件（Work First原則）
+diff --git a/.claude/rules/workflow/ai-coordination.md b/.claude/rules/workflow/ai-coordination.md
+index ee586d5..a88960e 100644
+--- a/.claude/rules/workflow/ai-coordination.md
++++ b/.claude/rules/workflow/ai-coordination.md
+@@ -6,15 +6,9 @@ paths:
+ 
+ # AI協調体制（軽量ディスパッチ版）
+ 
+-> **2026-07-05 変更**: 旧「7段階ワークフロー」（`/workflow:init/order/request/impl/review/test/status` による
+-> WORK_ORDER→IMPLEMENT_REQUEST→REVIEW_REPORT→TEST_REQUEST の自動連鎖）は**過剰設計として撤去**した。
+-> 現在のモデルは実装→失敗→修正→再実行を自己完結でき、書面受け渡しの儀式は不要。各AIへは
+-> **軽量CLIディスパッチで直接依頼**する。旧コマンド・テンプレ機構は
+-> `_archive/removed-overengineering-20260705/` にアーカイブ（git履歴で復元可）。
+->
+-> **2026-07-12 変更**: Grok **Lead mode** を正式採用。司令塔は「常に Claude」ではなく
+-> **そのセッションを開いた入口 CLI** に紐づく。Grok は汎用控えではなく、
+-> Lead / 探索実装 / 独立検証 / 調査主導の第一候補になりうる。
++各AIへは軽量CLIディスパッチ（codex-dispatch / grok-dispatch / agy-dispatch）で直接依頼する。
++書面を連鎖させる7段階ワークフロー（`/workflow:*`）は存在しない。
++司令塔（Session Lead）はそのセッションを開いた入口 CLI であり、Grok も Lead になりうる。
+ 
+ ## 司令塔ルール（Session Lead）
+ 
+diff --git a/.claude/skills/blueprint-gate/SKILL.md b/.claude/skills/blueprint-gate/SKILL.md
+index 24159f1..f2a5d57 100644
+--- a/.claude/skills/blueprint-gate/SKILL.md
++++ b/.claude/skills/blueprint-gate/SKILL.md
+@@ -5,20 +5,13 @@ description: |
+   Use when: ユーザーが /blueprint-gate を実行した時、
+   「要件定義」「設計」「何を作るか整理したい」「開発の前に整理」「Blueprint Gate」と言及した時、
+   または1時間以上かかりそうなタスクの着手前。
+-allowed-tools: Read, Glob, Grep, AskUserQuestion, Write
++allowed-tools: Read, Glob, Grep, AskUserQuestion, Write, Bash
+ ---
+ 
+ # Blueprint Gate v1.0
+ 
+ 開発・制作に入る前に、あみおの思考をゴールから逆順で引き出し、正攻法の要件定義書として整形するスキル。
+ 
+-## このスキルが生まれた背景
+-
+-- Opus 4.6の出力を信頼しすぎて前提確認を怠り、修正の連続になった
+-- Codexレビューがあるからと安心し、自分の判断介入が遅れた
+-- ゴールとアウトプットを定義せずにAIを走らせて時間を溶かした
+-- 他人のリポジトリを参考にした設計プロセスが自分の感覚に合わなかった
+-
+ ## 適用基準
+ 
+ 以下のいずれかに該当する場合、Blueprint Gate必須:
+@@ -145,7 +138,7 @@ AIは関連コード／ドメインを**実際に読んでから**、1回だけ
+ 
+ ### 生成手順
+ 
+-1. markdown要件定義書を `.sd/specs/{feature}/requirements.md` に保存（AI向け、既存通り）
++1. markdown要件定義書を `.sd/specs/{feature}/requirements.md` に保存（AI向け）。`.sd/` は Write/Edit が hook でブロックされるため、scratchpad に Write → Bash で `cp` し、すぐ commit する（`.claude/rules/git/sd-safe-commit.md`）
+ 2. HTML版を `materials/html/{feature}-blueprint.html` に生成（人間向け）
+ 3. AskUserQuestion でHTML版のフルパスを案内し、ブラウザで確認を促す
+ 
+@@ -171,7 +164,6 @@ AIは関連コード／ドメインを**実際に読んでから**、1回だけ
+ ## 出力テンプレート（要件定義書）
+ 
+ 5フェーズ完了後、以下の構成でマークダウンファイルを生成する。
+-保存先はあみおに確認する。
+ 
+ ```markdown
+ # [プロジェクト名] 要件定義書
+diff --git a/.claude/skills/codex-dispatch/SKILL.md b/.claude/skills/codex-dispatch/SKILL.md
+index d4e135f..031bc85 100644
+--- a/.claude/skills/codex-dispatch/SKILL.md
++++ b/.claude/skills/codex-dispatch/SKILL.md
+@@ -8,12 +8,8 @@ allowed-tools: Bash, Read, Write
+ 
+ Claude Code から Codex CLI (`codex exec`) にタスクを渡す正準スキル。
+ 
+-> ⚠️ **2026-05-26 事故対策（必読・二度と同じ間違いをしないため）**
+-> 旧版（user-global の codex-dispatch）は `codex exec "..." 2>&1 | tee` を教えていた。これが**全失敗の原因**:
+-> codex は **進捗・テレメトリを stderr に、最終回答だけを stdout に**出す。
+-> `2>&1` で stderr を混ぜると DEBUG/OpenTelemetry ログが数MB〜10MB流入し最終回答が埋もれる（実測9.2MB）。
+-> さらに `config.toml` の `model_reasoning_effort=xhigh` が既定だと **遅すぎてタイムアウト**（RAM逼迫時は確実に落ちる）。
+-> → 下記「正準コマンド」を**必ず**使う。素の `codex exec ... 2>&1 | tee` は禁止。
++codex は進捗・テレメトリを stderr に、最終回答だけを stdout に出す。`2>&1` で混ぜると数MBのログが回答を埋めるため、
++下記の正準コマンドを使う。effort は `medium` を明示する（既定 `xhigh` はタイムアウトしやすい）。
+ 
+ ## 正準コマンド（これだけ使う）
+ 
+diff --git a/.claude/skills/find-duplicates/SKILL.md b/.claude/skills/find-duplicates/SKILL.md
+index cf8c4ba..010ebd1 100644
+--- a/.claude/skills/find-duplicates/SKILL.md
++++ b/.claude/skills/find-duplicates/SKILL.md
+@@ -80,18 +80,6 @@ Phase 1の候補ペアをLLM（Claude）で意図分析する。
+ 4. レポートを出力
+ ```
+ 
+-### `/refactor:init` からの連携
+-
+-`/refactor:init` の Pattern Agent が本スキルを参照して重複検出を実行:
+-
+-```
+-/refactor:init {scope}
+-  └── Pattern Agent
+-        └── find-duplicates スキルを適用
+-              ├── Phase 1: 関数抽出
+-              └── Phase 2: 意図クラスタリング
+-```
+-
+ ## 出力フォーマット
+ 
+ ```markdown
+diff --git a/.claude/skills/gas-e2e/SKILL.md b/.claude/skills/gas-e2e/SKILL.md
+index 83788c1..0d0bdf5 100644
+--- a/.claude/skills/gas-e2e/SKILL.md
++++ b/.claude/skills/gas-e2e/SKILL.md
+@@ -182,7 +182,7 @@ Step 5: gif_creator で操作記録（必要に応じて）
+ ### 接続方式: autoConnect（唯一の推奨方式）
+ 
+ **前提条件（初回のみ1回だけ設定）:**
+-1. Chrome **144以上**であること（現環境: 145 ✅）
++1. Chrome **144以上**であること（`chrome://version` で確認）
+ 2. Chromeで `chrome://inspect/#remote-debugging` を開く
+ 3. リモートデバッグ接続を有効にする（UIの指示に従う）
+ 4. MCP接続時にChromeが許可ダイアログを表示 → 許可する
+@@ -347,21 +347,20 @@ if (-not (Test-Path $dst)) {
+     --user-data-dir="D:\playwright-browsers\chrome-debug-profile"
+ ```
+ 
+-### AIの自律実行手順
++### AIの実行手順
++
++Chrome の終了はユーザーの作業を壊すため AI が行わない。AskUserQuestion で Chrome を閉じてもらい、閉じたと回答を得てから以下を実行する。
+ 
+ ```bash
+-# Step 1: Chromeプロセスを終了
+-powershell.exe -Command "Stop-Process -Name chrome -Force -ErrorAction SilentlyContinue"
+-sleep 3
+ 
+-# Step 2: プロファイルコピー（初回のみ）
++# Step 1: プロファイルコピー（初回のみ）
+ SRC="$LOCALAPPDATA/Google/Chrome/User Data"
+ DST="D:/playwright-browsers/chrome-debug-profile"
+ if [ ! -d "$DST" ]; then
+     cp -r "$SRC" "$DST"
+ fi
+ 
+-# Step 3: コピーしたプロファイルでChromium起動（Chromeでも可）
++# Step 2: コピーしたプロファイルでChromium起動（Chromeでも可）
+ # Chromium（事前インストール済み）を使用
+ "D:/playwright-browsers/chromium-1194/chrome-win/chrome.exe" \
+     --remote-debugging-port=9222 \
+@@ -369,7 +368,7 @@ fi
+ # または Chrome: "/c/Program Files/Google/Chrome/Application/chrome.exe" \
+ #     --remote-debugging-port=9222 --user-data-dir="D:/playwright-browsers/chrome-debug-profile" &
+ 
+-# Step 4: 接続確認（最大3回リトライ）
++# Step 3: 接続確認（最大3回リトライ）
+ for i in 1 2 3; do
+     sleep 3
+     if curl -s http://localhost:9222/json/version > /dev/null 2>&1; then
+diff --git a/.claude/skills/git-worktrees/SKILL.md b/.claude/skills/git-worktrees/SKILL.md
+index fb27793..0d5b464 100644
+--- a/.claude/skills/git-worktrees/SKILL.md
++++ b/.claude/skills/git-worktrees/SKILL.md
+@@ -17,15 +17,15 @@ allowed-tools:
+ 
+ Git Worktreeを使い、メインの作業ディレクトリを汚さずに並列作業を行うためのガイド。
+ SD003のCLAUDE.mdで推奨される「git worktreeでの分離作業」を安全に自動化する。
++worktree はブランチ作成を伴うため、ユーザーが指示したときだけ使う（Solo運用は master 直接作業）。
+ 
+ ## いつ使うか
+ 
+ | ケース | 説明 |
+ |--------|------|
+ | 並列実装 | メインブランチを保ちながら別機能を実装 |
+-| `/workflow:impl` | Antigravity(agy)がworktreeで作業する場合 |
++| agy委譲 | `agy-dispatch` で Antigravity に worktree 内で作業させる場合 |
+ | 実験的変更 | メインを壊さずに大規模変更を試す |
+-| リファクタリング | `/refactor:batch` の安全な実行環境 |
+ 
+ ## Phase 1: ディレクトリ選択
+ 
+@@ -111,17 +111,6 @@ Agent toolの `isolation: "worktree"` パラメータでもworktreeが自動作
+ | `Agent(isolation: "worktree")` | サブエージェントが自動worktreeで作業 |
+ | 本スキルの手順 | 上記で対応できない複雑なケース |
+ 
+-## AI協調でのworktree活用
+-
+-### `/workflow:impl` でAntigravity(agy)がworktreeを使うケース
+-
+-```
+-1. Claude Code: worktreeを作成（Phase 1-3）
+-2. Claude Code: IMPLEMENT_REQUEST に worktreeパスを記載
+-3. Antigravity(agy): worktree内で実装
+-4. Claude Code: 実装結果をメインにマージ（Phase 4）
+-```
+-
+ ## 禁止事項
+ 
+ | 禁止 | 理由 |
+diff --git a/.claude/skills/grok-dispatch/SKILL.md b/.claude/skills/grok-dispatch/SKILL.md
+index ce51d14..02209a0 100644
+--- a/.claude/skills/grok-dispatch/SKILL.md
++++ b/.claude/skills/grok-dispatch/SKILL.md
+@@ -99,10 +99,3 @@ CC が回すのが不安定（RAM<5GB・既存agy/codex稼働・2回連続失敗
+ - 結果は CC 側でレビューしてから適用する。
+ - 顧客データの外部送信に注意（OCR等の外部送信はユーザー `!` 実行）。
+ - Windows/pwsh 前提。`grok.exe` は Windows ネイティブのため `.ps1` ラッパーを使う。
+-
+-## 改訂履歴
+-
+-| 版 | 日付 | 内容 |
+-|---|------|------|
+-| 0.1 | 2026-06-28 | 初版。実測で正準invocation確定（`--output-format plain`・`--prompt-file`・stdout/stderr分離・`-m grok-build`）。codex-dispatch をミラーし grok-run.ps1 を追加。Grok自身による計画レビューを反映 |
+-| 0.2 | 2026-07-12 | Lead mode 正式採用に合わせ Assist 専用と明記。Lead は GROK_NATIVE / GROK_GUIDE へ |
+diff --git a/.claude/skills/parallel-subagents/SKILL.md b/.claude/skills/parallel-subagents/SKILL.md
+index 4a2bdca..87a0c10 100644
+--- a/.claude/skills/parallel-subagents/SKILL.md
++++ b/.claude/skills/parallel-subagents/SKILL.md
+@@ -25,7 +25,7 @@ Claude Code内のAgent toolを使い、複数のサブエージェントを並
+ 
+ | 領域 | 仕組み | 使うもの |
+ |------|--------|---------|
+-| 外部AI並列 | Claude Code → Gemini/Codex/Antigravity | AI協調体制（`/workflow:*`） |
++| 外部AI並列 | Claude Code → Gemini/Codex/Antigravity | codex-dispatch / grok-dispatch / agy-dispatch スキル |
+ | **内部並列** | Claude Code → Agent tool × N | **本スキル** |
+ 
+ ## 適用判断フロー
+@@ -57,7 +57,6 @@ Agent("ファイルCの構造を調査", subagent_type="Explore")
+ 
+ | コマンド | 並列タスク |
+ |---------|-----------|
+-| `/refactor:init` | Scope Agent + Pattern Agent + Risk Agent |
+ | `/bug-trace` | 多ファイル同時調査 |
+ | コードレビュー | 複数ファイルの同時読解 |
+ 
+diff --git a/.claude/skills/sd-deploy/SKILL.md b/.claude/skills/sd-deploy/SKILL.md
+index f363449..4c5c745 100644
+--- a/.claude/skills/sd-deploy/SKILL.md
++++ b/.claude/skills/sd-deploy/SKILL.md
+@@ -79,7 +79,7 @@ dry-run は以下を一覧表示する（無変更）:
+ ## 使用方法
+ 
+ ```
+-/sd:deploy <target-project-path>
++/sd-deploy <target-project-path>
+ ```
+ 
+ ## 実行手順
+@@ -192,7 +192,6 @@ aa001 に渡っていた）。
+ | 14 | `scripts/sync-cli-commands.py`（agy/codex skill生成器） | 単体コピー |
+ | 15 | `scripts/verify-deployment.mjs`（Phase 6b 内容検証ゲート） | 単体コピー |
+ | 16 | `AGENTS.md` | 単体コピー |
+-| 18 | `.sd/steering/` | ツリーコピー |
+ | 20 | `tests/gas-fakes/setup.ts` | 単体コピー |
+ | 21 | `.git/hooks/` | templates/git-hooks/ からコピー（自動push + .sd/自動ステージ） |
+ 
+diff --git a/.claude/skills/sd-upgrade/SKILL.md b/.claude/skills/sd-upgrade/SKILL.md
+index bcafd24..324d5dd 100644
+--- a/.claude/skills/sd-upgrade/SKILL.md
++++ b/.claude/skills/sd-upgrade/SKILL.md
+@@ -92,7 +92,7 @@ CLAUDE.md
+ package.json
+ ```
+ 
+-### dry-run が正直になった（誤報の根絶）
++### dry-run の表示
+ 
+ dry-run は deploy に委譲し、**上書きで失われる固有化ファイルを必ず一覧表示する**:
+ - `WILL OVERWRITE - LOCAL CUSTOMIZATION WILL BE LOST`（内容差分あり＝消える）
+@@ -105,12 +105,11 @@ dry-run は deploy に委譲し、**上書きで失われる固有化ファイ
+ 3. /sd-upgrade <target> --execute  # 保護したものは残り、廃止物は削除、残りは最新化
+ ```
+ execute 後は「OVERWROTE local divergence（バックアップ済み）」が報告される。
+-**もはや "UPGRADE OK / 全部無傷" とは誤報しない。**
+ 
+ ## 安全装置
+ 
+ - **dry-run 既定**：`--execute` なしは一切変更しない
+-- **divergence 可視化（正直化）**：dry-run が「上書きで失われる固有化ファイル」を一覧。execute 後も上書きした divergence を報告。**"全部無傷" と誤報しない**
++- **divergence 可視化**：dry-run が「上書きで失われる固有化ファイル」を一覧。execute 後も上書きした divergence を報告
+ - **オプトアウト保護**：`.sd003-keep` 記載の FW ファイルは上書きしない（バックアップに頼らず最初から守る）
+ - **全バックアップ**：削除対象は消す前に `.sd003-upgrade-backup-*/` へ移動（元のパス構造を保持＝復元可能）。deploy 側の上書き分は `.sd003-backup-*/`
+ - **明示的DELETE list**：全走査での削除はしない。既知の廃止物のみ。`.agent`≠`.agents` を厳密に区別
+@@ -129,7 +128,7 @@ execute 後は「OVERWROTE local divergence（バックアップ済み）」が
+ いたことが判明）。upgrade完了後、Phase 6 として以下を必須実行する:
+ 
+ - 対象パターンごとに `<target>/` 直下を走査し、**同一パターンが2個以上あれば**タイムスタンプ最新の1個を
+-  残し、残りを `<target>/.sd/cleanup/archive/<YYYYMMDD>/` へ**移動**する（`rm` 等の削除は禁止。常に
++  残し、残りを `<target>/.sd003-archive/<YYYYMMDD>/` へ**移動**する（`rm` 等の削除は禁止。常に
+   archive-then-remove）
+ - `upgrade.ps1` の Phase 6 として実装済み。`--execute` 実行時のみ動く（dry-runでは走らない）
+ - 移動のみで削除はしないため、必要ならアーカイブから復元可能
+diff --git a/CLAUDE.md b/CLAUDE.md
+index cfeece9..4e2d102 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -69,55 +69,55 @@ SD003 の全判断の根拠。詳細: `docs/core-doctrine.md`
+ 
+ ## Conditional Context
+ 
+-IMPORTANT: タスクの「完了」判定は柱1 — ユーザーが見る画面/成果物が存在し検証済みであること。画面ゼロは進捗ゼロ。Details: `docs/rules-reference/global/output-primacy.md`
++タスクの「完了」判定は柱1 — ユーザーが見る画面/成果物が存在し検証済みであること。画面ゼロは進捗ゼロ。Details: `docs/rules-reference/global/output-primacy.md`
+ 
+-IMPORTANT: 内部設計（adapter/core/interface/types）は柱2 — 動くアウトプットが先、内部パターンは安定後。types→interface→adapter→core の順で始めない。Details: `docs/rules-reference/global/silent-interior.md`
++内部設計（adapter/core/interface/types）は柱2 — 動くアウトプットが先、内部パターンは安定後。types→interface→adapter→core の順で始めない。Details: `docs/rules-reference/global/silent-interior.md`
+ 
+-IMPORTANT: テストは柱3 — 本番バグの再現・固定時のみ、実データ（またはコピー）で書く。モック・カバレッジ目標・テストのためのテストは禁止（VTD-001〜005自動検出）。Adapter層のみ本番データコピーで徹底検証。Details: `docs/rules-reference/global/real-data-first.md`, `.claude/rules/testing/`
++テストは柱3 — 本番バグの再現・固定時のみ、実データ（またはコピー）で書く。モック・カバレッジ目標・テストのためのテストは禁止（VTD-001〜005自動検出）。Adapter層のみ本番データコピーで徹底検証。Details: `docs/rules-reference/global/real-data-first.md`, `.claude/rules/testing/`
+ 
+-IMPORTANT: 段取りは柱4 — 非ブロッキング（tsc/lint/test/dev server/スクショ）を連続実行し、ユーザー確認は AskUserQuestion で末端に1回。確認の省略も毎ステップ確認も禁止。Details: `docs/rules-reference/global/segmented-sequencing.md`
++段取りは柱4 — 非ブロッキング（tsc/lint/test/dev server/スクショ）を連続実行し、ユーザー確認は AskUserQuestion で末端に1回。確認の省略も毎ステップ確認も禁止。Details: `docs/rules-reference/global/segmented-sequencing.md`
+ 
+-IMPORTANT: タスク開始時に分岐判定 — GAS（Google Workspaceアプリ）/ Cowork（SD003自体）/ Sukima Digital（業務設計）。AI直接実行で済むものは作らない。Details: `docs/rules-reference/global/project-branching.md`, `docs/development-philosophy.md`
++タスク開始時に分岐判定 — GAS（Google Workspaceアプリ）/ Cowork（SD003自体）/ Sukima Digital（業務設計）。AI直接実行で済むものは作らない。Details: `docs/rules-reference/global/project-branching.md`, `docs/development-philosophy.md`
+ 
+-IMPORTANT: 非自明な作業の着手前・完了宣言前に無知の知（Known Unknowns）— 知らないことを先に宣言する。GREEN=証拠確認済 / YELLOW=要確認（条文・実データ・コードで確認後に昇格）/ RED=想定外乖離→`/bug-trace`。blindspot pass は1問のみ、フォーム化・儀式化は禁止。未知の宣言は報酬であり罰しない。Details: `docs/rules-reference/global/known-unknowns.md`
++非自明な作業の着手前・完了宣言前に無知の知（Known Unknowns）— 知らないことを先に宣言する。GREEN=証拠確認済 / YELLOW=要確認（条文・実データ・コードで確認後に昇格）/ RED=想定外乖離→`/bug-trace`。blindspot pass は1問のみ、フォーム化・儀式化は禁止。未知の宣言は報酬であり罰しない。Details: `docs/rules-reference/global/known-unknowns.md`
+ 
+-IMPORTANT: Blueprint Gate必須ライン（1時間超/ゴール未定義）の実装完了主張には Quiz Gate — `/codex:review` で Evaluator が差分に即したクイズを1〜3問出題。自己申告のみは証拠ゼロ。fail-open（警告のみ、マージブロックしない）。Details: `docs/rules-reference/global/quiz-gate.md`
++Blueprint Gate必須ライン（1時間超/ゴール未定義）の実装完了主張には Quiz Gate — `/codex:review` で Evaluator が差分に即したクイズを1〜3問出題。自己申告のみは証拠ゼロ。fail-open（警告のみ、マージブロックしない）。Details: `docs/rules-reference/global/quiz-gate.md`
+ 
+-IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. iframe/CORS/@HEAD等の既知制約は即コードに反映。Details: `.claude/rules/gas/`
++When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. iframe/CORS/@HEAD等の既知制約は即コードに反映。Details: `.claude/rules/gas/`
+ 
+-IMPORTANT: AI協調文書は `.sd/ai-coordination/` へ（`.antigravity/` やルート禁止）。アドホック相談は各AIのディスパッチスキルを使う。Details: `.claude/rules/workflow/ai-coordination.md`
++AI協調文書は `.sd/ai-coordination/` へ（`.antigravity/` やルート禁止）。アドホック相談は各AIのディスパッチスキルを使う。Details: `.claude/rules/workflow/ai-coordination.md`
+ 
+-IMPORTANT: Codexへのアドホック相談・レビュー（「codexにレビューさせて」等）は公式プラグインを使う — `/codex:review`（読み取り）/ `/codex:adversarial-review`（批判的）/ `/codex:rescue`（調査・修正委譲）。未セットアップ時は `/codex:setup` を一度実行。
++Codexへのアドホック相談・レビュー（「codexにレビューさせて」等）は公式プラグインを使う — `/codex:review`（読み取り）/ `/codex:adversarial-review`（批判的）/ `/codex:rescue`（調査・修正委譲）。未セットアップ時は `/codex:setup` を一度実行。
+ 
+-IMPORTANT: Grokは2モード。**Lead mode**（ユーザーがGrok直接起動、「Grok主導で」「grokで進めて」等）→ Claudeはオーケストレーションせずハンドオフ（`.grok/GROK_NATIVE.md`）。**Assist mode**（「grokに相談/依頼/実装」等）→ `grok-dispatch` スキル（`pwsh -File grok-run.ps1 <repo> <out> "<prompt>"`、モデル名は固定せず省略=CLI既定、`--output-format plain`）。Grok=探索実装・独立検証・リサーチ / Codex=正式レビュー / agy=本番E2E。Details: `.claude/rules/workflow/ai-coordination.md`
++Grokは2モード。**Lead mode**（ユーザーがGrok直接起動、「Grok主導で」「grokで進めて」等）→ Claudeはオーケストレーションせずハンドオフ（`.grok/GROK_NATIVE.md`）。**Assist mode**（「grokに相談/依頼/実装」等）→ `grok-dispatch` スキル（`pwsh -File grok-run.ps1 <repo> <out> "<prompt>"`、モデル名は固定せず省略=CLI既定、`--output-format plain`）。Grok=探索実装・独立検証・リサーチ / Codex=正式レビュー / agy=本番E2E。Details: `.claude/rules/workflow/ai-coordination.md`
+ 
+-IMPORTANT: SD003の他プロジェクト展開は `/sd-deploy` のみ。手動デプロイ禁止。Details: `.claude/skills/sd-deploy/SKILL.md`
++SD003の他プロジェクト展開は `/sd-deploy` のみ。手動デプロイ禁止。Details: `.claude/skills/sd-deploy/SKILL.md`
+ 
+-IMPORTANT: 仕様書は `.sd/specs/{feature}/` のみ、メインは `spec.md`（`design.md` 禁止=Antigravity予約）。hook `enforce-spec-location.sh` が違反書き込みを物理deny。Details: `.claude/rules/specs/spec-driven.md`
++仕様書は `.sd/specs/{feature}/` のみ、メインは `spec.md`（`design.md` 禁止=Antigravity予約）。hook `enforce-spec-location.sh` が違反書き込みを物理deny。Details: `.claude/rules/specs/spec-driven.md`
+ 
+-IMPORTANT: Excel/CSV/PDF/画像を扱う前に `.claude/skills/` の該当スキルを確認し SKILL.md に正確に従う（cf001データ破損事故の再発防止）。Details: `.claude/rules/skills/skill-check-before-action.md`
++Excel/CSV/PDF/画像を扱う前に `.claude/skills/` の該当スキルを確認し SKILL.md に正確に従う（cf001データ破損事故の再発防止）。Details: `.claude/rules/skills/skill-check-before-action.md`
+ 
+-IMPORTANT: デバッグは3階層 — `/bug-quick`（5-15分・フロー照合）→ `/bug-trace`（30-60分・3エージェント並列）→ `/dialogue-resolution`（AI迷走検出・各Step後にAskUserQuestion必須）。同一エラー2回目でエスカレーション。
++デバッグは3階層 — `/bug-quick`（5-15分・フロー照合）→ `/bug-trace`（30-60分・3エージェント並列）→ `/dialogue-resolution`（AI迷走検出・各Step後にAskUserQuestion必須）。同一エラー2回目でエスカレーション。
+ 
+-IMPORTANT: Web UI（HTML/CSS/JS）は8デザイン原則＋デザイントークン適用、視覚品質スコア50/70以上。Details: `.claude/rules/ui/`
++Web UI（HTML/CSS/JS）は8デザイン原則＋デザイントークン適用、視覚品質スコア50/70以上。Details: `.claude/rules/ui/`
+ 
+-IMPORTANT: Playwright等のChromiumダウンロードは共有キャッシュ `D:\playwright-browsers` を使う。プロジェクトローカルの `PLAYWRIGHT_BROWSERS_PATH` 設定禁止。Details: `.claude/rules/global/playwright-cache.md`
++Playwright等のChromiumダウンロードは共有キャッシュ `D:\playwright-browsers` を使う。プロジェクトローカルの `PLAYWRIGHT_BROWSERS_PATH` 設定禁止。Details: `.claude/rules/global/playwright-cache.md`
+ 
+-IMPORTANT: 全AI（特にagy）の成果物はプロジェクト内へ保存 — ユーザー向けは `materials/`、協調文書は `.sd/ai-coordination/`、FW文書は `docs/`。agyの `~/.gemini/antigravity-cli/brain/<会話ID>/` に唯一のコピーを残さない（CLIから発見不能=柱1違反）。発見時は `scripts/recover-agy-artifacts.sh` で回収しフルパス提示。Details: `docs/rules-reference/workflow/artifact-output-location.md`
++全AI（特にagy）の成果物はプロジェクト内へ保存 — ユーザー向けは `materials/`、協調文書は `.sd/ai-coordination/`、FW文書は `docs/`。agyの `~/.gemini/antigravity-cli/brain/<会話ID>/` に唯一のコピーを残さない（CLIから発見不能=柱1違反）。発見時は `scripts/recover-agy-artifacts.sh` で回収しフルパス提示。Details: `docs/rules-reference/workflow/artifact-output-location.md`
+ 
+-IMPORTANT: UIをユーザーに見せる前にバックエンド統合・デプロイへ進まない。「動くはず」ではなく「ユーザーが見て承認した」が確認。
++UIをユーザーに見せる前にバックエンド統合・デプロイへ進まない。「動くはず」ではなく「ユーザーが見て承認した」が確認。
+ 
+-IMPORTANT: 構造化・複数項目の確認事項（計画/マトリクス/レビュー結果/差分要約/進捗）は Artifact で提示（`artifact-design` スキル必読）し、判断は AskUserQuestion で末端集約。単純な二択はインラインのまま（過剰ceremony禁止）。Artifact不可環境はテキストにフォールバック。Details: `docs/rules-reference/global/artifact-confirmation.md`
++構造化・複数項目の確認事項（計画/マトリクス/レビュー結果/差分要約/進捗）は Artifact で提示（`artifact-design` スキル必読）し、判断は AskUserQuestion で末端集約。単純な二択はインラインのまま（過剰ceremony禁止）。Artifact不可環境はテキストにフォールバック。Details: `docs/rules-reference/global/artifact-confirmation.md`
+ 
+-IMPORTANT: Solo運用 — master/main で直接作業する。ブランチ・PR作成はユーザー指示時のみ（提案は可、無断作成・無断切替・無断削除は禁止）。セッション終了時は commit に加えて `git pull --rebase && git push` まで完了させる（2026-07-26裁定: Beads運用を正とする）。Details: `docs/rules-reference/git/branch-strategy.md`
++Solo運用 — master/main で直接作業する。ブランチ・PR作成はユーザー指示時のみ（提案は可、無断作成・無断切替・無断削除は禁止）。セッション終了時は commit に加えて `git pull --rebase && git push` まで完了させる（2026-07-26裁定: Beads運用を正とする）。Details: `docs/rules-reference/git/branch-strategy.md`
+ 
+-IMPORTANT: 異常・エラー時は根本原因の特定が先 — 1)症状記述 2)自分の直前の行動を列挙 3)自分原因の仮説を最初に（外部要因は最後）4)検証 5)それから修正+登録+commit。「気をつける」は対策ではない。Details: `docs/rules-reference/troubleshooting/root-cause-first.md`
++異常・エラー時は根本原因の特定が先 — 1)症状記述 2)自分の直前の行動を列挙 3)自分原因の仮説を最初に（外部要因は最後）4)検証 5)それから修正+登録+commit。「気をつける」は対策ではない。Details: `docs/rules-reference/troubleshooting/root-cause-first.md`
+ 
+-IMPORTANT: 大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ・重複チェック）。保存先は層境界表の判断フローで1か所に決める（repo外の事実→kb001 / やること→bd issue / 守らせる行動→規範 / 他PJ・他CLIでも効く→`bd remember` / このPJでClaude Codeが次回も使う→auto-memory / 経緯→.sessions / どれでもない→書かない）。Details: `docs/rules-reference/session/memory-nudge.md`, `docs/rules-reference/session/memory-layers.md`
++大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ・重複チェック）。保存先は層境界表の判断フローで1か所に決める（repo外の事実→kb001 / やること→bd issue / 守らせる行動→規範 / 他PJ・他CLIでも効く→`bd remember` / このPJでClaude Codeが次回も使う→auto-memory / 経緯→.sessions / どれでもない→書かない）。Details: `docs/rules-reference/session/memory-nudge.md`, `docs/rules-reference/session/memory-layers.md`
+ 
+-IMPORTANT: このrepo外の対象（顧客・法人・人・製品/ツール・税制や制度・記事・発信者）について答える前、および調べ直す前に、まず kb001 の司書に聞く — `cd /d/claudecode/kb001 && claude -p "<自然文>"`。Web検索・原典の再読はその後（司書が「無い」と言ってから）。新しく分かった事実・実測は同じ経路で入れる。SD003内部の知識（手順・真因・規範）は対象外で既存層のまま。Details: `D:\claudecode\kb001\CLAUDE.md`
++このrepo外の対象（顧客・法人・人・製品/ツール・税制や制度・記事・発信者）について答える前、および調べ直す前に、まず kb001 の司書に聞く — `cd /d/claudecode/kb001 && claude -p "<自然文>"`。Web検索・原典の再読はその後（司書が「無い」と言ってから）。新しく分かった事実・実測は同じ経路で入れる。SD003内部の知識（手順・真因・規範）は対象外で既存層のまま。Details: `D:\claudecode\kb001\CLAUDE.md`
+ 
+-IMPORTANT: `/sessionwrite` 時は学習評価 — セッション中のユーザー修正をレビューし備考に記録、2回以上でルール/スキル/メモリ化を提案（提案のみ・自動作成禁止）。Details: `docs/rules-reference/skills/learning-nudge.md`
++`/sessionwrite` 時は学習評価 — セッション中のユーザー修正をレビューし備考に記録、2回以上でルール/スキル/メモリ化を提案（提案のみ・自動作成禁止）。Details: `docs/rules-reference/skills/learning-nudge.md`
+ 
+ ---
+ 
+@@ -129,7 +129,7 @@ IMPORTANT: `/sessionwrite` 時は学習評価 — セッション中のユーザ
+ | Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution`, `/ai-suspect` |
+ | Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
+ | Skills | `/sd:skills-find`, `skills-add`, `skills-list` |
+-| Cleanup | `/cleanup`, `restore`, `history` |
++| Cleanup | `/cleanup`, `/cleanup-restore`, `/cleanup-history` |
+ 
+ ---
+ SD003 Framework v2.19.5 | deploy v3.5.0 | Updated: 2026-09-23 (Opus 5.5公式ガイド準拠: 思考・検証指示の削減) | Style: `.claude/rules/global/claude-md-style.md`
