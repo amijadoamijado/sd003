@@ -3,17 +3,17 @@ description: Restore files from cleanup archive
 allowed-tools: Read, Write, Bash, Glob, AskUserQuestion
 ---
 
-# /cleanup:restore
+# /cleanup-restore
 
 アーカイブされたファイルを元の場所に復元する。
 
 ## Usage
 
 ```
-/cleanup:restore                    # セッション選択UI
-/cleanup:restore {session-id}       # 特定セッションを復元
-/cleanup:restore --all              # 全ファイル復元
-/cleanup:restore --select           # ファイル個別選択
+/cleanup-restore                    # セッション選択UI
+/cleanup-restore {session-id}       # 特定セッションを復元
+/cleanup-restore --all              # 全ファイル復元
+/cleanup-restore --select           # ファイル個別選択
 ```
 
 ## Execution Flow

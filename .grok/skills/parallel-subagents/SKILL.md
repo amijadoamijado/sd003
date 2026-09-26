@@ -17,7 +17,7 @@ Claude Code内のAgent toolを使い、複数のサブエージェントを並�
 
 | 領域 | 仕組み | 使うもの |
 |------|--------|---------|
-| 外部AI並列 | Claude Code → Gemini/Codex/Antigravity | AI協調体制（`/workflow:*`） |
+| 外部AI並列 | Claude Code → Gemini/Codex/Antigravity | codex-dispatch / grok-dispatch / agy-dispatch スキル |
 | **内部並列** | Claude Code → Agent tool × N | **本スキル** |
 
 ## 適用判断フロー
@@ -49,7 +49,6 @@ Agent("ファイルCの構造を調査", subagent_type="Explore")
 
 | コマンド | 並列タスク |
 |---------|-----------|
-| `/refactor:init` | Scope Agent + Pattern Agent + Risk Agent |
 | `/bug-trace` | 多ファイル同時調査 |
 | コードレビュー | 複数ファイルの同時読解 |
 

@@ -56,10 +56,8 @@ describe('対象', () => {
 - 本番/ステージング環境でのUI確認
 - **`gas-e2e` スキル（`.claude/skills/gas-e2e/`）を使用すること**
 - 初回セットアップ: `npm run e2e:setup`（Playwrightブラウザ + E2Eプロファイル作成）
-- **GAS Web App → Mode 1 (claude-in-chrome) を最優先**（認証済み、セットアップ不要）
-- スクリプト制御が必要な場合 → Mode 2 (connect_over_cdp)
-- CI/CD環境 → Mode 3 (persistent_context)
-- `/workflow:test` で TEST_REQUEST を作成し、Antigravityに委譲も可能
+- モード選択は `gas-e2e` スキルに従う（iframe内操作 → Mode 2 chrome-devtools-mcp / 外観確認のみ → Mode 1 claude-in-chrome / Playwright制御 → Mode 3 connect_over_cdp / CI → Mode 4 persistent_context）
+- Antigravity に委譲する場合は `agy-dispatch` スキルを使う
 - ローカルWeb Appのテストには `webapp-testing` スキルを使用（Anthropic公式）
 
 ### Tier選択基準
@@ -68,7 +66,7 @@ describe('対象', () => {
 | Core ビジネスロジック | Tier-1 | Claude Code |
 | GAS API統合（Properties, Cache） | Tier-2 | Claude Code |
 | GAS API統合（Sheets, Drive） | Tier-2（GCP認証時）/ Tier-3 | Claude Code / Antigravity |
-| UI・フロー確認 | Tier-3 | **Antigravity**（`/workflow:test`） |
+| UI・フロー確認 | Tier-3 | **Antigravity**（`agy-dispatch`） |
 | ローカルWeb App | `webapp-testing` スキル | Claude Code |
 
 ## ⛔ テストの前提条件（Work First原則）

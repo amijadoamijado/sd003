@@ -58,9 +58,9 @@ Cautionレベルのスキルをインストールする前に以下を確認:
 
 | コマンド | 説明 |
 |---------|------|
-| `/skills:find {query}` | スキル検索 |
-| `/skills:add {owner/repo}` | スキルインストール |
-| `/skills:list` | インストール済み一覧 |
+| `/sd:skills-find {query}` | スキル検索 |
+| `/sd:skills-add {owner/repo}` | スキルインストール |
+| `/sd:skills-list` | インストール済み一覧 |
 
 ## 全AIモデル共通
 

@@ -1,6 +1,6 @@
 ---
 description: AI judgment-based project cleanup (materials organization + temp file archive)
-allowed-tools: Task, Read, Write, Bash, Glob, Grep, AskUserQuestion, TodoWrite
+allowed-tools: Task, Read, Write, Bash, Glob, Grep, AskUserQuestion
 ---
 
 # /cleanup
@@ -184,7 +184,7 @@ mv test_parser.js "${ARCHIVE_DIR}/files/"
 - Size: 45.2KB
 
 ### 復元方法
-/cleanup:restore cleanup-20260102-150000
+/cleanup-restore cleanup-20260102-150000
 ```
 
 ## Safety Mechanisms
@@ -194,20 +194,6 @@ gitで変更中のファイルは絶対に移動しない。
 
 ### エラー時ロールバック
 途中エラー時は実行済み移動を元に戻す。
-
-### タイムアウト
-- 処理全体: 5分
-- AI判断: 60秒（タイムアウト時は保守的に移動拒否）
-
-## Output Markers
-
-| Marker | Meaning |
-|--------|---------|
-| `CLEANUP_SCAN_COMPLETE` | スキャン完了 |
-| `CLEANUP_ANALYSIS_COMPLETE` | AI分析完了 |
-| `CLEANUP_EXECUTED` | 整理実行完了 |
-| `CLEANUP_CANCELLED` | キャンセル |
-| `CLEANUP_ERROR` | エラー発生 |
 
 ## Arguments
 $ARGUMENTS

@@ -1,7 +1,6 @@
 ---
 name: source-command-sessionread
 description: Legacy alias for sessionread. Use only when source-command-sessionread is explicitly requested.
-disable-model-invocation: true
 ---
 
 # source-command-sessionread

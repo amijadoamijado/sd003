@@ -10,7 +10,7 @@
 
 ## ファイル保護（hook未整備のため文で維持・削減対象外）
 
-- **rm 禁止**: 不要ファイルは `.sd/cleanup/archive/` へ移動（`/cleanup` 整理・`/cleanup:restore` 復元・`/cleanup:history` 履歴）
+- **rm 禁止**: 不要ファイルは `.sd/cleanup/archive/` へ移動（`/cleanup` 整理・`/cleanup-restore` 復元・`/cleanup-history` 履歴）
 - **上書き禁止**: ユーザー提供ファイル・`materials/` 成果物・`.sd/ai-coordination/` 文書・`.sessions/` 記録は
   上書きせず別名で新規作成（`_v2` 等）。スクリプト再生成時は事前にアーカイブへバックアップ
   （背景: Excel上書きでレイアウト崩壊事故）

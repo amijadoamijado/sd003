@@ -9,15 +9,15 @@ description: Git Worktreeの安全な作成・管理・クリーンアップ手�
 
 Git Worktreeを使い、メインの作業ディレクトリを汚さずに並列作業を行うためのガイド。
 SD003のCLAUDE.mdで推奨される「git worktreeでの分離作業」を安全に自動化する。
+worktree はブランチ作成を伴うため、ユーザーが指示したときだけ使う（Solo運用は master 直接作業）。
 
 ## いつ使うか
 
 | ケース | 説明 |
 |--------|------|
 | 並列実装 | メインブランチを保ちながら別機能を実装 |
-| `/workflow:impl` | Antigravity(agy)がworktreeで作業する場合 |
+| agy委譲 | `agy-dispatch` で Antigravity に worktree 内で作業させる場合 |
 | 実験的変更 | メインを壊さずに大規模変更を試す |
-| リファクタリング | `/refactor:batch` の安全な実行環境 |
 
 ## Phase 1: ディレクトリ選択
 
@@ -102,17 +102,6 @@ Agent toolの `isolation: "worktree"` パラメータでもworktreeが自動作�
 | `EnterWorktree` / `ExitWorktree` | 手動でworktreeに入退出 |
 | `Agent(isolation: "worktree")` | サブエージェントが自動worktreeで作業 |
 | 本スキルの手順 | 上記で対応できない複雑なケース |
-
-## AI協調でのworktree活用
-
-### `/workflow:impl` でAntigravity(agy)がworktreeを使うケース
-
-```
-1. Claude Code: worktreeを作成（Phase 1-3）
-2. Claude Code: IMPLEMENT_REQUEST に worktreeパスを記載
-3. Antigravity(agy): worktree内で実装
-4. Claude Code: 実装結果をメインにマージ（Phase 4）
-```
 
 ## 禁止事項
 

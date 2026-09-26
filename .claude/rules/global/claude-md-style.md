@@ -9,7 +9,7 @@ paths:
 
 ## 原則
 
-CLAUDE.mdは**200行以下**に保ち、条件付きブロック（IMPORTANT IF/When）で文脈を制御する。
+CLAUDE.mdは**200行以下**に保ち、条件付きブロック（When {条件}）で文脈を制御する。
 詳細は `.claude/rules/` に委譲し、CLAUDE.mdは方針とルーティングのみを担う。
 
 ## 構造
@@ -25,8 +25,8 @@ CLAUDE.mdは**200行以下**に保ち、条件付きブロック（IMPORTANT IF/
   - ファイル安全ルール
 
 ## Conditional Context（条件付き・~80行）
-  IMPORTANT: When {条件}, {ルール要約}. Details: {rules/パス}
-  IMPORTANT: When {条件}, {ルール要約}. Details: {rules/パス}
+  When {条件}, {ルール要約}. Details: {rules/パス}
+  When {条件}, {ルール要約}. Details: {rules/パス}
   ...
 
 ## Quick Command Reference（参照・~20行）
@@ -39,20 +39,23 @@ CLAUDE.mdは**200行以下**に保ち、条件付きブロック（IMPORTANT IF/
 
 ### 構文
 ```
-IMPORTANT: When {具体的な条件}, {守るべきルール}. Details: {詳細ファイルパス}
+When {具体的な条件}, {守るべきルール}. Details: {詳細ファイルパス}
 ```
+
+`IMPORTANT:` 等の強調は付けない。全ブロックに付けると強調が情報を失い、現行モデルでは過剰適用を招く。
+強調は、実測で守られなかった1ルールに限って理由と一緒に付ける。
 
 ### 良い例（条件が狭く具体的）
 ```
-IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern.
-IMPORTANT: When coordinating with other AIs, all documents go to `.sd/ai-coordination/`.
-IMPORTANT: If a file operation involves Excel/CSV/PDF, check `.claude/skills/` first.
+When writing or modifying GAS code, use Env Interface Pattern.
+When coordinating with other AIs, all documents go to `.sd/ai-coordination/`.
+If a file operation involves Excel/CSV/PDF, check `.claude/skills/` first.
 ```
 
 ### 悪い例（条件が広すぎて常時発火 = 効果なし）
 ```
-IMPORTANT: When you are writing code, follow best practices.
-IMPORTANT: When working on this project, be careful.
+When you are writing code, follow best practices.
+When working on this project, be careful.
 ```
 
 ## ルール
@@ -67,5 +70,5 @@ IMPORTANT: When working on this project, be careful.
 
 ## デプロイ時の適用
 
-`/sd:deploy` でCLAUDE.mdテンプレートを生成する際、この規約に従う。
+`/sd-deploy` でCLAUDE.mdテンプレートを生成する際、この規約に従う。
 deploy.ps1のPhase 5でテンプレートから生成されるCLAUDE.mdは200行以下であること。

@@ -4,7 +4,7 @@ source: .claude/commands/bug-trace.md
 description: Bug Trace - 3-Agent parallel investigation for complex bugs
 claude_command: /bug-trace
 agent_skill: bug-trace/SKILL.md
-allowed_tools: Read, Glob, Grep, Task, AskUserQuestion, TodoWrite
+allowed_tools: Read, Glob, Grep, Task, AskUserQuestion
 ---
 
 # Bug Trace - 3-Agent Parallel Investigation v2.4
@@ -36,7 +36,7 @@ Step 1: Error Collection + Past Bug Search
     ↓
 Step 2: 3-Agent Parallel Investigation
     ↓
-Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
+Step 2.5: Synthesis + Divergence Classification
     ↓
     ├─ Code Defect → Step 3: Visual Flow Diagrams
     │                    ↓
@@ -44,7 +44,7 @@ Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
     │                    ↓
     │               Step 8: Bug Report Generation
     │
-    └─ Spec Defect → Step 2.6: Spec Update Proposal  ← NEW in v2.4
+    └─ Spec Defect → Step 2.6: Spec Update Proposal
                          ↓
                     Spec Updated → End
 ```
@@ -57,28 +57,6 @@ Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
 | **Code Agent** | Code Investigator | Implementation, data flow, state transitions |
 | **Solution Agent** | Solution Architect | Hypothesis formation, resolution strategies |
 
-### New in v2.0
-- **Synthesis**: Deep analysis of 3-agent findings with cross-referencing
-- **ASCII Flow Diagrams**: Visual representation of error flow (Input → Process → Error)
-- **Reverse Trace Diagrams**: Error backtracking visualization
-- **Divergence Analysis Box**: Side-by-side Expected vs Actual comparison
-
-### New in v2.1
-- **Japanese Explanations**: Each diagram now includes mandatory Japanese explanations below the ASCII art
-
-### New in v2.2
-- **Synthesis Japanese Explanation**: Root Cause section now includes detailed Japanese explanation
-
-### New in v2.3
-- **Mandatory Output Requirements**: Japanese explanations are now mandatory (skip = step incomplete)
-- **Bug Report Management**: Numbered reports saved for future reference
-- **Past Bug Search**: Check for similar past bugs before investigation
-
-### New in v2.4
-- **Divergence Classification**: Categorize issues as Code Defect, Spec Defect, Both, or Ambiguous
-- **Step 2.6 Spec Update Proposal**: New flow for handling Spec Defects
-- **Smart Next Action**: Classification determines whether to fix code or update specs
-
 ---
 
 ## Prohibited Actions
@@ -90,11 +68,9 @@ Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
 
 ---
 
-## MANDATORY OUTPUT REQUIREMENTS
+## Japanese Explanations
 
-**The following outputs are REQUIRED. DO NOT skip or omit them.**
-
-### Japanese Explanations (4 locations)
+Put a Japanese explanation under each of these four outputs. The user reads the explanation, not the ASCII art, so a diagram without one is not finished.
 
 | Step | Section | Required Output |
 |------|---------|-----------------|
@@ -103,12 +79,7 @@ Step 2.5: Synthesis + Divergence Classification  ← NEW in v2.4
 | Step 3 | Reverse Trace | `📝 **逆追跡解説**` |
 | Step 3 | Divergence Analysis | `📝 **乖離分析解説**` |
 
-**RULE: A Step is NOT complete until its Japanese explanation is output.**
-
-Before proceeding to the next step, verify:
-- [ ] ASCII diagram generated
-- [ ] Japanese explanation output below the diagram
-- [ ] All template fields filled (no placeholders like `[xxx]`)
+Fill every template field; leave no `[xxx]` placeholders.
 
 ---
 

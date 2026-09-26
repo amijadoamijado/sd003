@@ -59,7 +59,7 @@ Bug QUICK (5-15 min) <-- THIS TOOL
     |
     +-- Complex --> Bug Trace (30-60 min)
                         |
-                        +-- Unresolved --> Bug Dialog
+                        +-- Unresolved --> /dialogue-resolution
 ```
 
 ---
@@ -320,7 +320,7 @@ Options:
 - Code behavior seems inconsistent with itself
 - Performance or timing issues involved
 
-**When to recommend Bug Dialog:**
+**When to recommend /dialogue-resolution:**
 
 - AI keeps misunderstanding the same point
 - Circular reasoning detected

@@ -91,7 +91,7 @@ CLAUDE.md
 package.json
 ```
 
-### dry-run が正直になった（誤報の根絶）
+### dry-run の表示
 
 dry-run は deploy に委譲し、**上書きで失われる固有化ファイルを必ず一覧表示する**:
 - `WILL OVERWRITE - LOCAL CUSTOMIZATION WILL BE LOST`（内容差分あり＝消える）
@@ -104,12 +104,11 @@ dry-run は deploy に委譲し、**上書きで失われる固有化ファイ�
 3. /sd-upgrade <target> --execute  # 保護したものは残り、廃止物は削除、残りは最新化
 ```
 execute 後は「OVERWROTE local divergence（バックアップ済み）」が報告される。
-**もはや "UPGRADE OK / 全部無傷" とは誤報しない。**
 
 ## 安全装置
 
 - **dry-run 既定**：`--execute` なしは一切変更しない
-- **divergence 可視化（正直化）**：dry-run が「上書きで失われる固有化ファイル」を一覧。execute 後も上書きした divergence を報告。**"全部無傷" と誤報しない**
+- **divergence 可視化**：dry-run が「上書きで失われる固有化ファイル」を一覧。execute 後も上書きした divergence を報告
 - **オプトアウト保護**：`.sd003-keep` 記載の FW ファイルは上書きしない（バックアップに頼らず最初から守る）
 - **全バックアップ**：削除対象は消す前に `.sd003-upgrade-backup-*/` へ移動（元のパス構造を保持＝復元可能）。deploy 側の上書き分は `.sd003-backup-*/`
 - **明示的DELETE list**：全走査での削除はしない。既知の廃止物のみ。`.agent`≠`.agents` を厳密に区別
@@ -128,7 +127,7 @@ execute 後は「OVERWROTE local divergence（バックアップ済み）」が�
 いたことが判明）。upgrade完了後、Phase 6 として以下を必須実行する:
 
 - 対象パターンごとに `<target>/` 直下を走査し、**同一パターンが2個以上あれば**タイムスタンプ最新の1個を
-  残し、残りを `<target>/.sd/cleanup/archive/<YYYYMMDD>/` へ**移動**する（`rm` 等の削除は禁止。常に
+  残し、残りを `<target>/.sd003-archive/<YYYYMMDD>/` へ**移動**する（`rm` 等の削除は禁止。常に
   archive-then-remove）
 - `upgrade.ps1` の Phase 6 として実装済み。`--execute` 実行時のみ動く（dry-runでは走らない）
 - 移動のみで削除はしないため、必要ならアーカイブから復元可能

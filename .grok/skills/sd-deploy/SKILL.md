@@ -78,7 +78,7 @@ dry-run は以下を一覧表示する（無変更）:
 ## 使用方法
 
 ```
-/sd:deploy <target-project-path>
+/sd-deploy <target-project-path>
 ```
 
 ## 実行手順
@@ -191,7 +191,6 @@ aa001 に渡っていた）。
 | 14 | `scripts/sync-cli-commands.py`（agy/codex skill生成器） | 単体コピー |
 | 15 | `scripts/verify-deployment.mjs`（Phase 6b 内容検証ゲート） | 単体コピー |
 | 16 | `AGENTS.md` | 単体コピー |
-| 18 | `.sd/steering/` | ツリーコピー |
 | 20 | `tests/gas-fakes/setup.ts` | 単体コピー |
 | 21 | `.git/hooks/` | templates/git-hooks/ からコピー（自動push + .sd/自動ステージ） |
 

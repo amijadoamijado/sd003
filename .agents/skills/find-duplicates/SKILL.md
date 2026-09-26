@@ -80,18 +80,6 @@ Phase 1の候補ペアをLLM（Claude）で意図分析する。
 4. レポートを出力
 ```
 
-### `/refactor:init` からの連携
-
-`/refactor:init` の Pattern Agent が本スキルを参照して重複検出を実行:
-
-```
-/refactor:init {scope}
-  └── Pattern Agent
-        └── find-duplicates スキルを適用
-              ├── Phase 1: 関数抽出
-              └── Phase 2: 意図クラスタリング
-```
-
 ## 出力フォーマット
 
 ```markdown

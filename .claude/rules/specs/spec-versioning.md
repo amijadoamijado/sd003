@@ -41,9 +41,9 @@ paths:
 
 | タイミング | 説明 | コマンド |
 |------------|------|----------|
-| 仕様変更前 | 大きな変更を加える前 | `/spec:archive {feature} {file}` |
-| マイルストーン完了 | フェーズ完了時 | `/spec:archive {feature}` |
-| 手動トリガー | 明示的な保存 | `/spec:archive {feature}` |
+| 仕様変更前 | 大きな変更を加える前 | `/spec-archive {feature} {file}` |
+| マイルストーン完了 | フェーズ完了時 | `/spec-archive {feature}` |
+| 手動トリガー | 明示的な保存 | `/spec-archive {feature}` |
 
 ## spec.json履歴セクション
 
@@ -99,8 +99,8 @@ paths:
 
 | コマンド | 説明 |
 |----------|------|
-| `/spec:archive {feature} [file]` | 履歴保存（fileなしで全ファイル） |
-| `/spec:history {feature}` | 履歴一覧表示 |
+| `/spec-archive {feature} [file]` | 履歴保存（fileなしで全ファイル） |
+| `/spec-history {feature}` | 履歴一覧表示 |
 
 ## 関連ルール
 

@@ -34,11 +34,12 @@ User-provided arguments (if any): $ARGUMENTS
 
 1. `.sessions/` ディレクトリ作成（なければ）
 2. タイムスタンプ生成（例: `20251123-143052`）
-3. git状態取得（ブランチ、最新コミット）
+3. git状態取得（ブランチ、最新コミット、作業ツリーと既存のstage）。更新先に既存の変更があれば内容を読み、保持して追記する。
 4. 履歴ファイル `.sessions/session-YYYYMMDD-HHMMSS.md` 作成
 5. `.sessions/session-current.md` にコピー
 6. **TIMELINE.md 更新**（新エントリ追加）
-7. 完了メッセージ表示
+7. `.handoff/DONE.md` を更新し、以下のGitコミット手順で保存する
+8. 完了メッセージ表示（保存先、コミット結果、pushの実施有無、未解決事項）
 
 ## 言語ルール（必須）
 
@@ -137,10 +138,10 @@ $ARGUMENTS
 
 1. セッション中にユーザーから受けた修正を振り返る
 2. 修正が2回以上あれば「学習ナッジ」セクションを備考に追加
-3. 完了メッセージ（Step 7）の末尾に1行で提案を追記
+3. 完了メッセージ（Step 8）の末尾に1行で提案を追記
 
 **ルール**: 非対話・非ブロッキング。AskUserQuestion禁止。保存フローを中断しない。
-**詳細**: `.claude/rules/skills/learning-nudge.md`
+**詳細**: `docs/rules-reference/skills/learning-nudge.md`
 
 ## Codex Handoff（並行保存）
 
@@ -160,17 +161,21 @@ $ARGUMENTS
 
 ## Gitコミット
 
-セッションファイル（.sessions/）と .handoff/DONE.md を git add + commit する。
+セッション保存の依頼は、今回の引継ぎファイルのローカルコミットを含む。pushはユーザーの明示依頼がある場合だけ実行する。
+
+1. `git status --short`、`git diff --cached --name-only`、対象ファイルの差分を確認する。今回作成・更新した引継ぎファイルだけを対象にし、ディレクトリ単位のstageや `git add -A` は使わない。
+2. コミット前に `git config --get core.hooksPath`（未設定ならGit既定のhooks配置先）と実際に動くhook・呼出先を確認する。自動push等の外部変更や対象外ファイルの自動stageがある場合、既存の一時的な抑止方法が確認できればそれを使う。未承認の外部変更・対象外ファイルの混入を抑止できなければ、ファイル保存まで完了し、コミットは保留して具体的な理由を報告する。hookを一括無効化したり、恒久設定を無断変更したりしない。
+3. 対象外の既存stageを巻き込まないよう、コミットにも対象パスを明示する。対象ファイル自体に他の作業の変更が混在していて分離できない場合は、その変更を保護し、保存済み・コミット保留として報告する。
+
+以下は4ファイルすべてを今回更新した場合の例。日時は実際の履歴ファイル名に置き換え、更新していないファイルは両コマンドから除く。
 
 ```bash
-git add .sessions/ .handoff/DONE.md
-git commit -m "session: [1行サマリー]
-
-Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
+git add -- .sessions/session-YYYYMMDD-HHMMSS.md .sessions/session-current.md .sessions/TIMELINE.md .handoff/DONE.md
+git commit --only -m "session: [1行サマリー]" -- .sessions/session-YYYYMMDD-HHMMSS.md .sessions/session-current.md .sessions/TIMELINE.md .handoff/DONE.md
 ```
 
-post-commit hookが非同期pushを自動実行。
+特定のAIやモデルの署名を固定で付けない。コミット後はコミットIDと対象ファイルを確認し、対象外のstageが保持されていることを確認する。コミット成功とpush成功を混同せず、pushを依頼されて実行した場合はその結果も確認する。
 
 ---
 
-**実行**: Write/Edit で .sessions/ ファイルを更新し、git add .sessions/ .handoff/DONE.md && git commit する。
+**実行**: 今回の引継ぎファイルを保存し、上記手順で対象を限定してローカルコミットする。保留事項があれば記録し、保存・コミット・pushそれぞれの実施結果を報告する。

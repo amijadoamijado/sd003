@@ -14,7 +14,7 @@ SD003 の開発ルール集。**読み込み機構に注意**:
 | `paths:` あり | 該当パスのファイルを扱うときのみロード（条件ロード）|
 
 > 2026-07-26 Claude 5世代lean化: 常時ロードは要点圧縮した3ファイルのみに削減。
-> ドクトリン・手順の全文は `docs/rules-reference/` へ移設（CLAUDE.md の IMPORTANT 行が要約とパスを保持）。
+> ドクトリン・手順の全文は `docs/rules-reference/` へ移設（CLAUDE.md の Conditional Context 行が要約とパスを保持）。
 > **新規ルールを追加するときは原則 `paths:` を付ける。常時ロード追加は最小限に。**
 
 ## 常時ロード（要点のみ・3ファイル）
@@ -49,5 +49,5 @@ artifact-confirmation、fullpath-display、artifact-output-location、
 root-cause-first、bug-quick、dialogue-resolution、memory-nudge、memory-layers、learning-nudge、
 および Phase2 圧縮前の原本（*-full.md）。
 
-要約は `CLAUDE.md` の Conditional Context（IMPORTANT 行）が保持し、
+要約は `CLAUDE.md` の Conditional Context 行が保持し、
 詳細が必要なときに AI が `Details:` パスを読みに行く（progressive disclosure）。

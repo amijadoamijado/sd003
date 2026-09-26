@@ -4,9 +4,9 @@ description: "Restore files from cleanup archive"
 disable-model-invocation: true
 ---
 
-# /cleanup:restore
+# /cleanup-restore
 
-SD003 custom command `/cleanup:restore` をCodex/agy共通Agent Skillとして再現します。
+SD003 custom command `/cleanup-restore` をCodex/agy共通Agent Skillとして再現します。
 
 User-provided arguments (if any): $ARGUMENTS
 
@@ -20,17 +20,17 @@ User-provided arguments (if any): $ARGUMENTS
 - Codex固有の実行優先順位は `.codex/CODEX_NATIVE.md` に従う。
 
 ## Original Command Body
-# /cleanup:restore
+# /cleanup-restore
 
 アーカイブされたファイルを元の場所に復元する。
 
 ## Usage
 
 ```
-/cleanup:restore                    # セッション選択UI
-/cleanup:restore {session-id}       # 特定セッションを復元
-/cleanup:restore --all              # 全ファイル復元
-/cleanup:restore --select           # ファイル個別選択
+/cleanup-restore                    # セッション選択UI
+/cleanup-restore {session-id}       # 特定セッションを復元
+/cleanup-restore --all              # 全ファイル復元
+/cleanup-restore --select           # ファイル個別選択
 ```
 
 ## Execution Flow

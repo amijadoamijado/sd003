@@ -275,8 +275,7 @@ bd create "<ガードレール名>" \
 
 ### 7-3. auto-memory（該当時のみ）
 
-全プロジェクト共通の知見なら `~/.claude/projects/*/memory/feedback-*.md` に記録（**dedup確認必須**）。
-SD003限定なら `/sessionwrite` 備考へ。一時的メモなら記録しない。
+保存先は `docs/rules-reference/session/memory-layers.md` の判断フローで1か所に決める（他PJ・他CLIでも効く → `bd remember` / このPJでClaude Codeだけが使う → auto-memory）。既存と重複しないか確認する。一時的メモなら記録しない。
 
 ---
 
@@ -295,33 +294,11 @@ SD003限定なら `/sessionwrite` 備考へ。一時的メモなら記録しな�
 
 ---
 
-## 参考: 模範5Why（at002 2026-06-13 — このレベルと構造を目指す）
-
-> **問題**: 最初から決定論（既存スキル `journal-builder` + `yayoi-csv-format`）で弥生CSVを書かず、自分で `csv.writer` を手書きした。結果、引用の有無・髙のバイト形・経過措置など現場固有の落とし穴を全部踏み、**ユーザーに4回もエラーログを取らせた**。
-
-| | Why | 答え |
-|---|-----|------|
-| Why1 | なぜ決定論（既存スキル）を使わなかったか | 弥生CSV書き出しの共通スキル `skills/common/yayoi-csv-format.js` の存在を着手時に確認せず、`csv.writer` で自作した |
-| Why2 | なぜ確認しなかったか | 「25列に値を並べるだけの単純作業」とみなし `skills/` を探索しなかった。本当の難所（弥生が受理する書式の固有知）を見落とした |
-| Why3 | なぜ単純作業とみなしたか | 弥生フォーマットを「知っている」という確信。validate が0エラーで通ったことで**「動いた」と誤認**し、実機取込前に完成扱い（Work First違反：検証通過≠実データ完走） |
-| Why4 | なぜ一般知識を一次情報にし、原典を下に置いたか | 「引用が要る／髙はNEC形だと弾かれる／経過措置は二重控除」は一般的な弥生知識に無い、**事故からしか得られない固有知**。その層が自分に欠けていることに気づけなかった（unknown unknown）。`taka.txt` という最高の原典をもらってもなお自作理論を上に置いた |
-| **Why5（真因）** | なぜ過信が起きたか | **優先順位の逆転**。私の中で「自分の一般知識 ＞ スキル ＞ 実物の証拠」になっていた。正しくは「**実物の証拠 ＞ スキル（固有知の結晶）＞ 自分の知識**」 |
-
-**真因の正体**: 会計の決定論（1円も狂わせない）は機械＝スキルの領域なのに、非決定論＝自分の推測・理論でやろうとした。[[at002-llm-self-driving]]（決定論への収束）と真逆で、CLAUDE.md 冒頭「スキル至上主義＝自分の知識でスキルを代替するな（全違反の真因＝過信）」そのもの。「弥生公式」の捏造も同根＝原典を確認せず手元の紙を権威化した。**原典照合の欠如という単一の真因**。
-
-**対策（「気をつける」は対策にあらず＝機構で固める）**:
-1. 弥生CSVの書き出しは `yayoi-csv-format.js` 経由を唯一の正準とし、手書き `csv.writer` を禁止 → 評価器が「自作書き出しでないか」を判定
-2. `ref-弥生仕訳ルール` に「書き出し器の正準＝`yayoi-csv-format.js`」を明記し、弥生CSV生成前に force-read
-3. 「公式」と言う前に原典（URL／実機エクスポート）を必ず提示。出せないものを「公式」と呼ばない
-4. **実物 ＞ スキル ＞ 自分の知識** を固定し、実物と自分の理論が食い違ったら無条件で実物を採る
-
----
-
 ## 関連
 
-- ルール: `.claude/rules/troubleshooting/root-cause-first.md`（6ステップ＋8段仮説優先順位）
-- ルール: `.claude/rules/global/work-first.md`（検証通過≠実データ完走）
-- ルール: `.claude/rules/global/output-primacy.md`（「完了」の定義）
+- ルール: `docs/rules-reference/troubleshooting/root-cause-first.md`（6ステップ＋8段仮説優先順位）
+- ルール: `docs/rules-reference/global/work-first.md`（検証通過≠実データ完走）
+- ルール: `docs/rules-reference/global/output-primacy.md`（「完了」の定義）
 - ドクトリン: `docs/core-doctrine.md`（柱2 Silent Interior / 柱3 Real Data First / 柱4 Segmented Sequencing）
 - コマンド: `/dialogue-resolution`（AI迷走時）, `/grillme`（説明再分解）, `/bug-trace`（コードのバグ）
 

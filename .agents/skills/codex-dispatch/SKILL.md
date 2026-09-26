@@ -8,12 +8,8 @@ disable-model-invocation: true
 
 Claude Code から Codex CLI (`codex exec`) にタスクを渡す正準スキル。
 
-> ⚠️ **2026-05-26 事故対策（必読・二度と同じ間違いをしないため）**
-> 旧版（user-global の codex-dispatch）は `codex exec "..." 2>&1 | tee` を教えていた。これが**全失敗の原因**:
-> codex は **進捗・テレメトリを stderr に、最終回答だけを stdout に**出す。
-> `2>&1` で stderr を混ぜると DEBUG/OpenTelemetry ログが数MB〜10MB流入し最終回答が埋もれる（実測9.2MB）。
-> さらに `config.toml` の `model_reasoning_effort=xhigh` が既定だと **遅すぎてタイムアウト**（RAM逼迫時は確実に落ちる）。
-> → 下記「正準コマンド」を**必ず**使う。素の `codex exec ... 2>&1 | tee` は禁止。
+codex は進捗・テレメトリを stderr に、最終回答だけを stdout に出す。`2>&1` で混ぜると数MBのログが回答を埋めるため、
+下記の正準コマンドを使う。effort は `medium` を明示する（既定 `xhigh` はタイムアウトしやすい）。
 
 ## 正準コマンド（これだけ使う）
 

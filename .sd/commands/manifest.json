@@ -71,7 +71,7 @@
       "slug": "cleanup-restore",
       "source": ".claude/commands/cleanup-restore.md",
       "description": "Restore files from cleanup archive",
-      "claude_command": "/cleanup:restore",
+      "claude_command": "/cleanup-restore",
       "agent_skill": "cleanup-restore/SKILL.md",
       "grok_skill": "cleanup-restore/SKILL.md",
       "aliases": []
@@ -143,7 +143,7 @@
       "slug": "sd-deploy",
       "source": ".claude/commands/sd-deploy.md",
       "description": "SD003フレームワークを新規プロジェクトに展開",
-      "claude_command": "/sd:deploy",
+      "claude_command": "/sd-deploy",
       "agent_skill": "sd-deploy/SKILL.md",
       "grok_skill": "sd-deploy/SKILL.md",
       "aliases": []

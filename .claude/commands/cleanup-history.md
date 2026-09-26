@@ -46,7 +46,7 @@ ls -lt .sd/cleanup/archive/ | head -20
 合計: 3セッション, 26ファイル, 185.8KB
 
 ### 復元コマンド
-/cleanup:restore {session-id}
+/cleanup-restore {session-id}
 ```
 
 ### 詳細表示（セッションID指定時）
@@ -66,7 +66,7 @@ ls -lt .sd/cleanup/archive/ | head -20
 | debug_log.txt | ./logs/debug_log.txt | 0.5KB | デバッグログ |
 
 ### 復元コマンド
-/cleanup:restore cleanup-20260102-150000
+/cleanup-restore cleanup-20260102-150000
 ```
 
 ## Output Format

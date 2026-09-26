@@ -6,15 +6,9 @@ paths:
 
 # AI協調体制（軽量ディスパッチ版）
 
-> **2026-07-05 変更**: 旧「7段階ワークフロー」（`/workflow:init/order/request/impl/review/test/status` による
-> WORK_ORDER→IMPLEMENT_REQUEST→REVIEW_REPORT→TEST_REQUEST の自動連鎖）は**過剰設計として撤去**した。
-> 現在のモデルは実装→失敗→修正→再実行を自己完結でき、書面受け渡しの儀式は不要。各AIへは
-> **軽量CLIディスパッチで直接依頼**する。旧コマンド・テンプレ機構は
-> `_archive/removed-overengineering-20260705/` にアーカイブ（git履歴で復元可）。
->
-> **2026-07-12 変更**: Grok **Lead mode** を正式採用。司令塔は「常に Claude」ではなく
-> **そのセッションを開いた入口 CLI** に紐づく。Grok は汎用控えではなく、
-> Lead / 探索実装 / 独立検証 / 調査主導の第一候補になりうる。
+各AIへは軽量CLIディスパッチ（codex-dispatch / grok-dispatch / agy-dispatch）で直接依頼する。
+書面を連鎖させる7段階ワークフロー（`/workflow:*`）は存在しない。
+司令塔（Session Lead）はそのセッションを開いた入口 CLI であり、Grok も Lead になりうる。
 
 ## 司令塔ルール（Session Lead）
 

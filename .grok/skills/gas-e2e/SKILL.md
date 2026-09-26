@@ -181,7 +181,7 @@ Step 5: gif_creator で操作記録（必要に応じて）
 ### 接続方式: autoConnect（唯一の推奨方式）
 
 **前提条件（初回のみ1回だけ設定）:**
-1. Chrome **144以上**であること（現環境: 145 ✅）
+1. Chrome **144以上**であること（`chrome://version` で確認）
 2. Chromeで `chrome://inspect/#remote-debugging` を開く
 3. リモートデバッグ接続を有効にする（UIの指示に従う）
 4. MCP接続時にChromeが許可ダイアログを表示 → 許可する
@@ -346,21 +346,20 @@ if (-not (Test-Path $dst)) {
     --user-data-dir="D:\playwright-browsers\chrome-debug-profile"
 ```
 
-### AIの自律実行手順
+### AIの実行手順
+
+Chrome の終了はユーザーの作業を壊すため AI が行わない。AskUserQuestion で Chrome を閉じてもらい、閉じたと回答を得てから以下を実行する。
 
 ```bash
-# Step 1: Chromeプロセスを終了
-powershell.exe -Command "Stop-Process -Name chrome -Force -ErrorAction SilentlyContinue"
-sleep 3
 
-# Step 2: プロファイルコピー（初回のみ）
+# Step 1: プロファイルコピー（初回のみ）
 SRC="$LOCALAPPDATA/Google/Chrome/User Data"
 DST="D:/playwright-browsers/chrome-debug-profile"
 if [ ! -d "$DST" ]; then
     cp -r "$SRC" "$DST"
 fi
 
-# Step 3: コピーしたプロファイルでChromium起動（Chromeでも可）
+# Step 2: コピーしたプロファイルでChromium起動（Chromeでも可）
 # Chromium（事前インストール済み）を使用
 "D:/playwright-browsers/chromium-1194/chrome-win/chrome.exe" \
     --remote-debugging-port=9222 \
@@ -368,7 +367,7 @@ fi
 # または Chrome: "/c/Program Files/Google/Chrome/Application/chrome.exe" \
 #     --remote-debugging-port=9222 --user-data-dir="D:/playwright-browsers/chrome-debug-profile" &
 
-# Step 4: 接続確認（最大3回リトライ）
+# Step 3: 接続確認（最大3回リトライ）
 for i in 1 2 3; do
     sleep 3
     if curl -s http://localhost:9222/json/version > /dev/null 2>&1; then

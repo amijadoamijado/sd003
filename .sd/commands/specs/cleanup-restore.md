@@ -2,29 +2,29 @@
 slug: cleanup-restore
 source: .claude/commands/cleanup-restore.md
 description: Restore files from cleanup archive
-claude_command: /cleanup:restore
+claude_command: /cleanup-restore
 agent_skill: cleanup-restore/SKILL.md
 allowed_tools: Read, Write, Bash, Glob, AskUserQuestion
 ---
 
-# /cleanup:restore
+# /cleanup-restore
 
 ## Canonical Intent
 Claude Code のカスタムコマンド仕様を CLI 非依存で保持する正本です。
 Codex/Antigravity共通Agent SkillとGrok Skillはこのファイルから生成します。
 
 ## Original Body
-# /cleanup:restore
+# /cleanup-restore
 
 アーカイブされたファイルを元の場所に復元する。
 
 ## Usage
 
 ```
-/cleanup:restore                    # セッション選択UI
-/cleanup:restore {session-id}       # 特定セッションを復元
-/cleanup:restore --all              # 全ファイル復元
-/cleanup:restore --select           # ファイル個別選択
+/cleanup-restore                    # セッション選択UI
+/cleanup-restore {session-id}       # 特定セッションを復元
+/cleanup-restore --all              # 全ファイル復元
+/cleanup-restore --select           # ファイル個別選択
 ```
 
 ## Execution Flow

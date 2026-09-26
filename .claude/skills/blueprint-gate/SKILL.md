@@ -5,19 +5,12 @@ description: |
   Use when: ユーザーが /blueprint-gate を実行した時、
   「要件定義」「設計」「何を作るか整理したい」「開発の前に整理」「Blueprint Gate」と言及した時、
   または1時間以上かかりそうなタスクの着手前。
-allowed-tools: Read, Glob, Grep, AskUserQuestion, Write
+allowed-tools: Read, Glob, Grep, AskUserQuestion, Write, Bash
 ---
 
 # Blueprint Gate v1.0
 
 開発・制作に入る前に、あみおの思考をゴールから逆順で引き出し、正攻法の要件定義書として整形するスキル。
-
-## このスキルが生まれた背景
-
-- Opus 4.6の出力を信頼しすぎて前提確認を怠り、修正の連続になった
-- Codexレビューがあるからと安心し、自分の判断介入が遅れた
-- ゴールとアウトプットを定義せずにAIを走らせて時間を溶かした
-- 他人のリポジトリを参考にした設計プロセスが自分の感覚に合わなかった
 
 ## 適用基準
 
@@ -145,7 +138,7 @@ AIは関連コード／ドメインを**実際に読んでから**、1回だけ�
 
 ### 生成手順
 
-1. markdown要件定義書を `.sd/specs/{feature}/requirements.md` に保存（AI向け、既存通り）
+1. markdown要件定義書を `.sd/specs/{feature}/requirements.md` に保存（AI向け）。`.sd/` は Write/Edit が hook でブロックされるため、scratchpad に Write → Bash で `cp` し、すぐ commit する（`.claude/rules/git/sd-safe-commit.md`）
 2. HTML版を `materials/html/{feature}-blueprint.html` に生成（人間向け）
 3. AskUserQuestion でHTML版のフルパスを案内し、ブラウザで確認を促す
 
@@ -171,7 +164,6 @@ AIは関連コード／ドメインを**実際に読んでから**、1回だけ�
 ## 出力テンプレート（要件定義書）
 
 5フェーズ完了後、以下の構成でマークダウンファイルを生成する。
-保存先はあみおに確認する。
 
 ```markdown
 # [プロジェクト名] 要件定義書

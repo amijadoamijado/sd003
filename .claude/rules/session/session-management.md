@@ -144,7 +144,7 @@ SD003を新規プロジェクトに展開する際、セッション管理は**�
 ### 展開コマンド
 
 ```bash
-/sd:deploy <target-project-path>
+/sd-deploy <target-project-path>
 ```
 
 詳細手順: `.claude/skills/sd-deploy/README.md`
