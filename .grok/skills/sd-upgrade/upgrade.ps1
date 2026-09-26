@@ -174,6 +174,25 @@ foreach ($s in $overengSkillNames) { $overengAll += ".claude\skills\$s", ".agent
 $overengAll += $overengExtra
 $delOverengPresent = @($overengAll | Where-Object { (Test-Path (Join-Path $TargetProject $_)) -and -not (Test-KeptUpgradeMove $_) })
 
+# Retired hooks: their registrations leave settings.json.template with the hook files, so
+# a hook file is removed only when the target's settings.json will not still call it
+# (settings.json is regenerated from the template, or does not mention the hook). A kept
+# settings.json that still registers the hook would error on every tool call if the file
+# disappeared, so that case is left in place and reported.
+$retiredHooks = @(".claude\hooks\workflow-gate.sh", ".claude\hooks\workflow-state-tracker.sh")
+$retiredHooksBlocked = @()
+$settingsKept = Test-KeptUpgrade ".claude/settings.json"
+$targetSettings = Join-Path $TargetProject ".claude\settings.json"
+foreach ($h in $retiredHooks) {
+    if (-not (Test-Path (Join-Path $TargetProject $h)) -or (Test-KeptUpgradeMove $h)) { continue }
+    $hookName = Split-Path $h -Leaf
+    if ($settingsKept -and (Test-Path $targetSettings) -and (Select-String -LiteralPath $targetSettings -SimpleMatch $hookName -Quiet)) {
+        $retiredHooksBlocked += $h
+    } else {
+        $delOverengPresent += $h
+    }
+}
+
 # Lean migration detection (keep/profile-aware; honesty: flag local edits)
 $leanMigrate = @(); $leanKeptRules = @(); $leanCustomized = @()
 if ($LeanMode -ne "off") {
@@ -218,6 +237,9 @@ if ($delDirsPresent.Count -eq 0 -and $delFilesPresent.Count -eq 0 -and $stubFile
     foreach ($f in $delFilesPresent) { Write-Host "  [file] $f" }
     foreach ($s in $stubFiles)       { Write-Host "  [stub] $s" }
     foreach ($o in $delOverengPresent) { Write-Host "  [oeng] $o" }
+}
+foreach ($h in $retiredHooksBlocked) {
+    Write-Host "  [hook] $h left in place: the kept .claude\settings.json still registers it. Remove that registration, then re-run." -ForegroundColor Yellow
 }
 Write-Host ""
 Write-Host "[Lean migration] mode=$LeanMode - legacy always-loaded rules (moved to docs/rules-reference/ in SD003 2026-07-26):" -ForegroundColor Cyan

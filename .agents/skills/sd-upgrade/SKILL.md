@@ -60,6 +60,7 @@ bash .claude/skills/sd-upgrade/upgrade.sh <target> [--execute] [--include-option
 | file | `scripts/sync-gemini-features.js` `scripts/migrate-kiro-to-sd.ps1` | 廃止/一回限り |
 | file | `.antigravity/rules.md` | agy非読・stale（→`antigravity.md`） |
 | file | `<claude-mem-context>` を含む nested `CLAUDE.md` | claude-mem(非公式)の自動スタブ |
+| file | `.claude/hooks/workflow-gate.sh` `.claude/hooks/workflow-state-tracker.sh` | 撤去済み `/workflow` 用。`settings.json` を `.sd003-keep` で保護し、まだ登録している配布先では退避せず `[hook]` と表示する（ファイルだけ消すと毎回 hook エラーになるため）。登録を外してから再実行する |
 
 > **⚠️ `.agents/skills/` は削除しない。** 旧「廃止」扱いから復活し、現在は agy の正規スキルパス。
 

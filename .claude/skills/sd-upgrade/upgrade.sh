@@ -153,6 +153,21 @@ done
 OVERENG_ALL+=("${OVERENG_EXTRA[@]}")
 DEL_OVERENG=(); for p in "${OVERENG_ALL[@]}"; do [ -e "$TARGET_PROJECT/$p" ] && ! up_is_kept_move "$p" && DEL_OVERENG+=("$p"); done
 
+# Retired hooks: removed only when the target's settings.json will not still call them
+# (regenerated from the template, or not mentioning the hook). A kept settings.json that
+# still registers one would error on every tool call if the file disappeared.
+RETIRED_HOOKS=(".claude/hooks/workflow-gate.sh" ".claude/hooks/workflow-state-tracker.sh")
+RETIRED_HOOKS_BLOCKED=()
+for h in "${RETIRED_HOOKS[@]}"; do
+    [ -e "$TARGET_PROJECT/$h" ] || continue
+    up_is_kept_move "$h" && continue
+    if up_is_kept ".claude/settings.json" && [ -f "$TARGET_PROJECT/.claude/settings.json" ] && grep -qF "$(basename "$h")" "$TARGET_PROJECT/.claude/settings.json"; then
+        RETIRED_HOOKS_BLOCKED+=("$h")
+    else
+        DEL_OVERENG+=("$h")
+    fi
+done
+
 # Lean migration detection (keep/profile-aware; honesty: flag local edits)
 LEAN_MIGRATE=(); LEAN_KEPT=(); LEAN_CUSTOMIZED=()
 if [ "$LEAN_MODE" != "off" ]; then
@@ -193,6 +208,9 @@ else
     for s in "${STUBS[@]}"; do echo "  [stub] $s"; done
     for o in "${DEL_OVERENG[@]}"; do echo "  [oeng] $o"; done
 fi
+for h in "${RETIRED_HOOKS_BLOCKED[@]}"; do
+    echo "  [hook] $h left in place: the kept .claude/settings.json still registers it. Remove that registration, then re-run."
+done
 echo ""
 echo "[Lean migration] mode=$LEAN_MODE - legacy always-loaded rules (moved to docs/rules-reference/ in SD003 2026-07-26):"
 if [ "$LEAN_MODE" = "off" ]; then
