@@ -1,35 +1,16 @@
-# 完了報告（2026-09-23 19:57）
+# 完了報告
 
 ## やったこと
-
-| ファイル | 変更内容 |
-|---------|----------|
-| `.sessions/session-20260923-195747.md` | 本セッションの履歴を保存 |
-| `.sessions/session-current.md` | 最新の引継ぎを更新 |
-| `.sessions/TIMELINE.md` | 当月の先頭に記録を追加し、セッション数を146に更新 |
-| `.handoff/DONE.md` | 他の実行環境向けに引継ぎを更新 |
-
-**要約**: 7日以上前の会話ログ37件（約11MB）を `G:\マイドライブ\claude-sessions-archive` へ退避し、索引を更新した。Claudeモデルの利用制限時に、Claude Code 上で別モデルを利用する場合の説明を訂正した。
+Claude/Codexプロンプト監査修正を統合し e944681・5d4d68a をpush。RULES矛盾、旧README、中程度7件を処理。
 
 ## 確認結果
-
-- 退避スクリプトが37件の移動完了、索引57件（空2件を除外）を報告。
-- SD003 本体と更新元はともに 2.19.5。
-- コード変更なし。ビルド・テスト・ブラウザ確認は実施していない。
+同期21件正常、差分正常、HTML置換項目17件一致、README退避内容一致。スキル実動作・他PJ展開は未実施。
 
 ## 残っていること
-
-- `/status` で Opus 5.5 の effort 設定が有効か確認する。
-- 必要な配布先へ `/sd-upgrade .` で 2.19.5 を反映する。
-- `claudecode-fyx`（Phase 6 の keep 対象件数と index.lock 残留）および aa001 フック停止原因の調査を継続する。
-- pm002 の `.gitignore` 改行抜けはユーザー判断待ち。
+scripts/ai-usage-monitor.pyの既存変更を保持。恒久hook修正と監査flag全件の再確認は未実施。次回は依頼範囲内の実動作確認。
 
 ## 判断したこと
+子はLuna medium。確認待ちや保護条件を残して指示を整理。引継ぎはローカルcommitで保存。
 
-- Claudeモデルの制限と Claude Code 自体の利用可否は区別する。別モデルが同じ Claude Code 上で利用可能なら、Codex への切替は必須ではない。
-- 開始時から存在する `scripts/ai-usage-monitor.py` の未コミット変更には触れていない。
-
-## 関連
-
-- 記録: `D:\claudecode\sd003\.sessions\session-20260923-195747.md`
-- 退避先: `G:\マイドライブ\claude-sessions-archive`
+## 詳細
+[セッション記録](../.sessions/session-20260926-123010.md)
