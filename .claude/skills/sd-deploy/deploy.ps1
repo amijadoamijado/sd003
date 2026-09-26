@@ -226,6 +226,17 @@ function Test-OptionalExcluded {
 # Honesty fix: surfaces framework files whose local content diverges (= bespoke
 # customization that would be silently lost), plus files preserved by .sd003-keep.
 # ============================================================
+# .sd003-profile "settings-merge = on": a kept .claude/settings.json is realigned to the
+# template instead of frozen (see realign-settings.mjs). Default off = plain keep.
+function Test-SettingsMerge {
+    $profilePath = Join-Path $TargetProject ".sd003-profile"
+    if (-not (Test-Path $profilePath)) { return $false }
+    foreach ($line in (Get-Content $profilePath -Encoding UTF8)) {
+        if ($line -match '^\s*settings-merge\s*=\s*on\s*(#.*)?$') { return $true }
+    }
+    return $false
+}
+
 function Invoke-DeployDryRun {
     Write-Host ""
     Write-Host "=== DRY-RUN: what a real deploy would write (no changes made) ===" -ForegroundColor Cyan
@@ -341,6 +352,12 @@ function Invoke-DeployDryRun {
         Write-Host ""
         Write-Host "WARNING: $($diverged.Count) file(s) with local changes will be overwritten on a real run." -ForegroundColor Red
         Write-Host "         A backup is taken, but to KEEP them, list them in <target>/.sd003-keep first." -ForegroundColor Red
+    }
+
+    if ((Test-Kept ".claude/settings.json") -and (Test-SettingsMerge)) {
+        Write-Host ""
+        Write-Host "settings-merge=on - kept .claude/settings.json realign plan:" -ForegroundColor Cyan
+        & node (Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\realign-settings.mjs") $TargetProject $SOURCE_DIR --dry-run
     }
 }
 
@@ -867,7 +884,15 @@ if (Test-Path $timelinePath) {
 $settingsPath = Join-Path $TargetProject ".claude\settings.json"
 $templatePath = Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\templates\settings.json.template"
 if (Test-Kept ".claude/settings.json") {
-    Write-Host "  KEEP: .claude/settings.json preserved via .sd003-keep" -ForegroundColor Magenta
+    if (Test-SettingsMerge) {
+        # Kept settings.json + settings-merge=on: template wiring is applied and the
+        # project's own hooks/env/permissions survive (realign-settings.mjs).
+        Write-Host "  MERGE: .claude/settings.json kept via .sd003-keep - realigning to template (settings-merge=on)" -ForegroundColor Magenta
+        & node (Join-Path $SOURCE_DIR ".claude\skills\sd-deploy\realign-settings.mjs") $TargetProject $SOURCE_DIR --backup-dir $BackupDir
+        if ($LASTEXITCODE -ne 0) { Write-Host "  WARN: settings.json realign failed - left as is" -ForegroundColor Yellow }
+    } else {
+        Write-Host "  KEEP: .claude/settings.json preserved via .sd003-keep" -ForegroundColor Magenta
+    }
     $script:keptFiles += ".claude/settings.json"
 } elseif (Test-Path $templatePath) {
     if ((Test-Path $settingsPath) -and ((Get-FileHash $templatePath).Hash -ne (Get-FileHash $settingsPath).Hash)) { $script:divergedOverwrites += ".claude/settings.json" }

@@ -59,7 +59,7 @@ bash .claude/skills/sd-upgrade/upgrade.sh <target> [--execute] [--include-option
 | file | `scripts/sync-gemini-features.js` `scripts/migrate-kiro-to-sd.ps1` | 廃止/一回限り |
 | file | `.antigravity/rules.md` | agy非読・stale（→`antigravity.md`） |
 | file | `<claude-mem-context>` を含む nested `CLAUDE.md` | claude-mem(非公式)の自動スタブ |
-| file | `.claude/hooks/workflow-gate.sh` `.claude/hooks/workflow-state-tracker.sh` | 撤去済み `/workflow` 用。`settings.json` を `.sd003-keep` で保護し、まだ登録している配布先では退避せず `[hook]` と表示する（ファイルだけ消すと毎回 hook エラーになるため）。登録を外してから再実行する |
+| file | `.claude/hooks/workflow-gate.sh` `.claude/hooks/workflow-state-tracker.sh` | 撤去済み `/workflow` 用。`settings.json` を `.sd003-keep` で保護し、まだ登録している配布先では退避せず `[hook]` と表示する（ファイルだけ消すと毎回 hook エラーになるため）。登録を外してから再実行する。`.sd003-profile` で `settings-merge = on` なら deploy が登録を外すため退避する |
 
 > **⚠️ `.agents/skills/` は削除しない。** 旧「廃止」扱いから復活し、現在は agy の正規スキルパス。
 
@@ -106,6 +106,35 @@ dry-run は deploy に委譲し、**上書きで失われる固有化ファイ�
 ```
 execute 後は「OVERWROTE local divergence（バックアップ済み）」が報告される。
 
+### settings.json を keep しているプロジェクト（`settings-merge = on`）
+
+bd init 等が `.claude/settings.json` にフックを足すため keep しているプロジェクトは、keep のままだと
+フレームワーク側の配線まで凍結される（廃止フックが登録されたまま・新フック未登録）。
+`<target>/.sd003-profile` に次の1行を書くと、deploy が keep 済み settings.json を最新テンプレートへ合わせる。
+
+```
+settings-merge = on
+```
+
+- 実体: `.claude/skills/sd-deploy/realign-settings.mjs`（deploy.ps1 / deploy.sh の両方から呼ぶ）
+- フレームワーク由来のフック（`scripts/run-hook.js`・`orchestrator-guard.js`・sd003 同梱フック・廃止フック）は
+  テンプレートの配線に置き換え、それ以外（`bd prime` やプロジェクト独自フック）・env・permissions は残す
+- dry-run で「keep project hook / drop retired hook / WOULD rewrite」を表示。実行時は旧版を deploy のバックアップへ保存
+- 冪等。2回目以降は「already matches」
+
+## 実行コマンドの正規形（権限ルールと一致させる）
+
+配布テンプレートの `permissions.allow` は次の形だけを許可する。Claude Code の auto mode は
+フレームワーク更新を自己設定変更と判定して拒否するため、**この形から崩さずに**実行する。
+
+```
+pwsh -NoProfile -File D:/claudecode/sd003/.claude/skills/sd-upgrade/upgrade.ps1 <target> [-Execute]
+```
+
+`cd sd003 && ...` や相対パス・バックスラッシュ区切りにすると許可ルールに一致しない。
+許可ルールは target の settings.json（テンプレート由来、keep 時は `settings-merge = on` で合流）に入るため、
+効くのは次回アップグレードから。
+
 ## 安全装置
 
 - **dry-run 既定**：`--execute` なしは一切変更しない
@@ -151,6 +180,7 @@ lean化で `docs/rules-reference/` へ移設された旧・常時ロードルー
 # 例
 lean-migration = standard        # standard(既定) | additive | off
 keep-always-loaded = global/known-unknowns.md   # 移行対象から除外（繰り返し可）
+settings-merge = on              # keep 済み settings.json をテンプレートへ合流（既定 off）
 ```
 
 | モード | 挙動 |

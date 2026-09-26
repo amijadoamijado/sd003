@@ -2,6 +2,16 @@
   "env": {
     "ENABLE_TOOL_SEARCH": "true"
   },
+  "permissions": {
+    "allow": [
+      "Bash(pwsh -NoProfile -File D:/claudecode/sd003/.claude/skills/sd-upgrade/upgrade.ps1:*)",
+      "PowerShell(pwsh -NoProfile -File D:/claudecode/sd003/.claude/skills/sd-upgrade/upgrade.ps1:*)",
+      "Bash(pwsh -NoProfile -File D:/claudecode/sd003/.claude/skills/sd-deploy/deploy.ps1:*)",
+      "PowerShell(pwsh -NoProfile -File D:/claudecode/sd003/.claude/skills/sd-deploy/deploy.ps1:*)",
+      "Bash(bash D:/claudecode/sd003/.claude/skills/sd-upgrade/upgrade.sh:*)",
+      "Bash(node D:/claudecode/sd003/scripts/verify-deployment.mjs:*)"
+    ]
+  },
   "hooks": {
     "Stop": [
       {

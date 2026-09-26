@@ -124,7 +124,9 @@ function Test-KeptUpgradeMove {
 # as .sd003-keep; NOT JSON so the bash twin can parse it identically).
 #   lean-migration = standard | additive | off      (default: standard)
 #   keep-always-loaded = <relpath under .claude/rules/>   (repeatable)
+#   settings-merge = on | off   (default: off) kept settings.json is realigned by deploy
 $LeanMode = "standard"
+$SettingsMerge = $false
 $KeepAlwaysLoaded = @()
 $profileFile = Join-Path $TargetProject ".sd003-profile"
 if (Test-Path $profileFile) {
@@ -133,8 +135,9 @@ if (Test-Path $profileFile) {
         if (-not $l -or $l.StartsWith('#')) { continue }
         if ($l -match '^lean-migration\s*=\s*(\S+)') { $LeanMode = $Matches[1].ToLower() }
         elseif ($l -match '^keep-always-loaded\s*=\s*(\S+)') { $KeepAlwaysLoaded += (($Matches[1]) -replace '\\', '/') }
+        elseif ($l -match '^settings-merge\s*=\s*on\b') { $SettingsMerge = $true }
     }
-    Write-Host "[.sd003-profile] lean-migration=$LeanMode, keep-always-loaded: $($KeepAlwaysLoaded.Count) entries" -ForegroundColor Magenta
+    Write-Host "[.sd003-profile] lean-migration=$LeanMode, keep-always-loaded: $($KeepAlwaysLoaded.Count) entries, settings-merge=$(if ($SettingsMerge) { 'on' } else { 'off' })" -ForegroundColor Magenta
 }
 
 # ------------------------------------------------------------------
@@ -178,7 +181,8 @@ $delOverengPresent = @($overengAll | Where-Object { (Test-Path (Join-Path $Targe
 # a hook file is removed only when the target's settings.json will not still call it
 # (settings.json is regenerated from the template, or does not mention the hook). A kept
 # settings.json that still registers the hook would error on every tool call if the file
-# disappeared, so that case is left in place and reported.
+# disappeared, so that case is left in place and reported. With settings-merge=on the
+# deploy step rewrites that registration away, so the file can go.
 $retiredHooks = @(".claude\hooks\workflow-gate.sh", ".claude\hooks\workflow-state-tracker.sh")
 $retiredHooksBlocked = @()
 $settingsKept = Test-KeptUpgrade ".claude/settings.json"
@@ -186,7 +190,7 @@ $targetSettings = Join-Path $TargetProject ".claude\settings.json"
 foreach ($h in $retiredHooks) {
     if (-not (Test-Path (Join-Path $TargetProject $h)) -or (Test-KeptUpgradeMove $h)) { continue }
     $hookName = Split-Path $h -Leaf
-    if ($settingsKept -and (Test-Path $targetSettings) -and (Select-String -LiteralPath $targetSettings -SimpleMatch $hookName -Quiet)) {
+    if ($settingsKept -and -not $SettingsMerge -and (Test-Path $targetSettings) -and (Select-String -LiteralPath $targetSettings -SimpleMatch $hookName -Quiet)) {
         $retiredHooksBlocked += $h
     } else {
         $delOverengPresent += $h
@@ -389,6 +393,7 @@ if ($deployExitCode -ne 0) {
 } else {
     $backupPatterns = @(".sd003-backup-*", ".sd003-upgrade-backup-*", ".sd002-backup-*")
     $pruned = $false
+    $pruneFailures = @()
     foreach ($pattern in $backupPatterns) {
         # Sort by the yyyyMMdd_HHmmss timestamp embedded in the DIRECTORY NAME,
         # not by LastWriteTime: touching any file inside an old backup (e.g.
@@ -409,18 +414,35 @@ if ($deployExitCode -ne 0) {
             $keep = $found[0]
             $stale = $found | Select-Object -Skip 1
             $archiveDir = Join-Path $TargetProject ".sd003-archive\$(Get-Date -Format 'yyyyMMdd')"
-            if (-not (Test-Path $archiveDir)) { New-Item -ItemType Directory -Path $archiveDir -Force | Out-Null }
             Write-Host "  [$pattern] $($found.Count) found. Keeping newest (by embedded timestamp): $($keep.Name)" -ForegroundColor Yellow
             foreach ($old in $stale) {
                 $dest = Join-Path $archiveDir $old.Name
                 if (Test-Path $dest) { $dest = Join-Path $archiveDir "$($old.Name)_$(Get-Date -Format 'HHmmss')" }
-                Move-Item -LiteralPath $old.FullName -Destination $dest -Force
-                Write-Host "    archived (not deleted): $($old.Name) -> $dest"
+                # Move-Item without -ErrorAction Stop raises a NON-TERMINATING error when a file
+                # inside the backup is locked (another CLI session, an open editor). The
+                # 2026-09-05 er001 run hit exactly that: the archive dir was created, the move
+                # failed, the script still reported success, and the only trace was an empty
+                # .sd003-archive/<date>/. Fail loudly and leave the source in place.
+                # Archive dir is created lazily so a fully failed prune leaves no empty dir.
+                try {
+                    if (-not (Test-Path $archiveDir)) { New-Item -ItemType Directory -Path $archiveDir -Force -ErrorAction Stop | Out-Null }
+                    Move-Item -LiteralPath $old.FullName -Destination $dest -Force -ErrorAction Stop
+                    Write-Host "    archived (not deleted): $($old.Name) -> $dest"
+                } catch {
+                    $pruneFailures += "$($old.Name): $($_.Exception.Message)"
+                    Write-Host "    [WARN] archive FAILED (left in place): $($old.Name) - $($_.Exception.Message)" -ForegroundColor Red
+                }
             }
         }
     }
     if (-not $pruned) {
         Write-Host "  (none - fewer than 2 backups per pattern, nothing to prune)" -ForegroundColor Green
+    }
+    if ($pruneFailures.Count -gt 0) {
+        Write-Host ""
+        Write-Host "  [WARN] $($pruneFailures.Count) backup folder(s) could not be archived and are still at project root:" -ForegroundColor Red
+        foreach ($f in $pruneFailures) { Write-Host "    - $f" -ForegroundColor Red }
+        Write-Host "  Nothing was lost. Close other CLI sessions/editors and re-run, or move them by hand." -ForegroundColor Yellow
     }
 }
 

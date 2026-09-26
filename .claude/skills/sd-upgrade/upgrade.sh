@@ -111,8 +111,10 @@ up_is_kept_move() {
 # .sd003-profile: per-project tuning (plain key=value, '#' comments)
 #   lean-migration = standard | additive | off      (default: standard)
 #   keep-always-loaded = <relpath under .claude/rules/>   (repeatable)
+#   settings-merge = on | off   (default: off) kept settings.json is realigned by deploy
 LEAN_MODE="standard"
 KEEP_ALWAYS=()
+SETTINGS_MERGE=off
 if [ -f "$TARGET_PROJECT/.sd003-profile" ]; then
     pf_first=true
     while IFS= read -r line; do
@@ -123,9 +125,10 @@ if [ -f "$TARGET_PROJECT/.sd003-profile" ]; then
         case "$line" in
             lean-migration*=*) LEAN_MODE="$(echo "${line#*=}" | tr -d ' ' | tr '[:upper:]' '[:lower:]')" ;;
             keep-always-loaded*=*) KEEP_ALWAYS+=("$(echo "${line#*=}" | tr -d ' ')") ;;
+            settings-merge*=*) SETTINGS_MERGE="$(echo "${line#*=}" | sed 's/#.*//' | tr -d ' ' | tr '[:upper:]' '[:lower:]')" ;;
         esac
     done < "$TARGET_PROJECT/.sd003-profile"
-    echo "[.sd003-profile] lean-migration=$LEAN_MODE, keep-always-loaded: ${#KEEP_ALWAYS[@]} entries"
+    echo "[.sd003-profile] lean-migration=$LEAN_MODE, keep-always-loaded: ${#KEEP_ALWAYS[@]} entries, settings-merge=$SETTINGS_MERGE"
 fi
 
 echo "=== SD003 Safe Upgrade ($MODE) ==="
@@ -161,7 +164,8 @@ RETIRED_HOOKS_BLOCKED=()
 for h in "${RETIRED_HOOKS[@]}"; do
     [ -e "$TARGET_PROJECT/$h" ] || continue
     up_is_kept_move "$h" && continue
-    if up_is_kept ".claude/settings.json" && [ -f "$TARGET_PROJECT/.claude/settings.json" ] && grep -qF "$(basename "$h")" "$TARGET_PROJECT/.claude/settings.json"; then
+    # settings-merge=on: deploy rewrites the kept registration away, so the file can go.
+    if up_is_kept ".claude/settings.json" && [ "$SETTINGS_MERGE" != on ] && [ -f "$TARGET_PROJECT/.claude/settings.json" ] && grep -qF "$(basename "$h")" "$TARGET_PROJECT/.claude/settings.json"; then
         RETIRED_HOOKS_BLOCKED+=("$h")
     else
         DEL_OVERENG+=("$h")
@@ -296,7 +300,78 @@ echo "[Deploy] Running deploy.sh ..."
 if [ "$INCLUDE_OPTIONAL" = true ]; then
     echo "[WARN] --include-optional is not supported by deploy.sh (bash) - only deploy.ps1 implements -IncludeOptional. Running standard deploy."
 fi
-bash "$DEPLOY_SH" "$TARGET_PROJECT"
+DEPLOY_EXIT=0
+bash "$DEPLOY_SH" "$TARGET_PROJECT" || DEPLOY_EXIT=$?
+
+# Phase 4b: prune accumulated backup folders (ps1 twin: upgrade.ps1 "[Prune]").
+# This phase existed ONLY in upgrade.ps1 until 2026-09-07 - the bash twin let
+# .sd003-backup-*, .sd003-upgrade-backup- and legacy .sd002-backup-* directories
+# pile up forever (8+ observed in cf001). Stale ones are MOVED to
+# <project>/.sd003-archive/<YYYYMMDD>/, never deleted.
+# Destination is intentionally OUTSIDE .sd/ - .sd/ is git-tracked and gets copied
+# into every future backup, so archiving inside it caused nested bloat and pulled
+# old backups into git commits.
+if [ "$DEPLOY_EXIT" -ne 0 ]; then
+    # Fail fast, as this script always has under `set -e`. The prune is skipped so a
+    # failed/unconfirmed deploy never causes backups to be pruned (same rule as the ps1 twin).
+    echo ""
+    echo "[Prune] [SKIP] deploy.sh exited nonzero ($DEPLOY_EXIT) - skipping prune so existing backups stay intact."
+    exit "$DEPLOY_EXIT"
+fi
+
+echo ""
+echo "[Prune] Checking for accumulated backup folders ..."
+ARCHIVE_DIR="$TARGET_PROJECT/.sd003-archive/$(date +%Y%m%d)"
+PRUNED=false
+PRUNE_FAIL_COUNT=0
+PRUNE_FAIL_LIST=""
+for pattern in ".sd003-backup-" ".sd003-upgrade-backup-" ".sd002-backup-"; do
+    # Sort by the yyyyMMdd_HHmmss timestamp embedded in the DIRECTORY NAME, not by
+    # mtime: restoring a single file out of an old backup bumps that directory's
+    # mtime and would make an mtime sort misidentify the real newest backup.
+    found=()
+    while IFS= read -r line; do
+        [ -n "$line" ] && found+=("${line#* }")
+    done < <(
+        for path in "$TARGET_PROJECT/${pattern}"*; do
+            [ -d "$path" ] || continue
+            name=$(basename "$path")
+            key=$(printf '%s' "$name" | grep -oE '[0-9]{8}_[0-9]{6}$' || true)
+            [ -n "$key" ] || key="00000000_000000"
+            printf '%s %s
+' "$key" "$name"
+        done | sort -r
+    )
+    if [ "${#found[@]}" -ge 2 ]; then
+        PRUNED=true
+        echo "  [${pattern}*] ${#found[@]} found. Keeping newest (by embedded timestamp): ${found[0]}"
+        for old in "${found[@]:1}"; do
+            dest="$ARCHIVE_DIR/$old"
+            [ -e "$dest" ] && dest="$ARCHIVE_DIR/${old}_$(date +%H%M%S)"
+            # Create the archive dir lazily so a fully failed prune leaves no empty dir,
+            # and report a failed move loudly. The ps1 twin used to swallow this: on
+            # 2026-09-05 in er001 a locked file made every move fail, the script still
+            # reported success, and the only trace was an empty .sd003-archive/<date>/.
+            if mkdir -p "$ARCHIVE_DIR" && mv "$TARGET_PROJECT/$old" "$dest"; then
+                echo "    archived (not deleted): $old -> $dest"
+            else
+                PRUNE_FAIL_COUNT=$((PRUNE_FAIL_COUNT + 1))
+                PRUNE_FAIL_LIST="${PRUNE_FAIL_LIST}    - ${old}
+"
+                echo "    [WARN] archive FAILED (left in place): $old"
+            fi
+        done
+    fi
+done
+if [ "$PRUNED" != true ]; then
+    echo "  (none - fewer than 2 backups per pattern, nothing to prune)"
+fi
+if [ "$PRUNE_FAIL_COUNT" -gt 0 ]; then
+    echo ""
+    echo "  [WARN] $PRUNE_FAIL_COUNT backup folder(s) could not be archived and are still at project root:"
+    printf '%s' "$PRUNE_FAIL_LIST"
+    echo "  Nothing was lost. Close other CLI sessions/editors and re-run, or move them by hand."
+fi
 
 # Phase 5: verify
 echo ""

@@ -205,6 +205,14 @@ KEPT_LOG="$(mktemp)"; DIVERGED_LOG="$(mktemp)"
 # ============================================================
 # DRY-RUN: report what a real deploy WOULD overwrite, then exit (no changes).
 # ============================================================
+# .sd003-profile "settings-merge = on": a kept .claude/settings.json is realigned to the
+# template instead of frozen (see realign-settings.mjs). Default off = plain keep.
+# Twin of Test-SettingsMerge in deploy.ps1.
+is_settings_merge() {
+    [ -f "$TARGET_PROJECT/.sd003-profile" ] || return 1
+    tr -d '\r' < "$TARGET_PROJECT/.sd003-profile" | grep -Eq '^[[:space:]]*settings-merge[[:space:]]*=[[:space:]]*on[[:space:]]*(#.*)?$'
+}
+
 deploy_dry_run() {
     echo ""
     echo "=== DRY-RUN: what a real deploy would write (no changes made) ==="
@@ -297,6 +305,12 @@ deploy_dry_run() {
         echo ""
         echo "WARNING: $diverged file(s) with local changes will be overwritten on a real run."
         echo "         Add them to <target>/.sd003-keep to KEEP them."
+    fi
+
+    if is_kept ".claude/settings.json" && is_settings_merge; then
+        echo ""
+        echo "settings-merge=on - kept .claude/settings.json realign plan:"
+        node "$SOURCE_DIR/.claude/skills/sd-deploy/realign-settings.mjs" "$TARGET_PROJECT" "$SOURCE_DIR" --dry-run
     fi
 }
 
@@ -816,7 +830,14 @@ fi
 # not just the Stop hook. A minimal settings.json leaves copied guardrail hooks INACTIVE
 # (block-edit-write-on-sd / enforce-skill-read / enforce-spec-location / etc.).
 if is_kept ".claude/settings.json"; then
-    echo "  KEEP: .claude/settings.json preserved via .sd003-keep"
+    if is_settings_merge; then
+        # Kept settings.json + settings-merge=on: template wiring is applied and the
+        # project's own hooks/env/permissions survive (realign-settings.mjs).
+        echo "  MERGE: .claude/settings.json kept via .sd003-keep - realigning to template (settings-merge=on)"
+        node "$SOURCE_DIR/.claude/skills/sd-deploy/realign-settings.mjs" "$TARGET_PROJECT" "$SOURCE_DIR" --backup-dir "$BACKUP_DIR"             || echo "  WARN: settings.json realign failed - left as is"
+    else
+        echo "  KEEP: .claude/settings.json preserved via .sd003-keep"
+    fi
     echo ".claude/settings.json" >> "$KEPT_LOG"
 else
     # settings.json is copied from templates/settings.json.template - the SAME
