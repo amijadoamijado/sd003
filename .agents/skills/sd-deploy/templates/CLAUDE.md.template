@@ -53,35 +53,35 @@ npm run test:gas-fakes   # Tier-2 gas-fakes tests only
 
 ## Conditional Context
 
-IMPORTANT: When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. Known constraints (iframe, CORS, @HEAD vs fixed deployment) must be reflected in code immediately. Details: `.claude/rules/gas/env-interface.md`, `.claude/rules/gas/gas-constraints.md`
+When writing or modifying GAS code, use Env Interface Pattern. Node.js APIs (`fs`, `path`, `process`) are prohibited. Known constraints (iframe, CORS, @HEAD vs fixed deployment) must be reflected in code immediately. Details: `.claude/rules/gas/env-interface.md`, `.claude/rules/gas/gas-constraints.md`
 
-IMPORTANT: When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Coverage-only tests are prohibited. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
+When running tests or writing test code, enforce production data TDD. Mock/dummy/empty data is prohibited for Adapter layer. Coverage-only tests are prohibited. VTD validation required. Details: `.claude/rules/testing/testing-standards.md`, `.claude/rules/testing/production-data-tdd.md`
 
-IMPORTANT: AI協調文書は `.sd/ai-coordination/` へ（`.antigravity/` やルート禁止）。Session Lead = ユーザーが開いたCLI。アドホック相談は各AIのディスパッチスキル（Codex `/codex:*`, `grok-dispatch`, `agy-dispatch`）。Details: `.claude/rules/workflow/ai-coordination.md`
+AI協調文書は `.sd/ai-coordination/` へ（`.antigravity/` やルート禁止）。Session Lead = ユーザーが開いたCLI。アドホック相談は各AIのディスパッチスキル（Codex `/codex:*`, `grok-dispatch`, `agy-dispatch`）。Details: `.claude/rules/workflow/ai-coordination.md`
 
-IMPORTANT: Grokは2モード。**Lead mode**（ユーザーがGrok直接起動、「Grok主導で」等）→ Claudeはオーケストレーションせずハンドオフ（`.grok/GROK_NATIVE.md`）。**Assist mode**（「grokに相談/依頼/実装」等）→ `grok-dispatch` スキル。Grok=探索実装・独立検証 / Codex=正式レビュー / agy=本番E2E。Details: `.claude/rules/workflow/ai-coordination.md`
+Grokは2モード。**Lead mode**（ユーザーがGrok直接起動、「Grok主導で」等）→ Claudeはオーケストレーションせずハンドオフ（`.grok/GROK_NATIVE.md`）。**Assist mode**（「grokに相談/依頼/実装」等）→ `grok-dispatch` スキル。Grok=探索実装・独立検証 / Codex=正式レビュー / agy=本番E2E。Details: `.claude/rules/workflow/ai-coordination.md`
 
-IMPORTANT: 全AI（特にagy）の成果物はプロジェクト内へ保存 — ユーザー向けは `materials/`、協調文書は `.sd/ai-coordination/`。agyの `~/.gemini/antigravity-cli/brain/<会話ID>/` に唯一のコピーを残さない。発見時は `bash scripts/recover-agy-artifacts.sh` で回収しフルパス提示。Details: `docs/rules-reference/workflow/artifact-output-location.md`
+全AI（特にagy）の成果物はプロジェクト内へ保存 — ユーザー向けは `materials/`、協調文書は `.sd/ai-coordination/`。agyの `~/.gemini/antigravity-cli/brain/<会話ID>/` に唯一のコピーを残さない。発見時は `bash scripts/recover-agy-artifacts.sh` で回収しフルパス提示。Details: `docs/rules-reference/workflow/artifact-output-location.md`
 
-IMPORTANT: If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Details: `.claude/rules/skills/skill-check-before-action.md`
+If a file operation involves Excel, CSV, PDF, or images, check `.claude/skills/` first for applicable skill. Follow SKILL.md instructions exactly. Details: `.claude/rules/skills/skill-check-before-action.md`
 
-IMPORTANT: デバッグは3階層 — `/bug-quick`（5-15分・フロー照合）→ `/bug-trace`（30-60分・3エージェント並列）→ `/dialogue-resolution`（AI迷走検出・各Step後にAskUserQuestion必須）。同一エラー2回目でエスカレーション。Details: `docs/rules-reference/troubleshooting/`
+デバッグは3階層 — `/bug-quick`（5-15分・フロー照合）→ `/bug-trace`（30-60分・3エージェント並列）→ `/dialogue-resolution`（AI迷走検出・各Step後にAskUserQuestion必須）。同一エラー2回目でエスカレーション。Details: `docs/rules-reference/troubleshooting/`
 
-IMPORTANT: When building or modifying Web UI (HTML/CSS/JS), follow the 8 design principles, apply design tokens, and check visual quality score (50/70 minimum). Details: `.claude/rules/ui/web-design-principles.md`, `.claude/rules/ui/visual-review-checklist.md`
+When building or modifying Web UI (HTML/CSS/JS), follow the 8 design principles, apply design tokens, and check visual quality score (50/70 minimum). Details: `.claude/rules/ui/web-design-principles.md`, `.claude/rules/ui/visual-review-checklist.md`
 
-IMPORTANT: When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
+When showing UI to the user, always present the screen for confirmation before proceeding to backend integration or deployment. "Should work" is not confirmation — "user saw it and approved" is.
 
-IMPORTANT: 構造化・複数項目の確認事項は Artifact（`artifact-design` スキル必読）で提示し、判断は AskUserQuestion で末端集約。単純な二択はインライン（過剰ceremony禁止）。Claude Code専用・不可環境はテキストへフォールバック。Details: `docs/rules-reference/global/artifact-confirmation.md`
+構造化・複数項目の確認事項は Artifact（`artifact-design` スキル必読）で提示し、判断は AskUserQuestion で末端集約。単純な二択はインライン（過剰ceremony禁止）。Claude Code専用・不可環境はテキストへフォールバック。Details: `docs/rules-reference/global/artifact-confirmation.md`
 
-IMPORTANT: `.sd/` の変更後は早めに commit する（同一bashが最も安全）。未commitの `.sd/` 変更は wipe 時に L4 で復元されない。Details: `.claude/rules/git/sd-safe-commit.md`
+`.sd/` の変更後は早めに commit する（同一bashが最も安全）。未commitの `.sd/` 変更は wipe 時に L4 で復元されない。Details: `.claude/rules/git/sd-safe-commit.md`
 
-IMPORTANT: Solo運用 — master/main で直接作業する。ブランチ・PR作成はユーザー指示時のみ（提案は可、無断作成・無断切替・無断削除は禁止）。セッション終了時は commit に加えて `git pull --rebase && git push` まで完了させる（Beads運用）。Details: `docs/rules-reference/git/branch-strategy.md`
+Solo運用 — master/main で直接作業する。ブランチ・PR作成はユーザー指示時のみ（提案は可、無断作成・無断切替・無断削除は禁止）。セッション終了時は commit に加えて `git pull --rebase && git push` まで完了させる（Beads運用）。Details: `docs/rules-reference/git/branch-strategy.md`
 
-IMPORTANT: 異常・エラー時は根本原因の特定が先 — 1)症状記述 2)自分の直前の行動を列挙 3)自分原因の仮説を最初に（外部要因は最後）4)検証 5)それから修正。「気をつける」は対策ではない。Details: `docs/rules-reference/troubleshooting/root-cause-first.md`
+異常・エラー時は根本原因の特定が先 — 1)症状記述 2)自分の直前の行動を列挙 3)自分原因の仮説を最初に（外部要因は最後）4)検証 5)それから修正。「気をつける」は対策ではない。Details: `docs/rules-reference/troubleshooting/root-cause-first.md`
 
-IMPORTANT: 大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ）。Details: `docs/rules-reference/session/memory-nudge.md`
+大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ）。Details: `docs/rules-reference/session/memory-nudge.md`
 
-IMPORTANT: `/sessionwrite` 時は学習評価 — ユーザー修正2回以上でルール/スキル/メモリ化を提案（提案のみ・自動作成禁止）。Details: `docs/rules-reference/skills/learning-nudge.md`
+`/sessionwrite` 時は学習評価 — ユーザー修正2回以上でルール/スキル/メモリ化を提案（提案のみ・自動作成禁止）。Details: `docs/rules-reference/skills/learning-nudge.md`
 
 ---
 
