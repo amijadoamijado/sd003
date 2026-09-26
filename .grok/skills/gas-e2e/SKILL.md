@@ -74,7 +74,7 @@ Step 5: take_screenshot → 証跡取得
 
 ---
 
-## ⚡ モード選択フローチャート（AIは必ずこれに従う）
+## モード選択フロー
 
 ```
 E2Eテスト要求
@@ -95,7 +95,7 @@ E2Eテスト要求
         └─ Mode 4
 ```
 
-**重要: iframe内操作 → Mode 2必須。Mode 1はスクリーンショット・外観確認のみ。**
+iframe内操作にはMode 2を使う。Mode 1はスクリーンショット・外観確認用。
 
 ---
 
@@ -301,13 +301,15 @@ Step 3: 2回失敗 → Mode 3/4にフォールバック
 ### GAS E2E実行手順
 
 ```
-Step 1: take_snapshot でページ状態取得（uid一覧取得）
-Step 2: navigate_page でGAS URLにアクセス
-Step 3: take_snapshot で画面要素確認
+Step 1: navigate_page でGAS URLにアクセス
+Step 2: wait_for で画面読み込み・遷移の完了を待機
+Step 3: take_snapshot で現在の画面要素を取得（uid一覧取得）
 Step 4: click / fill / fill_form で操作（uid指定）
-Step 5: wait_for で画面遷移を待機
+Step 5: wait_for で操作後の画面遷移を待機
 Step 6: take_screenshot で証跡取得
 ```
+
+操作後の画面も確認する場合は、`wait_for` の後に `take_snapshot` を実行する。
 
 ---
 
@@ -465,31 +467,14 @@ const context = await chromium.launchPersistentContext(
 | **ヘッドレス** | 不可 | 可能 | 可能 | **可能** |
 | **AI自律度** | 高（外観のみ） | **高（全操作）** | 中 | 低 |
 
-## フォールバックフロー（AIは必ず従う）
+## フォールバック
 
-```
-E2Eテスト要求
-    │
-    ├─ iframe内操作が必要？（ほぼ常にYES）
-    │   │
-    │   ├─ YES → Mode 2 (chrome-devtools-mcp) を試行 ★ここから開始
-    │   │   ├─ MCP設定済み → autoConnect で接続 → テスト実行 ✓
-    │   │   └─ MCP未設定 → インストール → テスト実行 ✓
-    │   │
-    │   └─ Mode 2 失敗
-    │       │
-    │       ├─ Mode 3 へフォールバック
-    │       │   ├─ プロファイルコピー済み → Chrome起動 → テスト実行 ✓
-    │       │   └─ 未コピー → コピー実行 → Chrome起動 → テスト実行 ✓
-    │       │
-    │       └─ ⛔ 3回以上のリトライ禁止 → ユーザーに状況報告
-    │
-    └─ NO（スクリーンショットのみ）
-        └─ Mode 1 (claude-in-chrome) で実行
-```
+- iframe内操作はMode 2から始め、失敗時はMode 3を検討する。
+- スクリーンショットのみならMode 1を使う。
+- CI/CD環境またはヘッドレス実行ではMode 4を使う。
+- 3回以上リトライしない。失敗原因を特定してから再試行する。
 
-**禁止事項:**
-- Chrome起動を5回以上リトライする
+避ける行動:
 - ユーザーに手動操作を3回以上依頼する
 - 失敗原因を特定せずにリトライする
 - Mode 3/4を最初に選ぶ（Mode 1/2を先に試すこと）
@@ -500,7 +485,7 @@ E2Eテスト要求
 # Mode 1: セットアップ不要（claude-in-chrome拡張のみ）
 
 # Mode 2: chrome-devtools-mcp インストール
-claude mcp add chrome-devtools --scope user -- npx chrome-devtools-mcp@latest --autoConnect --no-usage-statistics
+claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest --autoConnect --no-usage-statistics
 
 # Mode 3/4: Playwrightブラウザとプロファイルの初期セットアップ
 npm run e2e:setup

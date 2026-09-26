@@ -46,8 +46,10 @@ description: |
 | `{{TITLE}}` | 文書タイトル | `at001 OCR機能` |
 | `{{DOC_TYPE}}` | 文書種別 | `要件定義書` |
 | `{{DATE}}` | 作成日 | `2026-05-10` |
-| `{{SECTION_1_CONTENT}}` ~ `{{SECTION_6}}` | 各セクションの本文 | 要件定義書の各項目 |
-| `{{VALIDATION_ITEM_N}}` | 検証観点のチェック項目 | `〇〇が動作すること` |
+| `{{SECTION_1_CONTENT}}`, `{{SECTION_2_1_CONTENT}}`, `{{SECTION_2_2_CONTENT}}`, `{{SECTION_2_3_CONTENT}}`, `{{SECTION_2_4_CONTENT}}`, `{{SECTION_3_CONTENT}}`, `{{SECTION_4_1_CONTENT}}`, `{{SECTION_4_2_CONTENT}}`, `{{SECTION_4_3_CONTENT}}`, `{{SECTION_5_1_CONTENT}}`, `{{SECTION_5_2_CONTENT}}` | テンプレートにある各セクションの本文 | 要件定義書の各項目 |
+| `{{VALIDATION_ITEM_1}}`, `{{VALIDATION_ITEM_2}}`, `{{VALIDATION_ITEM_3}}` | 検証観点のチェック項目 | `〇〇が動作すること` |
+
+プレースホルダーは `assets/report-template.html` を正本とし、テンプレートを変更したときはこの一覧も更新する。
 
 ### コンテンツ注入時の変換ルール
 

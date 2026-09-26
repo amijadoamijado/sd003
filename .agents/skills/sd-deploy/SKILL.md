@@ -168,6 +168,8 @@ aa001 に渡っていた）。
 | C4 | `.claude/commands/*.md` / `settings.json` / `CLAUDE.md` に廃止語が無いか | `.kiro` 残存・stale ref |
 | C5 | hookスクリプトと `settings.json` に文字化け（U+FFFD）が無いか | デプロイ時文字化け |
 | C6 | 生成JSON（registry / handoff-log）がparse可能か（BOM許容） | JSON破損 |
+| C7 | 配信先 `CLAUDE.md` に Lead mode があるか（`.sd003-keep` で保護された場合はスキップ） | Session Lead手順の配布漏れ |
+| C8 | 配信先 `CLAUDE.md` のルール参照先が実在するか（`.sd003-keep` で保護された場合はスキップ） | 参照先ファイルの配布漏れ |
 
 **手動実行**: `node scripts/verify-deployment.mjs <targetDir> [sourceDir]`（全PASSでexit 0、1件でもFAILでexit 1）。
 **deny-list の調整（C4）**: 環境変数 `SD003_DEPRECATED_TOKENS="tok1,tok2"`（既定 `.kiro`）。誤検知でゲート信頼を損なわないよう最小限に保つ。
@@ -280,9 +282,12 @@ find .claude/hooks -type f | wc -l            # Hooks
 | `.claude/hooks/` | ファイルを置くだけ |
 | `.agents/skills/` | `.claude/commands` を直して `python scripts/sync-cli-commands.py`（Codex・agyが共通のSKILL.mdをロード） |
 
-## 詳細手順
+## トラブルシューティング
 
-README.md を参照。
+- コマンドが認識されない場合は `.claude/commands/` の対象ファイルを確認し、Claude Codeを再起動する。
+- スキルが認識されない場合は配置先の `SKILL.md` とYAML frontmatterを確認する。Claude Codeは `.claude/skills/`、Codex・agyは `.agents/skills/` を確認する。
+- Codex・agyのスキル内容が古い場合は生成元を修正し、`python scripts/sync-cli-commands.py` と `--check` を実行する。必要に応じてセッションを再起動する。
+- 配布後の検証失敗は表示された検査項目と対象ファイルを確認する。通過させるためだけに `.sd003-keep` の保護や固有設定を削除しない。
 
 ## Lean配布（2026-07-26 / FRAMEWORK 2.18.0）
 

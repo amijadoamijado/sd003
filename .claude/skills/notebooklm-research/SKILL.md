@@ -41,12 +41,13 @@ with sync_playwright() as p:
     browser.close()
 ```
 
-### 2. GitHubリポジトリ仕様変更チェック（必須）
+### 2. GitHubリリース確認
 
 ```bash
-# https://github.com/teng-lin/notebooklm-py/releases
-# GoogleのRPCメソッドID変更で即座に壊れるため、最新版を確認
+gh release list -R teng-lin/notebooklm-py -L 1
 ```
+
+実行前に最新リリースと変更内容を確認し、利用中の `notebooklm-py` に影響する変更がないか判断する。
 
 ---
 
@@ -181,7 +182,6 @@ notebooklm-pyがエラーを返す場合（GoogleのRPC変更等）:
 |--------|------|
 | `nb_data['notebook']['id']` を使う | `data['id']` は空文字を返す |
 | 全操作で `-n <notebook_id>` を明示指定 | コンテキスト依存は事故の元 |
-| GitHubチェックなしの実行禁止 | GoogleのRPC仕様変更で壊れるリスク |
 | 認証チェックを毎回実行 | Cookie有効期限は数十分〜数時間 |
 
 ## トラブルシューティング
@@ -198,4 +198,3 @@ notebooklm-pyがエラーを返す場合（GoogleのRPC変更等）:
 
 - **トークン節約のためにクエリ結果を要約しない**: NotebookLMの回答をそのまま保存する。Claude Codeでの再要約はトークン消費の本末転倒
 - **認証情報のgit commit**: `storage_state.json` は `.gitignore` に追加済みであること
-- **GitHubチェックなしの実行**: 壊れるリスクが常にある
