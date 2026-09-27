@@ -1,7 +1,7 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 151
+- **Total Sessions**: 152
 - **Latest Session**: 2026-09-27
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | 日付 | 主な作業 | コミット | 詳細 |
 |---|---|---|---|
+| 09-27 | 配布テンプレート（CLAUDE.md.template と .agents/.grok の複製）を sd003 に合わせた。「sd003 を直す＝配布テンプレート更新・配布先まで展開」を記録。全配布先48件への sd-upgrade は dry-run 実行中（12/48 完了・まだ変更なし） | 1b828c6 | [記録](session-20260927-213540.md) |
 | 09-27 | **/doctor（prompt-audit）と hook 高速化**。未使用の skill 15件・plugin 4件を無効化、CLAUDE.md からコードで分かる節を削除しスタイルガイドを更新。run-hook.js に `--only` を追加し、関係ないコマンドでは bash を起動しない（約6秒→0.25秒）。ドキュメントだけの commit ではテストを省略。commit 時のテストがこれまで期限切れで実行されていなかったことが判明し、C7 失敗を修正 | e58310a, 42c4fb0, claudecode:13d9d27 | [記録](session-20260927-195836.md) |
 | 09-27 | **PostToolUse hook の51分停止を修正**。高負荷時（aa001 のテスト並列・CPU 100%）に hook が timeout 5〜10秒を超え、Claude Code が node だけを kill して孫プロセスがパイプを握り続けていた。run-hook.js の自前強制終了が100秒で timeout より遅く、発動していなかった。自前期限を既定25秒にし、timeout を30秒へ上げ、長い hook に `--deadline` を付けた | a6851b6 | [記録](session-20260927-181616.md) |
 | 09-27 | Claude Code 指示ファイルの読み取り専用監査で暫定所見19件と提案差分を提示。未確認範囲を明記し、設定・指示ファイルは変更せず引継ぎを保存 | f799293（保存前） | [記録](session-20260927-141029.md) |
