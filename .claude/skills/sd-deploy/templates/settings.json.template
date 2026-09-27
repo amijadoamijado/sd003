@@ -19,7 +19,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/claim-evidence-stop.sh\"",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       },
@@ -28,7 +28,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-check-stop.sh\"",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       }
@@ -45,22 +45,22 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
-            "timeout": 10
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-sd-destructive.sh\"",
-            "timeout": 5
+            "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --deadline=110 \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
             "timeout": 120
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -70,7 +70,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -80,7 +80,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-edit-write-on-sd.sh\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -90,7 +90,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-skill-read.sh\"",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       },
@@ -100,7 +100,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-spec-location.sh\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       }
@@ -111,7 +111,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/sd-watchdog.sh\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       },
@@ -121,7 +121,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Edit",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       },
@@ -131,7 +131,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Write",
-            "timeout": 10
+            "timeout": 30
           }
         ]
       },
@@ -141,16 +141,16 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Bash",
-            "timeout": 10
+            "timeout": 30
           },
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/deploy-package-reminder.sh\"",
-            "timeout": 10
+            "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-review.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --deadline=590 \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-review.sh\"",
             "timeout": 600
           }
         ]
@@ -161,7 +161,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/track-skill-read.sh\"",
-            "timeout": 5
+            "timeout": 30
           }
         ]
       }
@@ -172,7 +172,7 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/session-skill-suggest.sh\"",
-            "timeout": 10
+            "timeout": 30
           },
           {
             "type": "command",

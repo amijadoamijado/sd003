@@ -4,15 +4,22 @@
 // That stub exits 1 when WSL is not installed, so Grok/Claude hooks fail open
 // and the TUI shows pre_tool_use errors. This launcher never uses that stub.
 //
-// Usage: node scripts/run-hook.js <script> [args...]
+// Usage: node scripts/run-hook.js [--deadline=<sec>] <script> [args...]
+//   --deadline must stay below the hook's "timeout" in settings.json (default 25s < 30s).
 'use strict';
 
 const { spawn, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const script = process.argv[2];
-const extraArgs = process.argv.slice(3);
+let argv = process.argv.slice(2);
+let deadlineSec = 0;
+if (argv[0] && argv[0].startsWith('--deadline=')) {
+  deadlineSec = Number(argv[0].slice('--deadline='.length)) || 0;
+  argv = argv.slice(1);
+}
+const script = argv[0];
+const extraArgs = argv.slice(1);
 
 if (!script) {
   process.stderr.write('run-hook.js: missing hook script path\n');
@@ -62,8 +69,10 @@ function resolveBash() {
     process.env.GROK_BASH,
     process.env.GIT_BASH
   ];
+  // Explicitly configured paths are trusted without the launch probe: the probe is a
+  // whole extra bash start per hook call (~1.4s each under load, measured 2026-09-27).
   for (const c of envCandidates) {
-    if (usable(c)) return c;
+    if (exists(c) && !isWslStub(c)) return c;
   }
 
   if (process.platform !== 'win32') return 'bash';
@@ -145,7 +154,9 @@ function run(payload) {
   // kills this node process on Windows, bash and its children (e.g. `npm test`) keep
   // running and keep the inherited stdout/stderr open, so the tool call waits for them
   // long after the configured timeout. Fail open on the deadline, like a missing bash.
-  const deadlineMs = Number(process.env.SD003_HOOK_DEADLINE_MS) || 100000;
+  // The deadline MUST fire before Claude Code's timeout, or this guard never runs
+  // (2026-09-27: 5s/10s timeouts vs the old 100s default -> a PostToolUse hook hung 51min).
+  const deadlineMs = deadlineSec * 1000 || Number(process.env.SD003_HOOK_DEADLINE_MS) || 25000;
   const watchdog = setTimeout(() => {
     process.stderr.write('run-hook.js: hook exceeded ' + deadlineMs + 'ms and was stopped (not enforced): ' + script + '\n');
     try {
