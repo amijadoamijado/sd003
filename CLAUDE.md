@@ -28,13 +28,6 @@ Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
 1時間以上かかるタスク OR ゴールが言語化できない場合 → `/blueprint-gate` 必須。
 承認プロセスなし。動くものが最終判定。詳細: `.claude/skills/blueprint-gate/SKILL.md`
 
-## Build & Test
-
-```bash
-npm run build && npm test && npm run lint
-npm run test:gas-fakes   # Tier-2 gas-fakes tests only
-```
-
 ## Required Settings
 
 `.claude/settings.local.json`: `"ENABLE_TOOL_SEARCH": "true"`
@@ -89,7 +82,7 @@ AI協調文書は `.sd/ai-coordination/` へ（`.antigravity/` やルート禁�
 
 Codexへのアドホック相談・レビュー（「codexにレビューさせて」等）は公式プラグインを使う — `/codex:review`（読み取り）/ `/codex:adversarial-review`（批判的）/ `/codex:rescue`（調査・修正委譲）。未セットアップ時は `/codex:setup` を一度実行。
 
-Grokは2モード。**Lead mode**（ユーザーがGrok直接起動、「Grok主導で」「grokで進めて」等）→ Claudeはオーケストレーションせずハンドオフ（`.grok/GROK_NATIVE.md`）。**Assist mode**（「grokに相談/依頼/実装」等）→ `grok-dispatch` スキル（`pwsh -File grok-run.ps1 <repo> <out> "<prompt>"`、モデル名は固定せず省略=CLI既定、`--output-format plain`）。Grok=探索実装・独立検証・リサーチ / Codex=正式レビュー / agy=本番E2E。Details: `.claude/rules/workflow/ai-coordination.md`
+Grokは2モード — Lead mode（ユーザーがGrok直接起動・「Grok主導で」）→ ハンドオフ（`.grok/GROK_NATIVE.md`）/ Assist mode（「grokに相談/依頼」）→ `grok-dispatch` スキル。Details: `.claude/rules/workflow/ai-coordination.md`
 
 SD003の他プロジェクト展開は `/sd-deploy` のみ。手動デプロイ禁止。Details: `.claude/skills/sd-deploy/SKILL.md`
 
@@ -118,18 +111,6 @@ Solo運用 — master/main で直接作業する。ブランチ・PR作成はユ
 このrepo外の対象（顧客・法人・人・製品/ツール・税制や制度・記事・発信者）について答える前、および調べ直す前に、まず kb001 の司書に聞く — `cd /d/claudecode/kb001 && claude -p "<自然文>"`。Web検索・原典の再読はその後（司書が「無い」と言ってから）。新しく分かった事実・実測は同じ経路で入れる。SD003内部の知識（手順・真因・規範）は対象外で既存層のまま。Details: `D:\claudecode\kb001\CLAUDE.md`
 
 `/sessionwrite` 時は学習評価 — セッション中のユーザー修正をレビューし備考に記録、2回以上でルール/スキル/メモリ化を提案（提案のみ・自動作成禁止）。Details: `docs/rules-reference/skills/learning-nudge.md`
-
----
-
-## Quick Command Reference
-
-| Category | Commands |
-|----------|----------|
-| Blueprint | `/blueprint-gate` |
-| Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution`, `/ai-suspect` |
-| Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
-| Skills | `/sd:skills-find`, `skills-add`, `skills-list` |
-| Cleanup | `/cleanup`, `/cleanup-restore`, `/cleanup-history` |
 
 ---
 SD003 Framework v2.19.5 | deploy v3.5.0 | Updated: 2026-09-23 (Opus 5.5公式ガイド準拠: 思考・検証指示の削減) | Style: `.claude/rules/global/claude-md-style.md`
