@@ -31,13 +31,6 @@ Handoff on exit: `cp .handoff/DONE.template.md .handoff/DONE.md`
 - **柱4: Segmented Sequencing** — 非ブロッキングを連続実行、ユーザー確認は末端に1回集約
 - 詳細: `docs/rules-reference/global/`（output-primacy / silent-interior / real-data-first / segmented-sequencing）
 
-## Build & Test
-
-```bash
-npm run build && npm test && npm run lint
-npm run test:gas-fakes   # Tier-2 gas-fakes tests only
-```
-
 ## Required Settings
 
 `.claude/settings.local.json`: `"ENABLE_TOOL_SEARCH": "true"`
@@ -59,7 +52,7 @@ When running tests or writing test code, enforce production data TDD. Mock/dummy
 
 AI協調文書は `.sd/ai-coordination/` へ（`.antigravity/` やルート禁止）。Session Lead = ユーザーが開いたCLI。アドホック相談は各AIのディスパッチスキル（Codex `/codex:*`, `grok-dispatch`, `agy-dispatch`）。Details: `.claude/rules/workflow/ai-coordination.md`
 
-Grokは2モード。**Lead mode**（ユーザーがGrok直接起動、「Grok主導で」等）→ Claudeはオーケストレーションせずハンドオフ（`.grok/GROK_NATIVE.md`）。**Assist mode**（「grokに相談/依頼/実装」等）→ `grok-dispatch` スキル。Grok=探索実装・独立検証 / Codex=正式レビュー / agy=本番E2E。Details: `.claude/rules/workflow/ai-coordination.md`
+Grokは2モード — Lead mode（ユーザーがGrok直接起動・「Grok主導で」）→ ハンドオフ（`.grok/GROK_NATIVE.md`）/ Assist mode（「grokに相談/依頼」）→ `grok-dispatch` スキル。Details: `.claude/rules/workflow/ai-coordination.md`
 
 全AI（特にagy）の成果物はプロジェクト内へ保存 — ユーザー向けは `materials/`、協調文書は `.sd/ai-coordination/`。agyの `~/.gemini/antigravity-cli/brain/<会話ID>/` に唯一のコピーを残さない。発見時は `bash scripts/recover-agy-artifacts.sh` で回収しフルパス提示。Details: `docs/rules-reference/workflow/artifact-output-location.md`
 
@@ -82,16 +75,6 @@ Solo運用 — master/main で直接作業する。ブランチ・PR作成はユ
 大きなタスク完了後（テスト通過・実装完了・バグ解決）、保存すべき知見がないか自己評価（非対話・非ブロッキング・控えめ）。Details: `docs/rules-reference/session/memory-nudge.md`
 
 `/sessionwrite` 時は学習評価 — ユーザー修正2回以上でルール/スキル/メモリ化を提案（提案のみ・自動作成禁止）。Details: `docs/rules-reference/skills/learning-nudge.md`
-
----
-
-## Quick Command Reference
-
-| Category | Commands |
-|----------|----------|
-| Blueprint | `/blueprint-gate` |
-| Debug | `/bug-quick`, `/bug-trace`, `/dialogue-resolution` |
-| Session | `/sessionread`, `/sessionwrite`, `/sessionhistory`, `/session-search` |
 
 ---
 SD003 v2.19.5 | Deployed: {{DATE}} | Style: `.claude/rules/global/claude-md-style.md`

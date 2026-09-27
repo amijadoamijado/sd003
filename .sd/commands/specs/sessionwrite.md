@@ -158,7 +158,7 @@ $ARGUMENTS
 
 ## Gitコミット
 
-セッション保存の依頼は、今回の引継ぎファイルのローカルコミットを含む。pushはユーザーの明示依頼がある場合だけ実行する。
+セッション保存の依頼は、今回の引継ぎファイルのコミットと push を含む（セッション終了時は必ず push。2026-09-27 ユーザー裁定、`D:\claudecode\CLAUDE.md` の Session Completion と同じ）。
 
 1. `git status --short`、`git diff --cached --name-only`、対象ファイルの差分を確認する。今回作成・更新した引継ぎファイルだけを対象にし、ディレクトリ単位のstageや `git add -A` は使わない。
 2. コミット前に `git config --get core.hooksPath`（未設定ならGit既定のhooks配置先）と実際に動くhook・呼出先を確認する。自動push等の外部変更や対象外ファイルの自動stageがある場合、既存の一時的な抑止方法が確認できればそれを使う。未承認の外部変更・対象外ファイルの混入を抑止できなければ、ファイル保存まで完了し、コミットは保留して具体的な理由を報告する。hookを一括無効化したり、恒久設定を無断変更したりしない。
@@ -169,10 +169,13 @@ $ARGUMENTS
 ```bash
 git add -- .sessions/session-YYYYMMDD-HHMMSS.md .sessions/session-current.md .sessions/TIMELINE.md .handoff/DONE.md
 git commit --only -m "session: [1行サマリー]" -- .sessions/session-YYYYMMDD-HHMMSS.md .sessions/session-current.md .sessions/TIMELINE.md .handoff/DONE.md
+git pull --rebase
+git push
+git status -sb   # "up to date with origin" / ahead 0 を確認
 ```
 
-特定のAIやモデルの署名を固定で付けない。コミット後はコミットIDと対象ファイルを確認し、対象外のstageが保持されていることを確認する。コミット成功とpush成功を混同せず、pushを依頼されて実行した場合はその結果も確認する。
+特定のAIやモデルの署名を固定で付けない。コミット後はコミットIDと対象ファイルを確認し、対象外のstageが保持されていることを確認する。コミット成功とpush成功を混同しない。未commitの作業変更が残っていて `git pull --rebase` できない場合は `git stash` せず、push 保留として理由を報告する。remote が無いrepoは push 対象外として報告する。push が失敗したら原因を解消して再試行する。
 
 ---
 
-**実行**: 今回の引継ぎファイルを保存し、上記手順で対象を限定してローカルコミットする。保留事項があれば記録し、保存・コミット・pushそれぞれの実施結果を報告する。
+**実行**: 今回の引継ぎファイルを保存し、上記手順で対象を限定してコミットし、push まで完了する。保留事項があれば記録し、保存・コミット・pushそれぞれの実施結果を報告する。
