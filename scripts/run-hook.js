@@ -4,19 +4,43 @@
 // That stub exits 1 when WSL is not installed, so Grok/Claude hooks fail open
 // and the TUI shows pre_tool_use errors. This launcher never uses that stub.
 //
-// Usage: node scripts/run-hook.js [--deadline=<sec>] <script> [args...]
+// Usage: node scripts/run-hook.js [--deadline=<sec>] [--only=<preset>] <script> [args...]
 //   --deadline must stay below the hook's "timeout" in settings.json (default 25s < 30s).
+//   --only skips bash entirely when tool_input.command cannot match what the script
+//   acts on (saves bash + python starts, ~1s each under load). Each preset MUST be a
+//   superset of its script's own triggers; payloads without a string command always run.
 'use strict';
 
 const { spawn, execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+const ONLY_PRESETS = {
+  'git-commit': /commit/i,
+  clasp: /clasp/i,
+  // block-sd-destructive.sh: checkout / stash / clean / restore / reset / rm / mv / find / Remove-Item
+  'sd-destructive': /checkout|stash|clean|restore|reset|\brm\b|\bmv\b|\bfind\b|remove-item/i,
+  // block-write-to-protected-dirs.sh (Bash): uv / pip / venv
+  'py-env': /uv|pip|venv/i
+};
+
 let argv = process.argv.slice(2);
 let deadlineSec = 0;
-if (argv[0] && argv[0].startsWith('--deadline=')) {
-  deadlineSec = Number(argv[0].slice('--deadline='.length)) || 0;
-  argv = argv.slice(1);
+let onlyRe = null;
+while (argv[0] && argv[0].startsWith('--')) {
+  const opt = argv.shift();
+  if (opt.startsWith('--deadline=')) deadlineSec = Number(opt.slice('--deadline='.length)) || 0;
+  else if (opt.startsWith('--only=')) onlyRe = ONLY_PRESETS[opt.slice('--only='.length)] || null;
+}
+
+function irrelevant(payload) {
+  if (!onlyRe) return false;
+  try {
+    const cmd = (JSON.parse(payload).tool_input || {}).command;
+    return typeof cmd === 'string' && !onlyRe.test(cmd);
+  } catch {
+    return false;
+  }
 }
 const script = argv[0];
 const extraArgs = argv.slice(1);
@@ -189,6 +213,7 @@ let started = false;
 function start(payload) {
   if (started) return;
   started = true;
+  if (irrelevant(payload)) process.exit(0);
   run(payload);
 }
 

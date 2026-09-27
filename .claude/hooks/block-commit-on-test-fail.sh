@@ -94,8 +94,17 @@ if [ ! -f "$CLAUDE_PROJECT_DIR/package.json" ]; then
   exit 0
 fi
 
-# Run npm test
 cd "$CLAUDE_PROJECT_DIR" 2>/dev/null || exit 0
+
+# Docs-only commits cannot break tests: skip the full run (it took ~100s per
+# session-record commit, measured 2026-09-27). Staged + unstaged tracked changes
+# are both checked so `git commit -a` / `git commit -- <paths>` stay covered.
+CHANGED=$( { git diff --cached --name-only; git diff --name-only; } 2>/dev/null | sort -u)
+if [ -n "$CHANGED" ] && ! echo "$CHANGED" | grep -qvE '\.(md|txt)$|^\.sessions/|^\.handoff/|^materials/|^docs/'; then
+  exit 0
+fi
+
+# Run npm test
 TEST_OUTPUT=$(npm test 2>&1)
 TEST_EXIT=$?
 

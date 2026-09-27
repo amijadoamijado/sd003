@@ -44,22 +44,22 @@
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --only=clasp \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-clasp-deploy.sh\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-sd-destructive.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --only=sd-destructive \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-sd-destructive.sh\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --deadline=110 \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --deadline=110 --only=git-commit \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-commit-on-test-fail.sh\"",
             "timeout": 120
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --only=py-env \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-write-to-protected-dirs.sh\"",
             "timeout": 30
           }
         ]
@@ -140,17 +140,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Bash",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --only=clasp \"$CLAUDE_PROJECT_DIR/.claude/hooks/clasp-deploy-tracker.sh\" Bash",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/deploy-package-reminder.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --only=git-commit \"$CLAUDE_PROJECT_DIR/.claude/hooks/deploy-package-reminder.sh\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --deadline=590 \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-review.sh\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/run-hook.js\" --deadline=590 --only=git-commit \"$CLAUDE_PROJECT_DIR/.claude/hooks/agent-review.sh\"",
             "timeout": 600
           }
         ]
