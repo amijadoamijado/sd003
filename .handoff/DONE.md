@@ -1,32 +1,36 @@
-# DONE.md - 完了報告（2026-09-27 18:16 Claude Code セッション）
+# DONE.md - 完了報告（2026-09-27 19:58 Claude Code セッション）
 
 ## やったこと
 
 **変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `scripts/run-hook.js` | 自前の子プロセスごと強制終了の期限を既定100秒から25秒へ変更。`--deadline=<秒>` 引数を追加。環境変数で指定された bash は起動確認を省く |
-| `.claude/skills/sd-deploy/templates/settings.json.template` | run-hook 経由の hook の timeout を5・10秒から30秒へ上げた（16件）。block-commit-on-test-fail に `--deadline=110`、agent-review に `--deadline=590` |
-| `.claude/settings.json`（git 管理外） | テンプレートと同じ変更 |
+| `scripts/run-hook.js` | `--only=<preset>` を追加。関係ないコマンドでは bash を起動せずに抜ける |
+| `.claude/hooks/block-commit-on-test-fail.sh` | ドキュメントだけの commit では全テストを省く |
+| `.claude/skills/sd-deploy/templates/settings.json.template` | Bash 用の7つの hook に `--only` を付けた |
+| `CLAUDE.md` | Build & Test・Quick Command Reference を削除し、Grok の段落を短縮（「Lead mode」の語は残す） |
+| `.claude/rules/global/claude-md-style.md` | 「書かないもの（コードから分かる内容）」の節を追加 |
+| `D:\claudecode\CLAUDE.md` | 改訂履歴を削除（D:\claudecode 13d9d27） |
 
 **変更内容の要約**
-PostToolUse hook が51分停止した件の修正。高負荷時に hook が timeout を超えると、Claude Code は node だけを kill し、残った bash がパイプを握り続けていた。run-hook.js の自前強制終了が timeout より後に設定されていて発動していなかったため、timeout より前に発動するよう直した。
+/doctor の結果を反映して、使っていない skill・plugin を無効化し、指示ファイルを削った。保護 hook は、関係ないコマンドのときに bash を起動しない形にして高速化した。
 
 ---
 
 ## 確認結果
 
-- 各 hook を個別に計測: 修正前 6.5〜10.6秒 → sd-watchdog は 1.8秒
-- `sleep 60` を2本抱える hook を `--deadline=3` で実行 → 4.9秒で戻り、プロセスの残り0
-- 修正の commit（a6851b6）で block-commit-on-test-fail（`--deadline=110`）が正常に通過
+- `--only` の動作: 関係ないコマンドは約0.25秒で抜ける。`.sd` を消す rm と clasp deploy では、今までどおり拒否する
+- commit 時のテスト hook が初めて最後まで走り、verify-deployment の C7 失敗を検出した。原因の CLAUDE.md の語句を戻した後、C7 は PASS、commit も通った
+- ドキュメントだけの commit（42c4fb0）では、テストを省略して即時に commit できた
 
 ---
 
 ## 残っていること
 
-- [ ] 配布先へ run-hook.js・テンプレートを展開（`/sd-upgrade`。settings.json・run-hook.js を `.sd003-keep` で保護している配布先は手動）
-- [ ] 未追跡の `.sessions/session-20260926-131310.md`、本セッション外の未 commit 変更（`.claude/commands/sessionwrite.md`, `scripts/ai-usage-monitor.py`）の扱い
-- [ ] aa001 のテストが powershell（DriveType の問い合わせ）を多重起動して全 PJ を重くする件
+- [ ] 配布先へ run-hook.js と設定を展開（`/sd-upgrade`。`.sd003-keep` で保護している PJ は手動）。commit 時のテストが初めて本当に走るので、隠れていた失敗が出る前提で進める
+- [ ] `CLAUDE.md.template` の Build & Test・Quick Command Reference を新しいスタイルガイドに揃えるか判断する
+- [ ] MCP の無効化は sd003 だけ。他 PJ では `/mcp` を操作するか、claude.ai の Connectors から外す
+- [ ] 本セッション外の未 commit 変更（`sessionwrite.md`, `ai-usage-monitor.py`）と、未追跡の `session-20260926-131310.md`
 
 ---
 
@@ -34,6 +38,6 @@ PostToolUse hook が51分停止した件の修正。高負荷時に hook が tim
 
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| timeout を上げるだけ | 不採用 | Claude Code が kill すると孫が残る問題は解決しない |
-| run-hook の自前期限を timeout より前に置く | 採用 | taskkill /T で子プロセスごと止められる（実測で残り0） |
-| 既定期限 4秒（timeout 5秒のまま） | 不採用 | 高負荷時に保護 hook が素通りする。25秒・30秒で余裕を持たせた |
+| 保護 hook を1本の node に書き直す | 不採用 | 保護の中身を作り直すことになり、ずれる危険がある |
+| run-hook.js で事前にふるい分ける（`--only`） | 採用 | 各 hook の反応条件をすべて含む条件で判定するので、保護範囲は変わらない |
+| commit 時のテストを関連テストだけに絞る | 不採用 | 配布先ごとにテストの仕組みが違う。ドキュメントだけの commit を省く方が安全 |
