@@ -1,59 +1,39 @@
-# DONE.md - 完了報告（2026-09-26 13:13 Claude Code セッション）
+# DONE.md - 完了報告（2026-09-27 18:16 Claude Code セッション）
 
 ## やったこと
 
 **変更したファイル**
 | ファイル | 変更内容 |
 |---------|----------|
-| `materials/text/prompt-audit-20260926.{md,diff}` | Opus 5.5 基準のプロンプト監査報告と修正案 |
-| `.claude/skills/sd-upgrade/{upgrade.ps1,upgrade.sh,SKILL.md}` | 廃止 hook（workflow-gate / workflow-state-tracker）を keep 保護を壊さずに退避 |
-| `.claude/skills/sd-deploy/templates/{settings.json,CLAUDE.md}.template` | 廃止 hook 登録を削除、`IMPORTANT:` 接頭辞を削除 |
-| `scripts/verify-deployment.mjs` | C2a を `.sd003-keep` 対応（run-hook.js 保護時は skip） |
-| `_archive/removed-overengineering-20260705/.claude/hooks/` | 廃止 hook 2本を退避 |
-| `D:\claudecode\aa001`（6705d7e） | 2.19.5 へ upgrade。独自3ファイルを `.sd003-keep` で保護 |
-| `D:\claudecode\at002`（2163ddeb, e848c9fd） | 2.19.5 へ upgrade。depends_on ハッシュ4件修正 |
+| `scripts/run-hook.js` | 自前の子プロセスごと強制終了の期限を既定100秒から25秒へ変更。`--deadline=<秒>` 引数を追加。環境変数で指定された bash は起動確認を省く |
+| `.claude/skills/sd-deploy/templates/settings.json.template` | run-hook 経由の hook の timeout を5・10秒から30秒へ上げた（16件）。block-commit-on-test-fail に `--deadline=110`、agent-review に `--deadline=590` |
+| `.claude/settings.json`（git 管理外） | テンプレートと同じ変更 |
 
 **変更内容の要約**
-監査結果を sd003 と配布側に反映し、廃止 hook を撤去、aa001・at002 を最新化した。
+PostToolUse hook が51分停止した件の修正。高負荷時に hook が timeout を超えると、Claude Code は node だけを kill し、残った bash がパイプを握り続けていた。run-hook.js の自前強制終了が timeout より後に設定されていて発動していなかったため、timeout より前に発動するよう直した。
 
 ---
 
 ## 確認結果
 
-- sd-upgrade dry-run: ad001（削除対象に表示）、cr001（keep で保持）、テスト用フォルダ（`[hook]` 表示）を ps1/sh 両方で確認
-- aa001 upgrade: Content verification PASSED（2 skipped）、Result: ALL PASSED
-- at002 upgrade: Result: ALL PASSED、pre-commit SKILL 検証 0 errors
-- 上書きされた at002 の105ファイルは全て sd003 過去版と一致（固有化の喪失なし）
+- 各 hook を個別に計測: 修正前 6.5〜10.6秒 → sd-watchdog は 1.8秒
+- `sleep 60` を2本抱える hook を `--deadline=3` で実行 → 4.9秒で戻り、プロセスの残り0
+- 修正の commit（a6851b6）で block-commit-on-test-fail（`--deadline=110`）が正常に通過
 
 ---
 
 ## 残っていること
 
-1. keep 保護の配布先14件（ap001, at003, cf002, cm001, cr001, er001, nl001, nm002, pc002, pm002, rc001, sb001, sd5yp, sr001, ss001）に廃止 hook の登録とファイルが残る。外すかはユーザー判断
-2. `/sessionwrite` の push 方針（明示依頼時のみ）と `D:\claudecode\CLAUDE.md` の「必ず push」が矛盾
-3. 監査報告の Low 項目
-
-## 判断したこと
-
-- aa001 の独自3ファイルは hook 停止対策なので上書きせず keep 保護した
-- keep 保護の settings.json に登録が残る配布先では、hook ファイルを消さない（消すと毎回 hook エラー）
-
-詳細: `.sessions/session-20260926-131310.md`
+- [ ] 配布先へ run-hook.js・テンプレートを展開（`/sd-upgrade`。settings.json・run-hook.js を `.sd003-keep` で保護している配布先は手動）
+- [ ] 未追跡の `.sessions/session-20260926-131310.md`、本セッション外の未 commit 変更（`.claude/commands/sessionwrite.md`, `scripts/ai-usage-monitor.py`）の扱い
+- [ ] aa001 のテストが powershell（DriveType の問い合わせ）を多重起動して全 PJ を重くする件
 
 ---
 
-## 追記（2026-09-27 14:10）
+## 判断したこと
 
-### 完了事項
-- Claude Code 指示ファイルの読み取り専用監査について、暫定所見19件と提案差分を会話上で提示。設定・指示ファイルの変更なし。
-- 今回の引継ぎを `.sessions/session-20260927-141029.md` に保存し、最新記録と年表を更新。
-
-### 未完了事項と次の手順
-- 監査対象の残りのスキル・コマンド・プラグイン指示を確認し、暫定所見と提案差分を現行ファイルで再検証する。設定ファイル・秘密情報は監査対象外。
-- 前回の未解決事項は上記2026-09-26の記録を参照する。既存の未追跡記録と `scripts/ai-usage-monitor.py` の変更は今回のコミット対象外。
-
-### 関連ファイル
-- `.sessions/session-20260927-141029.md`
-- `.sessions/session-current.md`
-- `.sessions/TIMELINE.md`
-- `materials/text/prompt-audit-20260926.md`（前回作成済みの監査資料）
+| 選択肢 | 採用 | 理由 |
+|--------|------|------|
+| timeout を上げるだけ | 不採用 | Claude Code が kill すると孫が残る問題は解決しない |
+| run-hook の自前期限を timeout より前に置く | 採用 | taskkill /T で子プロセスごと止められる（実測で残り0） |
+| 既定期限 4秒（timeout 5秒のまま） | 不採用 | 高負荷時に保護 hook が素通りする。25秒・30秒で余裕を持たせた |

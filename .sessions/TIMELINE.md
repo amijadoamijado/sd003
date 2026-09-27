@@ -1,7 +1,7 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 149
+- **Total Sessions**: 150
 - **Latest Session**: 2026-09-27
 - **Project Start**: 2026-02-15
 
@@ -11,6 +11,7 @@
 
 | 日付 | 主な作業 | コミット | 詳細 |
 |---|---|---|---|
+| 09-27 | **PostToolUse hook の51分停止を修正**。高負荷時（aa001 のテスト並列・CPU 100%）に hook が timeout 5〜10秒を超え、Claude Code が node だけを kill して孫プロセスがパイプを握り続けていた。run-hook.js の自前強制終了が100秒で timeout より遅く、発動していなかった。自前期限を既定25秒にし、timeout を30秒へ上げ、長い hook に `--deadline` を付けた | a6851b6 | [記録](session-20260927-181616.md) |
 | 09-27 | Claude Code 指示ファイルの読み取り専用監査で暫定所見19件と提案差分を提示。未確認範囲を明記し、設定・指示ファイルは変更せず引継ぎを保存 | f799293（保存前） | [記録](session-20260927-141029.md) |
 | 09-26 | **Opus 5.5 基準のプロンプト監査と適用**（報告書・diff、Codex と統合）。廃止 `/workflow` hook を登録解除・退避し、sd-upgrade に keep 保護を壊さない退避を追加。配布 CLAUDE.md テンプレートの IMPORTANT 削除、verify C2a を keep 対応。aa001・at002 を 2.19.5 へ upgrade（aa001 独自3ファイルを keep 保護、at002 の依存ハッシュ4件修正） | a489c37, 443d0f8, bf70762, eb80147, 0bd71b5, aa001:6705d7e, at002:2163ddeb/e848c9fd | [記録](session-20260926-131310.md) |
 | 09-26 | Claude/Codex監査修正統合、Luna medium子方針、引継ぎ整理、残件7件・RULES矛盾・旧README処理 | e944681, 5d4d68a | [記録](session-20260926-123010.md) |
