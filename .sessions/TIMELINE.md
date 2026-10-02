@@ -1,11 +1,17 @@
 # SD003 Project Timeline
 
 ## Statistics
-- **Total Sessions**: 152
-- **Latest Session**: 2026-09-27
+- **Total Sessions**: 153
+- **Latest Session**: 2026-10-02
 - **Project Start**: 2026-02-15
 
 ---
+
+## 2026-10
+
+| 日付 | 主な作業 | コミット | 詳細 |
+|---|---|---|---|
+| 10-02 | **D: と C: の容量対策**。`D:\claudecode` 直下と `D:\` 直下の不要物を `D:\_cleanup_candidates_20261002\` に集約（移動のみ・台帳更新）。`aa001\.tmp` 約11GB を削除（D: 空き 11→21.5GB）。Google ドライブのキャッシュ先をレジストリで F: に変更（junction は起動失敗のため不可）。C: の空きは 3.5→5.1GB。Drive への退避は時間切れで中止（途中コピーが G: に残る） | claudecode:8250f6c（未 push） | [記録](session-20261002-231031.md) |
 
 ## 2026-09
 

@@ -1,34 +1,38 @@
-# DONE.md - 完了報告（2026-09-27 21:35 Claude Code セッション）
+# DONE.md - 完了報告（2026-10-02 23:10 Claude Code セッション）
 
 ## やったこと
 
-**変更したファイル**
-| ファイル | 変更内容 |
-|---------|----------|
-| `.claude/skills/sd-deploy/templates/CLAUDE.md.template` | Build & Test・Quick Command Reference を削除し、Grok の段落を短縮（sd003 の CLAUDE.md と同じ変更） |
-| `.agents/skills/sd-deploy/templates/*.template`, `.grok/skills/sd-deploy/templates/*.template` | `sync-cli-commands.py` で `.claude/` と同期（timeout・deadline・`--only` を含む） |
+**変更したもの**
+| 対象 | 変更内容 |
+|------|----------|
+| `D:\claudecode` 直下・`D:\` 直下 | 不要物を `D:\_cleanup_candidates_20261002\` に集約（移動のみ。一覧は同フォルダの `MANIFEST.md`） |
+| `D:\claudecode\PROJECT_REGISTRY.md` | 例外リストの ffmpeg・serena・SuperClaude_Framework を「退避済」に更新（`D:\claudecode` の `8250f6c`・未 push） |
+| `D:\claudecode\aa001\.tmp` | 約11GB を削除（再生成物）。D: の空き 11.1GB → 21.5GB |
+| `HKCU:\Software\Google\DriveFS` | `ContentCachePath` = `F:\GoogleDriveCache`（Drive のキャッシュを F: へ） |
+| C: 上 | Drive の Logs・Orca の AppData を削除、OneDrive をオンラインのみに設定。C: の空き 3.5GB → 5.1GB |
 
 **変更内容の要約**
-sd003 本体への変更を配布テンプレートと複製に反映した（1b828c6）。全配布先への展開は dry-run の途中。
+D: と C: の容量逼迫への対応。整理は移動のみで、削除したのは再生成物（`aa001\.tmp`・Drive の Logs）と、ユーザーが使わないと明言した Orca のデータだけ。
 
 ---
 
 ## 確認結果
 
-- `npx jest tests/deploy`: 9件すべて通過
-- `.agents/` と `.grok/` のテンプレートが `.claude/` と一致することを diff で確認
-- 配布先48件の dry-run: 21:35 時点で12件完了（変更なし）
+- worktree 13個＋3個の移動後も、`git worktree list` で新しいパスに更新されていることを確認
+- Drive 再起動後に `G:\マイドライブ\ob001-raw-exports` が見えること、`F:\GoogleDriveCache` に `content_cache` が作られることを確認
+- `aa001\.tmp` の削除後、残りはファイル157個（5.5MB）・フォルダ0個
+- sd003 のコードは変更していないため、テスト・ビルドは対象外
 
 ---
 
 ## 残っていること
 
-- [ ] **P0** 全配布先48件への sd-upgrade を完了する
-  - dry-run の結果: `C:\AppData\Local\Temp\claude\D--claudecode-sd003\aeb11c4e-da60-4da7-8280-784b3d4ed36a\scratchpad\dryrun-result.json`
-  - 固有化0件の PJ から `-Execute` で実行する
-  - 作業ツリーがきれいな PJ だけ commit・push する
-- [ ] upgrade 後、各 PJ で commit 時のテストが初めて本当に走る。隠れていた失敗が出る前提で見る
-- [ ] 本セッション外の未 commit 変更（`sessionwrite.md` 系、`ai-usage-monitor.py`）の扱いを決める
+- [ ] **P0** `Desktop`（8.8GB）と `Documents`（8.4GB）の中身を一覧にして整理方針を決める（ユーザー「明日やる」）
+- [ ] **P1** Google ドライブへの退避は未完了。`robocopy` は約21,000ファイルで中止。G: に途中コピーが残る（残すか消すか未決定）。`D:\tmp\upload`（約27GB）・`D:\claudecode\.archive`（約22GB）は未コピー。zip にまとめる案あり
+- [ ] **P1** `D:\claudecode` ルートの commit `8250f6c` を push する
+- [ ] **P1** `C:\Windows\SoftwareDistribution.old`（2.7GB）を管理者権限で削除（コマンドはユーザーに案内済み）
+- [ ] **P1** `pagefile.sys`（9.1GB）を F: へ移す案（再起動が必要）
+- [ ] P2 `.codex\sessions` の整理、Cowork 利用時の `vm_bundles` 対策、Orca 本体のアンインストール、`MANIFEST.md` の追記
 
 ---
 
@@ -36,6 +40,7 @@ sd003 本体への変更を配布テンプレートと複製に反映した（1b
 
 | 選択肢 | 採用 | 理由 |
 |--------|------|------|
-| dry-run の「失われる固有化」をそのまま信じる | 不採用 | 古い版の配布物も差として出るため、全件が固有化に見える |
-| 差のあるファイルのハッシュが sd003 の履歴にあるかで判定 | 採用 | 過去の配布物と完全に一致すれば固有化ではない（at002 で実績あり） |
-| 未 commit 変更が多い PJ でも commit する | 不採用 | 他の作業の変更と混ざるため |
+| Drive のキャッシュを junction で F: へ | 不採用 | Drive が junction を「ディレクトリではない」と判断して起動に失敗した。元に戻した |
+| レジストリ `ContentCachePath` で F: へ | 採用 | 公式の設定で、再起動時に自動で移る。戻すときは値を消すだけ |
+| 整理は削除せず1か所へ移動 | 採用 | あとで Google ドライブへまとめて移す方針（ユーザー指示） |
+| Drive へのコピーを zip なしで続ける | 不採用（中止） | 細かいファイルが多く時間がかかるため、ユーザーが時間切れで中止を指示 |
