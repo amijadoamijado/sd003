@@ -1,37 +1,32 @@
-# DONE.md - 完了報告（2026-10-03 10:16 Claude Code セッション）
+# DONE.md - 完了報告（2026-10-03 11:03 Claude Code セッション）
 
 ## やったこと
 
 **変更したもの**
 | 対象 | 変更内容 |
 |------|----------|
-| `C:\Users\a-odajima\Desktop\at002` | `F:\Desktop\at002` へ移しジャンクション化（5.9GB・13,559件） |
-| `C:\Users\a-odajima\Documents\Yayoi\弥生会計26データフォルダ\Backup` | `F:\Documents\...\Backup` へ移しジャンクション化（4.1GB・869件） |
-| `C:\Users\a-odajima\Documents\Hayawaza\早業8バックアップフォルダ` | `F:\Documents\Hayawaza\...` へ移しジャンクション化（1.2GB・11件） |
-| `C:\Users\a-odajima\.codex\sessions` | `F:\codex\sessions` へ移しジャンクション化（3.4GB・2,319件） |
-| Google ドライブ | トレイから終了→再起動で WAL 約1.1GB を縮小（C: 側 2.2→1.2GB） |
-| `...\Claude_実レジストリ修復_20261002\00_原因と修復の記録.txt` | 再起動後の起動・会社回線の送信とも問題なしと追記 |
+| `D:\claudecode`（ルート repo） | `8250f6c` を push（origin と一致） |
+| `D:\_archive_zip_20261003\` | `_cleanup_candidates_20261002.zip`（87,489件・2.6GB）と `claudecode_dot_archive.zip` を作成 |
+| `G:\マイドライブ\claudecode-archive\20261002-d-cleanup\` | 上の zip 2つをコピー（SHA256 一致）、途中コピーのフォルダ（22,686件）を削除 |
 
 **変更内容の要約**
-C: の空きを 3.6GB から 18GB に増やした。移動は全件 SHA1 照合後にジャンクション化し、ユーザー承認後に元を削除。sd003 のコードは変更していない。
+前回の容量対策の残りを確認し、Google ドライブへの退避を zip でやり直した。sd003 のコードは変更していない。
 
 ## 確認結果
-- 4か所とも C: 側パスからジャンクション経由で全件見えることを確認。
-- アプリでの動作（at002 スクリプト・弥生/早業のバックアップ保存・Codex の過去会話）は未確認。
+- `SoftwareDistribution.old` は消去済み。C: の空きは 32.8GB。ページファイルは C: 2GB 固定で適用済み。
+- 移した4か所はジャンクションとして正常。アプリからの書き込みはまだない（未確認）。
+- zip は testzip 正常、G: 側と SHA256 一致。入らなかった3件は `serena\.venv\bin\python*` の壊れたシンボリックリンクだけ。
 
 ## 未完了
-- `C:\Windows\SoftwareDistribution.old`（2.7GB）: ユーザーが管理者ターミナルで削除中。
-- `pagefile.sys`（9.3GB）: C: のまま 2GB 固定を推奨、未実行。
-- C: の空きの数値が揺れる原因は未調査。
+- zip の Drive へのアップロード完了（「同期済み」）は未確認。
+- ページファイル設定に `F:\pagefile.sys`（16〜32GB）が残っている。削除はユーザーが管理者ターミナルで実行。
+- 移した4か所のアプリ動作確認。
 
 ## 次のステップ
-1. `SoftwareDistribution.old` の消去と C: の空きを確認。
-2. ページファイルの扱いを確定。
-3. 移した4か所の動作確認。
-
-## 注意
-- **F: は USB 外付け SSD**。外すと上記4か所・Drive キャッシュ・Outlook の PST が見えなくなる。
-- 日本語パスの robocopy は Bash からだと文字化けする。pwsh 経由で実行すること。
+1. Drive の同期完了後、ユーザーが `D:\_cleanup_candidates_20261002` と `D:\_archive_zip_20261003` を削除。
+2. 管理者ターミナルで `Get-CimInstance Win32_PageFileSetting | ? Name -like 'F:*' | Remove-CimInstance`。
+3. 弥生・早業のバックアップ、Codex の過去会話を1回ずつ試し、移動先に書き込まれるか確認。
 
 ## 関連ファイル
-- `D:\claudecode\sd003\.sessions\session-20261003-101645.md`
+- `D:\claudecode\sd003\.sessions\session-20261003-110339.md`
+- `C:\AppData\Local\Temp\claude\D--claudecode-sd003\cb172a01-ee7e-413a-966c-17e515d6137c\scratchpad\make_zip.py`
