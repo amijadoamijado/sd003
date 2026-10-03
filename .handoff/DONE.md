@@ -1,32 +1,28 @@
-# DONE.md - 完了報告（2026-10-03 11:03 Claude Code セッション）
+# DONE.md - 完了報告（2026-10-03 18:57 Claude Code セッション）
 
 ## やったこと
 
 **変更したもの**
 | 対象 | 変更内容 |
 |------|----------|
-| `D:\claudecode`（ルート repo） | `8250f6c` を push（origin と一致） |
-| `D:\_archive_zip_20261003\` | `_cleanup_candidates_20261002.zip`（87,489件・2.6GB）と `claudecode_dot_archive.zip` を作成 |
-| `G:\マイドライブ\claudecode-archive\20261002-d-cleanup\` | 上の zip 2つをコピー（SHA256 一致）、途中コピーのフォルダ（22,686件）を削除 |
+| レジストリ `HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management\PagingFiles` | `?:\pagefile.sys`（全ドライブ自動管理）に変更。ユーザーが管理者で実行、`reg query` で確認済み |
 
 **変更内容の要約**
-前回の容量対策の残りを確認し、Google ドライブへの退避を zip でやり直した。sd003 のコードは変更していない。
+ページファイル 2GB 固定でコミット上限が約 17.7GB に下がり、メモリ確保量が上限の 98.9% に達してエラーが出ていた。2GB 固定は前回の Claude セッションが「実使用量」を根拠に勧めた誤り。自動管理に戻した。sd003 のコードは変更していない。
 
 ## 確認結果
-- `SoftwareDistribution.old` は消去済み。C: の空きは 32.8GB。ページファイルは C: 2GB 固定で適用済み。
-- 移した4か所はジャンクションとして正常。アプリからの書き込みはまだない（未確認）。
-- zip は testzip 正常、G: 側と SHA256 一致。入らなかった3件は `serena\.venv\bin\python*` の壊れたシンボリックリンクだけ。
+- レジストリ値は `?:\pagefile.sys` になった（C: 2GB 固定と F: の設定は置き換え済み）。
+- CIM/WMI 経由の変更は応答なし（メモリ逼迫が原因の可能性）。`reg add` で回避。
 
 ## 未完了
-- zip の Drive へのアップロード完了（「同期済み」）は未確認。
-- ページファイル設定に `F:\pagefile.sys`（16〜32GB）が残っている。削除はユーザーが管理者ターミナルで実行。
-- 移した4か所のアプリ動作確認。
+- 再起動と、その後の反映確認（ページファイルのサイズ・コミット上限・エラーの再発有無）。
+- 前回からの持ち越し: Drive 同期確認後の D: の退避元削除、F: へ移した4か所のアプリ動作確認。
 
 ## 次のステップ
-1. Drive の同期完了後、ユーザーが `D:\_cleanup_candidates_20261002` と `D:\_archive_zip_20261003` を削除。
-2. 管理者ターミナルで `Get-CimInstance Win32_PageFileSetting | ? Name -like 'F:*' | Remove-CimInstance`。
-3. 弥生・早業のバックアップ、Codex の過去会話を1回ずつ試し、移動先に書き込まれるか確認。
+1. 再起動後に `reg query`、`C:\pagefile.sys` のサイズ、`Win32_OperatingSystem.TotalVirtualMemorySize` / `FreeVirtualMemory`、C: の空きを確認。
+2. Codex 側のメモリ消費（プロセス別コミットサイズ）を確認。
 
 ## 関連ファイル
-- `D:\claudecode\sd003\.sessions\session-20261003-110339.md`
-- `C:\AppData\Local\Temp\claude\D--claudecode-sd003\cb172a01-ee7e-413a-966c-17e515d6137c\scratchpad\make_zip.py`
+- `D:\claudecode\sd003\.sessions\session-20261003-185724.md`
+- `D:\claudecode\sd003\.sessions\session-20261003-101645.md`（2GB 固定を勧めた記録）
+- `D:\claudecode\sd003\.sessions\session-20260527-111508.md`（5月のクラッシュとページファイル対策）
